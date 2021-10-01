@@ -1,0 +1,60 @@
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main, development ]
+  workflow_dispatch:
+
+name: Default installation and tests
+
+jobs:
+  stable_installation:
+    name: Test stable pip installation on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macOS-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@v2
+      - uses: conda-incubator/setup-miniconda@v2
+        with:
+          auto-update-conda: true
+          python-version: ${{ matrix.python-version }}
+      - name: Conda info
+        shell: bash -l {0}
+        run: conda info
+      - name: Test pip installation with all stable dependencies
+        shell: bash -l {0}
+        run: |
+          cd misc
+          . ./stable_pip_install.sh
+      - name: Unittests
+        shell: bash -l {0}
+        run: |
+          cd tests
+          . ./run_tests.sh
+  loose_installation:
+    name: Test loose pip installation on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macOS-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@v2
+      - uses: conda-incubator/setup-miniconda@v2
+        with:
+          auto-update-conda: true
+          python-version: ${{ matrix.python-version }}
+      - name: Conda info
+        shell: bash -l {0}
+        run: conda info
+      - name: Test pip installation with all loose dependencies
+        shell: bash -l {0}
+        run: |
+          cd misc
+          . ./loose_pip_install.sh
+      - name: Unittests
+        shell: bash -l {0}
+        run: |
+          cd tests
+          . ./run_tests.sh

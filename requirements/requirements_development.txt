@@ -1,0 +1,11 @@
+jupyter==1.0.0
+jupyter_contrib_nbextensions==0.5.1
+pyinstaller==4.2
+autodocsumm==0.2.6
+sphinx-rtd-theme==0.5.2
+twine==3.4.1
+bumpversion==0.6.0
+pipdeptree==2.1.0
+ipykernel==6.4.0
+tqdm==4.61.1
+psutil==5.8.0
