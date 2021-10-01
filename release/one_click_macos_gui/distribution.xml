@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<installer-script minSpecVersion="1.000000">
+    <title>alphadeep 0.0.1</title>
+    <background mime-type="image/png" file="alpha_logo.png" scaling="proportional"/>
+    <welcome file="welcome.html" mime-type="text/html" />
+    <conclusion file="conclusion.html" mime-type="text/html" />
+    <license file="LICENSE.txt"/>
+    <options customize="never" allow-external-scripts="no"/>
+    <domains enable_localSystem="true" />
+    <choices-outline>
+        <line choice="alphadeep"/>
+    </choices-outline>
+    <choice id="alphadeep" title="alphadeep">
+        <pkg-ref id="alphadeep.pkg"/>
+    </choice>
+    <pkg-ref id="alphadeep.pkg" auth="Root">alphadeep.pkg</pkg-ref>
+</installer-script>

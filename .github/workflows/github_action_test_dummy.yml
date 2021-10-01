@@ -1,0 +1,12 @@
+on:
+  workflow_dispatch:
+
+name: Test new GitHub action workflow
+
+
+jobs:
+  Version_bumped:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2

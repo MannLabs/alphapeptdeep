@@ -1,0 +1,195 @@
+on:
+  # push:
+  #   branches: [ main ]
+  workflow_dispatch:
+
+
+name: Publish on PyPi and release on GitHub
+
+jobs:
+  Version_Bumped:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.master_version_bumped.outputs.version }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - uses: conda-incubator/setup-miniconda@v2
+        with:
+          auto-update-conda: true
+          python-version: ${{ matrix.python-version }}
+      - name: Master version bumped
+        id: master_version_bumped
+        shell: bash -l {0}
+        run: |
+          cd misc
+          . ./check_version.sh
+          echo ::set-output name=version::$current_version
+  Create_Draft_On_GitHub:
+    runs-on: ubuntu-latest
+    needs: Version_Bumped
+    outputs:
+      upload_url: ${{ steps.draft_release.outputs.upload_url }}
+    steps:
+      - name: Draft Release
+        id: draft_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
+        with:
+          tag_name: ${{ needs.Version_Bumped.outputs.version }}
+          release_name: Release version ${{ needs.Version_Bumped.outputs.version }}
+          draft: false
+          prerelease: false
+  Create_Linux_Release:
+    runs-on: ubuntu-latest
+    needs: Create_Draft_On_GitHub
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - uses: conda-incubator/setup-miniconda@v2
+        with:
+          auto-update-conda: true
+          python-version: ${{ matrix.python-version }}
+      - name: Conda info
+        shell: bash -l {0}
+        run: conda info
+      - name: Creating installer for Linux
+        shell: bash -l {0}
+        run: |
+          cd release/one_click_linux_gui
+          . ./create_installer_linux.sh
+      - name: Test installer for Linux
+        shell: bash -l {0}
+        run: |
+          sudo dpkg -i release/one_click_linux_gui/dist/alphadeep_gui_installer_linux.deb
+      - name: Upload Linux Installer
+        id: upload-release-asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.Create_Draft_On_GitHub.outputs.upload_url }}
+          asset_path: release/one_click_linux_gui/dist/alphadeep_gui_installer_linux.deb
+          asset_name: alphadeep_gui_installer_linux.deb
+          asset_content_type: application/octet-stream
+  Create_MacOS_Release:
+    runs-on: macos-latest
+    needs: Create_Draft_On_GitHub
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - uses: conda-incubator/setup-miniconda@v2
+        with:
+          auto-update-conda: true
+          python-version: ${{ matrix.python-version }}
+      - name: Conda info
+        shell: bash -l {0}
+        run: conda info
+      - name: Creating installer for MacOS
+        shell: bash -l {0}
+        run: |
+          cd release/one_click_macos_gui
+          . ./create_installer_macos.sh
+      - name: Test installer for MacOS
+        shell: bash -l {0}
+        run: |
+          sudo installer -pkg release/one_click_macos_gui/dist/alphadeep_gui_installer_macos.pkg -target /
+      - name: Upload MacOS Installer
+        id: upload-release-asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.Create_Draft_On_GitHub.outputs.upload_url }}
+          asset_path: release/one_click_macos_gui/dist/alphadeep_gui_installer_macos.pkg
+          asset_name: alphadeep_gui_installer_macos.pkg
+          asset_content_type: application/octet-stream
+  Create_Windows_Release:
+    runs-on: windows-latest
+    needs: Create_Draft_On_GitHub
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - uses: conda-incubator/setup-miniconda@v2
+        with:
+          auto-update-conda: true
+          python-version: ${{ matrix.python-version }}
+      - name: Conda info
+        shell: bash -l {0}
+        run: conda info
+      - name: Creating installer for Windows
+        shell: bash -l {0}
+        run: |
+          cd release/one_click_windows_gui
+          . ./create_installer_windows.sh
+      - name: Test installer for Windows
+        shell: bash -l {0}
+        run: |
+          cd release/one_click_windows_gui/dist/
+          echo "TODO, this test seems to freeze the runner..."
+          # ./alphadeep_gui_installer_windows.exe //verysilent //log=log.txt //noicons //tasks= //portable=1
+          # cat log.txt
+      - name: Upload Windows Installer
+        id: upload-release-asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.Create_Draft_On_GitHub.outputs.upload_url }}
+          asset_path: release/one_click_windows_gui/dist/alphadeep_gui_installer_windows.exe
+          asset_name: alphadeep_gui_installer_windows.exe
+          asset_content_type: application/octet-stream
+  Create_PyPi_Release:
+    runs-on: ubuntu-latest
+    needs: [Create_Linux_Release, Create_MacOs_Release, Create_Windows_Release]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - uses: conda-incubator/setup-miniconda@v2
+        with:
+          auto-update-conda: true
+          python-version: ${{ matrix.python-version }}
+      - name: Conda info
+        shell: bash -l {0}
+        run: conda info
+      - name: Prepare distribution
+        shell: bash -l {0}
+        run: |
+          cd release/pypi
+          . ./prepare_pypi_wheel.sh
+      - name: Publish distribution to Test PyPI
+        uses: pypa/gh-action-pypi-publish@master
+        with:
+          password: ${{ secrets.TEST_PYPI_API_TOKEN }}
+          repository_url: https://test.pypi.org/legacy/
+      - name: Test PyPI test release
+        shell: bash -l {0}
+        run: |
+          cd release/pypi
+          . ./install_test_pypi_wheel.sh
+      - name: Publish distribution to PyPI
+        uses: pypa/gh-action-pypi-publish@master
+        with:
+          password: ${{ secrets.PYPI_API_TOKEN }}
+  Test_PyPi_Release:
+    name: Test_PyPi_version_on_${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    needs: Create_PyPi_Release
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macOS-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@v2
+      - uses: conda-incubator/setup-miniconda@v2
+        with:
+          auto-update-conda: true
+          python-version: ${{ matrix.python-version }}
+      - name: Conda info
+        shell: bash -l {0}
+        run: conda info
+      - name: Test pip installation from PyPi
+        shell: bash -l {0}
+        run: |
+          cd release/pypi
+          . ./install_pypi_wheel.sh
