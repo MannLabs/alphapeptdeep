@@ -39,6 +39,10 @@ index = {"ModelImplBase": "base.ipynb",
          "batch_metric": "msms.ipynb",
          "evaluate_msms": "msms.ipynb",
          "add_cutoff_metric": "msms.ipynb",
+         "parse_ap": "alphapept_reader.ipynb",
+         "AlphaPeptReader": "alphapept_reader.ipynb",
+         "parse_mq": "maxquant_reader.ipynb",
+         "MaxQuantReader": "maxquant_reader.ipynb",
          "convert_one_pFind_mod": "pfind_reader.ipynb",
          "translate_pFind_mod": "pfind_reader.ipynb",
          "get_pFind_mods": "pfind_reader.ipynb",
@@ -49,15 +53,15 @@ index = {"ModelImplBase": "base.ipynb",
          "load_psmlabel_list": "pfind_reader.ipynb",
          "translate_other_modification": "psm_reader.ipynb",
          "keep_modifications": "psm_reader.ipynb",
-         "PSMReaderBase": "psm_reader.ipynb",
-         "RawReaderBase": "raw_reader.ipynb"}
+         "PSMReaderBase": "psm_reader.ipynb"}
 
 modules = ["model/base.py",
            "model/featurize.py",
            "model/msms.py",
+           "reader/alphapept_reader.py",
+           "reader/maxquant_reader.py",
            "reader/pfind_reader.py",
-           "reader/psm_reader.py",
-           "reader/raw_reader.py"]
+           "reader/psm_reader.py"]
 
 doc_url = "https://MannLabs.github.io/alphadeep/"
 
