@@ -1,0 +1,18 @@
+# do not change const settings here
+mod_elements:
+- C
+- H
+- N
+- O
+- S
+- P
+- Reserved
+- Others
+instruments:
+- QE
+- Lumos
+- timsTOF
+- SciexTOF
+max_instrument_num: 8
+nce_factor: 0.01
+charge_factor: 0.1

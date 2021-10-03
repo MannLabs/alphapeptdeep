@@ -1,0 +1,103 @@
+model:
+  frag_types:
+  - b
+  - y
+  - b-modloss
+  - y-modloss
+  max_frag_charge: 2
+  modifications: 
+  - Carbamidomethyl@C
+  - Oxidation@M
+  - Phospho@S
+  - Phospho@T
+  - Phospho@Y
+  max_peplen: 100
+  train_type: tune
+  msms_model: msms_model.pt
+  rt_model: rt_model.pt
+  mobility_model: ccs_model.pt
+model_path: pretrain-models.zip
+pytorch_cpu_threads: 2
+train:
+  psm_type: psmlabel
+  psm_file: []
+  ms_file:
+  - xxx_psmlabel_folder@30@QE
+  - xxx_psmlabel_folder@25@Lumos
+  tol: 20
+  ppm: true
+tune:
+  psm_type: maxquant
+  psm_file: []
+  ms_file:
+  - xxxx.ms_data.hdf@30@QE
+  - yyyy.ms_data.hdf@25@Lumos
+  tol: 20
+  ppm: true
+  epoch: 5
+  use_grid_search: false
+  grid_search_instruments:
+  - QE
+  - Lumos
+  grid_search_ce_min: 10
+  grid_search_ce_max: 50
+  grid_search_ce_step: 3
+  save_zip:
+test:
+  psm_type: alphapept
+  psm_file: []
+  ms_file:
+    - xxxx.ms_data.hdf@30@QE
+    - yyyy.ms_data.hdf@25@Lumos
+  tolerance: 20
+  ppm: true
+speclib:
+  input:
+    type: pfind3
+    accepted_types:
+    - fasta
+    - pfind3
+    - maxquant
+    - alphapept
+    files: 
+    - xxx.fasta
+    ms_files:
+    - /x/xx/xxx.raw
+    instrument: QE
+    ce: 27
+    fasta:
+      max_miss_cleave: 3
+      fixmod: 
+      - Carbamidomethyl@C
+      varmod:
+      - Oxidation@M
+      min_varmod: 0
+      max_varmod: 1
+      target_mod: []
+      min_target_mod: 0
+      max_target_mod: 2
+  output:
+    type: spectronaut
+    accepted_types:
+    - spectronaut
+    - diann
+    - msp
+    library: xxx.csv
+    min_fragment_mz: 300
+    max_fragment_mz: 2000
+    min_intensity: 0.1
+    least_n_peaks: 6
+    max_ion_charge: 2
+    ion_types:
+    - b
+    - y
+    - b-modloss
+    - y-modloss
+    min_precursor_charge: 2
+    max_precursor_charge: 4
+    min_precursor_mz: 400
+    max_precursor_mz: 1200
+    min_peptide_len: 6
+    max_peptide_len: 60
+    decoy: no_decoy
+    modname_as_mass: false
