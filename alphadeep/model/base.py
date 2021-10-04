@@ -60,6 +60,7 @@ class ModelImplBase(object):
         *args, **kargs
     ):
         if isinstance(model_file, str):
+            # We may release all models (msms, rt, ccs, ...) in a single zip file
             if model_file.lower().endswith('.zip'):
                 with ZipFile(model_file, 'rb') as model_zip:
                     with model_zip.open(model_name_in_zip) as pt_file:

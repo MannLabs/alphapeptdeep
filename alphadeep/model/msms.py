@@ -36,7 +36,7 @@ class ModelMSMSpDeep3(torch.nn.Module):
     ):
         super().__init__()
         BiRNN = True
-        aa_embedding_hidden = 27
+        self.aa_embedding_size = 27
         hidden=256
         ins_nce_embed_size = 3
 
@@ -55,7 +55,7 @@ class ModelMSMSpDeep3(torch.nn.Module):
         self.dropout = torch.nn.Dropout(dropout)
 
         self.input = model_base.SeqLSTM(
-            aa_embedding_hidden+mod_feature_size+ins_nce_embed_size+1,
+            self.aa_embedding_size+mod_feature_size+ins_nce_embed_size+1,
             hidden,
             rnn_layer=1, bidirectional=BiRNN
         )
@@ -79,7 +79,7 @@ class ModelMSMSpDeep3(torch.nn.Module):
         NCEs:torch.Tensor,
         instrument_indices,
     ):
-        aa_x = torch.nn.functional.one_hot(aa_indices, 27)
+        aa_x = torch.nn.functional.one_hot(aa_indices, self.aa_embedding_size)
         inst_x = torch.nn.functional.one_hot(instrument_indices, self.max_instrument_num)
 
         ins_nce = torch.cat((inst_x, NCEs), 1)
