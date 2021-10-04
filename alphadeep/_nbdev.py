@@ -2,7 +2,11 @@
 
 __all__ = ["index", "modules", "custom_doc_links", "git_url"]
 
-index = {"ModelCCS": "RT.ipynb",
+index = {"TorchModelCCS": "CCS.ipynb",
+         "TorchModelRT": "RT.ipynb",
+         "mod_feature_size": "msms.ipynb",
+         "AlphaRTModel": "RT.ipynb",
+         "evaluate_RT": "RT.ipynb",
          "ModelImplBase": "base.ipynb",
          "zero_param": "base.ipynb",
          "xavier_param": "base.ipynb",
@@ -14,7 +18,6 @@ index = {"ModelCCS": "RT.ipynb",
          "SeqAttentionSum": "base.ipynb",
          "LinearDecoder": "base.ipynb",
          "mod_elements": "featurize.ipynb",
-         "mod_feature_size": "msms.ipynb",
          "mod_elem_to_idx": "featurize.ipynb",
          "MOD_TO_FEATURE": "featurize.ipynb",
          "parse_mod_feature": "featurize.ipynb",

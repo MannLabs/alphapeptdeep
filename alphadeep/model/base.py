@@ -190,13 +190,13 @@ class SeqGRU(torch.nn.Module):
 class SeqAttentionSum(torch.nn.Module):
     def __init__(self, in_features):
         super().__init__()
-        self.pos_weight = torch.nn.Sequential(
+        self.attn = torch.nn.Sequential(
             torch.nn.Linear(in_features, 1, bias=False),
-            torch.nn.Softmax(dim=2),
+            torch.nn.Softmax(dim=1),
         )
 
     def forward(self, x):
-        attn = self.pos_weight(x)
+        attn = self.attn(x)
         return torch.sum(torch.mul(x, attn), dim=1)
 
 
@@ -209,7 +209,7 @@ class LinearDecoder(torch.nn.Module):
             torch.nn.Linear(in_features, 128),
             torch.nn.PReLU(),
             torch.nn.Linear(128, 32),
-            torch.nn.Relu(),
+            torch.nn.PReLU(),
             torch.nn.Linear(32, out_features)
         )
 
