@@ -9,11 +9,11 @@ import numpy as np
 
 from tqdm import tqdm
 
-from .featurize import \
+from alphadeep.model.featurize import \
     parse_aa_indices, parse_instrument_indices, \
     get_batch_mod_feature
 
-from .._settings import \
+from alphadeep._settings import \
     global_settings as settings, \
     const_settings
 

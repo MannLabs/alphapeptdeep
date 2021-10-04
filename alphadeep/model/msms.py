@@ -11,11 +11,17 @@ import numpy as np
 
 from tqdm import tqdm
 
-from .featurize import \
+from alphabase.peptide.fragment import \
+    init_fragment_by_precursor_dataframe, \
+    set_sliced_fragment_dataframe, \
+    get_sliced_fragment_dataframe, \
+    get_charged_frag_types
+
+from alphadeep.model.featurize import \
     parse_aa_indices, parse_instrument_indices, \
     get_batch_mod_feature
 
-from .._settings import \
+from alphadeep._settings import \
     global_settings as settings, \
     const_settings
 

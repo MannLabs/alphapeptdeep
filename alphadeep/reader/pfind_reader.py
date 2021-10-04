@@ -15,7 +15,7 @@ from alphabase.peptide.fragment import \
     init_fragment_by_precursor_dataframe
 
 
-from .psm_reader import PSMReaderBase
+from alphadeep.reader.psm_reader import PSMReaderBase
 
 
 def convert_one_pFind_mod(mod):

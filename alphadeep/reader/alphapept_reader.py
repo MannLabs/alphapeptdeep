@@ -8,7 +8,7 @@ import os
 import pandas as pd
 import h5py
 
-from .psm_reader import PSMReaderBase
+from alphadeep.reader.psm_reader import PSMReaderBase
 
 @numba.njit
 def parse_ap(precursor):
