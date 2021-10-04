@@ -2,7 +2,8 @@
 
 __all__ = ["index", "modules", "custom_doc_links", "git_url"]
 
-index = {"ModelImplBase": "base.ipynb",
+index = {"ModelCCS": "RT.ipynb",
+         "ModelImplBase": "base.ipynb",
          "zero_param": "base.ipynb",
          "xavier_param": "base.ipynb",
          "aa_embedding": "base.ipynb",
@@ -54,7 +55,9 @@ index = {"ModelImplBase": "base.ipynb",
          "keep_modifications": "psm_reader.ipynb",
          "PSMReaderBase": "psm_reader.ipynb"}
 
-modules = ["model/base.py",
+modules = ["model/CCS.py",
+           "model/RT.py",
+           "model/base.py",
            "model/featurize.py",
            "model/msms.py",
            "reader/alphapept_reader.py",

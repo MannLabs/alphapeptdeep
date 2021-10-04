@@ -9,7 +9,7 @@ import numpy as np
 import pandas as pd
 from typing import List, Union
 
-from alphadeep._settings import const_settings
+from .._settings import const_settings
 from alphabase.constants.modification import MOD_CHEM
 
 # Cell

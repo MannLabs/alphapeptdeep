@@ -5,7 +5,7 @@ __all__ = ['parse_mq', 'MaxQuantReader']
 # Cell
 import pandas as pd
 import numba
-from alphadeep.reader.psm_reader import PSMReaderBase
+from .psm_reader import PSMReaderBase
 
 @numba.njit
 def parse_mq(
