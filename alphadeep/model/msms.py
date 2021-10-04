@@ -317,7 +317,7 @@ def evaluate_msms(
     predict_inten_df: pd.DataFrame,
     fragment_inten_df: pd.DataFrame,
     charged_frag_types: typing.List,
-    metrics = ['PCC','COS','SPC','SA'],
+    metrics = ['PCC','COS','SA'], #+['SPC']
 )->pd.DataFrame:
     ret = pd.DataFrame(
         np.zeros((len(precursor_df), len(metrics))),
