@@ -152,7 +152,8 @@ class pDeepModel(model_base.ModelImplBase):
         fragment_inten_df: pd.DataFrame,
         epoch=10,
         batch_size=1024,
-        callback:typing.Callable=None
+        verbose=False,
+        verbose_each_epoch=True,
     ):
         self.model.train()
 
@@ -165,7 +166,10 @@ class pDeepModel(model_base.ModelImplBase):
             batch_cost = []
             _grouped = list(precursor_df.sample(frac=1).groupby('nAA'))
             rnd_nAA = np.random.permutation(len(_grouped))
-            batch_tqdm = tqdm(rnd_nAA)
+            if verbose_each_epoch:
+                batch_tqdm = tqdm(rnd_nAA)
+            else:
+                batch_tqdm = rnd_nAA
             for i_group in batch_tqdm:
                 nAA, df_group = _grouped[i_group]
                 df_group = df_group.reset_index(drop=True)
@@ -205,15 +209,17 @@ class pDeepModel(model_base.ModelImplBase):
                         nces, instrument_indices
                     )
                     batch_cost.append(cost.item())
-                batch_tqdm.set_description(
-                    f'Epoch={epoch+1}, nAA={nAA}, Batch={len(batch_cost)}, Loss={cost.item():.4f}'
-                )
+                if verbose_each_epoch:
+                    batch_tqdm.set_description(
+                        f'Epoch={epoch+1}, nAA={nAA}, Batch={len(batch_cost)}, Loss={cost.item():.4f}'
+                    )
             if verbose: print(f'[MS/MS training] epoch={epoch+1}, mean Loss={np.mean(batch_cost)}')
 
     def predict(self,
         precursor_df: pd.DataFrame,
         reference_frag_df: pd.DataFrame = None,
-        batch_size: int=1024
+        batch_size: int=1024,
+        verbose=False,
     )->pd.DataFrame:
 
         self.model.eval()
@@ -226,7 +232,13 @@ class pDeepModel(model_base.ModelImplBase):
             precursor_df['NCE'] = precursor_df['NCE']*self.NCE_factor
 
         _grouped = precursor_df.groupby('nAA')
-        for nAA, df_group in tqdm(_grouped):
+
+        if verbose:
+            batch_tqdm = tqdm(_grouped)
+        else:
+            batch_tqdm = _grouped
+
+        for nAA, df_group in batch_tqdm:
             df_group = df_group.reset_index(drop=True)
             for i in range(0, len(df_group), batch_size):
                 batch_end = i+batch_size-1 # DataFrame.loc[start:end] inlcudes the end

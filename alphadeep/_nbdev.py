@@ -2,14 +2,7 @@
 
 __all__ = ["index", "modules", "custom_doc_links", "git_url"]
 
-index = {"TorchModelCCS": "CCS.ipynb",
-         "TorchModelRT": "RT.ipynb",
-         "mod_feature_size": "msms.ipynb",
-         "EncDecModelRT": "RT.ipynb",
-         "AlphaRTModel": "RT.ipynb",
-         "evaluate_linear_regression": "RT.ipynb",
-         "evaluate_linear_regression_plot": "RT.ipynb",
-         "ModelImplBase": "base.ipynb",
+index = {"ModelImplBase": "base.ipynb",
          "zero_param": "base.ipynb",
          "xavier_param": "base.ipynb",
          "aa_embedding": "base.ipynb",
@@ -21,6 +14,9 @@ index = {"TorchModelCCS": "CCS.ipynb",
          "LinearDecoder": "base.ipynb",
          "SeqEncoder": "base.ipynb",
          "SeqDecoder": "base.ipynb",
+         "mod_feature_size": "RT.ipynb",
+         "EncDecModelCCS": "CCS.ipynb",
+         "AlphaCCSModel": "CCS.ipynb",
          "mod_elements": "featurize.ipynb",
          "mod_elem_to_idx": "featurize.ipynb",
          "MOD_TO_FEATURE": "featurize.ipynb",
@@ -47,6 +43,10 @@ index = {"TorchModelCCS": "CCS.ipynb",
          "batch_metric": "msms.ipynb",
          "evaluate_msms": "msms.ipynb",
          "add_cutoff_metric": "msms.ipynb",
+         "EncDecModelRT": "RT.ipynb",
+         "AlphaRTModel": "RT.ipynb",
+         "evaluate_linear_regression": "RT.ipynb",
+         "evaluate_linear_regression_plot": "RT.ipynb",
          "parse_ap": "alphapept_reader.ipynb",
          "AlphaPeptReader": "alphapept_reader.ipynb",
          "parse_mq": "maxquant_reader.ipynb",
@@ -60,20 +60,17 @@ index = {"TorchModelCCS": "CCS.ipynb",
          "load_psmlabel_list": "pfind_reader.ipynb",
          "translate_other_modification": "psm_reader.ipynb",
          "keep_modifications": "psm_reader.ipynb",
-         "PSMReaderBase": "psm_reader.ipynb",
-         "tqdm_wrapper": "_utils.ipynb",
-         "train_callback": "_utils.ipynb"}
+         "PSMReaderBase": "psm_reader.ipynb"}
 
-modules = ["model/CCS.py",
-           "model/RT.py",
-           "model/base.py",
+modules = ["model/base.py",
+           "model/CCS.py",
            "model/featurize.py",
            "model/msms.py",
+           "model/RT.py",
            "reader/alphapept_reader.py",
            "reader/maxquant_reader.py",
            "reader/pfind_reader.py",
-           "reader/psm_reader.py",
-           "_utils.py"]
+           "reader/psm_reader.py"]
 
 doc_url = "https://MannLabs.github.io/alphadeep/"
 
