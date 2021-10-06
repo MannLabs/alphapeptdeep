@@ -83,6 +83,10 @@ class MaxQuantReader(PSMReaderBase):
             psm_df['mobility'] = 1/df['K0']
         else:
             psm_df['mobility'] = pd.NA
+        if 'CCS' in df.columns:
+            psm_df['CCS'] = df['CCS']
+        else:
+            psm_df['CCS'] = pd.NA
         psm_df['raw_name'] = df['Raw file']
         psm_df['score'] = df['Score']
         psm_df['proteins'] = df['Proteins']
