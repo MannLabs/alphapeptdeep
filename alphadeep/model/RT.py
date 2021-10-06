@@ -114,7 +114,7 @@ class AlphaRTModel(model_base.ModelImplBase):
                     batch_tqdm.set_description(
                         f'Epoch={epoch+1}, nAA={nAA}, Batch={len(batch_cost)}, Loss={cost.item():.4f}'
                     )
-            if verbose: print(f'[MS/MS training] epoch={epoch+1}, mean Loss={np.mean(batch_cost)}')
+            if verbose: print(f'[MS/MS training] Epoch={epoch+1}, Mean Loss={np.mean(batch_cost)}')
 
     def predict(self, precursor_df, batch_size=1024, verbose=False):
         self.model.eval()
@@ -154,6 +154,7 @@ class AlphaRTModel(model_base.ModelImplBase):
 # Cell
 import statsmodels.api as sm
 import matplotlib.pyplot as plt
+import seaborn as sns
 
 def evaluate_linear_regression(df, x='predict_RT', y='RT', ci=0.95):
     gls = sm.GLS(df[y], sm.add_constant(df[x]))
@@ -161,15 +162,6 @@ def evaluate_linear_regression(df, x='predict_RT', y='RT', ci=0.95):
     summary = res.summary(alpha=1-ci)
     return summary
 
-def evaluate_linear_regression_plot(df, x='predict_RT', y='RT', ci=0.95):
-    gls = sm.GLS(df[y], sm.add_constant(df[x]))
-    res = gls.fit()
-    ax = plt.gca()
-    ax.scatter(df[x], df[y], s = .05, alpha = .05)
-    sm.graphics.abline_plot(model_results=res, ax=ax)
-    ax.set_xlabel(x)
-    ax.set_ylabel(y)
-    # ci_value = res.conf_int(1-ci)
-    # sm.graphics.abline_plot(ci_value.loc['const',0], res.params.loc['predict_RT'], ax=fig.axes[0], color='r')
-    # sm.graphics.abline_plot(ci_value.loc['const',1], res.params.loc['predict_RT'], ax=fig.axes[0], color='g')
+def evaluate_linear_regression_plot(df, x='predict_RT', y='RT', ci=95):
+    sns.regplot(data=df, x=x, y=y, color='r', ci=ci, scatter_kws={'s':0.05, 'alpha':0.05, 'color':'b'})
     plt.show()

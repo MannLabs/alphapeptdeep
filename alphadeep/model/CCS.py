@@ -74,6 +74,7 @@ class AlphaCCSModel(model_base.ModelImplBase):
             mod_feature_size=mod_feature_size
         )
         self.loss_func = torch.nn.L1Loss()
+        self.charge_factor = 0.1
 
     def train(self,
         precursor_df: pd.DataFrame,
@@ -109,16 +110,20 @@ class AlphaCCSModel(model_base.ModelImplBase):
 
                     CCSs = torch.Tensor(df_group.loc[i:batch_end,'CCS'].values)
 
+                    charges = torch.Tensor(
+                        df_group.loc[i:batch_end, 'charge'].values
+                    ).unsqueeze(1)*self.charge_factor
+
                     cost = self._train_one_batch(
                         CCSs,
-                        aa_indices, mod_x
+                        aa_indices, mod_x, charges
                     )
                     batch_cost.append(cost.item())
                 if verbose_each_epoch:
                     batch_tqdm.set_description(
                         f'Epoch={epoch+1}, nAA={nAA}, Batch={len(batch_cost)}, Loss={cost.item():.4f}'
                     )
-            if verbose: print(f'[MS/MS training] epoch={epoch+1}, mean Loss={np.mean(batch_cost)}')
+            if verbose: print(f'[MS/MS training] Epoch={epoch+1}, Mean Loss={np.mean(batch_cost)}')
 
     def predict(self, precursor_df, batch_size=1024, verbose=False):
         self.model.eval()
@@ -143,9 +148,13 @@ class AlphaCCSModel(model_base.ModelImplBase):
                 ))
                 mod_x = torch.Tensor(mod_x_batch)
 
+                charges = torch.Tensor(
+                    df_group.loc[i:batch_end, 'charge'].values
+                ).unsqueeze(1)*self.charge_factor
+
                 predicts = self.model(
                     *[fea.to(self.device) for fea in
-                    [aa_indices, mod_x]
+                    [aa_indices, mod_x, charges]
                 ]).cpu().detach().numpy()
 
                 predicts[predicts<0] = 0
