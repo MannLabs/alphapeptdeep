@@ -48,26 +48,26 @@ class PSMReaderBase(object):
         '''
             Raise: KeyError if `mod` in `mod_names` is not in `self.modification_convert_dict`
         '''
-        self.psm_df.mods = self.psm_df.mods.apply(
+        self._psm_df.mods = self._psm_df.mods.apply(
             translate_other_modification,
             mod_dict=self.modification_convert_dict
         )
 
-        self.psm_df.dropna(
+        self._psm_df.dropna(
             subset=['mods'], inplace=True
         )
-        self.psm_df.reset_index(drop=True, inplace=True)
+        self._psm_df.reset_index(drop=True, inplace=True)
 
     def filter_psm_by_modifications(self, include_mod_list = [
         'Oxidation@M','Phospho@S','Phospho@T','Phospho@Y','Acetyl@Protein N-term'
     ]):
         mod_set = set(include_mod_list)
-        self.psm_df.mods = self.psm_df.mods.apply(keep_modifications, mod_set=mod_set)
+        self._psm_df.mods = self._psm_df.mods.apply(keep_modifications, mod_set=mod_set)
 
-        self.psm_df.dropna(
+        self._psm_df.dropna(
             subset=['mods'], inplace=True
         )
-        self.psm_df.reset_index(drop=True, inplace=True)
+        self._psm_df.reset_index(drop=True, inplace=True)
 
     def load(self, filename):
         self._load_file(filename)

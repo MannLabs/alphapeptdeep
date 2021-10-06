@@ -52,7 +52,9 @@ index = {"ModelImplBase": "base.ipynb",
          "load_psmlabel_list": "pfind_reader.ipynb",
          "translate_other_modification": "psm_reader.ipynb",
          "keep_modifications": "psm_reader.ipynb",
-         "PSMReaderBase": "psm_reader.ipynb"}
+         "PSMReaderBase": "psm_reader.ipynb",
+         "tqdm_wrapper": "_utils.ipynb",
+         "train_callback": "_utils.ipynb"}
 
 modules = ["model/base.py",
            "model/featurize.py",
@@ -60,7 +62,8 @@ modules = ["model/base.py",
            "reader/alphapept_reader.py",
            "reader/maxquant_reader.py",
            "reader/pfind_reader.py",
-           "reader/psm_reader.py"]
+           "reader/psm_reader.py",
+           "_utils.py"]
 
 doc_url = "https://MannLabs.github.io/alphadeep/"
 

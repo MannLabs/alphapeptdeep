@@ -10,7 +10,7 @@ import pandas as pd
 import torch
 
 from zipfile import ZipFile
-from typing import IO, Type, Tuple
+from typing import IO, Type, Tuple, Callable
 
 # Cell
 class ModelImplBase(object):
@@ -88,7 +88,11 @@ class ModelImplBase(object):
     ):
         return self.model(*[fea.to(self.device) for fea in features])
 
-    def train(self, batch_size=1024, epoch=20, *args, **kargs):
+    def train(self,
+        batch_size=1024,
+        epoch=20,
+        *args, **kargs
+    ):
         raise NotImplementedError('train() function is not finished yet')
 
     def predict(self, batch_size=1024, *args, **kargs):
