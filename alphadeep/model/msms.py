@@ -9,6 +9,8 @@ import torch
 import pandas as pd
 import numpy as np
 
+import typing
+
 from tqdm import tqdm
 
 from alphabase.peptide.fragment import \
@@ -102,7 +104,7 @@ class ModelMSMSpDeep3(torch.nn.Module):
 
 # Cell
 class IntenAwareLoss(torch.nn.Module):
-    def __init__(self, base_weight = 0.1):
+    def __init__(self, base_weight=0.2):
         super().__init__()
         self.w = base_weight
 
@@ -150,7 +152,7 @@ class pDeepModel(model_base.ModelImplBase):
         fragment_inten_df: pd.DataFrame,
         epoch=10,
         batch_size=1024,
-        verbose=True
+        callback:typing.Callable=None
     ):
         self.model.train()
 
@@ -210,13 +212,14 @@ class pDeepModel(model_base.ModelImplBase):
 
     def predict(self,
         precursor_df: pd.DataFrame,
+        reference_frag_df: pd.DataFrame = None,
         batch_size: int=1024
     )->pd.DataFrame:
 
         self.model.eval()
 
         predict_inten_df = init_fragment_by_precursor_dataframe(
-            precursor_df, self.charged_frag_types
+            precursor_df, self.charged_frag_types, reference_frag_df
         )
 
         if np.all(precursor_df['NCE'].values > 1):
@@ -266,7 +269,6 @@ class pDeepModel(model_base.ModelImplBase):
 from scipy.stats import pearsonr
 from scipy.stats import spearmanr
 from scipy.spatial.distance import cosine
-import typing
 
 def cosine(x1, x2, eps=1e-8):
     _cos = np.dot(x1,x2)/(np.linalg.norm(x1)*np.linalg.norm(x2)+eps)
