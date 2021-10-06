@@ -1,1 +1,6 @@
 click==8.0.1
+
+pandas
+numpy
+torch
+statsmodels
