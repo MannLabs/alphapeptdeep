@@ -212,7 +212,7 @@ class PSMLabelReader(pFindReader):
 
         self._load_fragment_inten(psmlabel_df.reset_index(drop=True))
 
-    def get_fragment_inten(self, raw_files=None, *args):
+    def load_fragment_inten_df(self, raw_files=None, *kargs):
         pass
 
 # Cell

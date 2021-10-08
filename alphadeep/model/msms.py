@@ -40,8 +40,8 @@ class ModelMSMSpDeep3(torch.nn.Module):
         super().__init__()
         BiRNN = True
         self.aa_embedding_size = 27
-        hidden=128
-        ins_nce_embed_size = 3
+        hidden=256
+        ins_nce_embed_size=3
         hidden_rnn_layer=2
 
         self.max_instrument_num = max_instrument_num
@@ -49,7 +49,7 @@ class ModelMSMSpDeep3(torch.nn.Module):
         # ins_nce_embed_size = conf.max_instrument_num+1
         # self.instrument_nce_embed = torch.nn.Identity()
 
-        output_hidden_size = hidden*(2 if BiRNN else 1) + ins_nce_embed_size + 1
+        output_hidden_size = hidden*(2 if BiRNN else 1)+ins_nce_embed_size+1
 
         # mod_embed_size = 8
         # self.mod_embed_weights = torch.nn.Parameter(
@@ -58,16 +58,20 @@ class ModelMSMSpDeep3(torch.nn.Module):
         # )
         self.dropout = torch.nn.Dropout(dropout)
 
-        self.input = model_base.SeqLSTM(
-            self.aa_embedding_size+mod_feature_size+ins_nce_embed_size+1,
+#         self.input_cnn = model_base.SeqCNN(
+#             self.aa_embedding_size+mod_feature_size
+#         )
+
+        self.input_rnn = model_base.SeqLSTM(
+            self.aa_embedding_size+mod_feature_size,
             hidden,
             rnn_layer=1, bidirectional=BiRNN
         )
 
         self.hidden = model_base.SeqLSTM(
             output_hidden_size,
-            hidden,
-            rnn_layer=hidden_rnn_layer, bidirectional=BiRNN
+            hidden, rnn_layer=hidden_rnn_layer,
+            bidirectional=BiRNN
         )
 
         self.output = model_base.SeqLSTM(
@@ -91,8 +95,8 @@ class ModelMSMSpDeep3(torch.nn.Module):
         ins_nce_charge = torch.cat((ins_nce, charges), 1)
         ins_nce_charge = ins_nce_charge.unsqueeze(1).repeat(1, aa_x.size(1), 1)
 
-        x = torch.cat((aa_x, mod_x, ins_nce_charge), 2)
-        x = self.input(x)
+        x = torch.cat((aa_x, mod_x), 2)
+        x = self.input_rnn(x)
         x = self.dropout(x)
 
         x = torch.cat((x, ins_nce_charge), 2)
@@ -101,7 +105,7 @@ class ModelMSMSpDeep3(torch.nn.Module):
 
         x = torch.cat((x, ins_nce_charge), 2)
 
-        return self.output(x)[:,1:-2,:]
+        return self.output(x)[:,3:,:]
 
 
 # Cell
@@ -179,6 +183,7 @@ class pDeepModel(model_base.ModelImplBase):
     def __init__(self,
         dropout=0.2,
         lr=0.001,
+        model_class:typing.Type[torch.nn.Module]=ModelMSMSpDeep3,
     ):
         super().__init__()
         self.charged_frag_types = get_charged_frag_types(
@@ -187,7 +192,7 @@ class pDeepModel(model_base.ModelImplBase):
         self.charge_factor = charge_factor
         self.NCE_factor = nce_factor
         self.build(
-            ModelMSMSpDeep3,
+            model_class,
             mod_feature_size = mod_feature_size,
             num_ion_types = len(self.charged_frag_types),
             max_instrument_num = max_instrument_num,
