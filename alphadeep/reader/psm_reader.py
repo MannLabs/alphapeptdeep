@@ -78,9 +78,9 @@ class PSMReaderBase(object):
             f'Sub-class of "{self.__class__}" must re-implement "_load_file()"'
         )
 
-    def get_fragment_inten(self,
-        raw_files=None, frag_ppm=True, frag_tol=20
+    def load_fragment_inten_df(self,
+        ms_files=None
     ):
         raise NotImplementedError(
-            f'Sub-class of "{self.__class__}" must re-implement "get_fragment_inten_df()"'
+            f'Sub-class of "{self.__class__}" must re-implement "load_fragment_inten_df()"'
         )

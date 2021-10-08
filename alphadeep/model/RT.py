@@ -14,12 +14,12 @@ from alphadeep.model.featurize import \
     parse_aa_indices, \
     get_batch_mod_feature
 
-from alphadeep._settings import const_settings
+from alphadeep._settings import model_const
 
 import alphadeep.model.base as model_base
 
 
-mod_feature_size = len(const_settings['mod_elements'])
+mod_feature_size = len(model_const['mod_elements'])
 
 
 # Cell

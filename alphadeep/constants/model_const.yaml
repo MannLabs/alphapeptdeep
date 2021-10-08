@@ -1,4 +1,4 @@
-# do not change const settings here
+# We MUST keep the order of these elemments for models
 mod_elements:
 - C
 - H
@@ -8,11 +8,15 @@ mod_elements:
 - P
 - Reserved
 - Others
+# We MUST keep the order of these instruments for models
+# We can add at most 3 instruments after SciexTOF
 instruments:
 - QE
 - Lumos
 - timsTOF
 - SciexTOF
+# DO NOT change these values, unless you know how to deal with them
 max_instrument_num: 8
 nce_factor: 0.01
 charge_factor: 0.1
+hidden: 256
