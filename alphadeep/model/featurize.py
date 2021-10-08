@@ -9,11 +9,11 @@ import numpy as np
 import pandas as pd
 from typing import List, Union
 
-from alphadeep._settings import const_settings
+from alphadeep._settings import model_const
 from alphabase.constants.modification import MOD_CHEM
 
 # Cell
-mod_elements = const_settings['mod_elements']
+mod_elements = model_const['mod_elements']
 mod_feature_size = len(mod_elements)
 
 mod_elem_to_idx = dict(zip(mod_elements, range(mod_feature_size)))
@@ -112,11 +112,11 @@ def parse_aa_indices(
 # Cell
 instrument_dict = dict(
     zip(
-        [inst.upper() for inst in const_settings['instruments']],
-        range(len(const_settings['instruments']))
+        [inst.upper() for inst in model_const['instruments']],
+        range(len(model_const['instruments']))
     )
 )
-unknown_inst_index = const_settings['max_instrument_num']-1
+unknown_inst_index = model_const['max_instrument_num']-1
 
 # Cell
 def parse_instrument_indices(instrument_list):

@@ -3,9 +3,9 @@
 __all__ = ["index", "modules", "custom_doc_links", "git_url"]
 
 index = {"mod_feature_size": "msms.ipynb",
+         "charge_factor": "msms.ipynb",
          "EncDecModelCCS": "CCS.ipynb",
          "AlphaCCSModel": "CCS.ipynb",
-         "charge_factor": "msms.ipynb",
          "EncDecModelRT": "RT.ipynb",
          "AlphaRTModel": "RT.ipynb",
          "evaluate_linear_regression": "RT.ipynb",
@@ -65,9 +65,14 @@ index = {"mod_feature_size": "msms.ipynb",
          "generate_modified_sequence": "lib_base.ipynb",
          "merge_precursor_fragment_df": "lib_base.ipynb",
          "SpecLibBase": "lib_base.ipynb",
+         "diann_mod_dict": "lib_base.ipynb",
+         "PredictLib": "predict_lib.ipynb",
          "update_settings": "_settings.ipynb",
          "global_settings": "_settings.ipynb",
-         "const_settings": "_settings.ipynb"}
+         "model_const": "_settings.ipynb",
+         "tqdm_wrapper": "_utils.ipynb",
+         "train_callback": "_utils.ipynb",
+         "str_to_int": "_utils.ipynb"}
 
 modules = ["model/CCS.py",
            "model/RT.py",
@@ -79,7 +84,9 @@ modules = ["model/CCS.py",
            "reader/pfind_reader.py",
            "reader/psm_reader.py",
            "speclib/lib_base.py",
-           "_settings.py"]
+           "speclib/predict_lib.py",
+           "_settings.py",
+           "_utils.py"]
 
 doc_url = "https://MannLabs.github.io/alphadeep/"
 

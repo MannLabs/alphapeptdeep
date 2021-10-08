@@ -175,7 +175,7 @@ class PSMLabelReader(pFindReader):
                 else:
                     frag_pos -= 1
                 intens[frag_pos,self.frag_df_columns[ion_type][frag_col]] = frag_inten
-            if not np.all(intens==0):
+            if np.any(intens>0):
                 intens /= np.max(intens)
             self._fragment_inten_df.iloc[
                 start:end,:

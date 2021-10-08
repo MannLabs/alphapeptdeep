@@ -26,7 +26,7 @@ from alphadeep.model.featurize import \
 
 from alphadeep._settings import \
     global_settings as settings, \
-    const_settings
+    model_const
 
 import alphadeep.model.base as model_base
 
@@ -40,7 +40,7 @@ class ModelMSMSpDeep3(torch.nn.Module):
         super().__init__()
         BiRNN = True
         self.aa_embedding_size = 27
-        hidden=256
+        hidden=model_const['hidden']
         ins_nce_embed_size=3
         hidden_rnn_layer=2
 
@@ -171,13 +171,13 @@ class IntenAwareLoss(torch.nn.Module):
         return torch.mean((y+self.w)*torch.abs(x-y))
 
 # Cell
-mod_feature_size = len(const_settings['mod_elements'])
-max_instrument_num = const_settings['max_instrument_num']
+mod_feature_size = len(model_const['mod_elements'])
+max_instrument_num = model_const['max_instrument_num']
 frag_types = settings['model']['frag_types']
 max_frag_charge = settings['model']['max_frag_charge']
 num_ion_types = len(frag_types)*max_frag_charge
-nce_factor = const_settings['nce_factor']
-charge_factor = const_settings['charge_factor']
+nce_factor = model_const['nce_factor']
+charge_factor = model_const['charge_factor']
 
 class pDeepModel(model_base.ModelImplBase):
     def __init__(self,
