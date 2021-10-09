@@ -32,7 +32,6 @@ index = {"mod_feature_size": "msms.ipynb",
          "unknown_inst_index": "featurize.ipynb",
          "parse_instrument_indices": "featurize.ipynb",
          "ModelMSMSpDeep3": "msms.ipynb",
-         "EncDecModelMSMS": "msms.ipynb",
          "IntenAwareLoss": "msms.ipynb",
          "pDeepModel": "msms.ipynb",
          "max_instrument_num": "msms.ipynb",
@@ -66,13 +65,7 @@ index = {"mod_feature_size": "msms.ipynb",
          "merge_precursor_fragment_df": "lib_base.ipynb",
          "SpecLibBase": "lib_base.ipynb",
          "diann_mod_dict": "lib_base.ipynb",
-         "PredictLib": "predict_lib.ipynb",
-         "update_settings": "_settings.ipynb",
-         "global_settings": "_settings.ipynb",
-         "model_const": "_settings.ipynb",
-         "tqdm_wrapper": "_utils.ipynb",
-         "train_callback": "_utils.ipynb",
-         "str_to_int": "_utils.ipynb"}
+         "PredictLib": "predict_lib.ipynb"}
 
 modules = ["model/CCS.py",
            "model/RT.py",
@@ -84,9 +77,7 @@ modules = ["model/CCS.py",
            "reader/pfind_reader.py",
            "reader/psm_reader.py",
            "speclib/lib_base.py",
-           "speclib/predict_lib.py",
-           "_settings.py",
-           "_utils.py"]
+           "speclib/predict_lib.py"]
 
 doc_url = "https://MannLabs.github.io/alphadeep/"
 

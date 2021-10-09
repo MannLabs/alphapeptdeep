@@ -139,10 +139,15 @@ class SeqCNN(torch.nn.Module):
 
 # Cell
 class SeqLSTM(torch.nn.Module):
-    def __init__(self, in_features, hidden,
+    def __init__(self, in_features, out_features,
                  rnn_layer=2, bidirectional=True
         ):
         super().__init__()
+
+        if bidirectional:
+            hidden = out_features//2
+        else:
+            hidden = out_features
 
         self.rnn_h0 = init_state(
             rnn_layer+rnn_layer*bidirectional,
@@ -168,10 +173,15 @@ class SeqLSTM(torch.nn.Module):
 
 
 class SeqGRU(torch.nn.Module):
-    def __init__(self, in_features, hidden,
+    def __init__(self, in_features, out_features,
                  rnn_layer=2, bidirectional=True
         ):
         super().__init__()
+
+        if bidirectional:
+            hidden = out_features//2
+        else:
+            hidden = out_features
 
         self.rnn_h0 = init_state(
             rnn_layer+rnn_layer*bidirectional,
@@ -225,7 +235,7 @@ class SeqEncoder(torch.nn.Module):
 
         self.dropout = torch.nn.Dropout(dropout)
         self.input_cnn = SeqCNN(in_features)
-        self.hidden_nn = SeqLSTM(in_features*4, out_features//2, rnn_layer=rnn_layer) #4 for MultiScaleCNN output
+        self.hidden_nn = SeqLSTM(in_features*4, out_features, rnn_layer=rnn_layer) #4 for MultiScaleCNN output
         self.attn_sum = SeqAttentionSum(out_features)
 
     def forward(self, x):
