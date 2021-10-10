@@ -49,7 +49,7 @@ class ModelImplBase(object):
         if not os.path.exists(dir): os.makedirs(dir)
         torch.save(self.model.state_dict(), save_as)
         with open(save_as+'.txt','w') as f: f.write(str(self.model))
-        save_yaml(save_as+'.model_const.txt', model_const)
+        save_yaml(save_as+'.model_const.yaml', model_const)
 
     def _load_model_file(self, stream):
         self.model.load_state_dict(torch.load(

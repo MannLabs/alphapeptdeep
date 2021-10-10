@@ -106,19 +106,21 @@ class ModelMSMSpDeep3(torch.nn.Module):
 
         x = torch.cat((x, ins_nce_charge), 2)
 
-        return self.output(x)[:,3:,:]
+        x = self.output(x)[:,3:,:]
+
+        return torch.clamp(x, 0, 1)
 
 
 # Cell
 class IntenAwareLoss(torch.nn.Module):
-    def __init__(self, base_weight=0.2):
+    def __init__(self, base_weight=0.1):
         super().__init__()
         self.w = base_weight
 
     def forward(self, pred, target):
-        x = pred.reshape(-1)
-        y = target.reshape(-1)
-        return torch.mean((y+self.w)*torch.abs(x-y))
+        return torch.mean(
+            (target+pred+self.w)*torch.abs(target-pred)
+        )
 
 # Cell
 mod_feature_size = len(model_const['mod_elements'])
@@ -407,8 +409,6 @@ def evaluate_msms(
             df_list.append(df_group)
 
     df = pd.concat(df_list).reset_index(drop=True)
-    if 'SA' in metrics:
-        df['SA'] = spectral_angle(df['COS'].values)
 
     metrics_describ = df[metrics].describe()
     add_cutoff_metric(metrics_describ, df, thres=0.9)
