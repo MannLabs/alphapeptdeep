@@ -24,7 +24,7 @@ class ModelImplBase(object):
             self.use_GPU(True)
 
     def use_GPU(self, GPU=True):
-        if GPU and not torch.cuda.is_available():
+        if not torch.cuda.is_available():
             GPU=False
         self.device = torch.device('cuda' if GPU else 'cpu')
 
@@ -123,6 +123,9 @@ class ModelImplBase(object):
         precursor_df:pd.DataFrame,
         **kargs
     ):
+        '''
+        This method must create a `self.predict_df` dataframe.
+        '''
         self.predict_df = pd.DataFrame()
 
     def _prepare_train_data_df(self,
@@ -180,6 +183,8 @@ class ModelImplBase(object):
                     )
             if verbose: print(f'[Training] Epoch={epoch+1}, Mean Loss={np.mean(batch_cost)}')
 
+        torch.cuda.empty_cache()
+
     def predict(self,
         precursor_df:pd.DataFrame,
         batch_size=1024,
@@ -211,6 +216,7 @@ class ModelImplBase(object):
                     **kargs
                 )
 
+        torch.cuda.empty_cache()
         return self.predict_df
 
 # Cell
