@@ -11,6 +11,8 @@ import torch
 
 from zipfile import ZipFile
 from typing import IO, Type, Tuple, Callable
+from alphabase.yaml_utils import save_yaml
+from alphadeep._settings import model_const
 
 # Cell
 class ModelImplBase(object):
@@ -47,6 +49,7 @@ class ModelImplBase(object):
         if not os.path.exists(dir): os.makedirs(dir)
         torch.save(self.model.state_dict(), save_as)
         with open(save_as+'.txt','w') as f: f.write(str(self.model))
+        save_yaml(save_as+'.model_const.txt', model_const)
 
     def _load_model_file(self, stream):
         self.model.load_state_dict(torch.load(
