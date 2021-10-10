@@ -8,9 +8,10 @@ import os
 import numpy as np
 import pandas as pd
 import torch
+from tqdm import tqdm
 
 from zipfile import ZipFile
-from typing import IO, Type, Tuple, Callable
+from typing import IO, Tuple, List, Union
 from alphabase.yaml_utils import save_yaml
 from alphadeep._settings import model_const
 
@@ -32,11 +33,11 @@ class ModelImplBase(object):
         self.loss_func = torch.nn.L1Loss()
 
     def build(self,
-        model_class: Type[torch.nn.Module],
+        model_class: torch.nn.Module,
         lr = 0.001,
-        *args, **kargs
+        **kargs
     ):
-        self.model = model_class(*args, **kargs)
+        self.model = model_class(**kargs)
         self.model.to(self.device)
         self.init_train(lr)
 
@@ -60,7 +61,7 @@ class ModelImplBase(object):
         self,
         model_file: Tuple[str, IO],
         model_name_in_zip: str = None,
-        *args, **kargs
+        **kargs
     ):
         if isinstance(model_file, str):
             # We may release all models (msms, rt, ccs, ...) in a single zip file
@@ -76,30 +77,141 @@ class ModelImplBase(object):
 
     def _train_one_batch(
         self,
-        targets:torch.Tensor,
-        *features
+        targets:Union[torch.Tensor,List[torch.Tensor]],
+        *features,
     ):
         self.optimizer.zero_grad()
         predicts = self.model(*[fea.to(self.device) for fea in features])
-        cost = self.loss_func(predicts, targets.to(self.device))
+        if isinstance(targets, list):
+            # predicts must be a list or tuple as well
+            cost = self.loss_func(
+                predicts,
+                [t.to(self.device) for t in targets]
+            )
+        else:
+            cost = self.loss_func(predicts, targets.to(self.device))
         cost.backward()
         self.optimizer.step()
-        return cost
+        return cost.item()
 
     def _predict_one_batch(self,
         *features
     ):
-        return self.model(*[fea.to(self.device) for fea in features])
+        predicts = self.model(*[fea.to(self.device) for fea in features])
+        if isinstance(predicts, torch.Tensor):
+            return predicts.cpu().detach().numpy()
+        else:
+            return [p.cpu().detach().numpy() for p in predicts]
+
+    def _get_targets_from_batch_df(self,
+        batch_df:pd.DataFrame,
+        nAA, **kargs,
+    )->Union[torch.Tensor,List]:
+        raise NotImplementedError(
+            'Must implement _get_targets_from_batch_df() method'
+        )
+
+    def _get_features_from_batch_df(self,
+        batch_df:pd.DataFrame,
+        nAA, **kargs,
+    )->Tuple[torch.Tensor]:
+        raise NotImplementedError(
+            'Must implement _get_features_from_batch_df() method'
+        )
+
+    def _prepare_predict_data_df(self,
+        precursor_df:pd.DataFrame,
+        **kargs
+    ):
+        self.predict_df = pd.DataFrame()
+
+    def _prepare_train_data_df(self,
+        precursor_df:pd.DataFrame,
+        **kargs
+    ):
+        pass
+
+    def _set_batch_predict_data(self,
+        batch_df:pd.DataFrame,
+        predicts:Union[torch.Tensor, List],
+        **kargs
+    ):
+        raise NotImplementedError(
+            'Must implement _set_batch_predict_data_df() method'
+        )
 
     def train(self,
+        precursor_df: pd.DataFrame,
         batch_size=1024,
         epoch=20,
-        *args, **kargs
+        verbose=False,
+        verbose_each_epoch=True,
+        **kargs
     ):
-        raise NotImplementedError('train() function is not finished yet')
+        self._prepare_train_data_df(precursor_df, **kargs)
+        self.model.train()
 
-    def predict(self, batch_size=1024, *args, **kargs):
-        raise NotImplementedError('predict() function is not finished yet')
+        for epoch in range(epoch):
+            batch_cost = []
+            _grouped = list(precursor_df.sample(frac=1).groupby('nAA'))
+            rnd_nAA = np.random.permutation(len(_grouped))
+            if verbose_each_epoch:
+                batch_tqdm = tqdm(rnd_nAA)
+            else:
+                batch_tqdm = rnd_nAA
+            for i_group in batch_tqdm:
+                nAA, df_group = _grouped[i_group]
+                df_group = df_group.reset_index(drop=True)
+                for i in range(0, len(df_group), batch_size):
+                    batch_end = i+batch_size-1 # DataFrame.loc[start:end] inlcudes the end
+
+                    batch_df = df_group.loc[i:batch_end,:]
+                    targets = self._get_targets_from_batch_df(batch_df,nAA,**kargs)
+                    features = self._get_features_from_batch_df(batch_df,nAA,**kargs)
+
+                    cost = self._train_one_batch(
+                        targets,
+                        *features,
+                    )
+                    batch_cost.append(cost)
+                if verbose_each_epoch:
+                    batch_tqdm.set_description(
+                        f'Epoch={epoch+1}, nAA={nAA}, Batch={len(batch_cost)}, Loss={cost:.4f}'
+                    )
+            if verbose: print(f'[Training] Epoch={epoch+1}, Mean Loss={np.mean(batch_cost)}')
+
+    def predict(self,
+        precursor_df:pd.DataFrame,
+        batch_size=1024,
+        verbose=False,**kargs
+    )->pd.DataFrame:
+        self._prepare_predict_data_df(precursor_df,**kargs)
+        self.model.eval()
+
+        _grouped = precursor_df.groupby('nAA')
+        if verbose:
+            batch_tqdm = tqdm(_grouped)
+        else:
+            batch_tqdm = _grouped
+
+        for nAA, df_group in batch_tqdm:
+            for i in range(0, len(df_group), batch_size):
+                batch_end = i+batch_size # DataFrame.loc[start:end] inlcudes the end
+
+                batch_df = df_group.iloc[i:batch_end,:]
+
+                features = self._get_features_from_batch_df(
+                    batch_df, nAA, **kargs
+                )
+
+                predicts = self._predict_one_batch(*features)
+
+                self._set_batch_predict_data(
+                    batch_df, predicts,
+                    **kargs
+                )
+
+        return self.predict_df
 
 # Cell
 def zero_param(*shape):

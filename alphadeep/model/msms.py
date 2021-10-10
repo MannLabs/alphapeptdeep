@@ -9,7 +9,7 @@ import torch
 import pandas as pd
 import numpy as np
 
-import typing
+from typing import List, Tuple
 
 from tqdm import tqdm
 
@@ -108,18 +108,18 @@ class ModelMSMSpDeep3(torch.nn.Module):
 
         x = self.output(x)[:,3:,:]
 
-        return torch.clamp(x, 0, 1)
+        return x
 
 
 # Cell
 class IntenAwareLoss(torch.nn.Module):
-    def __init__(self, base_weight=0.1):
+    def __init__(self, base_weight=0.2):
         super().__init__()
         self.w = base_weight
 
     def forward(self, pred, target):
         return torch.mean(
-            (target+pred+self.w)*torch.abs(target-pred)
+            (target+self.w)*torch.abs(target-pred)
         )
 
 # Cell
@@ -135,7 +135,7 @@ class pDeepModel(model_base.ModelImplBase):
     def __init__(self,
         dropout=0.2,
         lr=0.001,
-        model_class:typing.Type[torch.nn.Module]=ModelMSMSpDeep3,
+        model_class:torch.nn.Module=ModelMSMSpDeep3,
     ):
         super().__init__()
         self.charged_frag_types = get_charged_frag_types(
@@ -155,135 +155,80 @@ class pDeepModel(model_base.ModelImplBase):
         # self.loss_func = torch.nn.L1Loss()
         self.min_inten = 1e-4
 
-    def train(self,
-        precursor_df: pd.DataFrame,
-        fragment_inten_df: pd.DataFrame,
-        epoch=10,
-        batch_size=1024,
-        verbose=False,
-        verbose_each_epoch=True,
+    def _prepare_train_data_df(self,
+        precursor_df:pd.DataFrame,
+        fragment_inten_df:pd.DataFrame=None,
     ):
-        self.model.train()
-
-        fragment_inten_df = fragment_inten_df[self.charged_frag_types]
-
+        self.frag_inten_df = fragment_inten_df[self.charged_frag_types]
         if np.all(precursor_df['NCE'].values > 1):
             precursor_df['NCE'] = precursor_df['NCE']*self.NCE_factor
 
-        for epoch in range(epoch):
-            batch_cost = []
-            _grouped = list(precursor_df.sample(frac=1).groupby('nAA'))
-            rnd_nAA = np.random.permutation(len(_grouped))
-            if verbose_each_epoch:
-                batch_tqdm = tqdm(rnd_nAA)
-            else:
-                batch_tqdm = rnd_nAA
-            for i_group in batch_tqdm:
-                nAA, df_group = _grouped[i_group]
-                df_group = df_group.reset_index(drop=True)
-                for i in range(0, len(df_group), batch_size):
-                    batch_end = i+batch_size-1 # DataFrame.loc[start:end] inlcudes the end
+    def _prepare_predict_data_df(self,
+        precursor_df:pd.DataFrame,
+        reference_frag_df:pd.DataFrame=None,
+    ):
 
-                    aa_indices = torch.LongTensor(
-                        parse_aa_indices(
-                            df_group.loc[i:batch_end, 'sequence'].values.astype('U')
-                        )
-                    )
-
-                    mod_x_batch = get_batch_mod_feature(df_group.loc[i:batch_end,:], nAA)
-                    mod_x = torch.Tensor(mod_x_batch)
-
-                    charges = torch.Tensor(
-                        df_group.loc[i:batch_end, 'charge'].values
-                    ).unsqueeze(1)*self.charge_factor
-
-                    nces = torch.Tensor(df_group.loc[i:batch_end, 'NCE'].values).unsqueeze(1)
-
-                    instrument_indices = torch.LongTensor(
-                        parse_instrument_indices(df_group.loc[i:batch_end, 'instrument'])
-                    )
-                    intens = torch.Tensor(
-                        get_sliced_fragment_dataframe(
-                            fragment_inten_df,
-                            df_group.loc[
-                                i:batch_end, ['frag_start_idx','frag_end_idx']
-                            ].values
-                        ).values
-                    ).view(-1, nAA-1, len(self.charged_frag_types))
-
-                    cost = self._train_one_batch(
-                        intens,
-                        aa_indices, mod_x, charges,
-                        nces, instrument_indices
-                    )
-                    batch_cost.append(cost.item())
-                if verbose_each_epoch:
-                    batch_tqdm.set_description(
-                        f'Epoch={epoch+1}, nAA={nAA}, Batch={len(batch_cost)}, Loss={cost.item():.4f}'
-                    )
-            if verbose: print(f'[MS/MS training] Epoch={epoch+1}, Mean Loss={np.mean(batch_cost)}')
-
-    def predict(self,
-        precursor_df: pd.DataFrame,
-        reference_frag_df: pd.DataFrame = None,
-        batch_size: int=1024,
-        verbose=False,
-    )->pd.DataFrame:
-
-        self.model.eval()
-
-        predict_inten_df = init_fragment_by_precursor_dataframe(
+        self.predict_df = init_fragment_by_precursor_dataframe(
             precursor_df, self.charged_frag_types, reference_frag_df
         )
 
         if np.all(precursor_df['NCE'].values > 1):
             precursor_df['NCE'] = precursor_df['NCE']*self.NCE_factor
 
-        _grouped = precursor_df.groupby('nAA')
+    def _get_features_from_batch_df(self,
+        batch_df: pd.DataFrame,
+        nAA,
+        **kargs,
+    ) -> Tuple[torch.Tensor]:
+        aa_indices = torch.LongTensor(
+            parse_aa_indices(
+                batch_df['sequence'].values.astype('U')
+            )
+        )
 
-        if verbose:
-            batch_tqdm = tqdm(_grouped)
-        else:
-            batch_tqdm = _grouped
+        mod_x_batch = get_batch_mod_feature(batch_df, nAA)
+        mod_x = torch.Tensor(mod_x_batch)
 
-        for nAA, df_group in batch_tqdm:
-            df_group = df_group.reset_index(drop=True)
-            for i in range(0, len(df_group), batch_size):
-                batch_end = i+batch_size-1 # DataFrame.loc[start:end] inlcudes the end
+        charges = torch.Tensor(
+            batch_df['charge'].values
+        ).unsqueeze(1)*self.charge_factor
 
-                mod_x_batch = get_batch_mod_feature(df_group.loc[i:batch_end,:], nAA)
+        nces = torch.Tensor(batch_df['NCE'].values).unsqueeze(1)
 
-                aa_indices = torch.LongTensor(parse_aa_indices(
-                    df_group.loc[i:batch_end, 'sequence'].values.astype('U')
-                ))
-                mod_x = torch.Tensor(mod_x_batch)
-                charges = torch.Tensor(
-                    df_group.loc[i:batch_end, 'charge'].values
-                ).view(-1,1)*self.charge_factor
+        instrument_indices = torch.LongTensor(
+            parse_instrument_indices(batch_df['instrument'])
+        )
+        return aa_indices, mod_x, charges, nces, instrument_indices
 
-                nces = torch.Tensor(df_group.loc[i:batch_end, 'NCE'].values).view(-1,1)
-                instrument_indices = torch.LongTensor(
-                    parse_instrument_indices(df_group.loc[i:batch_end, 'instrument'])
-                )
+    def _get_targets_from_batch_df(self,
+        batch_df: pd.DataFrame,
+        nAA,
+        fragment_inten_df:pd.DataFrame=None
+    ) -> torch.Tensor:
+        return torch.Tensor(
+            get_sliced_fragment_dataframe(
+                fragment_inten_df,
+                batch_df[
+                    ['frag_start_idx','frag_end_idx']
+                ].values
+            ).values
+        ).view(-1, nAA-1, len(self.charged_frag_types))
 
-                predicts = self.model(
-                    *[fea.to(self.device) for fea in
-                    [aa_indices, mod_x, charges, nces, instrument_indices]
-                ]).cpu().detach().numpy()
-                predicts[predicts>1] = 1
-                predicts[predicts<self.min_inten] = 0
-
-                set_sliced_fragment_dataframe(
-                    predict_inten_df,
-                    predicts.reshape((-1, len(self.charged_frag_types))),
-                    df_group.loc[
-                        i:batch_end,
-                        ['frag_start_idx','frag_end_idx']
-                    ].values,
-                    self.charged_frag_types
-                )
-
-        return predict_inten_df
+    def _set_batch_predict_data(self,
+        batch_df: pd.DataFrame,
+        predicts,
+        **kargs,
+    ):
+        set_sliced_fragment_dataframe(
+            self.predict_df,
+            predicts.clip(self.min_inten,1).reshape(
+                (-1, len(self.charged_frag_types))
+            ),
+            batch_df[
+                ['frag_start_idx','frag_end_idx']
+            ].values,
+            self.charged_frag_types
+        )
 
 # Cell
 
@@ -331,7 +276,7 @@ def evaluate_msms(
     psm_df: pd.DataFrame,
     predict_inten_df: pd.DataFrame,
     fragment_inten_df: pd.DataFrame,
-    charged_frag_types: typing.List=None,
+    charged_frag_types: List=None,
     metrics = ['PCC','COS','SA','SPC'],
     use_GPU = True,
     batch_size=4096,

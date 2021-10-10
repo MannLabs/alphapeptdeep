@@ -78,90 +78,39 @@ class AlphaCCSModel(model_base.ModelImplBase):
         self.loss_func = torch.nn.L1Loss()
         self.charge_factor = charge_factor
 
-    def train(self,
-        precursor_df: pd.DataFrame,
-        epoch=10,
-        batch_size=1024,
-        verbose=False,
-        verbose_each_epoch=False,
+    def _prepare_predict_data_df(self,
+        precursor_df:pd.DataFrame,
     ):
-        self.model.train()
-
-        for epoch in range(epoch):
-            batch_cost = []
-            _grouped = list(precursor_df.sample(frac=1).groupby('nAA'))
-            rnd_nAA = np.random.permutation(len(_grouped))
-            if verbose_each_epoch:
-                batch_tqdm = tqdm(rnd_nAA)
-            else:
-                batch_tqdm = rnd_nAA
-            for i_group in batch_tqdm:
-                nAA, df_group = _grouped[i_group]
-                df_group = df_group.reset_index(drop=True)
-                for i in range(0, len(df_group), batch_size):
-                    batch_end = i+batch_size-1 # DataFrame.loc[start:end] inlcudes the end
-
-                    aa_indices = torch.LongTensor(
-                        parse_aa_indices(
-                            df_group.loc[i:batch_end, 'sequence'].values.astype('U')
-                        )
-                    )
-
-                    mod_x_batch = get_batch_mod_feature(df_group.loc[i:batch_end,:], nAA)
-                    mod_x = torch.Tensor(mod_x_batch)
-
-                    CCSs = torch.Tensor(df_group.loc[i:batch_end,'CCS'].values)
-
-                    charges = torch.Tensor(
-                        df_group.loc[i:batch_end, 'charge'].values
-                    ).unsqueeze(1)*self.charge_factor
-
-                    cost = self._train_one_batch(
-                        CCSs,
-                        aa_indices, mod_x, charges
-                    )
-                    batch_cost.append(cost.item())
-                if verbose_each_epoch:
-                    batch_tqdm.set_description(
-                        f'Epoch={epoch+1}, nAA={nAA}, Batch={len(batch_cost)}, Loss={cost.item():.4f}'
-                    )
-            if verbose: print(f'[MS/MS training] Epoch={epoch+1}, Mean Loss={np.mean(batch_cost)}')
-
-    def predict(self, precursor_df, batch_size=1024, verbose=False):
-        self.model.eval()
-
         precursor_df['predict_CCS'] = 0
+        self.predict_df = precursor_df
 
-        _grouped = precursor_df.groupby('nAA')
-        df_list = []
-        if verbose:
-            batch_tqdm = tqdm(_grouped)
-        else:
-            batch_tqdm = _grouped
-        for nAA, df_group in batch_tqdm:
-            df_group = df_group.reset_index(drop=True)
-            for i in range(0, len(df_group), batch_size):
-                batch_end = i+batch_size-1 # DataFrame.loc[start:end] inlcudes the end
+    def _get_features_from_batch_df(self,
+        batch_df: pd.DataFrame,
+        nAA
+    ):
+        aa_indices = torch.LongTensor(
+            parse_aa_indices(
+                batch_df['sequence'].values.astype('U')
+            )
+        )
 
-                mod_x_batch = get_batch_mod_feature(df_group.loc[i:batch_end,:], nAA)
+        mod_x_batch = get_batch_mod_feature(batch_df, nAA)
+        mod_x = torch.Tensor(mod_x_batch)
 
-                aa_indices = torch.LongTensor(parse_aa_indices(
-                    df_group.loc[i:batch_end, 'sequence'].values.astype('U')
-                ))
-                mod_x = torch.Tensor(mod_x_batch)
+        charges = torch.Tensor(
+            batch_df['charge'].values
+        ).unsqueeze(1)*self.charge_factor
 
-                charges = torch.Tensor(
-                    df_group.loc[i:batch_end, 'charge'].values
-                ).unsqueeze(1)*self.charge_factor
+        return aa_indices, mod_x, charges
 
-                predicts = self.model(
-                    *[fea.to(self.device) for fea in
-                    [aa_indices, mod_x, charges]
-                ]).cpu().detach().numpy()
+    def _get_targets_from_batch_df(self,
+        batch_df: pd.DataFrame,
+        nAA
+    ) -> torch.Tensor:
+        return torch.Tensor(batch_df['CCS'].values)
 
-                predicts[predicts<0] = 0
-
-                df_group.loc[i:batch_end, 'predict_CCS'] = predicts
-            df_list.append(df_group)
-
-        return pd.concat(df_list).reset_index(drop=True)
+    def _set_batch_predict_data(self,
+        batch_df: pd.DataFrame,
+        predicts,
+    ):
+        self.predict_df.loc[batch_df.index,'predict_CCS'] = predicts
