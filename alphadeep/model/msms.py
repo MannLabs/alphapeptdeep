@@ -279,7 +279,7 @@ def evaluate_msms(
     charged_frag_types: List=None,
     metrics = ['PCC','COS','SA','SPC'],
     GPU = True,
-    batch_size=4096,
+    batch_size=10240,
     verbose=False,
 )->pd.DataFrame:
 
@@ -330,7 +330,7 @@ def evaluate_msms(
             ).to(device)
 
             if 'PCC' in metrics:
-                psm_df[batch_df.index,'PCC'] = pearson(
+                psm_df.loc[batch_df.index,'PCC'] = pearson(
                     pred_intens, frag_intens
                 ).cpu().detach().numpy()
 
@@ -338,21 +338,27 @@ def evaluate_msms(
                 cos = torch.cosine_similarity(
                     pred_intens, frag_intens, dim=1
                 )
-                psm_df[batch_df.index,'COS'] = cos.cpu().detach().numpy()
+                psm_df.loc[
+                    batch_df.index,'COS'
+                ] = cos.cpu().detach().numpy()
 
                 if 'SA' in metrics:
-                    psm_df[batch_df.index,'SA'] = spectral_angle(
+                    psm_df.loc[
+                        batch_df.index,'SA'
+                    ] = spectral_angle(
                         cos
                     ).cpu().detach().numpy()
 
             if 'SPC' in metrics:
-                psm_df[batch_df.index,'SPC'] = spearman(
+                psm_df.loc[batch_df.index,'SPC'] = spearman(
                     pred_intens, frag_intens, device
                 ).cpu().detach().numpy()
 
     metrics_describ = psm_df[metrics].describe()
     add_cutoff_metric(metrics_describ, psm_df, thres=0.9)
     add_cutoff_metric(metrics_describ, psm_df, thres=0.75)
+
+    torch.cuda.empty_cache()
     return psm_df, metrics_describ
 
 def add_cutoff_metric(
