@@ -201,7 +201,7 @@ class ModelImplBase(object):
 
         for nAA, df_group in batch_tqdm:
             for i in range(0, len(df_group), batch_size):
-                batch_end = i+batch_size # DataFrame.loc[start:end] inlcudes the end
+                batch_end = i+batch_size
 
                 batch_df = df_group.iloc[i:batch_end,:]
 

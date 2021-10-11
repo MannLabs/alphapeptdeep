@@ -19,4 +19,4 @@ instruments:
 max_instrument_num: 8
 nce_factor: 0.01
 charge_factor: 0.1
-hidden: 256
+hidden: 512

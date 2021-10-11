@@ -127,10 +127,11 @@ class MaxQuantReader(PSMReaderBase):
         ):
             intens = np.zeros((nAA-1, len(self.charged_ion_types)))
 
-            frag_types = mq_df.loc[ith_psm,'Matches']
+            frag_types = mq_df.loc[ith_psm,'Matches'].split(';')
+            if len(frag_types) < 5: continue
             frag_intens = mq_df.loc[ith_psm,'Intensities']
             for frag_type, frag_inten in zip(
-                frag_types.split(';'), frag_intens.split(';')
+                frag_types, frag_intens.split(';')
             ):
                 if '-' in frag_type: continue
                 idx = frag_type.find('(')

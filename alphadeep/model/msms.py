@@ -177,8 +177,7 @@ class pDeepModel(model_base.ModelImplBase):
 
     def _get_features_from_batch_df(self,
         batch_df: pd.DataFrame,
-        nAA,
-        **kargs,
+        nAA, **kargs,
     ) -> Tuple[torch.Tensor]:
         aa_indices = torch.LongTensor(
             parse_aa_indices(
@@ -201,8 +200,7 @@ class pDeepModel(model_base.ModelImplBase):
         return aa_indices, mod_x, charges, nces, instrument_indices
 
     def _get_targets_from_batch_df(self,
-        batch_df: pd.DataFrame,
-        nAA,
+        batch_df: pd.DataFrame, nAA,
         fragment_inten_df:pd.DataFrame=None
     ) -> torch.Tensor:
         return torch.Tensor(
@@ -216,12 +214,14 @@ class pDeepModel(model_base.ModelImplBase):
 
     def _set_batch_predict_data(self,
         batch_df: pd.DataFrame,
-        predicts,
+        predicts:np.array,
         **kargs,
     ):
+        predicts = predicts.clip(max=1)
+        predicts[predicts<self.min_inten] = 0
         set_sliced_fragment_dataframe(
             self.predict_df,
-            predicts.clip(self.min_inten,1).reshape(
+            predicts.reshape(
                 (-1, len(self.charged_frag_types))
             ),
             batch_df[
@@ -278,12 +278,12 @@ def evaluate_msms(
     fragment_inten_df: pd.DataFrame,
     charged_frag_types: List=None,
     metrics = ['PCC','COS','SA','SPC'],
-    use_GPU = True,
+    GPU = True,
     batch_size=4096,
     verbose=False,
 )->pd.DataFrame:
 
-    if torch.cuda.is_available() and use_GPU:
+    if torch.cuda.is_available() and GPU:
         device = torch.device('cuda')
     else:
         device = torch.device('cpu')
@@ -300,17 +300,16 @@ def evaluate_msms(
 
     psm_df[metrics] = 0
 
-    df_list = []
-
     for nAA, df_group in batch_tqdm:
-        df_group = df_group.reset_index(drop=True)
         for i in range(0, len(df_group), batch_size):
-            batch_end = i+batch_size-1 # DataFrame.loc[start:end] inlcudes the end
+            batch_end = i+batch_size
+            batch_df = df_group.iloc[i:batch_end,:]
+
             pred_intens = torch.Tensor(
                 get_sliced_fragment_dataframe(
                     predict_inten_df,
-                    df_group.loc[
-                        i:batch_end, ['frag_start_idx','frag_end_idx']
+                    batch_df[
+                        ['frag_start_idx','frag_end_idx']
                     ].values,
                     charged_frag_types
                 ).values
@@ -321,8 +320,8 @@ def evaluate_msms(
             frag_intens = torch.Tensor(
                 get_sliced_fragment_dataframe(
                     fragment_inten_df,
-                    df_group.loc[
-                        i:batch_end, ['frag_start_idx','frag_end_idx']
+                    batch_df[
+                        ['frag_start_idx','frag_end_idx']
                     ].values,
                     charged_frag_types
                 ).values
@@ -331,7 +330,7 @@ def evaluate_msms(
             ).to(device)
 
             if 'PCC' in metrics:
-                df_group.loc[i:batch_end,'PCC'] = pearson(
+                psm_df[batch_df.index,'PCC'] = pearson(
                     pred_intens, frag_intens
                 ).cpu().detach().numpy()
 
@@ -339,26 +338,22 @@ def evaluate_msms(
                 cos = torch.cosine_similarity(
                     pred_intens, frag_intens, dim=1
                 )
-                df_group.loc[i:batch_end,'COS'] = cos.cpu().detach().numpy()
+                psm_df[batch_df.index,'COS'] = cos.cpu().detach().numpy()
 
                 if 'SA' in metrics:
-                    df_group.loc[i:batch_end,'SA'] = spectral_angle(
+                    psm_df[batch_df.index,'SA'] = spectral_angle(
                         cos
                     ).cpu().detach().numpy()
 
             if 'SPC' in metrics:
-                df_group.loc[i:batch_end,'SPC'] = spearman(
+                psm_df[batch_df.index,'SPC'] = spearman(
                     pred_intens, frag_intens, device
                 ).cpu().detach().numpy()
 
-            df_list.append(df_group)
-
-    df = pd.concat(df_list).reset_index(drop=True)
-
-    metrics_describ = df[metrics].describe()
-    add_cutoff_metric(metrics_describ, df, thres=0.9)
-    add_cutoff_metric(metrics_describ, df, thres=0.75)
-    return df, metrics_describ
+    metrics_describ = psm_df[metrics].describe()
+    add_cutoff_metric(metrics_describ, psm_df, thres=0.9)
+    add_cutoff_metric(metrics_describ, psm_df, thres=0.75)
+    return psm_df, metrics_describ
 
 def add_cutoff_metric(
     metrics_describ, metrics_df, thres=0.9
