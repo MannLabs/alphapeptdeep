@@ -3,7 +3,7 @@
 __all__ = ['PredictLib']
 
 # Cell
-from alphabase.library.library_base import SpecLibBase
+from alphabase.speclib.library_base import SpecLibBase
 from alphadeep.model.msms import pDeepModel
 from alphadeep.model.RT import AlphaRTModel
 from alphadeep.model.CCS import AlphaCCSModel
@@ -49,7 +49,7 @@ class PredictLib(SpecLibBase):
         # add 'predict_RT' into columns
         self._precursor_df = self.rt_model.predict(self._precursor_df, verbose=self.verbose)
 
-    def load_fragment_inten_df(self, **kargs):
+    def load_fragment_inten_df(self, **kwargs):
         if self._fragment_mass_df is None:
             self.load_fragment_mass_df()
 
@@ -59,7 +59,6 @@ class PredictLib(SpecLibBase):
             verbose=self.verbose,
         )
 
-        # it does not make sense to
         charged_frag_list = []
         for frag_type in self._fragment_mass_df.columns.values:
             if frag_type in frag_inten_df:

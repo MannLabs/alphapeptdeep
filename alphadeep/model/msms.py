@@ -48,9 +48,7 @@ class ModelMSMSpDeep3(torch.nn.Module):
         # ins_nce_embed_size = conf.max_instrument_num+1
         # self.instrument_nce_embed = torch.nn.Identity()
 
-        output_hidden_size = (
-            hidden if BiRNN else hidden//2
-        )+ins_nce_embed_size+1
+        output_hidden_size = hidden+ins_nce_embed_size+1
 
         # mod_embed_size = 8
         # self.mod_embed_weights = torch.nn.Parameter(
