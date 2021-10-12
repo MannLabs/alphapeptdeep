@@ -3,7 +3,7 @@
 __all__ = ['PredictLib']
 
 # Cell
-from alphadeep.speclib.lib_base import SpecLibBase
+from alphabase.library.library_base import SpecLibBase
 from alphadeep.model.msms import pDeepModel
 from alphadeep.model.RT import AlphaRTModel
 from alphadeep.model.CCS import AlphaCCSModel
@@ -13,7 +13,7 @@ class PredictLib(SpecLibBase):
         charged_ion_types, #['b_1+','b_2+','y_1+','y_2+', ...]
         msms_model: pDeepModel,
         rt_model: AlphaRTModel,
-        ccs_model: AlphaRTModel,
+        ccs_model: AlphaCCSModel,
         min_frag_mz = 200, max_frag_mz = 2000,
         min_precursor_mz = 500, max_precursor_mz = 2000,
     ):

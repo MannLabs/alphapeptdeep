@@ -298,7 +298,8 @@ def evaluate_msms(
     else:
         batch_tqdm = _grouped
 
-    psm_df[metrics] = 0
+    for met in metrics:
+        psm_df[met] = 0
 
     for nAA, df_group in batch_tqdm:
         for i in range(0, len(df_group), batch_size):

@@ -58,10 +58,6 @@ index = {"mod_feature_size": "msms.ipynb",
          "translate_other_modification": "psm_reader.ipynb",
          "keep_modifications": "psm_reader.ipynb",
          "PSMReaderBase": "psm_reader.ipynb",
-         "generate_modified_sequence": "lib_base.ipynb",
-         "merge_precursor_fragment_df": "lib_base.ipynb",
-         "SpecLibBase": "lib_base.ipynb",
-         "diann_mod_dict": "lib_base.ipynb",
          "PredictLib": "predict_lib.ipynb"}
 
 modules = ["model/CCS.py",
@@ -73,7 +69,6 @@ modules = ["model/CCS.py",
            "reader/maxquant_reader.py",
            "reader/pfind_reader.py",
            "reader/psm_reader.py",
-           "speclib/lib_base.py",
            "speclib/predict_lib.py"]
 
 doc_url = "https://MannLabs.github.io/alphadeep/"
