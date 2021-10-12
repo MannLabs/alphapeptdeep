@@ -55,7 +55,8 @@ class PredictLib(SpecLibBase):
 
         frag_inten_df = self.msms_model.predict(
             self._precursor_df,
-            self._fragment_mass_df,
+            reference_frag_df=self._fragment_mass_df,
+            verbose=self.verbose,
         )
 
         # it does not make sense to
