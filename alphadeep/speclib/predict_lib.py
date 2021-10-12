@@ -36,11 +36,17 @@ class PredictLib(SpecLibBase):
 
     @precursor_df.setter
     def precursor_df(self, df):
-        super().precursor_df(df)
-        # add 'predict_RT' into columns
-        self._precursor_df = self.rt_model.predict(self._precursor_df)
+        self._precursor_df = df
+        self._init_precursor_df()
+
+    def _init_precursor_df(self):
+        self._precursor_df['nAA'] = self._precursor_df['sequence'].str.len()
+        self._precursor_df['mod_sites'] = self._precursor_df['mod_sites'].astype('U')
+        self._precursor_df['charge'] = self._precursor_df['charge'].astype(int)
         # add 'predict_CCS' into columns
-        self._precursor_df = self.ccs_model.predict(self._precursor_df)
+        self._precursor_df = self.ccs_model.predict(self._precursor_df, verbose=self.verbose)
+        # add 'predict_RT' into columns
+        self._precursor_df = self.rt_model.predict(self._precursor_df, verbose=self.verbose)
 
     def load_fragment_inten_df(self, **kargs):
         if self._fragment_mass_df is None:
