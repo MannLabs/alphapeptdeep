@@ -29,6 +29,7 @@ class PredictLib(SpecLibBase):
         self.ccs_model = ccs_model
 
         self.inten_factor = 10000
+        self.verbose = True
 
     @property
     def precursor_df(self):
