@@ -169,8 +169,8 @@ class ModelImplBase(object):
                     batch_end = i+batch_size-1 # DataFrame.loc[start:end] inlcudes the end
 
                     batch_df = df_group.loc[i:batch_end,:]
-                    targets = self._get_targets_from_batch_df(batch_df,nAA,**kargs)
-                    features = self._get_features_from_batch_df(batch_df,nAA,**kargs)
+                    targets = self._get_targets_from_batch_df(batch_df,nAA,**kwargs)
+                    features = self._get_features_from_batch_df(batch_df,nAA,**kwargs)
 
                     cost = self._train_one_batch(
                         targets,

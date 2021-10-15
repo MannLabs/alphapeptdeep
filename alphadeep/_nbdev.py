@@ -32,6 +32,11 @@ index = {"mod_feature_size": "msms.ipynb",
          "instrument_dict": "featurize.ipynb",
          "unknown_inst_index": "featurize.ipynb",
          "parse_instrument_indices": "featurize.ipynb",
+         "InputLSTM": "msms.ipynb",
+         "InputEmbedding": "msms.ipynb",
+         "MetaNet": "msms.ipynb",
+         "HiddenMixNN": "msms.ipynb",
+         "ModelMSMSTransformer": "msms.ipynb",
          "ModelMSMSpDeep3": "msms.ipynb",
          "IntenAwareLoss": "msms.ipynb",
          "pDeepModel": "msms.ipynb",
@@ -59,7 +64,10 @@ index = {"mod_feature_size": "msms.ipynb",
          "translate_other_modification": "psm_reader.ipynb",
          "keep_modifications": "psm_reader.ipynb",
          "PSMReaderBase": "psm_reader.ipynb",
-         "PredictLib": "predict_lib.ipynb"}
+         "PredictLib": "predict_lib.ipynb",
+         "merge_precursor_fragment_df": "translate.ipynb",
+         "speclib_to_single_df": "translate.ipynb",
+         "alpha_to_other_mod_dict": "translate.ipynb"}
 
 modules = ["model/CCS.py",
            "model/RT.py",
@@ -70,7 +78,8 @@ modules = ["model/CCS.py",
            "reader/maxquant_reader.py",
            "reader/pfind_reader.py",
            "reader/psm_reader.py",
-           "speclib/predict_lib.py"]
+           "speclib/predict_lib.py",
+           "speclib/translate.py"]
 
 doc_url = "https://MannLabs.github.io/alphadeep/"
 
