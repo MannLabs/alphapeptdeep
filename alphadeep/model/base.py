@@ -17,7 +17,8 @@ from alphadeep._settings import model_const
 
 # Cell
 class ModelImplBase(object):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, **kwargs):
+        self.model = None
         if 'GPU' in kwargs:
             self.use_GPU(kwargs['GPU'])
         else:
@@ -27,8 +28,10 @@ class ModelImplBase(object):
         if not torch.cuda.is_available():
             GPU=False
         self.device = torch.device('cuda' if GPU else 'cpu')
+        if self.model:
+            self.model.to(self.device)
 
-    def init_train(self, lr=0.001):
+    def _init_for_train(self, lr=0.001):
         self.optimizer = torch.optim.Adam(self.model.parameters(), lr=lr)
         self.loss_func = torch.nn.L1Loss()
 
@@ -39,7 +42,7 @@ class ModelImplBase(object):
     ):
         self.model = model_class(**kwargs)
         self.model.to(self.device)
-        self.init_train(lr)
+        self._init_for_train(lr)
 
     def get_parameter_num(self):
         return np.sum([p.numel() for p in self.model.parameters()])
