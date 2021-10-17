@@ -7,7 +7,7 @@ import pandas as pd
 import numba
 import numpy as np
 
-from alphadeep.reader.psm_reader import PSMReaderBase
+from alphadeep.reader.psm_reader import PSMReaderBase, psm_reader_provider
 
 from alphabase.peptide.fragment import \
     init_fragment_by_precursor_dataframe
@@ -46,9 +46,13 @@ class MaxQuantReader(PSMReaderBase):
     def __init__(self,
         frag_types=['b','y','b-modloss','y-modloss'],
         max_frag_charge=2,
+        frag_tol=20, frag_ppm=True,
         load_frag_inten=False,
     ):
-        super().__init__(frag_types, max_frag_charge)
+        super().__init__(
+            frag_types, max_frag_charge,
+            frag_tol, frag_ppm
+        )
 
         self.if_load_frag_inten = load_frag_inten
 
@@ -157,3 +161,5 @@ class MaxQuantReader(PSMReaderBase):
 
     def load_fragment_inten_df(self, ms_files=None):
         pass
+
+psm_reader_provider.register_reader('maxquant', MaxQuantReader)

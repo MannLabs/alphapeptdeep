@@ -15,7 +15,7 @@ from alphabase.peptide.fragment import \
     init_fragment_by_precursor_dataframe
 
 
-from alphadeep.reader.psm_reader import PSMReaderBase
+from alphadeep.reader.psm_reader import PSMReaderBase, psm_reader_provider
 
 
 def convert_one_pFind_mod(mod):
@@ -76,9 +76,13 @@ def remove_pFind_decoy_protein(protein):
 class pFindReader(PSMReaderBase):
     def __init__(self,
         frag_types=['b','y','b-modloss','y-modloss'],
-        max_frag_charge=2
+        max_frag_charge=2,
+        frag_tol=20, frag_ppm=True,
     ):
-        super().__init__(frag_types, max_frag_charge)
+        super().__init__(
+            frag_types, max_frag_charge,
+            frag_tol, frag_ppm
+        )
 
     def translate_modification(self):
         pass
@@ -117,14 +121,20 @@ class pFindReader(PSMReaderBase):
 
         self._psm_df = psm_df
 
+psm_reader_provider.register_reader('pfind', pFindReader)
+
 # Cell
 
 class PSMLabelReader(pFindReader):
     def __init__(self,
         frag_types=['b','y','b-modloss','y-modloss'],
-        max_frag_charge=2
+        max_frag_charge=2,
+        frag_tol=20, frag_ppm=True,
     ):
-        super().__init__(frag_types, max_frag_charge)
+        super().__init__(
+            frag_types, max_frag_charge,
+            frag_tol, frag_ppm
+        )
         psmlabel_columns = 'b,b-NH3,b-H20,b-ModLoss,y,y-HN3,y-H20,y-ModLoss'.split(',')
         self.psmlabel_frag_columns = []
         self.frag_df_columns = {}
@@ -214,6 +224,8 @@ class PSMLabelReader(pFindReader):
 
     def load_fragment_inten_df(self, raw_files=None, *kargs):
         pass
+
+psm_reader_provider.register_reader('psmlabel', PSMLabelReader)
 
 # Cell
 def load_psmlabel_list(

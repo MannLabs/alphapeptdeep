@@ -58,6 +58,8 @@ index = {"mod_feature_size": "msms.ipynb",
          "translate_other_modification": "psm_reader.ipynb",
          "keep_modifications": "psm_reader.ipynb",
          "PSMReaderBase": "psm_reader.ipynb",
+         "PSMReaderProvider": "psm_reader.ipynb",
+         "psm_reader_provider": "psm_reader.ipynb",
          "PredictLib": "predict_lib.ipynb"}
 
 modules = ["model/CCS.py",
