@@ -12,7 +12,7 @@ from alphabase.peptide.fragment import get_charged_frag_types
 
 class FragmentReaderBase(object):
     '''
-    Read fragment intensities for a given psm_df
+    Read fragments for a given psm_df
     '''
     def __init__(self,
         frag_types=['b','y','b-modloss','y-modloss'],
@@ -31,7 +31,8 @@ class FragmentReaderBase(object):
         return self._fragment_inten_df
 
     def load_fragment_inten_df(self,
-        psm_df, ms_files=None
+        psm_df: pd.DataFrame,
+        ms_files=None
     ):
         raise NotImplementedError(
             f'Sub-class of "{self.__class__}" must re-implement "load_fragment_inten_df()"'
@@ -58,8 +59,22 @@ class RawFragmentReader(FragmentReaderBase):
             f'"{self.__class__}" must implement "load_fragment_inten_df()"'
         )
 
-
-def translate_other_modification(mod_str: str, mod_dict: dict):
+def translate_other_modification(
+    mod_str: str,
+    mod_dict: dict
+)->str:
+    '''
+    Translate modifications in `mod_str` to the other
+    format mapped by mod_dict.
+    Args:
+        mod_str (str): mod list in str format, seperated by ';',
+            e.g. ModA;ModB
+        mod_dict (dict): translate mod dict from others to AlphaBase,
+            e.g. for pFind, key='Phospho[S]', value='Phospho@S'
+    Returns:
+        str: new mod list in str format seperated by ';' if all
+             modifications are in `mod_dict` else pd.NA.
+    '''
     if not mod_str: return ""
     ret_mods = []
     for mod in mod_str.split(';'):
@@ -69,7 +84,20 @@ def translate_other_modification(mod_str: str, mod_dict: dict):
             return pd.NA
     return ";".join(ret_mods)
 
-def keep_modifications(mod_str: str, mod_set):
+def keep_modifications(
+    mod_str: str,
+    mod_set: set
+)->str:
+    '''
+    Check if modifications in `mod_str` in `mod_set`
+    Args:
+        mod_str (str): mod list in str format, seperated by ';',
+            e.g. Oxidation@M;Phospho@S.
+        mod_set (set): mod set to check
+    Returns:
+        str: `mod_str` if all modifications are in mod_set
+             else pd.NA.
+    '''
     if not mod_str: return ""
     for mod in mod_str.split(';'):
         if not mod in mod_set:
@@ -81,7 +109,14 @@ class PSMReaderBase(object):
     def __init__(self,
         fragment_reader:FragmentReaderBase=None
     ):
+        # modification_convert_dict=dict[str, str]:
+        #     key:   mod names of other search engines
+        #     value: mod names in AlphaBase
+        # It is used to convert mods of other engines
+        # to AlphaBase format. Different search engines
+        # have different mod names.
         self.modification_convert_dict = {}
+
         self.fragment_reader = fragment_reader
 
     @property
@@ -91,13 +126,16 @@ class PSMReaderBase(object):
     @property
     def fragment_inten_df(self):
         if self.fragment_reader:
-            return self.fragment_reader._fragment_inten_df
+            return self.fragment_reader.fragment_inten_df
         else:
             return None
 
     def translate_modification(self):
         '''
-            Raise: KeyError if `mod` in `mod_names` is not in `self.modification_convert_dict`
+        Translate modifications to AlphaBase format.
+
+        Raises: KeyError if `mod` in `mod_names` is
+            not in `self.modification_convert_dict`
         '''
         self._psm_df.mods = self._psm_df.mods.apply(
             translate_other_modification,
@@ -112,6 +150,9 @@ class PSMReaderBase(object):
     def filter_psm_by_modifications(self, include_mod_list = [
         'Oxidation@M','Phospho@S','Phospho@T','Phospho@Y','Acetyl@Protein N-term'
     ]):
+        '''
+            Only keeps peptides with modifications in `include_mod_list`.
+        '''
         mod_set = set(include_mod_list)
         self._psm_df.mods = self._psm_df.mods.apply(keep_modifications, mod_set=mod_set)
 
