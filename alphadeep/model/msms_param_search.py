@@ -25,18 +25,18 @@ class ModelMSMSTest(torch.nn.Module):
         self.cat_meta_first=cat_meta_first
         self.output_transform = output_transform
 
-        self.meta_nn = msms.MetaNet(
+        self.meta_nn = model_base.MetaNet(
             max_instrument_num, hidden_size
         )
 
         self.dropout = torch.nn.Dropout(dropout)
 
-        self.input = msms.InputLSTM(
+        self.input = model_base.InputLSTM(
             mod_feature_size, hidden_size
         )
 
         if hidden_nn == 'transformer':
-            self.hidden = msms.HiddenTransformer(
+            self.hidden = model_base.HiddenTransformer(
                 hidden_size, dropout,
                 hidden_layer
             )
