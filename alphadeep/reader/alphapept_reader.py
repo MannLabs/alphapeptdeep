@@ -46,13 +46,10 @@ def parse_ap(precursor):
 
 class AlphaPeptReader(PSMReaderBase):
     def __init__(self,
-        frag_types=['b','y','b-modloss','y-modloss'],
-        max_frag_charge=2,
-        frag_tol=20, frag_ppm=True,
+        fragment_reader = None
     ):
         super().__init__(
-            frag_types, max_frag_charge,
-            frag_tol, frag_ppm
+            fragment_reader
         )
 
         self.modification_convert_dict['cC'] = 'Carbamidomethyl@C'
@@ -60,7 +57,7 @@ class AlphaPeptReader(PSMReaderBase):
         self.modification_convert_dict['pS'] = 'Phospho@S'
         self.modification_convert_dict['pT'] = 'Phospho@T'
         self.modification_convert_dict['pY'] = 'Phospho@Y'
-        self.modification_convert_dict['a'] = 'Acetyl@Protein_N-term'
+        self.modification_convert_dict['a'] = 'Acetyl@Protein N-term'
 
     def _load_file(self, filename):
         with h5py.File(filename, 'r') as _hdf:
