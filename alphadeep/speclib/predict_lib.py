@@ -3,7 +3,7 @@
 __all__ = ['PredictLib']
 
 # Cell
-from alphabase.library.library_base import SpecLibBase
+from alphabase.speclib.library_base import SpecLibBase
 from alphadeep.model.msms import pDeepModel
 from alphadeep.model.RT import AlphaRTModel
 from alphadeep.model.CCS import AlphaCCSModel
@@ -42,7 +42,7 @@ class PredictLib(SpecLibBase):
         # add 'predict_CCS' into columns
         self._precursor_df = self.ccs_model.predict(self._precursor_df)
 
-    def load_fragment_inten_df(self, **kargs):
+    def load_fragment_inten_df(self, **kwargs):
         if self._fragment_mass_df is None:
             self.load_fragment_mass_df()
 

@@ -224,20 +224,20 @@ class SpecLibBase(object):
         return df
 
     def load_precursor_df(self,
-        precursor_files, **kargs
+        precursor_files, **kwargs
     ):
-        self._load_precursor_df(precursor_files, **kargs)
+        self._load_precursor_df(precursor_files, **kwargs)
 
-    def _load_precursor_df(self, precursor_files, **kargs):
+    def _load_precursor_df(self, precursor_files, **kwargs):
         raise NotImplementedError(
             f'Sub-class of "{self.__class__}" must re-implement "_load_precursor_df()"'
         )
 
-    def load_fragment_df(self, **kargs):
+    def load_fragment_df(self, **kwargs):
         self.load_fragment_mass_df()
         self.load_fragment_inten_df()
 
-    def load_fragment_inten_df(self, **kargs):
+    def load_fragment_inten_df(self, **kwargs):
         raise NotImplementedError(
             f'Sub-class of "{self.__class__}" must re-implement "load_fragment_inten_df()"'
         )

@@ -177,7 +177,7 @@ class pDeepModel(model_base.ModelImplBase):
 
     def _get_features_from_batch_df(self,
         batch_df: pd.DataFrame,
-        nAA, **kargs,
+        nAA, **kwargs,
     ) -> Tuple[torch.Tensor]:
         aa_indices = torch.LongTensor(
             parse_aa_indices(
@@ -215,7 +215,7 @@ class pDeepModel(model_base.ModelImplBase):
     def _set_batch_predict_data(self,
         batch_df: pd.DataFrame,
         predicts:np.array,
-        **kargs,
+        **kwargs,
     ):
         predicts = predicts.clip(max=1)
         predicts[predicts<self.min_inten] = 0

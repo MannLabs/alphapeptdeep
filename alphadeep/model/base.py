@@ -17,9 +17,9 @@ from alphadeep._settings import model_const
 
 # Cell
 class ModelImplBase(object):
-    def __init__(self, *args, **kargs):
-        if 'GPU' in kargs:
-            self.use_GPU(kargs['GPU'])
+    def __init__(self, *args, **kwargs):
+        if 'GPU' in kwargs:
+            self.use_GPU(kwargs['GPU'])
         else:
             self.use_GPU(True)
 
@@ -35,9 +35,9 @@ class ModelImplBase(object):
     def build(self,
         model_class: torch.nn.Module,
         lr = 0.001,
-        **kargs
+        **kwargs
     ):
-        self.model = model_class(**kargs)
+        self.model = model_class(**kwargs)
         self.model.to(self.device)
         self.init_train(lr)
 
@@ -61,7 +61,7 @@ class ModelImplBase(object):
         self,
         model_file: Tuple[str, IO],
         model_name_in_zip: str = None,
-        **kargs
+        **kwargs
     ):
         if isinstance(model_file, str):
             # We may release all models (msms, rt, ccs, ...) in a single zip file
@@ -105,7 +105,7 @@ class ModelImplBase(object):
 
     def _get_targets_from_batch_df(self,
         batch_df:pd.DataFrame,
-        nAA, **kargs,
+        nAA, **kwargs,
     )->Union[torch.Tensor,List]:
         raise NotImplementedError(
             'Must implement _get_targets_from_batch_df() method'
@@ -113,7 +113,7 @@ class ModelImplBase(object):
 
     def _get_features_from_batch_df(self,
         batch_df:pd.DataFrame,
-        nAA, **kargs,
+        nAA, **kwargs,
     )->Tuple[torch.Tensor]:
         raise NotImplementedError(
             'Must implement _get_features_from_batch_df() method'
@@ -121,7 +121,7 @@ class ModelImplBase(object):
 
     def _prepare_predict_data_df(self,
         precursor_df:pd.DataFrame,
-        **kargs
+        **kwargs
     ):
         '''
         This method must create a `self.predict_df` dataframe.
@@ -130,14 +130,14 @@ class ModelImplBase(object):
 
     def _prepare_train_data_df(self,
         precursor_df:pd.DataFrame,
-        **kargs
+        **kwargs
     ):
         pass
 
     def _set_batch_predict_data(self,
         batch_df:pd.DataFrame,
         predicts:Union[torch.Tensor, List],
-        **kargs
+        **kwargs
     ):
         raise NotImplementedError(
             'Must implement _set_batch_predict_data_df() method'
@@ -149,9 +149,9 @@ class ModelImplBase(object):
         epoch=20,
         verbose=False,
         verbose_each_epoch=True,
-        **kargs
+        **kwargs
     ):
-        self._prepare_train_data_df(precursor_df, **kargs)
+        self._prepare_train_data_df(precursor_df, **kwargs)
         self.model.train()
 
         for epoch in range(epoch):
@@ -169,8 +169,8 @@ class ModelImplBase(object):
                     batch_end = i+batch_size-1 # DataFrame.loc[start:end] inlcudes the end
 
                     batch_df = df_group.loc[i:batch_end,:]
-                    targets = self._get_targets_from_batch_df(batch_df,nAA,**kargs)
-                    features = self._get_features_from_batch_df(batch_df,nAA,**kargs)
+                    targets = self._get_targets_from_batch_df(batch_df,nAA,**kwargs)
+                    features = self._get_features_from_batch_df(batch_df,nAA,**kwargs)
 
                     cost = self._train_one_batch(
                         targets,
@@ -188,9 +188,9 @@ class ModelImplBase(object):
     def predict(self,
         precursor_df:pd.DataFrame,
         batch_size=1024,
-        verbose=False,**kargs
+        verbose=False,**kwargs
     )->pd.DataFrame:
-        self._prepare_predict_data_df(precursor_df,**kargs)
+        self._prepare_predict_data_df(precursor_df,**kwargs)
         self.model.eval()
 
         _grouped = precursor_df.groupby('nAA')
@@ -206,14 +206,14 @@ class ModelImplBase(object):
                 batch_df = df_group.iloc[i:batch_end,:]
 
                 features = self._get_features_from_batch_df(
-                    batch_df, nAA, **kargs
+                    batch_df, nAA, **kwargs
                 )
 
                 predicts = self._predict_one_batch(*features)
 
                 self._set_batch_predict_data(
                     batch_df, predicts,
-                    **kargs
+                    **kwargs
                 )
 
         torch.cuda.empty_cache()
