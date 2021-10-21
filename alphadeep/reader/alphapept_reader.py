@@ -8,7 +8,7 @@ import os
 import pandas as pd
 import h5py
 
-from alphadeep.reader.psm_reader import PSMReaderBase
+from alphadeep.reader.psm_reader import PSMReaderBase, psm_reader_provider
 
 @numba.njit
 def parse_ap(precursor):
@@ -46,17 +46,18 @@ def parse_ap(precursor):
 
 class AlphaPeptReader(PSMReaderBase):
     def __init__(self,
-        frag_types=['b','y','b-modloss','y-modloss'],
-        max_frag_charge=2
+        fragment_reader = None
     ):
-        super().__init__(frag_types, max_frag_charge)
+        super().__init__(
+            fragment_reader
+        )
 
         self.modification_convert_dict['cC'] = 'Carbamidomethyl@C'
         self.modification_convert_dict['oxM'] = 'Oxidation@M'
         self.modification_convert_dict['pS'] = 'Phospho@S'
         self.modification_convert_dict['pT'] = 'Phospho@T'
         self.modification_convert_dict['pY'] = 'Phospho@Y'
-        self.modification_convert_dict['a'] = 'Acetyl@Protein_N-term'
+        self.modification_convert_dict['a'] = 'Acetyl@Protein N-term'
 
     def _load_file(self, filename):
         with h5py.File(filename, 'r') as _hdf:
@@ -87,3 +88,5 @@ class AlphaPeptReader(PSMReaderBase):
         psm_df['nAA'] = psm_df.sequence.str.len()
 
         self._psm_df = psm_df
+
+psm_reader_provider.register_reader('alphapept', AlphaPeptReader)
