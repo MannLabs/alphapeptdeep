@@ -17,7 +17,7 @@ from alphadeep._settings import model_const
 
 # Cell
 class ModelImplBase(object):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, **kwargs):
         if 'GPU' in kwargs:
             self.use_GPU(kwargs['GPU'])
         else:
