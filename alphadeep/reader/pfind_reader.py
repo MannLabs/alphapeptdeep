@@ -37,17 +37,17 @@ def convert_one_pFind_mod(mod):
     elif site == 'ProteinN-term':
         return name + '@' + 'Protein N-term'
     elif site.startswith('AnyN-term'):
-        return name + '@' + site[-1] + '^Any_N-term'
+        return name + '@' + site[-1] + '^Any N-term'
     elif site.startswith('ProteinN-term'):
-        return name + '@' + site[-1] + '^Protein_N-term'
+        return name + '@' + site[-1] + '^Protein N-term'
     elif site == 'AnyC-term':
         return name + '@' + 'Any C-term'
     elif site == 'ProteinC-term':
         return name + '@' + 'Protein C-term'
     elif site.startswith('AnyC-term'):
-        return name + '@' + site[-1] + '^Any_C-term'
+        return name + '@' + site[-1] + '^Any C-term'
     elif site.startswith('ProteinC-term'):
-        return name + '@' + site[-1] + '^Protein_C-term'
+        return name + '@' + site[-1] + '^Protein C-term'
     else:
         return None
 
