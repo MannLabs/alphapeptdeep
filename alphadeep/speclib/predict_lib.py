@@ -10,7 +10,7 @@ from alphadeep.model.CCS import AlphaCCSModel
 
 class PredictLib(SpecLibBase):
     def __init__(self,
-        charged_ion_types, #['b_1+','b_2+','y_1+','y_2+', ...]
+        charged_frag_types, #['b_1+','b_2+','y_1+','y_2+', ...]
         msms_model: pDeepModel,
         rt_model: AlphaRTModel,
         ccs_model: AlphaCCSModel,
@@ -18,7 +18,7 @@ class PredictLib(SpecLibBase):
         min_precursor_mz = 500, max_precursor_mz = 2000,
     ):
         super().__init__(
-            charged_ion_types,
+            charged_frag_types,
             min_frag_mz=min_frag_mz,
             max_frag_mz=max_frag_mz,
             min_precursor_mz=min_precursor_mz,

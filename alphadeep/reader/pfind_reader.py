@@ -141,7 +141,7 @@ class PSMLabelFragmentReader(FragmentReaderBase):
         for _type in psmlabel_columns:
             frag_idxes = [
                 i for i,_t in enumerate(
-                    self.charged_ion_types
+                    self.charged_frag_types
                 ) if _t.startswith(_type.lower()+'_')
             ]
             if frag_idxes:
@@ -153,13 +153,13 @@ class PSMLabelFragmentReader(FragmentReaderBase):
         psmlabel_df, raw_files=None
     ):
         self._fragment_inten_df = init_fragment_by_precursor_dataframe(
-            psmlabel_df, self.charged_ion_types
+            psmlabel_df, self.charged_frag_types
         )
 
         for ith_psm, (nAA, start,end) in enumerate(
             psmlabel_df[['nAA','frag_start_idx','frag_end_idx']].values
         ):
-            intens = np.zeros((nAA-1, len(self.charged_ion_types)))
+            intens = np.zeros((nAA-1, len(self.charged_frag_types)))
             for ion_type in self.psmlabel_frag_columns:
                 if ion_type not in psmlabel_df.columns: continue
 

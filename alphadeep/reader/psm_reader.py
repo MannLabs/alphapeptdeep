@@ -19,7 +19,7 @@ class FragmentReaderBase(object):
         max_frag_charge=2,
         frag_tol=20, frag_ppm=True,
     ):
-        self.charged_ion_types = get_charged_frag_types(
+        self.charged_frag_types = get_charged_frag_types(
             frag_types, max_frag_charge
         )
 

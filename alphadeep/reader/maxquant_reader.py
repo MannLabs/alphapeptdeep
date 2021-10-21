@@ -29,18 +29,18 @@ class MaxQuantMSMSFragmentReader(FragmentReaderBase):
         mq_df, ms_files=None
     ):
         self._fragment_inten_df = init_fragment_by_precursor_dataframe(
-            mq_df, self.charged_ion_types
+            mq_df, self.charged_frag_types
         )
 
         frag_col_dict = dict(zip(
-            self.charged_ion_types,
-            range(len(self.charged_ion_types))
+            self.charged_frag_types,
+            range(len(self.charged_frag_types))
         ))
 
         for ith_psm, (nAA, start,end) in enumerate(
             mq_df[['nAA','frag_start_idx','frag_end_idx']].values
         ):
-            intens = np.zeros((nAA-1, len(self.charged_ion_types)))
+            intens = np.zeros((nAA-1, len(self.charged_frag_types)))
 
             frag_types = mq_df.loc[ith_psm,'Matches'].split(';')
             if len(frag_types) < 5: continue
@@ -73,30 +73,26 @@ class MaxQuantMSMSFragmentReader(FragmentReaderBase):
 @numba.njit
 def parse_mq(
     modseq,
+    mod_sep='()',
     fixed_C=True
 ):
-    PeptideModSeq = modseq.strip('_')
+    PeptideModSeq = modseq
     mod_list = []
     site_list = []
-    if PeptideModSeq.startswith('('):
-        site_list.append('0')
-        site_end = PeptideModSeq.find(')')+2
-        mod_list.append(PeptideModSeq[:site_end])
-        PeptideModSeq = PeptideModSeq[site_end:]
-    site = PeptideModSeq.find('(')
+    site = PeptideModSeq.find(mod_sep[0])
     while site != -1:
-        site_end = PeptideModSeq.find(')',site+1)+1
-        if site_end < len(PeptideModSeq) and PeptideModSeq[site_end] == ')':
+        site_end = PeptideModSeq.find(mod_sep[1],site+1)+1
+        if site_end < len(PeptideModSeq) and PeptideModSeq[site_end] == mod_sep[1]:
             site_end += 1
-        site_list.append(str(site))
+        site_list.append(str(site-1))
         mod_list.append(PeptideModSeq[site-1:site_end])
         PeptideModSeq = PeptideModSeq[:site] + PeptideModSeq[site_end:]
-        site = PeptideModSeq.find('(', site)
+        site = PeptideModSeq.find(mod_sep[0], site)
     if fixed_C:
         site = PeptideModSeq.find('C')
         while site != -1:
-            site_list.append(str(site+1))
-            mod_list.append('C(Carbamidomethyl (C))')
+            site_list.append(str(site))
+            mod_list.append(f'C{"Carbamidomethyl (C)".join(mod_sep)}')
             site = PeptideModSeq.find('C',site+1)
     return ';'.join(mod_list), ';'.join(site_list)
 
@@ -109,8 +105,10 @@ class MaxQuantReader(PSMReaderBase):
             fragment_reader
         )
 
+        self.mod_sep = '()'
+
         self.modification_convert_dict = {}
-        self.modification_convert_dict['(Acetyl (Protein N-term))'] = 'Acetyl@Protein N-term'
+        self.modification_convert_dict['_(Acetyl (Protein N-term))'] = 'Acetyl@Protein N-term'
         self.modification_convert_dict['C(Carbamidomethyl (C))'] = 'Carbamidomethyl@C'
         self.modification_convert_dict['M(Oxidation (M))'] = 'Oxidation@M'
         self.modification_convert_dict['S(Phospho (S))'] = 'Phospho@S'
@@ -124,12 +122,16 @@ class MaxQuantReader(PSMReaderBase):
         self.modification_convert_dict['N(Deamidation (NQ))'] = 'Deamidated@N'
         self.modification_convert_dict['Q(Deamidation (NQ))'] = 'Deamidated@Q'
         self.modification_convert_dict['K(GlyGly (K))'] = 'GlyGly@K'
-        self.modification_convert_dict['(ac)'] = 'Acetyl@Protein N-term'
+        self.modification_convert_dict['_(ac)'] = 'Acetyl@Protein N-term'
         self.modification_convert_dict['M(ox)'] = 'Oxidation@M'
         self.modification_convert_dict['S(ph)'] = 'Phospho@S'
         self.modification_convert_dict['T(ph)'] = 'Phospho@T'
         self.modification_convert_dict['Y(ph)'] = 'Phospho@Y'
         self.modification_convert_dict['K(gl)'] = 'GlyGly@K'
+        self.modification_convert_dict['E(Glu->pyro-Glu)'] = 'Glu->pyro-Glu@E^Protein N-term'
+
+        for key, val in list(self.modification_convert_dict.items()):
+            self.modification_convert_dict[f'{key[0]}[{key[2:-1]}]'] = val
 
     def _load_file(self, filename):
         df = pd.read_csv(filename, sep='\t')
@@ -139,7 +141,7 @@ class MaxQuantReader(PSMReaderBase):
         psm_df['sequence'] = df['Sequence']
         df['nAA'] = df['Sequence'].str.len() # place holder for future
         psm_df['nAA'] = df['nAA']
-        psm_df['mods'], psm_df['mod_sites'] = zip(*df['Modified sequence'].apply(parse_mq))
+        psm_df['mods'], psm_df['mod_sites'] = zip(*df['Modified sequence'].apply(parse_mq, mod_sep=self.mod_sep))
         psm_df['charge'] = df['Charge']
         psm_df['RT'] = df['Retention time']*60
         if 'Scan number' in df.columns:
