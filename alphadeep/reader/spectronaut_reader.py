@@ -13,7 +13,7 @@ from alphadeep.reader.maxquant_reader import parse_mq, \
     MaxQuantReader
 
 class SpectronautReader(MaxQuantReader):
-    def __init__(self):
+    def __init__(self, fragment_reader=None):
         super().__init__(None)
         self.mod_sep = '[]'
 
@@ -53,6 +53,8 @@ class SpectronautReader(MaxQuantReader):
             psm_df['CCS'] = pd.NA
 
         psm_df['proteins'] = df['Protein Name']
+        if 'UniProtIds' in df.columns:
+            psm_df['uniprot_id'] = df['UniProtIds']
         if 'Genes' in df.columns:
             psm_df['genes'] = df['Genes']
         else:
