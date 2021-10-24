@@ -2,7 +2,14 @@
 
 __all__ = ["index", "modules", "custom_doc_links", "git_url"]
 
-index = {"mod_feature_size": "msms.ipynb",
+index = {"mass_match": "match.ipynb",
+         "MS2ReaderBase": "ms_reader.ipynb",
+         "AlphaPeptHDFReader": "ms_reader.ipynb",
+         "read_until": "ms_reader.ipynb",
+         "find_line": "ms_reader.ipynb",
+         "parse_pfind_scan_from_TITLE": "ms_reader.ipynb",
+         "MGFReader": "ms_reader.ipynb",
+         "mod_feature_size": "msms.ipynb",
          "charge_factor": "msms.ipynb",
          "EncDecModelCCS": "CCS.ipynb",
          "AlphaCCSModel": "CCS.ipynb",
@@ -79,7 +86,9 @@ index = {"mod_feature_size": "msms.ipynb",
          "speclib_to_single_df": "translate.ipynb",
          "alpha_to_other_mod_dict": "translate.ipynb"}
 
-modules = ["model/CCS.py",
+modules = ["mass_spec/match.py",
+           "mass_spec/ms_reader.py",
+           "model/CCS.py",
            "model/RT.py",
            "model/base.py",
            "model/featurize.py",

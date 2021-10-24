@@ -4,7 +4,6 @@ __all__ = ['SpectronautReader']
 
 # Cell
 import pandas as pd
-import numpy as np
 
 from alphadeep.reader.psm_reader import \
     psm_reader_provider
@@ -41,7 +40,6 @@ class SpectronautReader(MaxQuantReader):
             df.iRT - min_rt
         )/(df.iRT.max() - min_rt)
         return df
-
 
 
 psm_reader_provider.register_reader(
