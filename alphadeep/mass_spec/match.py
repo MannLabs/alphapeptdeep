@@ -60,7 +60,14 @@ class Match:
             columns=fragment_mass_df.columns
         )
 
-    def match(self,
+        self.matched_mass_err_df = pd.DataFrame(
+            np.full_like(
+                fragment_mass_df.values, 100, dtype=np.float64
+            ),
+            columns=fragment_mass_df.columns
+        )
+
+    def match_centroid(self,
         ms2_file_dict: dict, #raw_name: ms2_file
         ms2_type:str = 'alphapept', # 'mgf'
         ppm=True, tol=20,
@@ -75,16 +82,18 @@ class Match:
                 ) in df_group[[
                     'scan_no', 'frag_start_idx',
                     'frag_end_idx'
-                ]]:
+                ]].values:
                     (
                         spec_masses, spec_intens
                     ) = ms2_reader.get_peaks(scan_no)
+                    if len(spec_masses) == 0: continue
+
                     if ppm:
                         Da_tols = spec_masses*tol*1e-6
                     else:
                         Da_tols = np.full_like(spec_masses, tol)
 
-                    frag_masses = df_group.values[
+                    frag_masses = self._fragment_mass_df.values[
                         frag_start_idx:frag_end_idx,:
                     ]
 
@@ -94,7 +103,15 @@ class Match:
                     matched_intens = spec_intens[matched_idx]
                     matched_intens[matched_idx==-1] = 0
 
+                    matched_merrs = np.abs(
+                        spec_masses[matched_idx]-frag_masses
+                    )
+                    matched_merrs[matched_idx==-1] = 100
+
                     self.matched_inten_df.values[
                         frag_start_idx:frag_end_idx,:
                     ] = matched_intens
-        return self.matched_inten_df
+
+                    self.matched_mass_err_df.values[
+                        frag_start_idx:frag_end_idx,:
+                    ] = matched_merrs
