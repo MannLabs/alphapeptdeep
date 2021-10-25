@@ -2,13 +2,17 @@
 
 __all__ = ["index", "modules", "custom_doc_links", "git_url"]
 
-index = {"mass_match": "match.ipynb",
+index = {"centroid_mass_match": "match.ipynb",
+         "Match": "match.ipynb",
          "MS2ReaderBase": "ms_reader.ipynb",
          "AlphaPeptHDFReader": "ms_reader.ipynb",
          "read_until": "ms_reader.ipynb",
          "find_line": "ms_reader.ipynb",
          "parse_pfind_scan_from_TITLE": "ms_reader.ipynb",
+         "is_pfind_mgf": "ms_reader.ipynb",
          "MGFReader": "ms_reader.ipynb",
+         "MS2ReaderProvider": "ms_reader.ipynb",
+         "ms2_reader_provider": "ms_reader.ipynb",
          "mod_feature_size": "msms.ipynb",
          "charge_factor": "msms.ipynb",
          "EncDecModelCCS": "CCS.ipynb",
