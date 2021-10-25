@@ -125,6 +125,7 @@ class PSMReaderBase(object):
                 for other_col in map_col:
                     if other_col in origin_df.columns:
                         self._psm_df[col] = origin_df[other_col]
+                        break
                 if col not in self._psm_df.columns:
                     self._psm_df[col] = pd.NA
         origin_df['nAA'] = origin_df[self.column_mapping['sequence']].str.len()

@@ -56,8 +56,10 @@ class AlphaPeptReader(PSMReaderBase):
         self.modification_convert_dict['a'] = 'Acetyl@Protein N-term'
 
         self.column_mapping = {
+            'sequence': 'naked_sequence',
             'RT':'rt',
-            'scan_idx': 'scan_no',
+            'scan_no': 'scan_no',
+            'scan_idx': 'raw_idx', #idx in ms2 list
             'mobility': 'mobility',
             'score': 'score',
             'charge': 'charge',

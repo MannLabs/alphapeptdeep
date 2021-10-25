@@ -79,7 +79,7 @@ class MaxQuantReader(PSMReaderBase):
             'RT': 'Retention time',
             'CCS': 'CCS',
             'mobility': ['Mobility','IonMobility'],
-            'scan': ['Scan number','MS/MS scan number'],
+            'scan_no': ['Scan number','MS/MS scan number'],
             'raw_name': 'Raw file',
             'score': 'Score',
             'proteins': 'Proteins',

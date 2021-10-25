@@ -94,7 +94,7 @@ class pFindReader(PSMReader_w_FragBase):
             'CCS': 'CCS',
             'raw_name': 'raw_name',
             'msms_id': 'File_Name',
-            'scan_idx': 'Scan_No',
+            'scan_no': 'Scan_No',
             'score': 'score',
             'proteins': 'Proteins',
             'uniprot_ids': 'uniprot_ids',
@@ -153,7 +153,7 @@ class PSMLabelReader(pFindReader):
             'CCS': 'CCS',
             'raw_name': 'raw_name',
             'msms_id': 'File_Name',
-            'scan_idx': 'scan_idx',
+            'scan_no': 'scan_no',
         }
 
         psmlabel_columns = 'b,b-NH3,b-H20,b-ModLoss,y,y-HN3,y-H20,y-ModLoss'.split(',')
@@ -175,10 +175,10 @@ class PSMLabelReader(pFindReader):
         psmlabel_df = pd.read_csv(filename, sep="\t")
         psmlabel_df.fillna('', inplace=True)
 
-        psmlabel_df['raw_name'], psmlabel_df['scan_idx'], psmlabel_df['charge'] = zip(
+        psmlabel_df['raw_name'], psmlabel_df['scan_no'], psmlabel_df['charge'] = zip(
             *psmlabel_df['spec'].str.split('.').apply(lambda x: (x[0], x[-4], x[-3]))
         )
-        psmlabel_df['scan_idx'] = psmlabel_df['scan_idx'].astype(int)
+        psmlabel_df['scan_no'] = psmlabel_df['scan_no'].astype(int)
         psmlabel_df['charge'] = psmlabel_df['charge'].astype(int)
         return psmlabel_df
 
