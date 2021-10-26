@@ -77,7 +77,7 @@ def remove_pFind_decoy_protein(protein):
 # Cell
 class pFindReader(PSMReader_w_FragBase):
     def __init__(self,
-        frag_types=['b','y','b-modloss','y-modloss'],
+        frag_types=['b','y','b_modloss','y_modloss'],
         max_frag_charge=2,
         frag_tol=20, frag_ppm=True,
     ):
@@ -136,7 +136,7 @@ psm_w_frag_reader_provider.register_reader('pfind', pFindReader)
 
 class PSMLabelReader(pFindReader):
     def __init__(self,
-        frag_types=['b','y','b-modloss','y-modloss'],
+        frag_types=['b','y','b_modloss','y_modloss'],
         max_frag_charge=2,
         frag_tol=20, frag_ppm=True,
     ):
@@ -156,14 +156,14 @@ class PSMLabelReader(pFindReader):
             'scan_no': 'scan_no',
         }
 
-        psmlabel_columns = 'b,b-NH3,b-H20,b-ModLoss,y,y-HN3,y-H20,y-ModLoss'.split(',')
+        psmlabel_columns = 'b,b-NH3,b-H20,b-modloss,y,y-HN3,y-H20,y-modloss'.split(',')
         self.psmlabel_frag_columns = []
         self.frag_df_columns = {}
         for _type in psmlabel_columns:
             frag_idxes = [
                 i for i,_t in enumerate(
                     self.charged_frag_types
-                ) if _t.startswith(_type.lower()+'_')
+                ) if _t.startswith(_type.replace('-','_').lower()+'_')
             ]
             if frag_idxes:
                 self.psmlabel_frag_columns.append(_type)
@@ -251,7 +251,7 @@ def load_psmlabel_list(
     psmlabel_list,
     nce_list,
     instrument_list,
-    frag_types=['b','y','b-modloss','y-modloss'],
+    frag_types=['b','y','b_modloss','y_modloss'],
     frag_charge=2,
     include_mod_list=[
         'Oxidation@M','Phospho@S','Phospho@T','Phospho@Y','Acetyl@Protein N-term'

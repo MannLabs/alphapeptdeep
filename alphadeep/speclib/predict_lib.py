@@ -3,6 +3,8 @@
 __all__ = ['PredictLib']
 
 # Cell
+import pandas as pd
+
 from alphabase.speclib.library_base import SpecLibBase
 from alphadeep.model.msms import pDeepModel
 from alphadeep.model.RT import AlphaRTModel
@@ -10,7 +12,7 @@ from alphadeep.model.CCS import AlphaCCSModel
 
 class PredictLib(SpecLibBase):
     def __init__(self,
-        charged_frag_types, #['b_1+','b_2+','y_1+','y_2+', ...]
+        charged_frag_types, #['b_1','b_2','y_1','y_2', ...]
         msms_model: pDeepModel,
         rt_model: AlphaRTModel,
         ccs_model: AlphaCCSModel,

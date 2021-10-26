@@ -5,6 +5,7 @@ __all__ = ['translate_other_modification', 'keep_modifications', 'PSMReaderBase'
 
 # Cell
 import typing
+import numpy as np
 import pandas as pd
 
 from alphabase.peptide.fragment import get_charged_frag_types
@@ -187,7 +188,7 @@ class PSMReader_w_FragBase(PSMReaderBase):
     Read PSMs and fragments
     '''
     def __init__(self,
-        frag_types=['b','y','b-modloss','y-modloss'],
+        frag_types=['b','y','b_modloss','y_modloss'],
         max_frag_charge=2,
         frag_tol=20, frag_ppm=True,
     ):
@@ -238,7 +239,7 @@ class PSMwFragReaderProvider:
         self.reader_dict[reader_name.lower()] = reader_class
 
     def get_reader(self, reader_name,
-        frag_types=['b','y','b-modloss','y-modloss'],
+        frag_types=['b','y','b_modloss','y_modloss'],
         max_frag_charge=2,
         frag_tol=20, frag_ppm=True,
     )->PSMReader_w_FragBase:

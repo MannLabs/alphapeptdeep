@@ -149,9 +149,9 @@ class MaxQuantMSMSReader(MaxQuantReader, PSMReader_w_FragBase):
             ):
                 if '-' in frag_type: continue
                 idx = frag_type.find('(')
-                charge = '1+'
+                charge = '1'
                 if idx > 0:
-                    frag_type, charge = frag_type[:idx], frag_type[idx+1:-1]
+                    frag_type, charge = frag_type[:idx], frag_type[idx+1:-2]
                 frag_type, frag_pos = frag_type[0], int(frag_type[1:])
                 if frag_type in 'xyz':
                     frag_pos = nAA - frag_pos -1
