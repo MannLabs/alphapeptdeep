@@ -14,7 +14,7 @@ def centroid_mass_match(
     Da_tols:np.array
 )->np.array:
     """
-    Matched query masses against sorted MS2/spec masses.
+    Matched query masses against sorted MS2/spec centroid masses.
     Args:
         spec_masses (np.array): MS2 or spec masses, 1-D float array
         query_masses (np.array): query masses, n-D float array
