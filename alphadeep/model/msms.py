@@ -32,41 +32,30 @@ import alphadeep.model.base as model_base
 # Cell
 class ModelMSMSpDeep3(torch.nn.Module):
     def __init__(self,
-        mod_feature_size,
         num_ion_types,
-        max_instrument_num,
-        dropout=0.2
+        dropout=0.2,
+        residue_conn=False,
     ):
         super().__init__()
-        BiRNN = True
-        self.aa_embedding_size = 27
-        hidden=512
-        ins_nce_embed_size=3
-        hidden_rnn_layer=2
 
-        self.max_instrument_num = max_instrument_num
-        self.instrument_nce_embed = torch.nn.Linear(max_instrument_num+1,ins_nce_embed_size)
-
-        output_hidden_size = hidden+ins_nce_embed_size+1
         self.dropout = torch.nn.Dropout(dropout)
 
+        BiRNN = True
+        hidden=512
+        hidden_rnn_layer=2
 
-        self.input_rnn = model_base.SeqLSTM(
-            self.aa_embedding_size+mod_feature_size,
-            hidden,
-            rnn_layer=1, bidirectional=BiRNN
-        )
+        self._residue_conn = residue_conn
 
-        self.hidden = model_base.SeqLSTM(
-            output_hidden_size,
-            hidden, rnn_layer=hidden_rnn_layer,
+        self.input_nn = model_base.InputAALSTM_cat_Meta(hidden)
+
+        self.hidden_nn = model_base.SeqLSTM(
+            hidden, hidden, rnn_layer=hidden_rnn_layer,
             bidirectional=BiRNN
         )
 
-        self.output = model_base.SeqLSTM(
-            output_hidden_size,
+        self.output_nn = model_base.OutputLSTM_cat_Meta(
+            hidden,
             num_ion_types,
-            rnn_layer=1, bidirectional=False
         )
 
     def forward(self,
@@ -76,25 +65,22 @@ class ModelMSMSpDeep3(torch.nn.Module):
         NCEs:torch.Tensor,
         instrument_indices,
     ):
-        aa_x = torch.nn.functional.one_hot(aa_indices, self.aa_embedding_size)
-        inst_x = torch.nn.functional.one_hot(instrument_indices, self.max_instrument_num)
 
-        ins_nce = torch.cat((inst_x, NCEs), 1)
-        ins_nce = self.instrument_nce_embed(ins_nce)
-        ins_nce_charge = torch.cat((ins_nce, charges), 1)
-        ins_nce_charge = ins_nce_charge.unsqueeze(1).repeat(1, aa_x.size(1), 1)
+        x = self.input_nn(
+            aa_indices, mod_x,
+            charges, NCEs, instrument_indices
+        )
+        x = self.dropout(x)
+        if self._residue_conn:
+            res = x
 
-        x = torch.cat((aa_x, mod_x), 2)
-        x = self.input_rnn(x)
+        x = self.hidden_nn(x)
         x = self.dropout(x)
 
-        x = torch.cat((x, ins_nce_charge), 2)
-        x = self.hidden(x)
-        x = self.dropout(x)
+        if self._residue_conn:
+            x *= res
 
-        x = torch.cat((x, ins_nce_charge), 2)
-
-        x = self.output(x)[:,3:,:]
+        x = self.output_nn(x, charges, NCEs, instrument_indices)[:,3:,:]
 
         return x
 
@@ -140,9 +126,7 @@ class pDeepModel(model_base.ModelImplBase):
         self.NCE_factor = nce_factor
         self.build(
             model_class,
-            mod_feature_size = mod_feature_size,
             num_ion_types = len(self.charged_frag_types),
-            max_instrument_num = max_instrument_num,
             dropout=dropout,
             lr=lr,
             **kwargs, # other model params

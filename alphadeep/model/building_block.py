@@ -391,7 +391,7 @@ class OutputLSTM_cat_Meta(torch.nn.Module):
         meta_x = self.meta_nn(
             charges, NCEs, instrument_indices
         ).unsqueeze(1).repeat(1, x.size(1), 1)
-        return self.nn(torch.cat((x, meta_x), 2))[:,3:,:]
+        return self.nn(torch.cat((x, meta_x), 2))
 
 
 class OutputLinear_cat_Meta(torch.nn.Module):
@@ -412,7 +412,7 @@ class OutputLinear_cat_Meta(torch.nn.Module):
         meta_x = self.meta_nn(
             charges, NCEs, instrument_indices
         ).unsqueeze(1).repeat(1, x.size(1), 1)
-        return self.nn(torch.cat((x, meta_x), 2)[:,3:,:])
+        return self.nn(torch.cat((x, meta_x), 2))
 
 # Cell
 class HiddenTransformer(torch.nn.Module):
