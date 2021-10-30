@@ -189,14 +189,15 @@ class PSMLabelReader(pFindReader):
         ) = zip(*psmlabel_df['modinfo'].apply(get_pFind_mods))
         self._psm_df['mods'] = self._psm_df['mods'].apply(translate_pFind_mod)
 
+    def _post_process(self, filename: str, psmlabel_df: pd.DataFrame):
         psmlabel_df = psmlabel_df[
             ~self._psm_df['mods'].isna()
         ].reset_index(drop=True)
+
         self._psm_df = self._psm_df[
             ~self._psm_df['mods'].isna()
         ].reset_index(drop=True)
 
-    def _post_process(self, filename: str, psmlabel_df: pd.DataFrame):
         self._fragment_inten_df = init_fragment_by_precursor_dataframe(
             psmlabel_df, self.charged_frag_types
         )

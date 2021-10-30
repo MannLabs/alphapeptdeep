@@ -207,7 +207,7 @@ class PSMReader_w_FragBase(PSMReaderBase):
         return self._fragment_inten_df
 
     def load_fragment_inten_df(self,
-        psm_df, ms_files=None
+        psm_df, ms_paths=None
     ):
         raise NotImplementedError(
             f'"{self.__class__}" must implement "load_fragment_inten_df()"'

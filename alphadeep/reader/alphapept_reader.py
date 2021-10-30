@@ -8,7 +8,8 @@ import os
 import pandas as pd
 import h5py
 
-from alphadeep.reader.psm_reader import PSMReaderBase, psm_reader_provider
+from alphadeep.reader.psm_reader import PSMReader_w_FragBase, psm_reader_provider
+from alphadeep.mass_spec.ms_reader import ms2_reader_provider, ms1_reader_provider
 
 @numba.njit
 def parse_ap(precursor):
@@ -32,6 +33,13 @@ def parse_ap(precursor):
         sites.append('0')
         mods.append('a')
         modseq = modseq[1:]
+    elif modseq.startswith('tmt'):
+        for l in modseq[3:]:
+            if modseq[l].isupper():
+                break
+        sites.append('0')
+        mods.append(modseq[:l])
+        modseq = modseq[l:]
 
     for i in modseq:
         string += i
@@ -44,7 +52,7 @@ def parse_ap(precursor):
 
     return ''.join(parsed), ';'.join(mods), ';'.join(sites), charge, decoy
 
-class AlphaPeptReader(PSMReaderBase):
+class AlphaPeptReader(PSMReader_w_FragBase):
     def __init__(self):
         super().__init__()
 
@@ -66,9 +74,11 @@ class AlphaPeptReader(PSMReaderBase):
             'raw_name': 'raw_name',
         }
 
+        self.hdf_dataset = 'peptide_fdr'
+
     def _load_file(self, filename):
         with h5py.File(filename, 'r') as _hdf:
-            dataset = _hdf['peptide_fdr']
+            dataset = _hdf[self.hdf_dataset]
             df = pd.DataFrame({col:dataset[col] for col in dataset.keys()})
             df['raw_name'] = os.path.basename(filename)[:-len('.ms_data.hdf')]
             df['precursor'] = df['precursor'].str.decode('utf-8')
@@ -83,5 +93,11 @@ class AlphaPeptReader(PSMReaderBase):
         self._psm_df['sequence'], self._psm_df['mods'], \
             self._psm_df['mod_sites'], self._psm_df['charge'], \
             self._psm_df['decoy'] = zip(*df['precursor'].apply(parse_ap))
+
+    def load_fragment_inten_df(self, psm_df, ms_paths=None):
+        if isinstance(ms_paths, (list,tuple)):
+            ms_file = ms_paths[0]
+        else:
+            ms_file = ms_paths
 
 psm_reader_provider.register_reader('alphapept', AlphaPeptReader)
