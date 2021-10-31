@@ -43,37 +43,51 @@ def centroid_mass_match(
 # Cell
 import pandas as pd
 from alphadeep.mass_spec.ms_reader import ms2_reader_provider
+from alphabase.peptide.fragment import \
+    get_fragment_mass_dataframe, get_charged_frag_types
 
 class Match:
     def __init__(self,
         psm_df: pd.DataFrame,
-        fragment_mass_df: pd.DataFrame,
+        fragment_mass_df:pd.DataFrame = None,
+        charged_frag_types = get_charged_frag_types(
+            ['b','y','b_modloss','y_modloss'],
+            2
+        ),
     ):
-        self._psm_df = psm_df
-        self._fragment_mass_df = fragment_mass_df
+        self.psm_df = psm_df
+        if fragment_mass_df is not None:
+            self.fragment_mass_df = fragment_mass_df[charged_frag_types]
+        else:
+            if 'frag_start_idx' in self.psm_df.columns:
+                del self.psm_df['frag_start_idx']
+                del self.psm_df['frag_end_idx']
+            self.psm_df, self.fragment_mass_df = get_fragment_mass_dataframe(
+                psm_df, charged_frag_types
+            )
         self._ms2_file_dict = {}
 
         self.matched_inten_df = pd.DataFrame(
             np.zeros_like(
-                fragment_mass_df.values, dtype=np.float64
+                self.fragment_mass_df.values, dtype=np.float64
             ),
-            columns=fragment_mass_df.columns
+            columns=self.fragment_mass_df.columns
         )
 
         self.matched_mass_err_df = pd.DataFrame(
             np.full_like(
-                fragment_mass_df.values, 100, dtype=np.float64
+                self.fragment_mass_df.values, 100, dtype=np.float64
             ),
-            columns=fragment_mass_df.columns
+            columns=self.fragment_mass_df.columns
         )
 
-    def match_centroid(self,
+    def match_ms2_centroid(self,
         ms2_file_dict: dict, #raw_name: ms2_file
         ms2_type:str = 'alphapept', # 'mgf'
         ppm=True, tol=20,
     ):
         ms2_reader = ms2_reader_provider.get_reader(ms2_type)
-        _grouped = self._psm_df.groupby('raw_name')
+        _grouped = self.psm_df.groupby('raw_name')
         for raw_name, df_group in _grouped:
             if raw_name in ms2_file_dict:
                 ms2_reader.load(ms2_file_dict[raw_name])
@@ -93,7 +107,7 @@ class Match:
                     else:
                         Da_tols = np.full_like(spec_masses, tol)
 
-                    frag_masses = self._fragment_mass_df.values[
+                    frag_masses = self.fragment_mass_df.values[
                         frag_start_idx:frag_end_idx,:
                     ]
 

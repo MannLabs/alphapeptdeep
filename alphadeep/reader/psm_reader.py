@@ -206,13 +206,6 @@ class PSMReader_w_FragBase(PSMReaderBase):
     def fragment_inten_df(self):
         return self._fragment_inten_df
 
-    def load_fragment_inten_df(self,
-        psm_df, ms_paths=None
-    ):
-        raise NotImplementedError(
-            f'"{self.__class__}" must implement "load_fragment_inten_df()"'
-        )
-
 
 # Cell
 class PSMReaderProvider:

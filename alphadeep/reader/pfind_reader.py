@@ -16,7 +16,7 @@ from alphabase.peptide.fragment import \
 
 
 from alphadeep.reader.psm_reader import \
-    psm_reader_provider, \
+    PSMReaderBase, psm_reader_provider, \
     PSMReader_w_FragBase, psm_w_frag_reader_provider
 
 
@@ -75,7 +75,7 @@ def remove_pFind_decoy_protein(protein):
 
 
 # Cell
-class pFindReader(PSMReader_w_FragBase):
+class pFindReader(PSMReaderBase):
     def __init__(self,
         frag_types=['b','y','b_modloss','y_modloss'],
         max_frag_charge=2,
@@ -134,7 +134,7 @@ psm_w_frag_reader_provider.register_reader('pfind', pFindReader)
 
 # Cell
 
-class PSMLabelReader(pFindReader):
+class PSMLabelReader(pFindReader, PSMReader_w_FragBase):
     def __init__(self,
         frag_types=['b','y','b_modloss','y_modloss'],
         max_frag_charge=2,

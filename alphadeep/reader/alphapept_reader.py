@@ -9,7 +9,6 @@ import pandas as pd
 import h5py
 
 from alphadeep.reader.psm_reader import PSMReader_w_FragBase, psm_reader_provider
-from alphadeep.mass_spec.ms_reader import ms2_reader_provider, ms1_reader_provider
 
 @numba.njit
 def parse_ap(precursor):
@@ -34,7 +33,7 @@ def parse_ap(precursor):
         mods.append('a')
         modseq = modseq[1:]
     elif modseq.startswith('tmt'):
-        for l in modseq[3:]:
+        for l in range(3, len(modseq)):
             if modseq[l].isupper():
                 break
         sites.append('0')
@@ -93,11 +92,5 @@ class AlphaPeptReader(PSMReader_w_FragBase):
         self._psm_df['sequence'], self._psm_df['mods'], \
             self._psm_df['mod_sites'], self._psm_df['charge'], \
             self._psm_df['decoy'] = zip(*df['precursor'].apply(parse_ap))
-
-    def load_fragment_inten_df(self, psm_df, ms_paths=None):
-        if isinstance(ms_paths, (list,tuple)):
-            ms_file = ms_paths[0]
-        else:
-            ms_file = ms_paths
 
 psm_reader_provider.register_reader('alphapept', AlphaPeptReader)

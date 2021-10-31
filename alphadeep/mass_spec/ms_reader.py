@@ -115,7 +115,8 @@ class MGFReader(MSReaderBase):
                 scan_list.append(scan)
                 masses_list.append(np.array(masses))
                 intens_list.append(np.array(intens))
-        f.close()
+        if isinstance(mgf, str):
+            f.close()
         indices = np.zeros(len(masses_list)+1, dtype=np.int64)
         indices[1:] = [len(_) for _ in masses_list]
         indices = np.cumsum(indices)
