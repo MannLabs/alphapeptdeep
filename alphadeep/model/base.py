@@ -42,11 +42,19 @@ class ModelImplBase(object):
         **kwargs
     ):
         self.model = model_class(**kwargs)
+        self.model_params = kwargs
         self.model.to(self.device)
         self._init_for_train(lr)
 
     def get_parameter_num(self):
         return np.sum([p.numel() for p in self.model.parameters()])
+
+    def _save_codes(self, save_as):
+        import inspect
+        code = '''import torch\nimport alphadeep.model.base as model_base\n'''
+        code += inspect.getsource(self.model.__class__)
+        with open(save_as, 'w') as f:
+            f.write(code)
 
     def save(self, save_as):
         dir = os.path.dirname(save_as)
@@ -55,6 +63,8 @@ class ModelImplBase(object):
         torch.save(self.model.state_dict(), save_as)
         with open(save_as+'.txt','w') as f: f.write(str(self.model))
         save_yaml(save_as+'.model_const.yaml', model_const)
+        self._save_codes(save_as+'.model.py')
+        save_yaml(save_as+'.param.yaml', self.model_params)
 
     def _load_model_file(self, stream):
         self.model.load_state_dict(torch.load(

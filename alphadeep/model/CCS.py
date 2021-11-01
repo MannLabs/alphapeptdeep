@@ -32,13 +32,13 @@ class EncDecModelCCS(torch.nn.Module):
 
         hidden = 256
 
-        self.encoder = model_base.Input_AA_CNN_LSTM_Encoder(
-            hidden, 2, dropout
-        )
+        self.ccs_encoder = \
+            model_base.Input_AA_CNN_LSTM_cat_Charge_Encoder(
+                hidden
+            )
 
-        self.decoder = model_base.LinearDecoder(
-            hidden+1,
-            1
+        self.ccs_decoder = model_base.LinearDecoder(
+            hidden+1, 1
         )
 
     def forward(self,
@@ -46,17 +46,15 @@ class EncDecModelCCS(torch.nn.Module):
         mod_x,
         charges,
     ):
-        x = self.encoder(aa_indices, mod_x)
-
+        x = self.ccs_encoder(aa_indices, mod_x, charges)
         x = self.dropout(x)
-        x = torch.cat((x, charges), 1)
-
-        return self.decoder(x).squeeze(1)
+        x = torch.cat((x, charges),1)
+        return self.ccs_decoder(x).squeeze(1)
 
 # Cell
 
 class AlphaCCSModel(model_base.ModelImplBase):
-    def __init__(self, dropout=0.2, lr=0.001):
+    def __init__(self, dropout=0.1, lr=0.001):
         super().__init__()
         self.build(
             EncDecModelCCS, lr=lr,

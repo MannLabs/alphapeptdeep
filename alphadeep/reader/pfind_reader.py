@@ -156,7 +156,7 @@ class PSMLabelReader(pFindReader, PSMReader_w_FragBase):
             'scan_no': 'scan_no',
         }
 
-        psmlabel_columns = 'b,b-NH3,b-H20,b-modloss,y,y-HN3,y-H20,y-modloss'.split(',')
+        psmlabel_columns = 'b,b-NH3,b-H20,b-ModLoss,y,y-HN3,y-H20,y-ModLoss'.split(',')
         self.psmlabel_frag_columns = []
         self.frag_df_columns = {}
         for _type in psmlabel_columns:

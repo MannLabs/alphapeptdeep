@@ -6,6 +6,7 @@ mod_elements:
 - O
 - P
 - S
+#first 6 are the basic elements, do not change them
 - B
 - F
 - I

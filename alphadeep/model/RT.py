@@ -33,11 +33,11 @@ class EncDecModelRT(torch.nn.Module):
         self.dropout = torch.nn.Dropout(dropout)
 
         hidden = 256
-        self.encoder = model_base.Input_AA_CNN_LSTM_Encoder(
-            hidden, 2, dropout
+        self.rt_encoder = model_base.Input_AA_CNN_LSTM_Encoder(
+            hidden
         )
 
-        self.decoder = model_base.LinearDecoder(
+        self.rt_decoder = model_base.LinearDecoder(
             hidden,
             1
         )
@@ -46,10 +46,10 @@ class EncDecModelRT(torch.nn.Module):
         aa_indices,
         mod_x,
     ):
-        x = self.encoder(aa_indices, mod_x)
+        x = self.rt_encoder(aa_indices, mod_x)
         x = self.dropout(x)
 
-        return self.decoder(x).squeeze(1)
+        return self.rt_decoder(x).squeeze(1)
 
 # Cell
 class AlphaRTModel(model_base.ModelImplBase):
