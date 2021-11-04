@@ -46,7 +46,7 @@ from alphadeep.mass_spec.ms_reader import ms2_reader_provider
 from alphabase.peptide.fragment import \
     get_fragment_mass_dataframe, get_charged_frag_types
 
-class Match:
+class Match(object):
     def __init__(self,
         psm_df: pd.DataFrame,
         fragment_mass_df:pd.DataFrame = None,
@@ -82,8 +82,8 @@ class Match:
         )
 
     def match_ms2_centroid(self,
-        ms2_file_dict: dict, #raw_name: ms2_file
-        ms2_type:str = 'alphapept', # 'mgf'
+        ms2_file_dict: dict, #raw_name: ms2_file_path
+        ms2_type:str = 'alphapept', # or 'mgf', or 'thermo'
         ppm=True, tol=20,
     ):
         ms2_reader = ms2_reader_provider.get_reader(ms2_type)
@@ -100,7 +100,7 @@ class Match:
                     (
                         spec_masses, spec_intens
                     ) = ms2_reader.get_peaks(scan_no)
-                    if len(spec_masses) == 0: continue
+                    if spec_masses is None or len(spec_masses)==0: continue
 
                     if ppm:
                         Da_tols = spec_masses*tol*1e-6

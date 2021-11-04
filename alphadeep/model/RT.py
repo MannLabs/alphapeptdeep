@@ -7,6 +7,7 @@ __all__ = ['mod_feature_size', 'EncDecModelRT', 'AlphaRTModel', 'evaluate_linear
 import torch
 import pandas as pd
 import numpy as np
+from typing import IO
 
 from tqdm import tqdm
 
@@ -53,7 +54,9 @@ class EncDecModelRT(torch.nn.Module):
 
 # Cell
 class AlphaRTModel(model_base.ModelImplBase):
-    def __init__(self, dropout=0.2, lr=0.001):
+    def __init__(self,
+        dropout=0.2, lr=0.001,
+    ):
         super().__init__()
         self.build(
             EncDecModelRT, lr=lr,

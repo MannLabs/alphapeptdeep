@@ -36,6 +36,30 @@ class ModelImplBase(object):
         self.optimizer = torch.optim.Adam(self.model.parameters(), lr=lr)
         self.loss_func = torch.nn.L1Loss()
 
+    def build_from_py_codes(self,
+        model_code_file:str,
+        code_file_in_zip:str=None,
+        lr = 0.001,
+        **kwargs
+    ):
+        if model_code_file.lower().endswith('.zip'):
+            with ZipFile(model_code_file, 'r') as model_zip:
+                with model_zip.open(code_file_in_zip) as f:
+                    codes = f.read()
+        else:
+            with open(model_code_file, 'r') as f:
+                codes = f.read()
+        codes = compile(
+            codes,
+            filename='model_file_py',
+            mode='exec'
+        )
+        exec(codes) #codes must contains torch model codes 'class Model(...'
+        self.model = Model(**kwargs)
+        self.model_params = kwargs
+        self.model.to(self.device)
+        self._init_for_train(lr)
+
     def build(self,
         model_class: torch.nn.Module,
         lr = 0.001,
@@ -52,7 +76,8 @@ class ModelImplBase(object):
     def _save_codes(self, save_as):
         import inspect
         code = '''import torch\nimport alphadeep.model.base as model_base\n'''
-        code += inspect.getsource(self.model.__class__)
+        class_code = inspect.getsource(self.model.__class__)
+        code += 'class Model' + class_code[class_code.find('('):]
         with open(save_as, 'w') as f:
             f.write(code)
 
@@ -67,8 +92,11 @@ class ModelImplBase(object):
         save_yaml(save_as+'.param.yaml', self.model_params)
 
     def _load_model_file(self, stream):
-        self.model.load_state_dict(torch.load(
-            stream, map_location=self.device)
+        (
+            missing_keys, unexpect_keys
+        ) = self.model.load_state_dict(torch.load(
+            stream, map_location=self.device),
+            strict=False
         )
 
     def load(
