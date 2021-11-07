@@ -100,7 +100,6 @@ class Match(object):
                         on='scan_no',
                         suffixes=['','_new']
                     )
-                    display(_df)
                     self.psm_df.loc[_df.index, 'RT'] = _df['RT_new']
                 for (
                     scan_no, frag_start_idx, frag_end_idx
