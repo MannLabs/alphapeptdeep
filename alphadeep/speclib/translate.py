@@ -17,12 +17,10 @@ def _get_frag_info_from_column_name(column:str):
     '''
     Only used when convert alphabase libraries into other libraries
     '''
-    idx = column.find('_')
+    idx = column.rfind('_')
     frag_type = column[:idx]
     ch_str = column[idx+1:]
-    charge = int(ch_str[:-1])
-    if ch_str[-1] == '-':
-        charge = -charge
+    charge = int(ch_str)
     if len(frag_type)==1:
         loss_type = 'noloss'
     else:

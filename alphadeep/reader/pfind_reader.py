@@ -16,7 +16,7 @@ from alphabase.peptide.fragment import \
 
 
 from alphadeep.reader.psm_reader import \
-    psm_reader_provider, \
+    PSMReaderBase, psm_reader_provider, \
     PSMReader_w_FragBase, psm_w_frag_reader_provider
 
 
@@ -75,9 +75,9 @@ def remove_pFind_decoy_protein(protein):
 
 
 # Cell
-class pFindReader(PSMReader_w_FragBase):
+class pFindReader(PSMReaderBase):
     def __init__(self,
-        frag_types=['b','y','b-modloss','y-modloss'],
+        frag_types=['b','y','b_modloss','y_modloss'],
         max_frag_charge=2,
         frag_tol=20, frag_ppm=True,
     ):
@@ -134,9 +134,9 @@ psm_w_frag_reader_provider.register_reader('pfind', pFindReader)
 
 # Cell
 
-class PSMLabelReader(pFindReader):
+class PSMLabelReader(pFindReader, PSMReader_w_FragBase):
     def __init__(self,
-        frag_types=['b','y','b-modloss','y-modloss'],
+        frag_types=['b','y','b_modloss','y_modloss'],
         max_frag_charge=2,
         frag_tol=20, frag_ppm=True,
     ):
@@ -163,7 +163,7 @@ class PSMLabelReader(pFindReader):
             frag_idxes = [
                 i for i,_t in enumerate(
                     self.charged_frag_types
-                ) if _t.startswith(_type.lower()+'_')
+                ) if _t.startswith(_type.replace('-','_').lower()+'_')
             ]
             if frag_idxes:
                 self.psmlabel_frag_columns.append(_type)
@@ -189,14 +189,15 @@ class PSMLabelReader(pFindReader):
         ) = zip(*psmlabel_df['modinfo'].apply(get_pFind_mods))
         self._psm_df['mods'] = self._psm_df['mods'].apply(translate_pFind_mod)
 
+    def _post_process(self, filename: str, psmlabel_df: pd.DataFrame):
         psmlabel_df = psmlabel_df[
             ~self._psm_df['mods'].isna()
         ].reset_index(drop=True)
+
         self._psm_df = self._psm_df[
             ~self._psm_df['mods'].isna()
         ].reset_index(drop=True)
 
-    def _post_process(self, filename: str, psmlabel_df: pd.DataFrame):
         self._fragment_inten_df = init_fragment_by_precursor_dataframe(
             psmlabel_df, self.charged_frag_types
         )
@@ -251,7 +252,7 @@ def load_psmlabel_list(
     psmlabel_list,
     nce_list,
     instrument_list,
-    frag_types=['b','y','b-modloss','y-modloss'],
+    frag_types=['b','y','b_modloss','y_modloss'],
     frag_charge=2,
     include_mod_list=[
         'Oxidation@M','Phospho@S','Phospho@T','Phospho@Y','Acetyl@Protein N-term'

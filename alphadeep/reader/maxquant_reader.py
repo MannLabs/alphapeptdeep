@@ -90,7 +90,8 @@ class MaxQuantReader(PSMReaderBase):
     def _load_file(self, filename):
         df = pd.read_csv(filename, sep='\t')
         df = df[(df['Reverse']!='+')&(~pd.isna(df['Retention time']))]
-        df = df.reset_index(drop=True)
+        df.reset_index(drop=True,inplace=True)
+        df.fillna('', inplace=True)
         return df
 
     def _translate_columns(self, origin_df: pd.DataFrame):
@@ -117,10 +118,17 @@ class MaxQuantMSMSReader(MaxQuantReader, PSMReader_w_FragBase):
         )
 
         MaxQuantReader.__init__(self)
+        self._score_thres = 50
 
     @property
     def fragment_inten_df(self):
         return self._fragment_inten_df
+
+    def _load_file(self, filename):
+        df = super()._load_file(filename)
+        df = df[df.Score >= self._score_thres]
+        df.reset_index(drop=True, inplace=True)
+        return df
 
     def _post_process(self,
         filename, mq_df
@@ -149,9 +157,9 @@ class MaxQuantMSMSReader(MaxQuantReader, PSMReader_w_FragBase):
             ):
                 if '-' in frag_type: continue
                 idx = frag_type.find('(')
-                charge = '1+'
+                charge = '1'
                 if idx > 0:
-                    frag_type, charge = frag_type[:idx], frag_type[idx+1:-1]
+                    frag_type, charge = frag_type[:idx], frag_type[idx+1:-2]
                 frag_type, frag_pos = frag_type[0], int(frag_type[1:])
                 if frag_type in 'xyz':
                     frag_pos = nAA - frag_pos -1
@@ -168,6 +176,11 @@ class MaxQuantMSMSReader(MaxQuantReader, PSMReader_w_FragBase):
             self._fragment_inten_df.iloc[
                 start:end,:
             ] = intens
+
+
+        self._psm_df[
+            ['frag_start_idx','frag_end_idx']
+        ] = mq_df[['frag_start_idx','frag_end_idx']]
 
     def load_fragment_inten_df(self,
         psm_df, ms_files=None

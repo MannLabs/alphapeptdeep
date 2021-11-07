@@ -2,8 +2,8 @@ model:
   frag_types:
   - b
   - y
-  - b-modloss
-  - y-modloss
+  - b_modloss
+  - y_modloss
   max_frag_charge: 2
   modifications: 
   - Carbamidomethyl@C

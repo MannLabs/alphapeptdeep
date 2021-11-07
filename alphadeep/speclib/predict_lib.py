@@ -3,6 +3,8 @@
 __all__ = ['PredictLib']
 
 # Cell
+import pandas as pd
+
 from alphabase.speclib.library_base import SpecLibBase
 from alphadeep.model.msms import pDeepModel
 from alphadeep.model.RT import AlphaRTModel
@@ -10,12 +12,12 @@ from alphadeep.model.CCS import AlphaCCSModel
 
 class PredictLib(SpecLibBase):
     def __init__(self,
-        charged_frag_types, #['b_1+','b_2+','y_1+','y_2+', ...]
+        charged_frag_types, #['b_1','b_2','y_1','y_2', ...]
         msms_model: pDeepModel,
         rt_model: AlphaRTModel,
         ccs_model: AlphaCCSModel,
-        min_frag_mz = 200, max_frag_mz = 2000,
-        min_precursor_mz = 500, max_precursor_mz = 2000,
+        min_frag_mz = 50, max_frag_mz = 2000,
+        min_precursor_mz = 400, max_precursor_mz = 2000,
     ):
         super().__init__(
             charged_frag_types,
@@ -65,5 +67,6 @@ class PredictLib(SpecLibBase):
                 charged_frag_list.append(frag_type)
         self._fragment_mass_df = self._fragment_mass_df[charged_frag_list]
         self._fragment_inten_df = frag_inten_df[charged_frag_list]*self.inten_factor
+        self._fragment_inten_df[self._fragment_mass_df==0] = 0
 
 
