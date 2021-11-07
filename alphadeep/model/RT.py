@@ -29,7 +29,6 @@ class EncDecModelRT(torch.nn.Module):
         dropout=0.2
     ):
         super().__init__()
-        self.aa_embedding_size = 27
 
         self.dropout = torch.nn.Dropout(dropout)
 
