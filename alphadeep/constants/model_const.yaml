@@ -118,8 +118,8 @@ instruments:
 - Lumos
 - timsTOF
 - SciexTOF
-# DO NOT change these values, unless you know how to deal with them
+# DO NOT change values below, unless you know how to deal with them
 max_instrument_num: 8
 nce_factor: 0.01
 charge_factor: 0.1
-hidden: 512
+aa_embedding_size: 27

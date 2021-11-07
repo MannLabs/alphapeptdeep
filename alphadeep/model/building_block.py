@@ -19,7 +19,7 @@ max_instrument_num = model_const['max_instrument_num']
 frag_types = settings['model']['frag_types']
 max_frag_charge = settings['model']['max_frag_charge']
 num_ion_types = len(frag_types)*max_frag_charge
-aa_embedding_size = 27
+aa_embedding_size = model_const['aa_embedding_size']
 
 # Cell
 class SeqCNN(torch.nn.Module):

@@ -77,7 +77,7 @@ class Match(object):
 
         self.matched_mass_err_df = pd.DataFrame(
             np.full_like(
-                self.fragment_mass_df.values, 100, dtype=np.float64
+                self.fragment_mass_df.values, np.inf, dtype=np.float64
             ),
             columns=self.fragment_mass_df.columns
         )
@@ -131,7 +131,7 @@ class Match(object):
                     matched_merrs = np.abs(
                         spec_masses[matched_idx]-frag_masses
                     )
-                    matched_merrs[matched_idx==-1] = 100
+                    matched_merrs[matched_idx==-1] = np.inf
 
                     self.matched_inten_df.values[
                         frag_start_idx:frag_end_idx,:
