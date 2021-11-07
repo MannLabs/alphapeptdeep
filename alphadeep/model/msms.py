@@ -34,6 +34,7 @@ class ModelMSMSpDeep(torch.nn.Module):
     def __init__(self,
         num_frag_types,
         num_modloss_types=0,
+        mask_modloss=True,
         dropout=0.2,
     ):
         super().__init__()
@@ -59,11 +60,20 @@ class ModelMSMSpDeep(torch.nn.Module):
         self._num_modloss_types = num_modloss_types
         if num_modloss_types:
             # for transfer learning of modloss frags
-            self.output_modloss_nn = model_base.OutputLSTM_cat_Meta(
-                hidden,
-                num_modloss_types
-            )
+            self.modloss_nn = torch.nn.ModuleList([
+                model_base.SeqLSTM(
+                    hidden, hidden,
+                    rnn_layer=1, bidirectional=BiRNN
+                ),
+                model_base.SeqLSTM(
+                    hidden, num_modloss_types,
+                    rnn_layer=1, bidirectional=False
+                ),
+            ])
+            self._mask_modloss = mask_modloss
             self._non_modloss = num_frag_types-num_modloss_types
+        else:
+            self._mask_modloss = True
 
     def forward(self,
         aa_indices,
@@ -73,24 +83,27 @@ class ModelMSMSpDeep(torch.nn.Module):
         instrument_indices,
     ):
 
-        x = self.input_nn(
+        in_x = self.input_nn(
             aa_indices, mod_x,
             charges, NCEs, instrument_indices
         )
-        x = self.dropout(x)
+        in_x = self.dropout(in_x)
 
-        x = self.hidden_nn(x)
-        x = self.dropout(x)
+        hidden_x = self.hidden_nn(in_x)
+        hidden_x = self.dropout(hidden_x)
 
         out_x = self.output_nn(
-            x,
+            hidden_x,
             charges, NCEs, instrument_indices
         )
 
-        if self._num_modloss_types:
-            modloss_x = self.output_modloss_nn(
-                x,
-                charges, NCEs, instrument_indices
+        # modloss is mainly only for Phospho@S/T
+        if not self._mask_modloss:
+            modloss_x = self.modloss_nn[0](
+                in_x
+            )*in_x + hidden_x
+            modloss_x = self.modloss_nn[-1](
+                modloss_x
             )
             out_x = torch.cat((
                 out_x[:,:,:self._non_modloss],
@@ -126,13 +139,14 @@ class pDeepModel(model_base.ModelImplBase):
         ),
         dropout=0.1,
         lr=0.001,
-        sep_loss_type='modloss',
+        mask_modloss=True,
+        modloss_type='modloss',
         model_class:torch.nn.Module=ModelMSMSpDeep,
         **kwargs, #model params
     ):
         super().__init__()
         self.charged_frag_types = charged_frag_types
-        self._sep_modloss_frags(sep_loss_type)
+        self._get_modloss_frags(modloss_type)
 
         self.charge_factor = charge_factor
         self.NCE_factor = nce_factor
@@ -140,6 +154,7 @@ class pDeepModel(model_base.ModelImplBase):
             model_class,
             num_frag_types = len(self.charged_frag_types),
             num_modloss_types = len(self._modloss_frag_types),
+            mask_modloss=mask_modloss,
             dropout=dropout,
             lr=lr,
             **kwargs, # other model params
@@ -148,7 +163,7 @@ class pDeepModel(model_base.ModelImplBase):
         self.loss_func = torch.nn.L1Loss()
         self.min_inten = 1e-4
 
-    def _sep_modloss_frags(self, modloss='modloss'):
+    def _get_modloss_frags(self, modloss='modloss'):
         self._modloss_frag_types = []
         for i,frag in enumerate(self.charged_frag_types):
             if modloss in frag:

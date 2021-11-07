@@ -190,7 +190,7 @@ class ModelImplBase(object):
         batch_size=1024,
         epoch=20,
         verbose=False,
-        verbose_each_epoch=True,
+        verbose_each_epoch=False,
         **kwargs
     ):
         self._prepare_train_data_df(precursor_df, **kwargs)

@@ -42,6 +42,7 @@ def centroid_mass_match(
 
 # Cell
 import pandas as pd
+import numpy as np
 from alphadeep.mass_spec.ms_reader import ms2_reader_provider
 from alphabase.peptide.fragment import \
     get_fragment_mass_dataframe, get_charged_frag_types
@@ -90,7 +91,17 @@ class Match(object):
         _grouped = self.psm_df.groupby('raw_name')
         for raw_name, df_group in _grouped:
             if raw_name in ms2_file_dict:
+                # pfind does not report RT in the result file
                 ms2_reader.load(ms2_file_dict[raw_name])
+                if pd.isna(df_group.RT).all():
+                    _df = df_group.merge(
+                        ms2_reader.spectrum_df[['scan_no','RT']],
+                        how='left',
+                        on='scan_no',
+                        suffixes=['','_new']
+                    )
+                    display(_df)
+                    self.psm_df.loc[_df.index, 'RT'] = _df['RT_new']
                 for (
                     scan_no, frag_start_idx, frag_end_idx
                 ) in df_group[[
