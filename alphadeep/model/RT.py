@@ -7,6 +7,7 @@ __all__ = ['mod_feature_size', 'EncDecModelRT', 'AlphaRTModel', 'evaluate_linear
 import torch
 import pandas as pd
 import numpy as np
+from typing import IO
 
 from tqdm import tqdm
 
@@ -25,23 +26,18 @@ mod_feature_size = len(model_const['mod_elements'])
 # Cell
 class EncDecModelRT(torch.nn.Module):
     def __init__(self,
-        mod_feature_size,
         dropout=0.2
     ):
         super().__init__()
-        self.aa_embedding_size = 27
 
         self.dropout = torch.nn.Dropout(dropout)
 
         hidden = 256
-        self.encoder = model_base.SeqEncoder(
-            self.aa_embedding_size+mod_feature_size,
-            hidden,
-            dropout=0,
-            rnn_layer=2
+        self.rt_encoder = model_base.Input_AA_CNN_LSTM_Encoder(
+            hidden
         )
 
-        self.decoder = model_base.LinearDecoder(
+        self.rt_decoder = model_base.LinearDecoder(
             hidden,
             1
         )
@@ -50,24 +46,20 @@ class EncDecModelRT(torch.nn.Module):
         aa_indices,
         mod_x,
     ):
-        aa_x = torch.nn.functional.one_hot(
-            aa_indices, self.aa_embedding_size
-        )
-
-        x = torch.cat((aa_x, mod_x), 2)
-        x = self.encoder(x)
+        x = self.rt_encoder(aa_indices, mod_x)
         x = self.dropout(x)
 
-        return self.decoder(x).squeeze(1)
+        return self.rt_decoder(x).squeeze(1)
 
 # Cell
 class AlphaRTModel(model_base.ModelImplBase):
-    def __init__(self, dropout=0.2, lr=0.001):
+    def __init__(self,
+        dropout=0.2, lr=0.001,
+    ):
         super().__init__()
         self.build(
             EncDecModelRT, lr=lr,
             dropout=dropout,
-            mod_feature_size=mod_feature_size
         )
         self.loss_func = torch.nn.L1Loss()
 

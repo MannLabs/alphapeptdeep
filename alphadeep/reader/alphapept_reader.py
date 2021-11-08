@@ -8,7 +8,7 @@ import os
 import pandas as pd
 import h5py
 
-from alphadeep.reader.psm_reader import PSMReaderBase
+from alphadeep.reader.psm_reader import PSMReader_w_FragBase, psm_reader_provider
 
 @numba.njit
 def parse_ap(precursor):
@@ -32,6 +32,13 @@ def parse_ap(precursor):
         sites.append('0')
         mods.append('a')
         modseq = modseq[1:]
+    elif modseq.startswith('tmt'):
+        for l in range(3, len(modseq)):
+            if modseq[l].isupper():
+                break
+        sites.append('0')
+        mods.append(modseq[:l])
+        modseq = modseq[l:]
 
     for i in modseq:
         string += i
@@ -44,46 +51,47 @@ def parse_ap(precursor):
 
     return ''.join(parsed), ';'.join(mods), ';'.join(sites), charge, decoy
 
-class AlphaPeptReader(PSMReaderBase):
-    def __init__(self,
-        frag_types=['b','y','b-modloss','y-modloss'],
-        max_frag_charge=2
-    ):
-        super().__init__(frag_types, max_frag_charge)
+class AlphaPeptReader(PSMReader_w_FragBase):
+    def __init__(self):
+        super().__init__()
 
         self.modification_convert_dict['cC'] = 'Carbamidomethyl@C'
         self.modification_convert_dict['oxM'] = 'Oxidation@M'
         self.modification_convert_dict['pS'] = 'Phospho@S'
         self.modification_convert_dict['pT'] = 'Phospho@T'
         self.modification_convert_dict['pY'] = 'Phospho@Y'
-        self.modification_convert_dict['a'] = 'Acetyl@Protein_N-term'
+        self.modification_convert_dict['a'] = 'Acetyl@Protein N-term'
+
+        self.column_mapping = {
+            'sequence': 'naked_sequence',
+            'RT':'rt',
+            'scan_no': 'scan_no',
+            'scan_idx': 'raw_idx', #idx in ms2 list
+            'mobility': 'mobility',
+            'score': 'score',
+            'charge': 'charge',
+            'raw_name': 'raw_name',
+        }
+
+        self.hdf_dataset = 'peptide_fdr'
 
     def _load_file(self, filename):
         with h5py.File(filename, 'r') as _hdf:
-            dataset = _hdf['peptide_fdr']
+            dataset = _hdf[self.hdf_dataset]
             df = pd.DataFrame({col:dataset[col] for col in dataset.keys()})
+            df['raw_name'] = os.path.basename(filename)[:-len('.ms_data.hdf')]
+            df['precursor'] = df['precursor'].str.decode('utf-8')
+            if 'scan_no' in df.columns:
+                df['scan_no'] = df['scan_no'].astype('int')
+            df['charge'] = df['charge'].astype(int)
+            df.rt /= df.rt.max()
+        return df
 
-        psm_df = pd.DataFrame()
+    def _translate_columns(self, df: pd.DataFrame):
+        super()._translate_columns(df)
 
-        psm_df['precursor'] = df['precursor'].str.decode('utf-8')
+        self._psm_df['sequence'], self._psm_df['mods'], \
+            self._psm_df['mod_sites'], self._psm_df['charge'], \
+            self._psm_df['decoy'] = zip(*df['precursor'].apply(parse_ap))
 
-        psm_df['raw_name'] = os.path.basename(filename)[:-len('.ms_data.hdf')]
-        psm_df['RT'] = df['rt']*60
-        if 'scan_no' in df.columns:
-            psm_df['scan'] = df['scan_no'].astype('int')
-        else:
-            psm_df['scan'] = pd.NA
-        if 'mobility' in df.columns:
-            psm_df['mobility'] = df['mobility']
-        else:
-            psm_df['mobility'] = pd.NA
-
-        psm_df['score'] = df['score']
-
-        psm_df['sequence'], psm_df['mods'], \
-            psm_df['mod_sites'], psm_df['charge'], \
-            psm_df['decoy'] = zip(*psm_df['precursor'].apply(parse_ap))
-        psm_df['charge'] = psm_df['charge'].astype(int)
-        psm_df['nAA'] = psm_df.sequence.str.len()
-
-        self._psm_df = psm_df
+psm_reader_provider.register_reader('alphapept', AlphaPeptReader)
