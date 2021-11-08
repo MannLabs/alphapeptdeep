@@ -27,6 +27,7 @@ class MSReaderBase:
             'RT': rt_list,
             'mobility': mobility_list,
         }, index = scan_list)
+        self.spectrum_df.RT /= self.spectrum.RT.max()
 
     def get_peaks(self, scan_no):
         if scan_no not in self.spectrum_df.index:

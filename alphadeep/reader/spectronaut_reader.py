@@ -36,13 +36,13 @@ class SpectronautReader(MaxQuantReader):
         ], inplace=True)
         df.reset_index(drop=True, inplace=True)
 
-        for rt_col in self.column_mapping['RT']:
-            if rt_col not in df.columns: continue
-            min_rt = df[rt_col].min()
-            df[rt_col] = (
-                df[rt_col] - min_rt
-            )/(df[rt_col].max() - min_rt)
-            break
+        # for rt_col in self.column_mapping['RT']:
+        #     if rt_col not in df.columns: continue
+        #     min_rt = df[rt_col].min()
+        #     df[rt_col] = (
+        #         df[rt_col] - min_rt
+        #     )/(df[rt_col].max() - min_rt)
+        #     break
         return df
 
 class OpenSwathReader(SpectronautReader):
@@ -83,13 +83,13 @@ class OpenSwathReader(SpectronautReader):
         ], inplace=True)
         df.reset_index(drop=True, inplace=True)
 
-        for rt_col in self.column_mapping['RT']:
-            if rt_col not in df.columns: continue
-            min_rt = df[rt_col].min()
-            df[rt_col] = (
-                df[rt_col] - min_rt
-            )/(df[rt_col].max() - min_rt)
-            break
+        # for rt_col in self.column_mapping['RT']:
+        #     if rt_col not in df.columns: continue
+        #     min_rt = df[rt_col].min()
+        #     df[rt_col] = (
+        #         df[rt_col] - min_rt
+        #     )/(df[rt_col].max() - min_rt)
+        #     break
         return df
 
 psm_reader_provider.register_reader(

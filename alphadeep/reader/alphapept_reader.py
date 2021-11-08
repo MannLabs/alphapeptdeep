@@ -84,6 +84,7 @@ class AlphaPeptReader(PSMReader_w_FragBase):
             if 'scan_no' in df.columns:
                 df['scan_no'] = df['scan_no'].astype('int')
             df['charge'] = df['charge'].astype(int)
+            df.rt /= df.rt.max()
         return df
 
     def _translate_columns(self, df: pd.DataFrame):

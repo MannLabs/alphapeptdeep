@@ -102,6 +102,7 @@ class MaxQuantReader(PSMReaderBase):
         df = df[(df['Reverse']!='+')&(~pd.isna(df['Retention time']))]
         df.reset_index(drop=True,inplace=True)
         df.fillna('', inplace=True)
+        df['Retention time'] /= df['Retention time'].max()
         return df
 
     def _translate_columns(self, origin_df: pd.DataFrame):
