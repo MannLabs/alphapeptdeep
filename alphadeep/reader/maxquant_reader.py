@@ -87,7 +87,7 @@ class MaxQuantReader(PSMReaderBase):
             'sequence': 'Sequence',
             'charge': 'Charge',
             'RT': 'Retention time',
-            'norm_RT': 'RT',
+            'norm_RT': 'norm_RT',
             'CCS': 'CCS',
             'mobility': ['Mobility','IonMobility'],
             'spec_idx': ['Scan number','MS/MS scan number'],
