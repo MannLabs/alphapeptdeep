@@ -21,19 +21,20 @@ class MSReaderBase:
     def build_spectrum_df(self, scan_list, scan_indices, rt_list, mobility_list = None):
         if not mobility_list: mobility_list = np.nan
         self.spectrum_df = pd.DataFrame({
-            'scan_no': scan_list,
+            'spec_idx': scan_list,
             'peak_start_idx': scan_indices[:-1],
             'peak_end_idx': scan_indices[1:],
             'RT': rt_list,
             'mobility': mobility_list,
         }, index = scan_list)
-        self.spectrum_df.RT /= self.spectrum.RT.max()
+        # self.max_rt = self.spectrum_df.RT.max()
+        # self.spectrum_df.RT /= self.max_rt
 
-    def get_peaks(self, scan_no):
-        if scan_no not in self.spectrum_df.index:
+    def get_peaks(self, spec_idx):
+        if spec_idx not in self.spectrum_df.index:
             return None, None
         start_idx, end_idx = self.spectrum_df.loc[
-            scan_no, ['peak_start_idx','peak_end_idx']
+            spec_idx, ['peak_start_idx','peak_end_idx']
         ].values.astype(np.int64)
         return (
             self.masses[start_idx:end_idx],

@@ -83,6 +83,7 @@ class PSMReaderBase(object):
         } # Add more columns for sub-classes of different tasks
 
         self._psm_df:pd.DataFrame = None
+        self.keep_all_psm = False
 
     @property
     def psm_df(self):

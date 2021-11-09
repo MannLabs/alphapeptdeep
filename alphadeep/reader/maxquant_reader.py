@@ -87,22 +87,30 @@ class MaxQuantReader(PSMReaderBase):
             'sequence': 'Sequence',
             'charge': 'Charge',
             'RT': 'Retention time',
+            'norm_RT': 'RT',
             'CCS': 'CCS',
             'mobility': ['Mobility','IonMobility'],
-            'scan_no': ['Scan number','MS/MS scan number'],
+            'spec_idx': ['Scan number','MS/MS scan number'],
             'raw_name': 'Raw file',
             'score': 'Score',
             'proteins': 'Proteins',
             'genes': ['Gene Names','Gene names'],
+            'decoy': 'decoy',
         }
         self.modseq_col = 'Modified sequence'
 
     def _load_file(self, filename):
         df = pd.read_csv(filename, sep='\t')
-        df = df[(df['Reverse']!='+')&(~pd.isna(df['Retention time']))]
+        if not self.keep_all_psm:
+            df = df[(df['Reverse']!='+')&(~pd.isna(df['Retention time']))]
         df.reset_index(drop=True,inplace=True)
         df.fillna('', inplace=True)
-        df['Retention time'] /= df['Retention time'].max()
+        min_rt = df['Retention time'].min()
+        df['norm_RT'] = (
+            df['Retention time']-min_rt
+        )/(df['Retention time'].max()-min_rt)
+        df['decoy'] = 0
+        df.loc[df['Reverse']=='+','decoy'] == 1
         return df
 
     def _translate_columns(self, origin_df: pd.DataFrame):
@@ -131,6 +139,7 @@ class MaxQuantMSMSReader(MaxQuantReader, PSMReader_w_FragBase):
         )
 
         MaxQuantReader.__init__(self)
+        self.keep_all_psm = False
         self._score_thres = 50
 
     @property

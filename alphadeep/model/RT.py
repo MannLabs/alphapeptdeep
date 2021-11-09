@@ -88,7 +88,7 @@ class AlphaRTModel(model_base.ModelImplBase):
         batch_df: pd.DataFrame,
         nAA
     ) -> torch.Tensor:
-        return torch.Tensor(batch_df['RT'].values)
+        return torch.Tensor(batch_df['norm_RT'].values)
 
     def _set_batch_predict_data(self,
         batch_df: pd.DataFrame,
@@ -101,12 +101,12 @@ import statsmodels.api as sm
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-def evaluate_linear_regression(df, x='predict_RT', y='RT', ci=0.95):
+def evaluate_linear_regression(df, x='predict_RT', y='norm_RT', ci=0.95):
     gls = sm.GLS(df[y], sm.add_constant(df[x]))
     res = gls.fit()
     summary = res.summary(alpha=1-ci)
     return summary
 
-def evaluate_linear_regression_plot(df, x='predict_RT', y='RT', ci=95):
+def evaluate_linear_regression_plot(df, x='predict_RT', y='norm_RT', ci=95):
     sns.regplot(data=df, x=x, y=y, color='r', ci=ci, scatter_kws={'s':0.05, 'alpha':0.05, 'color':'b'})
     plt.show()

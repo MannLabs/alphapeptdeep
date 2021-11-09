@@ -91,14 +91,15 @@ class pFindReader(PSMReaderBase):
             'sequence': 'Sequence',
             'charge': 'Charge',
             'RT': 'RT',
+            'norm_RT': 'norm_RT',
             'CCS': 'CCS',
             'raw_name': 'raw_name',
             'msms_id': 'File_Name',
-            'scan_no': 'Scan_No',
+            'spec_idx': 'spec_idx',
             'score': 'score',
             'proteins': 'Proteins',
-            'uniprot_ids': 'uniprot_ids',
-            'genes': 'genes',
+            'uniprot_ids': 'Proteins',
+            'genes': 'Proteins',
             'q_value': 'Q-value',
             'decoy': 'decoy'
         }
@@ -118,8 +119,6 @@ class pFindReader(PSMReaderBase):
         pfind_df['score'] = -np.log(pfind_df['Final_Score'].values)
         pfind_df['Proteins'] = pfind_df['Proteins'].apply(remove_pFind_decoy_protein)
         pfind_df['decoy'] = (pfind_df['Target/Decoy']=='decoy').astype(int)
-        pfind_df['uniprot_ids'] = ''
-        pfind_df['genes'] = ''
         return pfind_df
 
     def _translate_columns(self, pfind_df):
@@ -153,7 +152,7 @@ class PSMLabelReader(pFindReader, PSMReader_w_FragBase):
             'CCS': 'CCS',
             'raw_name': 'raw_name',
             'msms_id': 'File_Name',
-            'scan_no': 'scan_no',
+            'spec_idx': 'spec_idx',
         }
 
         psmlabel_columns = 'b,b-NH3,b-H20,b-ModLoss,y,y-HN3,y-H20,y-ModLoss'.split(',')
@@ -175,10 +174,10 @@ class PSMLabelReader(pFindReader, PSMReader_w_FragBase):
         psmlabel_df = pd.read_csv(filename, sep="\t")
         psmlabel_df.fillna('', inplace=True)
 
-        psmlabel_df['raw_name'], psmlabel_df['scan_no'], psmlabel_df['charge'] = zip(
+        psmlabel_df['raw_name'], psmlabel_df['spec_idx'], psmlabel_df['charge'] = zip(
             *psmlabel_df['spec'].str.split('.').apply(lambda x: (x[0], x[-4], x[-3]))
         )
-        psmlabel_df['scan_no'] = psmlabel_df['scan_no'].astype(int)
+        psmlabel_df['spec_idx'] = psmlabel_df['spec_idx'].astype(int)
         psmlabel_df['charge'] = psmlabel_df['charge'].astype(int)
         return psmlabel_df
 

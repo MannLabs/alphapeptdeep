@@ -21,6 +21,7 @@ class SpectronautReader(MaxQuantReader):
             'sequence': 'StrippedPeptide',
             'charge': 'PrecursorCharge',
             'RT': ['RT','iRT','Tr_recalibrated','RetentionTime'],
+            'norm_RT': 'norm_RT',
             'CCS': 'CCS',
             'mobility': ['Mobility','IonMobility'],
             'proteins': 'Protein Name',
@@ -36,13 +37,13 @@ class SpectronautReader(MaxQuantReader):
         ], inplace=True)
         df.reset_index(drop=True, inplace=True)
 
-        # for rt_col in self.column_mapping['RT']:
-        #     if rt_col not in df.columns: continue
-        #     min_rt = df[rt_col].min()
-        #     df[rt_col] = (
-        #         df[rt_col] - min_rt
-        #     )/(df[rt_col].max() - min_rt)
-        #     break
+        for rt_col in self.column_mapping['RT']:
+            if rt_col not in df.columns: continue
+            min_rt = df[rt_col].min()
+            df['norm_RT'] = (
+                df[rt_col] - min_rt
+            )/(df[rt_col].max() - min_rt)
+            break
         return df
 
 class OpenSwathReader(SpectronautReader):
@@ -56,6 +57,7 @@ class OpenSwathReader(SpectronautReader):
             'sequence': 'PeptideSequence',
             'charge': 'PrecursorCharge',
             'RT': ['RT','iRT','Tr_recalibrated','RetentionTime'],
+            'norm_RT':'norm_RT',
             'CCS': 'CCS',
             'mobility': ['Mobility','IonMobility'],
             'proteins': 'Protein Name',
@@ -83,13 +85,13 @@ class OpenSwathReader(SpectronautReader):
         ], inplace=True)
         df.reset_index(drop=True, inplace=True)
 
-        # for rt_col in self.column_mapping['RT']:
-        #     if rt_col not in df.columns: continue
-        #     min_rt = df[rt_col].min()
-        #     df[rt_col] = (
-        #         df[rt_col] - min_rt
-        #     )/(df[rt_col].max() - min_rt)
-        #     break
+        for rt_col in self.column_mapping['RT']:
+            if rt_col not in df.columns: continue
+            min_rt = df[rt_col].min()
+            df['norm_RT'] = (
+                df[rt_col] - min_rt
+            )/(df[rt_col].max() - min_rt)
+            break
         return df
 
 psm_reader_provider.register_reader(

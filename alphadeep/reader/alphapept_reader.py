@@ -65,7 +65,8 @@ class AlphaPeptReader(PSMReader_w_FragBase):
         self.column_mapping = {
             'sequence': 'naked_sequence',
             'RT':'rt',
-            'scan_no': 'scan_no',
+            'norm_RT': 'norm_RT',
+            'spec_idx': 'scan_no',
             'scan_idx': 'raw_idx', #idx in ms2 list
             'mobility': 'mobility',
             'score': 'score',
@@ -73,18 +74,21 @@ class AlphaPeptReader(PSMReader_w_FragBase):
             'raw_name': 'raw_name',
         }
 
-        self.hdf_dataset = 'peptide_fdr'
-
     def _load_file(self, filename):
+        if self.keep_all_psm:
+            hdf_dataset = 'first_search'
+        else:
+            hdf_dataset = 'peptide_fdr'
         with h5py.File(filename, 'r') as _hdf:
-            dataset = _hdf[self.hdf_dataset]
+            dataset = _hdf[hdf_dataset]
             df = pd.DataFrame({col:dataset[col] for col in dataset.keys()})
             df['raw_name'] = os.path.basename(filename)[:-len('.ms_data.hdf')]
             df['precursor'] = df['precursor'].str.decode('utf-8')
             if 'scan_no' in df.columns:
                 df['scan_no'] = df['scan_no'].astype('int')
             df['charge'] = df['charge'].astype(int)
-            df.rt /= df.rt.max()
+            min_rt = df.rt.min()
+            df['norm_RT'] = (df.rt-min_rt)/(df.rt.max()-min_rt)
         return df
 
     def _translate_columns(self, df: pd.DataFrame):
