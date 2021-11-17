@@ -19,12 +19,12 @@ def _get_frag_info_from_column_name(column:str):
     '''
     idx = column.rfind('_')
     frag_type = column[:idx]
-    ch_str = column[idx+1:]
+    ch_str = column[idx+2:]
     charge = int(ch_str)
     if len(frag_type)==1:
         loss_type = 'noloss'
     else:
-        idx = frag_type.find('-')
+        idx = frag_type.find('_')
         loss_type = frag_type[idx+1:]
         frag_type = frag_type[0]
     return frag_type, loss_type, charge
@@ -166,15 +166,15 @@ def speclib_to_single_df(
     df['frag_end_idx'] = speclib._precursor_df['frag_end_idx']
 
     df['PrecursorCharge'] = speclib._precursor_df['charge']
-    if 'predict_RT' in speclib._precursor_df.columns:
-        df['iRT'] = speclib._precursor_df['predict_RT']
+    if 'rt_pred' in speclib._precursor_df.columns:
+        df['iRT'] = speclib._precursor_df['rt_pred']
     else:
-        df['iRT'] = speclib._precursor_df['RT']
+        df['iRT'] = speclib._precursor_df['rt']
 
-    if 'predict_CCS' in speclib._precursor_df.columns:
-        df['CCS'] = speclib._precursor_df['predict_CCS']
-    elif 'CCS' in speclib._precursor_df.columns:
-        df['CCS'] = speclib._precursor_df['CCS']
+    if 'ccs_pred' in speclib._precursor_df.columns:
+        df['CCS'] = speclib._precursor_df['ccs_pred']
+    elif 'ccs' in speclib._precursor_df.columns:
+        df['CCS'] = speclib._precursor_df['ccs']
 
     df['LabelModifiedSequence'] = df['ModifiedPeptide']
     df['StrippedPeptide'] = speclib._precursor_df['sequence']
@@ -198,7 +198,7 @@ def speclib_to_single_df(
     if 'protein_group' in speclib._precursor_df.columns:
         df['ProteinGroups'] = speclib._precursor_df['protein_group']
 
-    frag_inten = speclib.clip_inten_by_fragment_mass()
+    frag_inten = speclib.clip_inten_by_fragment_mz()
 
     df = merge_precursor_fragment_df(
         df,

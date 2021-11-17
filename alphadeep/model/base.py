@@ -102,14 +102,14 @@ class ModelImplBase(object):
     def load(
         self,
         model_file: Tuple[str, IO],
-        model_name_in_zip: str = None,
+        model_path_in_zip: str = None,
         **kwargs
     ):
         if isinstance(model_file, str):
             # We may release all models (msms, rt, ccs, ...) in a single zip file
             if model_file.lower().endswith('.zip'):
-                with ZipFile(model_file, 'rb') as model_zip:
-                    with model_zip.open(model_name_in_zip) as pt_file:
+                with ZipFile(model_file) as model_zip:
+                    with model_zip.open(model_path_in_zip,'r') as pt_file:
                         self._load_model_file(pt_file)
             else:
                 with open(model_file,'rb') as pt_file:

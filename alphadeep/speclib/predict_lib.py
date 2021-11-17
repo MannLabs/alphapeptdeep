@@ -6,13 +6,13 @@ __all__ = ['PredictLib']
 import pandas as pd
 
 from alphabase.speclib.library_base import SpecLibBase
-from alphadeep.model.msms import pDeepModel
-from alphadeep.model.RT import AlphaRTModel
-from alphadeep.model.CCS import AlphaCCSModel
+from alphadeep.model.ms2 import pDeepModel
+from alphadeep.model.rt import AlphaRTModel
+from alphadeep.model.ccs import AlphaCCSModel
 
 class PredictLib(SpecLibBase):
     def __init__(self,
-        charged_frag_types, #['b_1','b_2','y_1','y_2', ...]
+        charged_frag_types, #['b_z1','b_z2','y_z1','y_z2', ...]
         msms_model: pDeepModel,
         rt_model: AlphaRTModel,
         ccs_model: AlphaCCSModel,
@@ -30,7 +30,7 @@ class PredictLib(SpecLibBase):
         self.rt_model = rt_model
         self.ccs_model = ccs_model
 
-        self.inten_factor = 10000
+        self.intensity_factor = 10000
         self.verbose = True
 
     @property
@@ -46,27 +46,27 @@ class PredictLib(SpecLibBase):
         self._precursor_df['nAA'] = self._precursor_df['sequence'].str.len()
         self._precursor_df['mod_sites'] = self._precursor_df['mod_sites'].astype('U')
         self._precursor_df['charge'] = self._precursor_df['charge'].astype(int)
-        # add 'predict_CCS' into columns
+        # add 'ccs_pred' into columns
         self._precursor_df = self.ccs_model.predict(self._precursor_df, verbose=self.verbose)
-        # add 'predict_RT' into columns
+        # add 'rt_pred' into columns
         self._precursor_df = self.rt_model.predict(self._precursor_df, verbose=self.verbose)
 
-    def load_fragment_inten_df(self, **kwargs):
-        if self._fragment_mass_df is None:
-            self.load_fragment_mass_df()
+    def load_fragment_intensity_df(self, **kwargs):
+        if len(self._fragment_mz_df) == 0:
+            self.load_fragment_mz_df()
 
         frag_inten_df = self.msms_model.predict(
             self._precursor_df,
-            reference_frag_df=self._fragment_mass_df,
+            reference_frag_df=self._fragment_mz_df,
             verbose=self.verbose,
         )
 
         charged_frag_list = []
-        for frag_type in self._fragment_mass_df.columns.values:
+        for frag_type in self._fragment_mz_df.columns.values:
             if frag_type in frag_inten_df:
                 charged_frag_list.append(frag_type)
-        self._fragment_mass_df = self._fragment_mass_df[charged_frag_list]
-        self._fragment_inten_df = frag_inten_df[charged_frag_list]*self.inten_factor
-        self._fragment_inten_df[self._fragment_mass_df==0] = 0
+        self._fragment_mz_df = self._fragment_mz_df[charged_frag_list]
+        self._fragment_intensity_df = frag_inten_df[charged_frag_list]*self.intensity_factor
+        self._fragment_intensity_df[self._fragment_mz_df==0] = 0
 
 

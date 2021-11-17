@@ -11,24 +11,22 @@ import pandas as pd
 
 class MSReaderBase:
     def __init__(self):
-        self.spectrum_df:pd.DataFrame = None
-        self.masses: np.array = None
-        self.intens: np.array = None
+        self.spectrum_df:pd.DataFrame = pd.DataFrame()
+        self.mzs: np.array = None
+        self.intensities: np.array = None
 
     def load(self, file_path):
         raise NotImplementedError('load()')
 
     def build_spectrum_df(self, scan_list, scan_indices, rt_list, mobility_list = None):
-        if not mobility_list: mobility_list = np.nan
+        if mobility_list is None: mobility_list = np.nan
         self.spectrum_df = pd.DataFrame({
             'spec_idx': scan_list,
             'peak_start_idx': scan_indices[:-1],
             'peak_end_idx': scan_indices[1:],
-            'RT': rt_list,
+            'rt_sec': rt_list,
             'mobility': mobility_list,
         }, index = scan_list)
-        # self.max_rt = self.spectrum_df.RT.max()
-        # self.spectrum_df.RT /= self.max_rt
 
     def get_peaks(self, spec_idx):
         if spec_idx not in self.spectrum_df.index:
@@ -37,8 +35,8 @@ class MSReaderBase:
             spec_idx, ['peak_start_idx','peak_end_idx']
         ].values.astype(np.int64)
         return (
-            self.masses[start_idx:end_idx],
-            self.intens[start_idx:end_idx]
+            self.mzs[start_idx:end_idx],
+            self.intensities[start_idx:end_idx]
         )
 
 class AlphaPept_HDF_MS1_Reader(MSReaderBase):
@@ -52,12 +50,12 @@ class AlphaPept_HDF_MS1_Reader(MSReaderBase):
                 group_name="Raw/MS1_scans",
             )
             self.ms_data[dataset_name] = values
-        self.masses = self.ms_data['mass_list_ms1']
-        self.intens = self.ms_data['int_list_ms1']
+        self.mzs = self.ms_data['mass_list_ms1']
+        self.intensities = self.ms_data['int_list_ms1']
         self.build_spectrum_df(
             scan_list=self.ms_data['scan_list_ms1'],
             scan_indices=self.ms_data['indices_ms1'],
-            rt_list=self.ms_dat['rt_list_ms1'],
+            rt_list=self.ms_data['rt_list_ms1']*60,
             mobility_list=self.ms_data['mobility'] if 'mobility' in self.ms_data else None,
         )
 
@@ -72,12 +70,16 @@ class AlphaPept_HDF_MS2_Reader(MSReaderBase):
                 group_name="Raw/MS2_scans",
             )
             self.ms_data[dataset_name] = values
-        self.masses = self.ms_data['mass_list_ms2']
-        self.intens = self.ms_data['int_list_ms2']
+        self.mzs = self.ms_data['mass_list_ms2']
+        self.intensities = self.ms_data['int_list_ms2']
+        if 'mobility2' in self.ms_data:
+            scan_list = np.arange(len(self.ms_data['rt_list_ms2']))
+        else:
+            scan_list = self.ms_data['scan_list_ms2']
         self.build_spectrum_df(
-            scan_list=self.ms_data['scan_list_ms2'],
+            scan_list=scan_list,
             scan_indices=self.ms_data['indices_ms2'],
-            rt_list=self.ms_dat['rt_list_ms2'],
+            rt_list=self.ms_data['rt_list_ms2']*60,
             mobility_list=self.ms_data['mobility2'] if 'mobility2' in self.ms_data else None,
         )
 
@@ -164,8 +166,8 @@ class MGFReader(MSReaderBase):
             index_ragged_list(masses_list),
             rt_list
         )
-        self.masses = np.concatenate(masses_list)
-        self.intens = np.concatenate(intens_list)
+        self.mzs = np.concatenate(masses_list)
+        self.intensities = np.concatenate(intens_list)
 
 
 class MSReaderProvider:
@@ -232,8 +234,8 @@ try:
                 index_ragged_list(masses_list),
                 rt_list,
             )
-            self.masses = np.concatenate(masses_list)
-            self.intens = np.concatenate(intens_list)
+            self.mzs = np.concatenate(masses_list)
+            self.intensities = np.concatenate(intens_list)
             rawfile.Close()
 
     class ThermoRawMS2Reader(MSReaderBase):
@@ -277,8 +279,8 @@ try:
                 index_ragged_list(masses_list),
                 rt_list,
             )
-            self.masses = np.concatenate(masses_list)
-            self.intens = np.concatenate(intens_list)
+            self.mzs = np.concatenate(masses_list)
+            self.intensities = np.concatenate(intens_list)
             rawfile.Close()
 
     ms2_reader_provider.register_reader('thermo', ThermoRawMS2Reader)
