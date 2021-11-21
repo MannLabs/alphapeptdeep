@@ -193,6 +193,8 @@ class ModelImplBase(object):
         verbose_each_epoch=False,
         **kwargs
     ):
+        if 'nAA' not in precursor_df.columns:
+            precursor_df['nAA'] = precursor_df.sequence.str.len()
         self._prepare_train_data_df(precursor_df, **kwargs)
         self.model.train()
 
@@ -232,6 +234,8 @@ class ModelImplBase(object):
         batch_size=1024,
         verbose=False,**kwargs
     )->pd.DataFrame:
+        if 'nAA' not in precursor_df.columns:
+            precursor_df['nAA'] = precursor_df.sequence.str.len()
         self._prepare_predict_data_df(precursor_df,**kwargs)
         self.model.eval()
 

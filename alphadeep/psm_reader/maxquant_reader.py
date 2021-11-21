@@ -105,10 +105,11 @@ class MaxQuantReader(PSMReaderBase):
             df = df[(df['Reverse']!='+')&(~pd.isna(df['Retention time']))]
         df.reset_index(drop=True,inplace=True)
         df.fillna('', inplace=True)
-        min_rt = df['Retention time'].min()
-        df['rt_norm'] = (
-            df['Retention time']-min_rt
-        )/(df['Retention time'].max()-min_rt)
+        # min_rt = df['Retention time'].min()
+        # df['rt_norm'] = (
+        #     df['Retention time']-min_rt
+        # )/(df['Retention time'].max()-min_rt)
+        df['rt_norm'] = df['Retention time']/df['Retention time'].max()
         df['decoy'] = 0
         df.loc[df['Reverse']=='+','decoy'] == 1
         return df

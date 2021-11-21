@@ -57,7 +57,7 @@ class PepSpecMatch(object):
             2
         ),
     ):
-        self.psm_df = psm_df
+        self.psm_df:pd.DataFrame = psm_df
         if fragment_mz_df is not None:
             self.fragment_mz_df = fragment_mz_df[charged_frag_types]
         else:
@@ -103,10 +103,11 @@ class PepSpecMatch(object):
                         how='left',
                         on='spec_idx',
                     )
-                    min_rt = _df['rt_sec'].min()
-                    _df['rt_norm'] = (
-                        _df['rt_sec']-min_rt
-                    )/(_df['rt_sec'].max()-min_rt)
+                    # min_rt = _df['rt_sec'].min()
+                    # _df['rt_norm'] = (
+                    #     _df['rt_sec']-min_rt
+                    # )/(_df['rt_sec'].max()-min_rt)
+                    _df['rt_norm'] = _df['rt_sec']/_df['rt_sec'].max()
                     self.psm_df.loc[
                         _df.index, ['rt','rt_norm']
                     ] = _df[['rt_sec','rt_norm']]
@@ -119,27 +120,27 @@ class PepSpecMatch(object):
                     (
                         spec_mzs, spec_intens
                     ) = ms2_reader.get_peaks(spec_idx)
-                    if len(spec_masses)==0: continue
+                    if len(spec_mzs)==0: continue
 
                     if ppm:
-                        Da_tols = spec_masses*tol*1e-6
+                        mz_tols = spec_mzs*tol*1e-6
                     else:
-                        Da_tols = np.full_like(spec_masses, tol)
+                        mz_tols = np.full_like(spec_mzs, tol)
 
-                    frag_masses = self.fragment_mz_df.values[
+                    frag_mzs = self.fragment_mz_df.values[
                         frag_start_idx:frag_end_idx,:
                     ]
 
-                    matched_idx = centroid_mz_match(
-                        spec_masses, frag_masses, Da_tols
+                    matched_idxs = centroid_mz_match(
+                        spec_mzs, frag_mzs, mz_tols
                     )
-                    matched_intens = spec_intens[matched_idx]
-                    matched_intens[matched_idx==-1] = 0
+                    matched_intens = spec_intens[matched_idxs]
+                    matched_intens[matched_idxs==-1] = 0
 
-                    matched_merrs = np.abs(
-                        spec_masses[matched_idx]-frag_masses
+                    matched_mass_errs = np.abs(
+                        spec_mzs[matched_idxs]-frag_mzs
                     )
-                    matched_merrs[matched_idx==-1] = np.inf
+                    matched_mass_errs[matched_idxs==-1] = np.inf
 
                     self.matched_intensity_df.values[
                         frag_start_idx:frag_end_idx,:
@@ -147,4 +148,4 @@ class PepSpecMatch(object):
 
                     self.matched_mz_err_df.values[
                         frag_start_idx:frag_end_idx,:
-                    ] = matched_merrs
+                    ] = matched_mass_errs

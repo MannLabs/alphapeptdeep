@@ -4,3 +4,6 @@ pandas
 numpy
 torch
 statsmodels
+wget
+searbon
+matplotlib

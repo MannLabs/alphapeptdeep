@@ -2,7 +2,7 @@
 
 __all__ = ['ModelMSMSpDeep', 'IntenAwareLoss', 'pDeepModel', 'mod_feature_size', 'max_instrument_num', 'frag_types',
            'max_frag_charge', 'num_ion_types', 'nce_factor', 'charge_factor', 'pDeepParamSearch', 'product_dict',
-           'get_param_iter', 'pearson', 'spectral_angle', 'spearman', 'evaluate_msms', 'add_cutoff_metric']
+           'get_param_iter', 'pearson', 'spectral_angle', 'spearman', 'add_cutoff_metric', 'calc_ms2_similarity']
 
 # Cell
 import torch
@@ -331,10 +331,19 @@ def spearman(x: torch.Tensor, y: torch.Tensor, device):
     down = n * (n ** 2 - 1.0)
     return 1.0 - (upper / down)
 
-def evaluate_msms(
+def add_cutoff_metric(
+    metrics_describ, metrics_df, thres=0.9
+):
+    vals = []
+    for col in metrics_describ.columns.values:
+        vals.append(metrics_df.loc[metrics_df[col]>thres, col].count()/len(metrics_df))
+    metrics_describ.loc[f'>{thres:.2f}'] = vals
+    return metrics_describ
+
+def calc_ms2_similarity(
     psm_df: pd.DataFrame,
-    predict_inten_df: pd.DataFrame,
-    fragment_inten_df: pd.DataFrame,
+    predict_intensity_df: pd.DataFrame,
+    fragment_intensity_df: pd.DataFrame,
     charged_frag_types: List=None,
     metrics = ['PCC','COS','SA','SPC'],
     GPU = True,
@@ -348,7 +357,7 @@ def evaluate_msms(
         device = torch.device('cpu')
 
     if not charged_frag_types:
-        charged_frag_types = fragment_inten_df.columns.values
+        charged_frag_types = fragment_intensity_df.columns.values
 
     _grouped = psm_df.groupby('nAA')
 
@@ -367,7 +376,7 @@ def evaluate_msms(
 
             pred_intens = torch.Tensor(
                 get_sliced_fragment_dataframe(
-                    predict_inten_df,
+                    predict_intensity_df,
                     batch_df[
                         ['frag_start_idx','frag_end_idx']
                     ].values,
@@ -379,7 +388,7 @@ def evaluate_msms(
 
             frag_intens = torch.Tensor(
                 get_sliced_fragment_dataframe(
-                    fragment_inten_df,
+                    fragment_intensity_df,
                     batch_df[
                         ['frag_start_idx','frag_end_idx']
                     ].values,
@@ -420,12 +429,3 @@ def evaluate_msms(
 
     torch.cuda.empty_cache()
     return psm_df, metrics_describ
-
-def add_cutoff_metric(
-    metrics_describ, metrics_df, thres=0.9
-):
-    vals = []
-    for col in metrics_describ.columns.values:
-        vals.append(metrics_df.loc[metrics_df[col]>thres, col].count()/len(metrics_df))
-    metrics_describ.loc[f'>{thres:.2f}'] = vals
-    return metrics_describ

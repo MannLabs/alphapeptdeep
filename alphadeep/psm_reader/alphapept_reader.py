@@ -87,8 +87,9 @@ class AlphaPeptReader(PSMReader_w_FragBase):
             if 'scan_no' in df.columns:
                 df['scan_no'] = df['scan_no'].astype('int')
             df['charge'] = df['charge'].astype(int)
-            min_rt = df.rt.min()
-            df['rt_norm'] = (df.rt-min_rt)/(df.rt.max()-min_rt)
+            # min_rt = df.rt.min()
+            # df['rt_norm'] = (df.rt-min_rt)/(df.rt.max()-min_rt)
+            df['rt_norm'] = df.rt/df.rt.max()
 
         return df
 
