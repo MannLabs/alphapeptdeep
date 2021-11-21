@@ -83,12 +83,6 @@ class OpenSwathReader(SpectronautReader):
         ]
         self.modseq_col = 'FullUniModPeptideName'
 
-    def _find_modseq_column(self, df):
-        for modseq_col in self._modseq_columns:
-            if modseq_col in df.columns:
-                self.modseq_col = modseq_col
-                break
-
     def _load_file(self, filename):
         df = pd.read_csv(filename, sep=self.tsv_sep)
         self._find_modseq_column(df)
@@ -106,7 +100,7 @@ class OpenSwathReader(SpectronautReader):
             break
         return df
 
-class DiannReader(OpenSwathReader):
+class DiannReader(SpectronautReader):
     def __init__(self):
         super().__init__()
         self.mod_sep = '()'
@@ -114,6 +108,7 @@ class DiannReader(OpenSwathReader):
         self.fixed_C=False
 
         self.column_mapping = {
+            'raw_name': 'File.Name',
             'sequence': 'Stripped.Sequence',
             'charge': 'Precursor.Charge',
             'rt': ['RT','iRT','Tr_recalibrated','RetentionTime'],
@@ -132,19 +127,9 @@ class DiannReader(OpenSwathReader):
         ]
         self.modseq_col = 'Modified.Sequence'
 
-    def _find_modseq_column(self, df):
-        for modseq_col in self._modseq_columns:
-            if modseq_col in df.columns:
-                self.modseq_col = modseq_col
-                break
-
     def _load_file(self, filename):
-        df = pd.read_csv(filename, sep=self.tsv_sep)
+        df = pd.read_csv(filename, sep='\t')
         self._find_modseq_column(df)
-        df.drop_duplicates([
-            'Run',self.modseq_col, 'Precursor.Charge'
-        ], inplace=True)
-        df.reset_index(drop=True, inplace=True)
 
         for rt_col in self.column_mapping['rt']:
             if rt_col not in df.columns: continue

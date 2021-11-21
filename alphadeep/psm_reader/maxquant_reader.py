@@ -31,7 +31,9 @@ def parse_modseq(
             site_end += 1
         if underscore_for_ncterm: site_list.append(str(site-1))
         else: site_list.append(str(site))
-        mod_list.append(PeptideModSeq[site-1:site_end])
+        start_mod = site
+        if start_mod > 0: start_mod -= 1
+        mod_list.append(PeptideModSeq[start_mod:site_end])
         PeptideModSeq = PeptideModSeq[:site] + PeptideModSeq[site_end:]
         site = PeptideModSeq.find(mod_sep[0], site)
     if fixed_C:
@@ -74,6 +76,7 @@ class MaxQuantReader(PSMReaderBase):
         self.modification_convert_dict['Y(ph)'] = 'Phospho@Y'
         self.modification_convert_dict['K(gl)'] = 'GlyGly@K'
         self.modification_convert_dict['E(Glu->pyro-Glu)'] = 'Glu->pyro-Glu@E^Protein N-term'
+        self.modification_convert_dict['_(UniMod:1)'] = 'Acetyl@Protein N-term'
         self.modification_convert_dict['C(UniMod:4)'] = 'Carbamidomethyl@C'
         self.modification_convert_dict['M(UniMod:35)'] = 'Oxidation@M'
         self.modification_convert_dict['S(UniMod:21)'] = 'Phospho@S'
@@ -82,6 +85,9 @@ class MaxQuantReader(PSMReaderBase):
 
         for key, val in list(self.modification_convert_dict.items()):
             self.modification_convert_dict[f'{key[0]}[{key[2:-1]}]'] = val
+            if key.startswith('_'):
+                self.modification_convert_dict[key[1:]] = val
+                self.modification_convert_dict[f'[{key[2:-1]}]'] = val
 
         self.column_mapping = {
             'sequence': 'Sequence',
