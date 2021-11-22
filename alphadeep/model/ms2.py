@@ -244,6 +244,45 @@ class pDeepModel(model_base.ModelImplBase):
             self.charged_frag_types
         )
 
+    def grid_search(self,
+        psm_df:pd.DataFrame,
+        fragment_intensity_df:pd.DataFrame,
+        nce_first=15, nce_last=45, nce_step=3,
+        search_instruments = ['Lumos'],
+        metric = 'PCC>0.9', # or 'median PCC'
+        max_psm_subset = 5000,
+        callback = None
+    ):
+        if len(psm_df) > max_psm_subset:
+            psm_df = psm_df.sample(max_psm_subset).copy()
+        best_pcc = -1
+        best_nce = 0
+        best_instrument = None
+        if 'median' in metric:
+            metric = '50%'
+        else:
+            metric = '>0.90'
+        for inst in search_instruments:
+            for nce in range(nce_first, nce_last+1, nce_step):
+                predict_inten_df = self.predict(
+                    psm_df,
+                    reference_frag_df=fragment_intensity_df
+                )
+                df, metrics = calc_ms2_similarity(
+                    psm_df,
+                    predict_inten_df,
+                    fragment_intensity_df,
+                    metrics=['PCC']
+                )
+                pcc = metrics.loc[metric, 'PCC']
+                if pcc > best_pcc:
+                    best_pcc = pcc
+                    best_nce = nce
+                    best_instrument = inst
+        return best_nce, best_instrument
+
+
+
 # Cell
 class pDeepParamSearch(pDeepModel):
     '''
@@ -349,7 +388,7 @@ def calc_ms2_similarity(
     GPU = True,
     batch_size=10240,
     verbose=False,
-)->pd.DataFrame:
+)->Tuple(pd.DataFrame, pd.DataFrame):
 
     if torch.cuda.is_available() and GPU:
         device = torch.device('cuda')

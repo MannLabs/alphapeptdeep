@@ -108,7 +108,7 @@ class DiannReader(SpectronautReader):
         self.fixed_C=False
 
         self.column_mapping = {
-            'raw_name': 'File.Name',
+            'raw_name': 'Run',
             'sequence': 'Stripped.Sequence',
             'charge': 'Precursor.Charge',
             'rt': ['RT','iRT','Tr_recalibrated','RetentionTime'],
