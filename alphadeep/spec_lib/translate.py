@@ -172,9 +172,18 @@ def speclib_to_single_df(
         df['iRT'] = speclib._precursor_df['rt']
 
     if 'ccs_pred' in speclib._precursor_df.columns:
-        df['CCS'] = speclib._precursor_df['ccs_pred']
+        df['ccs'] = speclib._precursor_df['ccs_pred']
     elif 'ccs' in speclib._precursor_df.columns:
-        df['CCS'] = speclib._precursor_df['ccs']
+        df['ccs'] = speclib._precursor_df['ccs']
+
+    try:
+        from alphapept.ext.bruker.timsdata import ccsToOneOverK0ToCCSforMz
+        mobilities = np.zeros_like(df.ccs.values)
+        for i,(ccs,charge,mz) in enumerate(df[['ccs','charge','precursor_mz']].values):
+            mobilities[i] = ccsToOneOverK0ToCCSforMz(ccs,charge,mz)
+        df['IonMobility'] = mobilities
+    except ImportError:
+        print('please install alphapept to convert CCS into IonMobility')
 
     df['LabelModifiedSequence'] = df['ModifiedPeptide']
     df['StrippedPeptide'] = speclib._precursor_df['sequence']
