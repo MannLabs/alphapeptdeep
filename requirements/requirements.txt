@@ -5,5 +5,5 @@ numpy
 torch
 statsmodels
 wget
-searbon
+seaborn
 matplotlib

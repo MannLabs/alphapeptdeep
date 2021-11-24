@@ -96,6 +96,11 @@ class AlphaRTModel(model_base.ModelImplBase):
     ):
         self.predict_df.loc[batch_df.index,'rt_pred'] = predicts
 
+    def rt_to_irt_pred(self,
+        precursor_df: pd.DataFrame
+    ):
+        convert_predicted_rt_to_irt(precursor_df, self)
+
 # Cell
 import statsmodels.api as sm
 import matplotlib.pyplot as plt
@@ -144,8 +149,15 @@ irt_pep['nAA'] = irt_pep.sequence.str.len()
 
 def convert_predicted_rt_to_irt(
     df:pd.DataFrame, rt_model:AlphaRTModel
-)->np.array:
+)->pd.DataFrame:
     rt_model.predict(irt_pep)
-    _reg = evaluate_linear_regression(irt_pep, x='rt_pred', y='irt')
-    df['irt_pred'] = df.rt_pred*_reg.slope.values[0] + _reg.intercept.values[0]
+    # simple linear regression
+    rt_pred_mean = irt_pep.rt_pred.mean()
+    irt_mean = irt_pep.irt.mean()
+    x = irt_pep.rt_pred.values - rt_pred_mean
+    y = irt_pep.irt.values - irt_mean
+    slope = np.sum(x*y)/np.sum(x*x)
+    intercept = irt_mean - slope*rt_pred_mean
+    # end linear regression
+    df['irt_pred'] = df.rt_pred*slope + intercept
     return df

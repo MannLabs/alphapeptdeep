@@ -6,6 +6,7 @@ __all__ = ['PredictLib']
 import pandas as pd
 
 from alphabase.spectrum_library.library_base import SpecLibBase
+from alphabase.peptide.fragment import update_precursor_mz
 from alphadeep.model.ms2 import pDeepModel
 from alphadeep.model.rt import AlphaRTModel
 from alphadeep.model.ccs import AlphaCCSModel
@@ -13,7 +14,7 @@ from alphadeep.model.ccs import AlphaCCSModel
 class PredictLib(SpecLibBase):
     def __init__(self,
         charged_frag_types, #['b_z1','b_z2','y_z1','y_z2', ...]
-        msms_model: pDeepModel,
+        ms2_model: pDeepModel,
         rt_model: AlphaRTModel,
         ccs_model: AlphaCCSModel,
         min_frag_mz = 50, max_frag_mz = 2000,
@@ -26,12 +27,16 @@ class PredictLib(SpecLibBase):
             min_precursor_mz=min_precursor_mz,
             max_precursor_mz=max_precursor_mz
         )
-        self.msms_model = msms_model
+        self.ms2_model = ms2_model
         self.rt_model = rt_model
         self.ccs_model = ccs_model
 
-        self.intensity_factor = 10000
+        self.intensity_factor = 1
         self.verbose = True
+
+        self._precursor_df = pd.DataFrame()
+        self._fragment_intensity_df = pd.DataFrame()
+        self._fragment_mz_df = pd.DataFrame()
 
     @property
     def precursor_df(self):
@@ -46,16 +51,22 @@ class PredictLib(SpecLibBase):
         self._precursor_df['nAA'] = self._precursor_df['sequence'].str.len()
         self._precursor_df['mod_sites'] = self._precursor_df['mod_sites'].astype('U')
         self._precursor_df['charge'] = self._precursor_df['charge'].astype(int)
-        # add 'ccs_pred' into columns
-        self._precursor_df = self.ccs_model.predict(self._precursor_df, verbose=self.verbose)
-        # add 'rt_pred' into columns
+        if 'precursor_mz' not in self._precursor_df.columns:
+            update_precursor_mz(self._precursor_df)
+
+    def predict_rt_ccs(self):
+        # add 'rt_pred' and 'irt_pred' into columns
         self._precursor_df = self.rt_model.predict(self._precursor_df, verbose=self.verbose)
+        self.rt_model.rt_to_irt_pred(self._precursor_df)
+        # add 'ccs_pred' and 'mobility_pred' into columns
+        self._precursor_df = self.ccs_model.predict(self._precursor_df, verbose=self.verbose)
+        self.ccs_model.ccs_to_mobility_pred(self._precursor_df)
 
     def load_fragment_intensity_df(self, **kwargs):
         if len(self._fragment_mz_df) == 0:
             self.load_fragment_mz_df()
 
-        frag_inten_df = self.msms_model.predict(
+        frag_inten_df = self.ms2_model.predict(
             self._precursor_df,
             reference_frag_df=self._fragment_mz_df,
             verbose=self.verbose,

@@ -76,16 +76,8 @@ def remove_pFind_decoy_protein(protein):
 
 # Cell
 class pFindReader(PSMReaderBase):
-    def __init__(self,
-        frag_types=['b','y','b_modloss','y_modloss'],
-        max_frag_charge=2,
-        frag_tol=20, frag_ppm=True,
-    ):
-        super().__init__(
-            frag_types=frag_types,
-            max_frag_charge=max_frag_charge,
-            frag_tol=frag_tol, frag_ppm=frag_ppm
-        )
+    def __init__(self):
+        super().__init__()
 
         self.column_mapping = {
             'sequence': 'Sequence',
@@ -96,11 +88,11 @@ class pFindReader(PSMReaderBase):
             'raw_name': 'raw_name',
             'query_id': 'File_Name',
             'spec_idx': 'Scan_No',
-            'score': 'score',
+            'score': 'Final_Score',
             'proteins': 'Proteins',
             'uniprot_ids': 'Proteins',
             'genes': 'Proteins',
-            'q_value': 'Q-value',
+            'fdr': 'Q-value',
             'decoy': 'decoy'
         }
 
@@ -113,10 +105,8 @@ class pFindReader(PSMReaderBase):
     def _load_file(self, filename):
         pfind_df = pd.read_csv(filename, index_col=False, sep='\t')
         pfind_df.fillna('', inplace=True)
-        columns = pfind_df.columns.values.copy()
-        pfind_df = pfind_df.iloc[:,:len(columns)]
+        pfind_df = pfind_df[pfind_df.Sequence != '']
         pfind_df['raw_name'] = pfind_df['File_Name'].str.split('.').apply(lambda x: x[0])
-        pfind_df['score'] = -np.log(pfind_df['Final_Score'].values)
         pfind_df['Proteins'] = pfind_df['Proteins'].apply(remove_pFind_decoy_protein)
         pfind_df['decoy'] = (pfind_df['Target/Decoy']=='decoy').astype(int)
         return pfind_df
@@ -129,7 +119,6 @@ class pFindReader(PSMReaderBase):
         self._psm_df = self._psm_df[~self._psm_df['mods'].isna()]
 
 psm_reader_provider.register_reader('pfind', pFindReader)
-psm_w_frag_reader_provider.register_reader('pfind', pFindReader)
 
 # Cell
 
@@ -139,7 +128,8 @@ class PSMLabelReader(pFindReader, PSMReader_w_FragBase):
         max_frag_charge=2,
         frag_tol=20, frag_ppm=True,
     ):
-        super().__init__(
+        pFindReader.__init__(self)
+        PSMReader_w_FragBase.__init__(self,
             frag_types=frag_types,
             max_frag_charge=max_frag_charge,
             frag_tol=frag_tol, frag_ppm=frag_ppm
@@ -246,7 +236,6 @@ class PSMLabelReader(pFindReader, PSMReader_w_FragBase):
             ['frag_start_idx','frag_end_idx']
         ] = psmlabel_df[['frag_start_idx','frag_end_idx']]
 
-psm_reader_provider.register_reader('psmlabel', PSMLabelReader)
 psm_w_frag_reader_provider.register_reader(
     'psmlabel', PSMLabelReader
 )

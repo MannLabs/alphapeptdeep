@@ -10,6 +10,7 @@ import typing
 import itertools
 
 from alphabase.spectrum_library.library_base import SpecLibBase
+from alphadeep.model.ccs import ccs_to_mobility_pred_df
 
 # Cell
 
@@ -156,7 +157,7 @@ def speclib_to_single_df(
     df['ModifiedPeptide'] = speclib._precursor_df[
         ['sequence','mods','mod_sites']
     ].apply(
-        generate_modified_sequence,
+        create_modified_sequence,
         axis=1,
         translate_mod_dict=translate_mod_dict,
         mod_sep='[]'
@@ -166,24 +167,13 @@ def speclib_to_single_df(
     df['frag_end_idx'] = speclib._precursor_df['frag_end_idx']
 
     df['PrecursorCharge'] = speclib._precursor_df['charge']
-    if 'rt_pred' in speclib._precursor_df.columns:
+    if 'irt_pred' in speclib._precursor_df.columns:
+        df['iRT'] = speclib._precursor_df['irt_pred']
+    elif 'rt_pred' in speclib._precursor_df.columns:
         df['iRT'] = speclib._precursor_df['rt_pred']
-    else:
-        df['iRT'] = speclib._precursor_df['rt']
 
-    if 'ccs_pred' in speclib._precursor_df.columns:
-        df['ccs'] = speclib._precursor_df['ccs_pred']
-    elif 'ccs' in speclib._precursor_df.columns:
-        df['ccs'] = speclib._precursor_df['ccs']
-
-    try:
-        from alphapept.ext.bruker.timsdata import ccsToOneOverK0ToCCSforMz
-        mobilities = np.zeros_like(df.ccs.values)
-        for i,(ccs,charge,mz) in enumerate(df[['ccs','charge','precursor_mz']].values):
-            mobilities[i] = ccsToOneOverK0ToCCSforMz(ccs,charge,mz)
-        df['IonMobility'] = mobilities
-    except ImportError:
-        print('please install alphapept to convert CCS into IonMobility')
+    ccs_to_mobility_pred_df(speclib._precursor_df)
+    df['IonMobility'] = speclib._precursor_df.mobility_pred
 
     df['LabelModifiedSequence'] = df['ModifiedPeptide']
     df['StrippedPeptide'] = speclib._precursor_df['sequence']

@@ -8,4 +8,4 @@ def get_MSFragger_mods(assigned_mods):
 
     items = [item[:-1].split('(') for item in assigned_mods.split(', ')]
     items = list(zip(*items))
-    return ';'.join(items[0]), ';'.join(items[1])
+    return ';'.join(items[1]), ';'.join(items[0]) #mods, sites

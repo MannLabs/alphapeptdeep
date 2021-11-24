@@ -174,8 +174,8 @@ class pDeepModel(model_base.ModelImplBase):
         fragment_inten_df:pd.DataFrame=None,
     ):
         self.frag_inten_df = fragment_inten_df[self.charged_frag_types]
-        if np.all(precursor_df['NCE'].values > 1):
-            precursor_df['NCE'] = precursor_df['NCE']*self.NCE_factor
+        if np.all(precursor_df['nce'].values > 1):
+            precursor_df['nce'] = precursor_df['nce']*self.NCE_factor
 
     def _prepare_predict_data_df(self,
         precursor_df:pd.DataFrame,
@@ -186,8 +186,8 @@ class pDeepModel(model_base.ModelImplBase):
             precursor_df, self.charged_frag_types, reference_frag_df
         )
 
-        if np.all(precursor_df['NCE'].values > 1):
-            precursor_df['NCE'] = precursor_df['NCE']*self.NCE_factor
+        if np.all(precursor_df['nce'].values > 1):
+            precursor_df['nce'] = precursor_df['nce']*self.NCE_factor
 
     def _get_features_from_batch_df(self,
         batch_df: pd.DataFrame,
@@ -206,7 +206,7 @@ class pDeepModel(model_base.ModelImplBase):
             batch_df['charge'].values
         ).unsqueeze(1)*self.charge_factor
 
-        nces = torch.Tensor(batch_df['NCE'].values).unsqueeze(1)
+        nces = torch.Tensor(batch_df['nce'].values).unsqueeze(1)
 
         instrument_indices = torch.LongTensor(
             parse_instrument_indices(batch_df['instrument'])
@@ -244,11 +244,12 @@ class pDeepModel(model_base.ModelImplBase):
             self.charged_frag_types
         )
 
-    def grid_search(self,
+    def grid_nce_search(self,
         psm_df:pd.DataFrame,
         fragment_intensity_df:pd.DataFrame,
         nce_first=15, nce_last=45, nce_step=3,
         search_instruments = ['Lumos'],
+        charged_frag_types:List = None,
         metric = 'PCC>0.9', # or 'median PCC'
         max_psm_subset = 5000,
         callback = None
@@ -259,11 +260,13 @@ class pDeepModel(model_base.ModelImplBase):
         best_nce = 0
         best_instrument = None
         if 'median' in metric:
-            metric = '50%'
+            metric_row = '50%'
         else:
-            metric = '>0.90'
+            metric_row = '>0.90'
         for inst in search_instruments:
             for nce in range(nce_first, nce_last+1, nce_step):
+                psm_df['nce'] = nce
+                psm_df['instrument'] = inst
                 predict_inten_df = self.predict(
                     psm_df,
                     reference_frag_df=fragment_intensity_df
@@ -272,15 +275,15 @@ class pDeepModel(model_base.ModelImplBase):
                     psm_df,
                     predict_inten_df,
                     fragment_intensity_df,
+                    charged_frag_types=charged_frag_types,
                     metrics=['PCC']
                 )
-                pcc = metrics.loc[metric, 'PCC']
+                pcc = metrics.loc[metric_row, 'PCC']
                 if pcc > best_pcc:
                     best_pcc = pcc
                     best_nce = nce
                     best_instrument = inst
         return best_nce, best_instrument
-
 
 
 # Cell
@@ -388,14 +391,14 @@ def calc_ms2_similarity(
     GPU = True,
     batch_size=10240,
     verbose=False,
-)->Tuple(pd.DataFrame, pd.DataFrame):
+)->Tuple[pd.DataFrame, pd.DataFrame]:
 
     if torch.cuda.is_available() and GPU:
         device = torch.device('cuda')
     else:
         device = torch.device('cpu')
 
-    if not charged_frag_types:
+    if charged_frag_types is None or len(charged_frag_types)==0:
         charged_frag_types = fragment_intensity_df.columns.values
 
     _grouped = psm_df.groupby('nAA')

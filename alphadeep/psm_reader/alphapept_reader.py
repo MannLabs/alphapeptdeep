@@ -8,8 +8,9 @@ import os
 import pandas as pd
 import h5py
 
-from alphadeep.psm_reader.psm_reader import \
-    PSMReader_w_FragBase, psm_reader_provider
+from alphadeep.psm_reader.psm_reader import (
+    PSMReaderBase, psm_reader_provider
+)
 
 @numba.njit
 def parse_ap(precursor):
@@ -52,7 +53,7 @@ def parse_ap(precursor):
 
     return ''.join(parsed), ';'.join(mods), ';'.join(sites), charge, decoy
 
-class AlphaPeptReader(PSMReader_w_FragBase):
+class AlphaPeptReader(PSMReaderBase):
     def __init__(self):
         super().__init__()
 
