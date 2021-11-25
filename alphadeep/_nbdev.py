@@ -117,6 +117,7 @@ index = {"download_models": "installed_models.ipynb",
          "uniform_sampling": "feature_extractor.ipynb",
          "ScoreFeatureExtractor": "feature_extractor.ipynb",
          "PredictLib": "predict_lib.ipynb",
+         "create_modified_sequence": "translate.ipynb",
          "merge_precursor_fragment_df": "translate.ipynb",
          "speclib_to_single_df": "translate.ipynb",
          "alpha_to_other_mod_dict": "translate.ipynb"}
