@@ -58,7 +58,7 @@ def parse_mod_feature(
         np.array: 2-D feature array with shape `(nAA+2,mod_feature_size)`
     '''
     mod_x = np.zeros((nAA+2,mod_feature_size))
-    if mod_names:
+    if len(mod_names) > 0:
         mod_x[mod_sites] = [MOD_TO_FEATURE[mod] for mod in mod_names]
     return mod_x
 
@@ -74,17 +74,24 @@ def get_batch_mod_feature(
     Returns:
         List[np.array]: a list of 2-D array features
     '''
-    mod_x_batch = []
-    for mod_names, mod_sites in df_batch[
-        ['mods', 'mod_sites']
-    ].values:
-        if mod_names:
-            mod_names = mod_names.split(';')
-            mod_sites = [int(site) for site in mod_sites.split(';')]
-        else:
-            mod_names = []
-            mod_sites = []
-        mod_x_batch.append(parse_mod_feature(nAA, mod_names, mod_sites))
+    mod_x_batch = np.zeros((len(df_batch), nAA+2, mod_feature_size))
+    mod_fea_list = df_batch.mods.str.split(';').apply(
+        lambda mod_names: [
+            MOD_TO_FEATURE[mod] for mod in mod_names
+            if len(mod)>0
+        ]
+    )
+    mod_sites_list = df_batch.mod_sites.str.split(';').apply(
+        lambda mod_sites:[
+            int(site) for site in mod_sites
+            if len(site)>0
+        ]
+    )
+    for i, (mod_feas, mod_sites) in enumerate(
+        zip(mod_fea_list, mod_sites_list)
+    ):
+        if len(mod_sites)>0:
+            mod_x_batch[i,mod_sites,:] = mod_feas
     return mod_x_batch
 
 # Cell

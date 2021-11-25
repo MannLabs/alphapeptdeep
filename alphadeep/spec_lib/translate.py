@@ -173,7 +173,7 @@ def speclib_to_single_df(
     keep_k_highest_intensity:int=16,
     modloss='H3PO4',
     frag_type_head:str='FragmentType',
-    frag_mass_head:str='FragmengMz',
+    frag_mass_head:str='FragmentMz',
     frag_inten_head:str='RelativeIntensity',
     frag_charge_head:str='FragmentCharge',
     frag_loss_head:str='FragmentLossType',
