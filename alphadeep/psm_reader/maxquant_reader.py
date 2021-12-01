@@ -95,7 +95,7 @@ class MaxQuantReader(PSMReaderBase):
             'rt': 'Retention time',
             'rt_norm': 'rt_norm',
             'ccs': 'CCS',
-            'mobility': ['Mobility','IonMobility'],
+            'mobility': 'K0', # Bug in MaxQuant, it should be 1/K0
             'spec_idx': ['Scan number','MS/MS scan number','Scan index'],
             'raw_name': 'Raw file',
             'score': 'Score',
@@ -111,8 +111,6 @@ class MaxQuantReader(PSMReaderBase):
             df = df[(df['Reverse']!='+')&(~pd.isna(df['Retention time']))]
         df.reset_index(drop=True,inplace=True)
         df.fillna('', inplace=True)
-        if 'K0' in df.columns:
-            df['Mobility'] = df['K0'] # Bug in MaxQuant, it should be 1/K0
         # min_rt = df['Retention time'].min()
         # df['rt_norm'] = (
         #     df['Retention time']-min_rt

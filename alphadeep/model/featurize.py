@@ -75,7 +75,7 @@ def get_batch_mod_feature(
         List[np.array]: a list of 2-D array features
     '''
     mod_x_batch = np.zeros((len(df_batch), nAA+2, mod_feature_size))
-    mod_fea_list = df_batch.mods.str.split(';').apply(
+    mod_features_list = df_batch.mods.str.split(';').apply(
         lambda mod_names: [
             MOD_TO_FEATURE[mod] for mod in mod_names
             if len(mod)>0
@@ -88,7 +88,7 @@ def get_batch_mod_feature(
         ]
     )
     for i, (mod_feas, mod_sites) in enumerate(
-        zip(mod_fea_list, mod_sites_list)
+        zip(mod_features_list, mod_sites_list)
     ):
         if len(mod_sites)>0:
             mod_x_batch[i,mod_sites,:] = mod_feas

@@ -2,7 +2,8 @@
 
 __all__ = ['ModelMSMSpDeep', 'IntenAwareLoss', 'pDeepModel', 'mod_feature_size', 'max_instrument_num', 'frag_types',
            'max_frag_charge', 'num_ion_types', 'nce_factor', 'charge_factor', 'pDeepParamSearch', 'product_dict',
-           'get_param_iter', 'pearson', 'spectral_angle', 'spearman', 'add_cutoff_metric', 'calc_ms2_similarity']
+           'get_param_iter', 'normalize_training_intensities', 'pearson', 'spectral_angle', 'spearman',
+           'add_cutoff_metric', 'calc_ms2_similarity']
 
 # Cell
 import torch
@@ -13,19 +14,22 @@ from typing import List, Tuple, IO
 
 from tqdm import tqdm
 
-from alphabase.peptide.fragment import \
-    init_fragment_by_precursor_dataframe, \
-    update_sliced_fragment_dataframe, \
-    get_sliced_fragment_dataframe, \
+from alphabase.peptide.fragment import (
+    init_fragment_by_precursor_dataframe,
+    update_sliced_fragment_dataframe,
+    get_sliced_fragment_dataframe,
     get_charged_frag_types
+)
 
-from alphadeep.model.featurize import \
-    parse_aa_indices, parse_instrument_indices, \
+from alphadeep.model.featurize import (
+    parse_aa_indices, parse_instrument_indices,
     get_batch_mod_feature
+)
 
-from alphadeep._settings import \
-    global_settings as settings, \
+from alphadeep._settings import (
+    global_settings as settings,
     model_const
+)
 
 import alphadeep.model.base as model_base
 
@@ -244,6 +248,30 @@ class pDeepModel(model_base.ModelImplBase):
             self.charged_frag_types
         )
 
+    def bootstrap_nce_search(self,
+        psm_df:pd.DataFrame,
+        fragment_intensity_df:pd.DataFrame,
+        nce_first=15, nce_last=45, nce_step=3,
+        charged_frag_types:List = None,
+        metric = 'PCC>0.9', # or 'median PCC'
+        max_psm_subset = 1000,
+        n_bootstrap = 3,
+        callback = None
+    ):
+        instrument = 'Lumos'
+        nce_list = []
+        for i in range(n_bootstrap):
+            nce, instrument = self.grid_nce_search(
+                psm_df, fragment_intensity_df,
+                nce_first, nce_last, nce_step,
+                [instrument],
+                charged_frag_types,
+                metric, max_psm_subset, n_bootstrap,
+                callback
+            )
+            nce_list.append(nce)
+        return np.median(nce_list), instrument
+
     def grid_nce_search(self,
         psm_df:pd.DataFrame,
         fragment_intensity_df:pd.DataFrame,
@@ -330,6 +358,45 @@ def get_param_iter(dropout=[0.1], lr=[0.001], **candidate_param_kwargs):
         dropout=dropout, lr=lr,
         **candidate_param_kwargs
     )
+
+# Cell
+def normalize_training_intensities(
+    train_df:pd.DataFrame,
+    frag_intensity_df:pd.DataFrame
+)->Tuple[pd.DataFrame, pd.DataFrame]:
+    """Normalize the intensities to 0-1 values for MS2 model training.
+
+    Args:
+        train_df (pd.DataFrame): training psm dataframe
+        frag_intensity_df (pd.DataFrame): training intensity dataframe
+
+    Returns:
+        pd.DataFrame: normalized training psm dataframe
+        pd.DataFrame: normalized training intensity dataframe
+    """
+    new_frag_intens_list = []
+    new_frag_lens = []
+    for i, (frag_start_idx, frag_end_idx) in enumerate(
+        train_df[['frag_start_idx','frag_end_idx']].values
+    ):
+        intens = frag_intensity_df.values[frag_start_idx:frag_end_idx]
+        new_frag_lens.append(len(intens))
+        max_inten = np.max(intens)
+        if max_inten > 0:
+            intens /= max_inten
+        new_frag_intens_list.append(intens)
+    indices = np.zeros(len(new_frag_lens)+1, dtype=np.int64)
+    indices[1:] = new_frag_lens
+    indices = np.cumsum(indices)
+    train_df['frag_start_idx'] = indices[:-1]
+    train_df['frag_end_idx'] = indices[1:]
+
+    frag_df = pd.DataFrame(
+        data=np.concatenate(new_frag_intens_list, axis=0),
+        columns=frag_intensity_df.columns
+    )
+    return train_df, frag_df
+
 
 # Cell
 

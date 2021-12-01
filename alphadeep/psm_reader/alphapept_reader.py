@@ -11,6 +11,7 @@ import h5py
 from alphadeep.psm_reader.psm_reader import (
     PSMReaderBase, psm_reader_provider
 )
+from alphadeep.model.ccs import mobility_to_ccs_df
 
 @numba.njit
 def parse_ap(precursor):
@@ -88,15 +89,13 @@ class AlphaPeptReader(PSMReaderBase):
             if 'scan_no' in df.columns:
                 df['scan_no'] = df['scan_no'].astype('int')
             df['charge'] = df['charge'].astype(int)
-            # min_rt = df.rt.min()
-            # df['rt_norm'] = (df.rt-min_rt)/(df.rt.max()-min_rt)
             df['rt_norm'] = df.rt/df.rt.max()
 
         return df
 
     def _translate_columns(self, df: pd.DataFrame):
         super()._translate_columns(df)
-
+        self._psm_df = mobility_to_ccs_df(self._psm_df)
         self._psm_df['sequence'], self._psm_df['mods'], \
             self._psm_df['mod_sites'], self._psm_df['charge'], \
             self._psm_df['decoy'] = zip(*df['precursor'].apply(parse_ap))
