@@ -6,7 +6,7 @@ __all__ = ['ScoreFeatureExtractor']
 import pandas as pd
 import numpy as np
 
-from alphadeep.model_provider import AlphaDeepModels
+from alphadeep.pretrained_models import AlphaDeepModels
 from alphadeep.model.ms2 import calc_ms2_similarity
 from alphadeep.mass_spec.match import PepSpecMatch
 from alphabase.peptide.fragment import get_charged_frag_types
@@ -56,8 +56,8 @@ class ScoreFeatureExtractor(object):
         self.models.fine_tune_ms2_model(
             self.psm_df, self.matched_intensity_df
         )
-        if 'ccs' in self.psm_df.columns:
-            self.models.fine_tune_ccs_model(self.psm_df)
+        # if 'ccs' in self.psm_df.columns:
+        #     self.models.fine_tune_ccs_model(self.psm_df)
 
         self.psm_df = self.rt_model.predict(
             self.psm_df
