@@ -7,7 +7,7 @@ import pandas as pd
 
 from alphabase.spectrum_library.library_base import SpecLibBase
 from alphabase.peptide.fragment import update_precursor_mz
-from alphadeep.model_provider import AlphaDeepModels
+from alphadeep.pretrained_models import AlphaDeepModels
 
 class PredictLib(SpecLibBase):
     def __init__(self,
@@ -64,7 +64,7 @@ class PredictLib(SpecLibBase):
 
     def load_fragment_intensity_df(self, **kwargs):
         if len(self._fragment_mz_df) == 0:
-            self.load_fragment_mz_df()
+            self.calc_fragment_mz_df()
 
         frag_inten_df = self.models.ms2_model.predict(
             self._precursor_df,

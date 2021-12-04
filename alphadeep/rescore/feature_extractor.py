@@ -27,8 +27,8 @@ class ScoreFeatureExtractor(object):
             'cos_bion','sa_bion','spc_bion',
             'cos_yion','sa_bion','spc_yion',
             'frag_ratio','frag_ratio_bion',
-            'frag_ratio_yion','rt_delta',
-            'mobility_delta', 'nAA',
+            'frag_ratio_yion','rt_delta_abs',
+            'mobility_delta_abs', 'nAA',
         ]
 
     def extract_features(self,
@@ -37,7 +37,7 @@ class ScoreFeatureExtractor(object):
         ms2_file_type:str = 'alphapept', #or 'mgf', or 'thermo'
         frag_types_to_match:list = get_charged_frag_types(['b','y'], 2),
         ms2_ppm=True, ms2_tol=30,
-    ):
+    )->pd.DataFrame:
         self.match = PepSpecMatch(psm_df,
             charged_frag_types=frag_types_to_match
         )
@@ -56,8 +56,8 @@ class ScoreFeatureExtractor(object):
         self.models.fine_tune_ms2_model(
             self.psm_df, self.matched_intensity_df
         )
-        # if 'ccs' in self.psm_df.columns:
-        #     self.models.fine_tune_ccs_model(self.psm_df)
+        if 'ccs' in self.psm_df.columns:
+            self.models.fine_tune_ccs_model(self.psm_df)
 
         self.psm_df = self.rt_model.predict(
             self.psm_df
@@ -183,8 +183,13 @@ class ScoreFeatureExtractor(object):
             self.psm_df.rt_pred-self.psm_df.rt_norm
         )
 
+        self.psm_df[
+            'rt_delta_abs'
+        ] = self.psm_df.rt_delta.abs()
+
         if 'mobility' not in self.psm_df.columns:
             self.psm_df['mobility_delta'] = 0
+            self.psm_df['mobility_delta_abs'] = 0
         else:
             self.psm_df[
                 'mobility_delta'
@@ -194,3 +199,5 @@ class ScoreFeatureExtractor(object):
             self.psm_df[
                 self.psm_df.mobility_delta.isna(),'mobility_delta'
             ] = 0
+            self.psm_df['mobility_delta_abs'] = self.psm_df.mobility_delta.abs()
+        return self.psm_df
