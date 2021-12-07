@@ -121,17 +121,15 @@ class PSMReaderBase(object):
             if isinstance(map_col, str):
                 if map_col in origin_df.columns:
                     self._psm_df[col] = origin_df[map_col]
-                else:
-                    self._psm_df[col] = pd.NA
+                # else:
+                #     self._psm_df[col] = pd.NA
             else:
                 for other_col in map_col:
                     if other_col in origin_df.columns:
                         self._psm_df[col] = origin_df[other_col]
                         break
-                if col not in self._psm_df.columns:
-                    self._psm_df[col] = pd.NA
-        origin_df['nAA'] = origin_df[self.column_mapping['sequence']].str.len()
-        self._psm_df['nAA'] = origin_df['nAA']
+                # if col not in self._psm_df.columns:
+                #     self._psm_df[col] = pd.NA
 
     def _translate_modifications(self):
         '''
@@ -149,13 +147,15 @@ class PSMReaderBase(object):
         filename:str, origin_df:pd.DataFrame
     ):
         """
-        Remove unknown modifications and perform other post processings,
+        Post processing after loading and translate everything.
+        Here, we remove unknown modifications and perform other post processings,
         e.g. loading fragments for AlphaQuant or AlphaDeep
 
         Args:
             filename (str): psm filename
             origin_df (pd.DataFrame): the loaded original df
         """
+        self._psm_df['nAA'] = self._psm_df.sequence.str.len()
         origin_df = origin_df[
             ~self._psm_df['mods'].isna()
         ].reset_index(drop=True)

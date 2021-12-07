@@ -137,7 +137,7 @@ class AlphaDeepModels(object):
         if self.n_rt_ccs_tune > 0:
             tr_df = uniform_sampling(
                 psm_df, target='rt_norm',
-                n_train=self.rt_ccs_n_tune,
+                n_train=self.n_rt_ccs_tune,
                 return_test_df=False
             )
             self.rt_model.train(tr_df,
@@ -150,7 +150,7 @@ class AlphaDeepModels(object):
         if self.n_ms2_tune > 0:
             tr_df = uniform_sampling(
                 psm_df, target='ccs',
-                n_train=self.rt_ccs_n_tune,
+                n_train=self.n_rt_ccs_tune,
                 return_test_df=False
             )
             self.ccs_model.train(tr_df,
@@ -165,6 +165,12 @@ class AlphaDeepModels(object):
         tr_df, frag_df = normalize_training_intensities(
             tr_df, matched_intensity_df
         )
+        tr_inten_df = pd.DataFrame()
+        for frag_type in self.ms2_model.charged_frag_types:
+            if frag_type in frag_df.columns:
+                tr_inten_df[frag_type] = frag_df[frag_type]
+            else:
+                tr_inten_df[frag_type] = 0
 
         if (
             self.grid_nce_search
@@ -172,7 +178,7 @@ class AlphaDeepModels(object):
             or 'instrument' not in psm_df.columns
         ):
             nce, instrument = self.ms2_model.grid_nce_search(
-                tr_df, frag_df
+                tr_df, tr_inten_df
             )
             tr_df['nce'] = nce
             tr_df['instrument'] = instrument
@@ -180,6 +186,6 @@ class AlphaDeepModels(object):
             psm_df['instrument'] = instrument
 
         self.ms2_model.train(tr_df,
-            reference_df = frag_df,
+            fragment_inten_df=tr_inten_df,
             epoch=self.epoch_ms2_tune
         )

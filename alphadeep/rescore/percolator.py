@@ -36,7 +36,7 @@ def get_q_values(_df, score_column, decoy_column='decoy'):
     decoy_cumsum = np.cumsum(_df[decoy_column].values)
     target_cumsum = np.cumsum(target_values)
     fdr_values = decoy_cumsum/target_cumsum
-    _df['q_value'] = fdr_to_q_values(fdr_values)
+    _df['fdr'] = fdr_to_q_values(fdr_values)
     return _df
 
 @numba.njit
@@ -81,6 +81,7 @@ class Percolator:
             ml_type = 'lr'
         self.ml_type = ml_type
         self.fdr_level = 'psm'
+        self.fdr = 0.01
         self.cv_fold = cv_fold
         self.n_iter = n_iteration
 
@@ -94,9 +95,15 @@ class Percolator:
             ppm=ms2_ppm, tol=ms2_tol
         )
         self.feature_list = self.feature_extractor.score_feature_list
-        self.feature_list += ['ml_score','score']
+        self.feature_list.append('score')
+        #self.feature_list.append('ml_score')
 
-    def _estimate_q_value(self, df):
+    def enable_model_fine_tuning(self):
+        self.feature_extractor.model_fine_tuning = True
+    def disable_model_fine_tuning(self):
+        self.feature_extractor.model_fine_tuning = False
+
+    def _estimate_fdr(self, df):
         df = df.sort_values(['ml_score','decoy'], ascending=False)
         df = df.reset_index(drop=True)
         if self.fdr_level == 'psm':
@@ -131,8 +138,8 @@ class Percolator:
 
     def _cv_score(self, df):
         df = df.sample(frac=1).reset_index(drop=True)
-        df_target = df[df['decoy'] == 0]
-        df_decoy = df[df['decoy'] == 1]
+        df_target = df[df.decoy == 0]
+        df_decoy = df[df.decoy != 0]
 
         if self.cv_fold > 1:
             test_df_list = []
@@ -142,7 +149,7 @@ class Percolator:
                 t_mask[_slice] = False
                 cv_df_target = df_target[t_mask]
                 train_t_df = cv_df_target[
-                    cv_df_target['fdr'] <= self.fdr
+                    cv_df_target.fdr <= self.fdr
                 ]
                 test_t_df = df_target[_slice]
 
@@ -153,13 +160,13 @@ class Percolator:
                 test_d_df = df_decoy[_slice]
 
                 train_df = pd.concat((train_t_df, train_d_df))
-                train_label = np.ones(len(train_df))
+                train_label = np.ones(len(train_df),dtype=np.int32)
                 train_label[len(train_t_df):] = 0
                 test_df = pd.concat((test_t_df, test_d_df))
 
                 self.model.fit(
                     train_df[
-                        self.feature_extractor.score_feature_list
+                        self.feature_list
                     ].values, train_label
                 )
                 if self.ml_type == 'lr':
@@ -174,10 +181,9 @@ class Percolator:
 
             return pd.concat(test_df_list)
         else:
-            train_t_df = df_target[df_target['fdr'] <= self.fdr]
-
+            train_t_df = df_target[df_target.fdr <= self.fdr]
             train_df = pd.concat((train_t_df, df_decoy))
-            train_label = np.ones(len(train_df))
+            train_label = np.ones(len(train_df),dtype=np.int32)
             train_label[len(train_t_df):] = 0
             test_df = pd.concat((df_target, df_decoy))
 
@@ -193,22 +199,37 @@ class Percolator:
 
             return test_df
 
-    def re_score(self,
+    def extract_features(self,
         psm_df, ms2_file_dict:dict, ms2_file_type:str
     ):
-        df = self.feature_extractor.extract_features(
+        psm_df['ml_score'] = psm_df.score
+        psm_df = self._estimate_fdr(psm_df)
+        print('Extracting features ...')
+        psm_df = self.feature_extractor.extract_features(
             psm_df, ms2_file_dict,
-            ms2_file_type, self.charged_frag_types,
-            self.ms2_ppm, self.ms2_tol
+            ms2_file_type,
+            psm_tune_df=psm_df[(psm_df.fdr<0.01)&(psm_df.decoy==0)],
+            frag_types_to_match=self.charged_frag_types,
+            ms2_ppm=self.ms2_ppm, ms2_tol=self.ms2_tol
         )
-        df['ml_score'] = df['score']
-        df = self._estimate_q_value(df)
-        print(f'{len(df[(df["q_value"]<=self.fdr) & (df["decoy"]==0)])} target PSMs at {self.fdr} spectrum-level FDR')
+        print('End extracting features ...')
+        return psm_df
+
+    def re_score(self, df):
+        print(f'{len(df[(df.fdr<=self.fdr) & (df.decoy==0)])} target PSMs at {self.fdr} psm-level FDR')
         for i in range(self.n_iter):
-            print(f'Iteration {i+1} of Percolator ...')
+            print(f'[RUN] Iteration {i+1} of Percolator ...')
             df = self._cv_score(df)
-            df = self._estimate_q_value(df)
-            print(f'{len(df[(df["q_value"]<=self.fdr) & (df["decoy"]==0)])} target PSMs at {self.fdr} spectrum-level FDR')
-        df = self._estimate_q_value(df)
-        print(f'{len(df[(df["q_value"]<=self.fdr) & (df["decoy"]==0)])} target PSMs at {self.fdr} {self.fdr_level}-level FDR')
+            df = self._estimate_fdr(df)
+            print(f'[RUN] {len(df[(df.fdr<=self.fdr) & (df.decoy==0)])} target PSMs at {self.fdr} psm-level FDR')
+        df = self._estimate_fdr(df)
+        print(f'[END] {len(df[(df.fdr<=self.fdr) & (df.decoy==0)])} target PSMs at {self.fdr} {self.fdr_level}-level FDR')
         return df
+
+    def run(self,
+        psm_df, ms2_file_dict:dict, ms2_file_type:str
+    ):
+        df = self.extract_features(
+            psm_df, ms2_file_dict, ms2_file_type
+        )
+        return self.re_score(df)

@@ -62,10 +62,11 @@ def translate_pFind_mod(mod_str):
     return ';'.join(ret_mods)
 
 def get_pFind_mods(pfind_mod_str):
-    pfind_mod_str = pfind_mod_str.strip(';')
     if not pfind_mod_str: return "", ""
+    pfind_mod_str = pfind_mod_str.strip(';')
 
     items = [item.split(',',3) for item in pfind_mod_str.split(';')]
+    items = [('-1',mod) if 'C-term' in mod else (site,mod) for site,mod in items]
     items = list(zip(*items))
     return ';'.join(items[1]), ';'.join(items[0])
 
@@ -99,13 +100,10 @@ class pFindReader(PSMReaderBase):
     def _translate_modifications(self):
         pass
 
-    def _post_process(self, filename: str, origin_df: pd.DataFrame):
-        pass
-
     def _load_file(self, filename):
         pfind_df = pd.read_csv(filename, index_col=False, sep='\t')
         pfind_df.fillna('', inplace=True)
-        pfind_df = pfind_df[pfind_df.Sequence != '']
+        pfind_df = pfind_df[pfind_df['Q-value'] <= 1]
         pfind_df['raw_name'] = pfind_df['File_Name'].str.split('.').apply(lambda x: x[0])
         pfind_df['Proteins'] = pfind_df['Proteins'].apply(remove_pFind_decoy_protein)
         pfind_df['decoy'] = (pfind_df['Target/Decoy']=='decoy').astype(int)
@@ -113,10 +111,10 @@ class pFindReader(PSMReaderBase):
 
     def _translate_columns(self, pfind_df):
         super()._translate_columns(pfind_df)
+        self._psm_df['score'] = np.exp(-self._psm_df['score'].astype(float))
         self._psm_df['mods'], self._psm_df['mod_sites'] = zip(*pfind_df['Modification'].apply(get_pFind_mods))
 
         self._psm_df['mods'] = self._psm_df['mods'].apply(translate_pFind_mod)
-        self._psm_df = self._psm_df[~self._psm_df['mods'].isna()]
 
 psm_reader_provider.register_reader('pfind', pFindReader)
 

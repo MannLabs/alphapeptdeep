@@ -14,13 +14,13 @@ from alphabase.peptide.fragment import get_charged_frag_types
 class ScoreFeatureExtractor(object):
     def __init__(self,
         ppm=True, tol=20,
-        use_GPU = True,
     ):
         self.models = AlphaDeepModels()
         self.models.load_installed_models()
         self.ppm = ppm
         self.tol = tol
-        self.GPU = use_GPU
+
+        self.model_fine_tuning = True
 
         self.score_feature_list = [
             'cos','sa','spc',
@@ -35,6 +35,7 @@ class ScoreFeatureExtractor(object):
         psm_df: pd.DataFrame,
         ms2_file_dict, #raw_name: ms2_file_path or ms_reader object
         ms2_file_type:str = 'alphapept', #or 'mgf', or 'thermo'
+        psm_tune_df: pd.DataFrame = None,
         frag_types_to_match:list = get_charged_frag_types(['b','y'], 2),
         ms2_ppm=True, ms2_tol=30,
     )->pd.DataFrame:
@@ -52,27 +53,33 @@ class ScoreFeatureExtractor(object):
         self.matched_mz_err_df = self.match.matched_mz_err_df
         self.matched_intensity_df = self.match.matched_intensity_df
 
-        self.models.fine_tune_rt_model(self.psm_df)
-        self.models.fine_tune_ms2_model(
-            self.psm_df, self.matched_intensity_df
-        )
-        if 'ccs' in self.psm_df.columns:
-            self.models.fine_tune_ccs_model(self.psm_df)
+        if psm_tune_df is not None:
+            self.models.fine_tune_rt_model(self.psm_df)
 
-        self.psm_df = self.rt_model.predict(
+        self.psm_df = self.models.rt_model.predict(
             self.psm_df
         )
 
-        self.psm_df = self.ccs_model.predict(
-            self.psm_df
-        )
+        if 'ccs' in self.psm_df.columns and not self.psm_df.ccs.isna().any():
+            if psm_tune_df is not None:
+                self.models.fine_tune_ccs_model(self.psm_df)
+            self.psm_df = self.models.ccs_model.predict(
+                self.psm_df
+            )
 
-        self.predict_intensity_df = self.ms2_model.predict(
+            self.psm_df = self.ccs_model.ccs_to_mobility_pred(
+                self.psm_df
+            )
+        if psm_tune_df is not None:
+            self.models.fine_tune_ms2_model(
+                self.psm_df, self.matched_intensity_df
+            )
+        self.predict_intensity_df = self.models.ms2_model.predict(
             self.psm_df, reference_frag_df=self.matched_intensity_df
         )
         used_frag_types = []
         for frag_type in frag_types_to_match:
-            if frag_type in self.ms2_model.charged_frag_types:
+            if frag_type in self.models.ms2_model.charged_frag_types:
                 used_frag_types.append(frag_type)
         self.predict_intensity_df = self.predict_intensity_df[
             used_frag_types
@@ -83,7 +90,6 @@ class ScoreFeatureExtractor(object):
             self.matched_intensity_df,
             charged_frag_types=used_frag_types,
             metrics=['COS','SA','SPC'],
-            GPU=self.GPU,
         )
         self.psm_df.rename(
             columns={
@@ -119,7 +125,6 @@ class ScoreFeatureExtractor(object):
                 self.matched_intensity_df,
                 charged_frag_types=b_frag_types,
                 metrics=['COS','SA','SPC'],
-                GPU=self.GPU,
             )
             self.psm_df.rename(
                 columns={
@@ -148,7 +153,6 @@ class ScoreFeatureExtractor(object):
                 self.matched_intensity_df,
                 charged_frag_types=y_frag_types,
                 metrics=['COS','SA','SPC'],
-                GPU=self.GPU,
             )
             self.psm_df.rename(
                 columns={
@@ -170,12 +174,6 @@ class ScoreFeatureExtractor(object):
         else:
             self.psm_df[['cos_yion','sa_yion','spc_yion']] = 0
             self.psm_df[['frag_ratio_yion']] = 0
-
-        self.psm_df = self.rt_model.predict(self.psm_df)
-        self.psm_df = self.ccs_model.predict(self.psm_df)
-        self.psm_df = self.ccs_model.ccs_to_mobility_pred(
-            self.psm_df
-        )
 
         self.psm_df[
             'rt_delta'
