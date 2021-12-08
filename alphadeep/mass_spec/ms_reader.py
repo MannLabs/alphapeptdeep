@@ -24,7 +24,7 @@ class MSReaderBase:
             'spec_idx': scan_list,
             'peak_start_idx': scan_indices[:-1],
             'peak_end_idx': scan_indices[1:],
-            'rt_sec': rt_list,
+            'rt': rt_list,
             'mobility': mobility_list,
         }, index = scan_list)
 
@@ -55,7 +55,7 @@ class AlphaPept_HDF_MS1_Reader(MSReaderBase):
         self.build_spectrum_df(
             scan_list=self.ms_data['scan_list_ms1'],
             scan_indices=self.ms_data['indices_ms1'],
-            rt_list=self.ms_data['rt_list_ms1']*60,
+            rt_list=self.ms_data['rt_list_ms1'],
             mobility_list=self.ms_data['mobility'] if 'mobility' in self.ms_data else None,
         )
 
@@ -79,7 +79,7 @@ class AlphaPept_HDF_MS2_Reader(MSReaderBase):
         self.build_spectrum_df(
             scan_list=scan_list,
             scan_indices=self.ms_data['indices_ms2'],
-            rt_list=self.ms_data['rt_list_ms2']*60,
+            rt_list=self.ms_data['rt_list_ms2'],
             mobility_list=self.ms_data['mobility2'] if 'mobility2' in self.ms_data else None,
         )
 
@@ -149,7 +149,7 @@ class MGFReader(MSReaderBase):
                     elif line.startswith('SCAN='):
                         scan = int(line.split('=')[1])
                     elif line.startswith('RTINSECOND'):
-                        RT = float(line.split('=')[1])
+                        RT = float(line.split('=')[1])/60
                 if not scan:
                     title = find_line(lines, 'TITLE=')
                     scan = parse_pfind_scan_from_TITLE(title)
@@ -263,7 +263,7 @@ try:
                         else:
                             masses, intens = rawfile.GetCentroidMassListFromScanNum(i)
                         scan_list.append(i)
-                        rt_list.append(rawfile.RTInSecondsFromScanNum(i))
+                        rt_list.append(rawfile.RTFromScanNum(i))
                         masses_list.append(masses)
                         intens_list.append(intens)
 
