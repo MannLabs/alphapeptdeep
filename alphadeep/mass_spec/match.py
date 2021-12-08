@@ -89,9 +89,6 @@ class PepSpecMatch(object):
         ppm=True, tol=20,
     ):
         _grouped = self.psm_df.groupby('raw_name')
-        if 'rt_norm' not in self.psm_df.columns:
-            self.psm_df['rt'] = 0
-            self.psm_df['rt_norm'] = 0
         for raw_name, df_group in _grouped:
             if raw_name in ms2_file_dict:
                 # pfind does not report RT in the result file
@@ -100,7 +97,7 @@ class PepSpecMatch(object):
                 else:
                     ms2_reader = ms2_reader_provider.get_reader(ms2_file_type)
                     ms2_reader.load(ms2_file_dict[raw_name])
-                if (df_group.rt==0).all():
+                if 'rt' not in df_group.columns:
                     _df = df_group.merge(
                         ms2_reader.spectrum_df[['spec_idx','rt']],
                         how='left',
