@@ -81,7 +81,7 @@ class AlphaPeptReader(PSMReaderBase):
             'spec_idx': ['scan_no','raw_idx'],
             'query_id': 'query_idx',
             'mobility': 'mobility',
-            'score': 'score',
+            'score': 'x_tandem',
             'charge': 'charge',
             'raw_name': 'raw_name',
         }
@@ -101,7 +101,7 @@ class AlphaPeptReader(PSMReaderBase):
             df['charge'] = df['charge'].astype(int)
             df['rt_norm'] = df.rt/df.rt.max()
 
-            df['score'] = get_x_tandem_score(df)
+            df['x_tandem'] = get_x_tandem_score(df)
 
         return df
 

@@ -28,7 +28,7 @@ class ScoreFeatureExtractor(object):
             'cos_yion','sa_bion','spc_yion',
             'frag_ratio','frag_ratio_bion',
             'frag_ratio_yion','rt_delta_abs',
-            'mobility_delta_abs', 'nAA',
+            'mobility_delta_abs',
         ]
 
     def extract_features(self,

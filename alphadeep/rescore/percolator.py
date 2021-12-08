@@ -67,7 +67,7 @@ class DeepLearningScore(torch.nn.Module):
 class Percolator:
     def __init__(self,
         ml_type='logistic_regression', #or 'random_forest'
-        cv_fold = 1,
+        cv_fold = 2,
         n_iteration = 5,
         ms2_ppm = True, ms2_tol=30,
         **sklearn_kwargs
@@ -95,7 +95,7 @@ class Percolator:
             ppm=ms2_ppm, tol=ms2_tol
         )
         self.feature_list = self.feature_extractor.score_feature_list
-        self.feature_list.append('score')
+        self.feature_list += ['score','nAA','charge']
         #self.feature_list.append('ml_score')
 
     def enable_model_fine_tuning(self):
