@@ -102,7 +102,7 @@ class PepSpecMatch(object):
                     ms2_reader.load(ms2_file_dict[raw_name])
                 if (df_group.rt==0).all():
                     _df = df_group.merge(
-                        ms2_reader.spectrum_df[['spec_idx','rt_sec']],
+                        ms2_reader.spectrum_df[['spec_idx','rt']],
                         how='left',
                         on='spec_idx',
                     )
@@ -110,10 +110,10 @@ class PepSpecMatch(object):
                     # _df['rt_norm'] = (
                     #     _df['rt_sec']-min_rt
                     # )/(_df['rt_sec'].max()-min_rt)
-                    _df['rt_norm'] = _df['rt_sec']/_df['rt_sec'].max()
+                    _df['rt_norm'] = _df['rt']/_df['rt'].max()
                     self.psm_df.loc[
                         _df.index, ['rt','rt_norm']
-                    ] = _df[['rt_sec','rt_norm']]
+                    ] = _df[['rt','rt_norm']]
 
                 for (
                     spec_idx, frag_start_idx, frag_end_idx
