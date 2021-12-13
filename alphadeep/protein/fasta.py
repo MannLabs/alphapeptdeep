@@ -3,7 +3,7 @@
 __all__ = ['protease_dict', 'read_fasta_file', 'load_all_proteins', 'read_fasta_file_entries', 'concat_proteins',
            'cleave_sequence_with_cut_pos', 'Digest', 'get_fix_mods', 'get_candidate_sites', 'get_var_mod_sites',
            'get_var_mods_per_sites_multi_mods_on_aa', 'get_var_mods_per_sites_single_mod_on_aa', 'get_var_mods',
-           'get_var_mods_per_sites', 'get_mods', 'FastaPeptideLibrary']
+           'get_var_mods_per_sites', 'get_mods', 'FastaSpecLib']
 
 # Cell
 import regex as re
@@ -232,13 +232,17 @@ def get_var_mods_per_sites_multi_mods_on_aa(
 )->list:
     mods_str_list = ['']
     for i,site in enumerate(mod_sites):
-        _new_list = []
-        for mod in var_mod_dict[sequence[site-1]]:
-            _lst = copy.deepcopy(mods_str_list)
-            for i in range(len(_lst)):
-                _lst[i] += mod+';'
-            _new_list.extend(_lst)
-        mods_str_list = _new_list
+        if len(var_mod_dict[sequence[site-1]]) == 1:
+            for i in range(len(mods_str_list)):
+                mods_str_list[i] += var_mod_dict[sequence[site-1]][0]+';'
+        else:
+            _new_list = []
+            for mod in var_mod_dict[sequence[site-1]]:
+                _lst = copy.deepcopy(mods_str_list)
+                for i in range(len(_lst)):
+                    _lst[i] += mod+';'
+                _new_list.extend(_lst)
+            mods_str_list = _new_list
     return [mod[:-1] for mod in mods_str_list]
 
 def get_var_mods_per_sites_single_mod_on_aa(
@@ -319,15 +323,7 @@ def get_mods(
         )
 
 # Cell
-def _flatten(list_of_lists):
-    '''
-    Flatten a list of lists
-    '''
-    return list(
-        itertools.chain.from_iterable(list_of_lists)
-    )
-
-class FastaPeptideLibrary(PredictLib):
+class FastaSpecLib(PredictLib):
     def __init__(self,
         models:AlphaDeepModels,
         charged_frag_types = ['b_z1','b_z2','y_z1','y_z2'],

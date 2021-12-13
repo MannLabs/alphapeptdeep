@@ -12,13 +12,9 @@ from alphadeep.mass_spec.match import PepSpecMatch
 from alphabase.peptide.fragment import get_charged_frag_types
 
 class ScoreFeatureExtractor(object):
-    def __init__(self,
-        ppm=True, tol=20,
-    ):
+    def __init__(self):
         self.models = AlphaDeepModels()
         self.models.load_installed_models()
-        self.ppm = ppm
-        self.tol = tol
 
         self.model_fine_tuning = True
 
