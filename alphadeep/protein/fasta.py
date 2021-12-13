@@ -326,18 +326,18 @@ def get_mods(
 class FastaSpecLib(PredictLib):
     def __init__(self,
         models:AlphaDeepModels,
-        charged_frag_types = ['b_z1','b_z2','y_z1','y_z2'],
+        charged_frag_types:list = ['b_z1','b_z2','y_z1','y_z2'],
         min_frag_mz = 50, max_frag_mz = 2000,
-        min_precursor_mz = 400, max_precursor_mz = 2000,
+        min_precursor_mz = 400, max_precursor_mz = 1800,
         protease:str = 'trypsin',
-        n_missed_cleavages = 3,
-        pep_length_min = 7,
-        pep_length_max = 35,
-        min_charge = 2,
-        max_charge = 4,
-        var_mods = ['Oxidation@M'],
-        max_var_mod_num = 3,
-        fix_mods = ['Carbamidomethyl@C'],
+        n_missed_cleavages:int = 2,
+        pep_length_min:int = 7,
+        pep_length_max:int = 30,
+        min_charge:int = 2,
+        max_charge:int = 4,
+        var_mods:list = ['Oxidation@M'],
+        max_var_mod_num:int = 2,
+        fix_mods:list = ['Carbamidomethyl@C'],
     ):
         super().__init__(
             models, charged_frag_types,
@@ -405,21 +405,23 @@ class FastaSpecLib(PredictLib):
 
     def from_protein_dict(self, protein_dict:dict):
         pep_set = set()
-        for prot_id, protein in protein_dict:
+        for prot_id, protein in protein_dict.items():
             (
                 seq_list, miss_list
             ) = self._digest.cleave_sequence(protein['sequence'])
             pep_set.update(seq_list)
         self._precursor_df = pd.DataFrame()
-        self._precursor_df['sequence'] = seq_list
+        self._precursor_df['sequence'] = list(pep_set)
         self._precursor_df['mods'] = ''
         self._precursor_df['mod_sites'] = ''
         self._precursor_df['mod_sites'] = ''
         self._precursor_df['charge'] = [
-            list(range(self.min_charge, self.max_charge+1))
+            np.arange(self.min_charge, self.max_charge+1)
         ]*len(pep_set)
         self._precursor_df = self._precursor_df.explode('charge')
-        self._precursor_df = update_precursor_mz(self._precursor_df)
+        self._precursor_df['charge'] = self._precursor_df.charge.astype(np.int8)
+        self._precursor_df.reset_index(drop=True, inplace=True)
+        self.clip_precursor_by_mz_()
 
     def add_modifications(self):
         (
@@ -436,6 +438,8 @@ class FastaSpecLib(PredictLib):
         ))
         self._precursor_df = self._precursor_df.explode(
             ['mods','mod_sites']
-        ).reset_index(drop=True)
+        )
+        self._precursor_df.reset_index(drop=True, inplace=True)
 
+    def update_precursor_mz(self):
         self._precursor_df = update_precursor_mz(self._precursor_df)

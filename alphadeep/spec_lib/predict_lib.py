@@ -4,6 +4,7 @@ __all__ = ['PredictLib']
 
 # Cell
 import pandas as pd
+import numpy as np
 
 from alphabase.spectrum_library.library_base import SpecLibBase
 from alphabase.peptide.fragment import update_precursor_mz
@@ -39,14 +40,20 @@ class PredictLib(SpecLibBase):
     @precursor_df.setter
     def precursor_df(self, df):
         self._precursor_df = df
-        self._init_precursor_df()
+        self.check_dtypes()
 
-    def _init_precursor_df(self):
-        self._precursor_df['nAA'] = self._precursor_df['sequence'].str.len()
-        self._precursor_df['mod_sites'] = self._precursor_df['mod_sites'].astype('U')
-        self._precursor_df['charge'] = self._precursor_df['charge'].astype(int)
+    def check_dtypes(self):
         if 'precursor_mz' not in self._precursor_df.columns:
             update_precursor_mz(self._precursor_df)
+
+        if self._precursor_df.charge.dtype not in ['int','int8','int64','int32']:
+            self._precursor_df['charge'] = self._precursor_df['charge'].astype(int)
+
+        if 'nAA' not in self._precursor_df.columns:
+            self._precursor_df['nAA'] = self._precursor_df['sequence'].str.len()
+
+        if self._precursor_df.mod_sites.dtype not in ['O','U']:
+            self._precursor_df['mod_sites'] = self._precursor_df.mod_sites.astype('U')
 
     def predict_rt_ccs(self):
         # add 'rt_pred' and 'irt_pred' into columns
@@ -63,6 +70,9 @@ class PredictLib(SpecLibBase):
         )
 
     def load_fragment_intensity_df(self, **kwargs):
+        self.predict_fragment_intensity_df(**kwargs)
+
+    def predict_fragment_intensity_df(self, **kwargs):
         if len(self._fragment_mz_df) == 0:
             self.calc_fragment_mz_df()
 
