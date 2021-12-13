@@ -11,8 +11,8 @@ from alphadeep.pretrained_models import AlphaDeepModels
 
 class PredictLib(SpecLibBase):
     def __init__(self,
-        charged_frag_types, #['b_z1','b_z2','y_z1','y_z2', ...]
         models: AlphaDeepModels,
+        charged_frag_types, #['b_z1','b_z2','y_z1','y_z2', ...]
         min_frag_mz = 50, max_frag_mz = 2000,
         min_precursor_mz = 400, max_precursor_mz = 2000,
     ):

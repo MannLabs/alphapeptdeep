@@ -139,7 +139,8 @@ class ModelImplBase(object):
     def _predict_one_batch(self,
         *features
     ):
-        predicts = self.model(*[fea.to(self.device) for fea in features])
+        with torch.no_grad():
+            predicts = self.model(*[fea.to(self.device) for fea in features])
         if isinstance(predicts, torch.Tensor):
             return predicts.cpu().detach().numpy()
         else:

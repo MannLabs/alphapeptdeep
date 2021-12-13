@@ -25,7 +25,7 @@ class ScoreFeatureExtractor(object):
         self.score_feature_list = [
             'cos','sa','spc',
             'cos_bion','sa_bion','spc_bion',
-            'cos_yion','sa_bion','spc_yion',
+            'cos_yion','sa_yion','spc_yion',
             'frag_ratio','frag_ratio_bion',
             'frag_ratio_yion','rt_delta_abs',
             'mobility_delta_abs',
