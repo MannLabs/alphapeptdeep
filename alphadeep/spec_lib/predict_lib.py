@@ -73,12 +73,13 @@ class PredictLib(SpecLibBase):
         self.predict_fragment_intensity_df(**kwargs)
 
     def predict_fragment_intensity_df(self, **kwargs):
+        self._precursor_df.sort_values('nAA', inplace=True)
+
         if len(self._fragment_mz_df) == 0:
             self.calc_fragment_mz_df()
 
         frag_inten_df = self.models.ms2_model.predict(
             self._precursor_df,
-            reference_frag_df=self._fragment_mz_df,
             verbose=self.verbose,
         )
 

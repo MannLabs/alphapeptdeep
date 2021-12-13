@@ -185,6 +185,13 @@ class pDeepModel(model_base.ModelImplBase):
         precursor_df:pd.DataFrame,
         reference_frag_df:pd.DataFrame=None,
     ):
+        if reference_frag_df is not None and precursor_df.nAA.is_monotonic():
+            self._no_reference = True
+            if 'frag_start_idx' in precursor_df:
+                del precursor_df['frag_start_idx']
+                del precursor_df['frag_end_idx']
+        else:
+            self._no_reference = False
 
         self.predict_df = init_fragment_by_precursor_dataframe(
             precursor_df, self.charged_frag_types, reference_frag_df
@@ -237,16 +244,22 @@ class pDeepModel(model_base.ModelImplBase):
     ):
         predicts = predicts.clip(max=1)
         predicts[predicts<self.min_inten] = 0
-        update_sliced_fragment_dataframe(
-            self.predict_df,
-            predicts.reshape(
-                (-1, len(self.charged_frag_types))
-            ),
-            batch_df[
-                ['frag_start_idx','frag_end_idx']
-            ].values,
-            self.charged_frag_types
-        )
+        if self._no_reference:
+            self.predict_df.values[
+                batch_df.frag_start_idx.min():
+                batch_df.frag_end_idx.max(),
+            :] = predicts
+        else:
+            update_sliced_fragment_dataframe(
+                self.predict_df,
+                predicts.reshape(
+                    (-1, len(self.charged_frag_types))
+                ),
+                batch_df[
+                    ['frag_start_idx','frag_end_idx']
+                ].values,
+                self.charged_frag_types
+            )
 
     def bootstrap_nce_search(self,
         psm_df:pd.DataFrame,

@@ -421,7 +421,6 @@ class FastaSpecLib(PredictLib):
         self._precursor_df = self._precursor_df.explode('charge')
         self._precursor_df['charge'] = self._precursor_df.charge.astype(np.int8)
         self._precursor_df.reset_index(drop=True, inplace=True)
-        self.clip_precursor_by_mz_()
 
     def add_modifications(self):
         (
@@ -443,3 +442,4 @@ class FastaSpecLib(PredictLib):
 
     def update_precursor_mz(self):
         self._precursor_df = update_precursor_mz(self._precursor_df)
+        self.clip_precursor_by_mz_()
