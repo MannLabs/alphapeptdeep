@@ -415,12 +415,6 @@ class FastaSpecLib(PredictLib):
         self._precursor_df['mods'] = ''
         self._precursor_df['mod_sites'] = ''
         self._precursor_df['mod_sites'] = ''
-        self._precursor_df['charge'] = [
-            np.arange(self.min_charge, self.max_charge+1)
-        ]*len(pep_set)
-        self._precursor_df = self._precursor_df.explode('charge')
-        self._precursor_df['charge'] = self._precursor_df.charge.astype(np.int8)
-        self._precursor_df.reset_index(drop=True, inplace=True)
 
     def add_modifications(self):
         (
@@ -438,6 +432,14 @@ class FastaSpecLib(PredictLib):
         self._precursor_df = self._precursor_df.explode(
             ['mods','mod_sites']
         )
+        self._precursor_df.reset_index(drop=True, inplace=True)
+
+    def add_charge(self):
+        self._precursor_df['charge'] = [
+            np.arange(self.min_charge, self.max_charge+1)
+        ]*len(self._precursor_df)
+        self._precursor_df = self._precursor_df.explode('charge')
+        self._precursor_df['charge'] = self._precursor_df.charge.astype(np.int8)
         self._precursor_df.reset_index(drop=True, inplace=True)
 
     def update_precursor_mz(self):

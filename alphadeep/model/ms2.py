@@ -185,13 +185,13 @@ class pDeepModel(model_base.ModelImplBase):
         precursor_df:pd.DataFrame,
         reference_frag_df:pd.DataFrame=None,
     ):
-        if reference_frag_df is not None and precursor_df.nAA.is_monotonic():
-            self._no_reference = True
-            if 'frag_start_idx' in precursor_df:
+        if reference_frag_df is None and precursor_df.nAA.is_monotonic():
+            self._predict_in_order = True
+            if 'frag_start_idx' in precursor_df.columns:
                 del precursor_df['frag_start_idx']
                 del precursor_df['frag_end_idx']
         else:
-            self._no_reference = False
+            self._predict_in_order = False
 
         self.predict_df = init_fragment_by_precursor_dataframe(
             precursor_df, self.charged_frag_types, reference_frag_df
@@ -244,7 +244,7 @@ class pDeepModel(model_base.ModelImplBase):
     ):
         predicts = predicts.clip(max=1)
         predicts[predicts<self.min_inten] = 0
-        if self._no_reference:
+        if self._predict_in_order:
             self.predict_df.values[
                 batch_df.frag_start_idx.min():
                 batch_df.frag_end_idx.max(),

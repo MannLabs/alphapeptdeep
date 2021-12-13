@@ -135,7 +135,13 @@ class AlphaRTModel(model_base.ModelImplBase):
         batch_df: pd.DataFrame,
         predicts,
     ):
-        self.predict_df.loc[batch_df.index,'rt_pred'] = predicts
+        if self._predict_in_order:
+            self.predict_df.loc[
+                batch_df.index.min():batch_df.index.max()+1,
+                'rt_pred'
+            ] = predicts
+        else:
+            self.predict_df.loc[batch_df.index,'rt_pred'] = predicts
 
     def rt_to_irt_pred(self,
         precursor_df: pd.DataFrame

@@ -145,7 +145,13 @@ class AlphaCCSModel(model_base.ModelImplBase):
         batch_df: pd.DataFrame,
         predicts,
     ):
-        self.predict_df.loc[batch_df.index,'ccs_pred'] = predicts
+        if self._predict_in_order:
+            self.predict_df.loc[
+                batch_df.index.min():batch_df.index.max()+1,
+                'ccs_pred'
+            ] = predicts
+        else:
+            self.predict_df.loc[batch_df.index,'ccs_pred'] = predicts
 
     def ccs_to_mobility_pred(self,
         precursor_df:pd.DataFrame
