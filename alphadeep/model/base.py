@@ -139,8 +139,7 @@ class ModelImplBase(object):
     def _predict_one_batch(self,
         *features
     ):
-        with torch.no_grad():
-            predicts = self.model(*[fea.to(self.device) for fea in features])
+        predicts = self.model(*[fea.to(self.device) for fea in features])
         if isinstance(predicts, torch.Tensor):
             return predicts.cpu().detach().numpy()
         else:
@@ -231,7 +230,7 @@ class ModelImplBase(object):
         torch.cuda.empty_cache()
 
     def _check_predict_in_order(self, precursor_df:pd.DataFrame):
-        if precursor_df.nAA.is_monotonic() and precursor_df.index.is_monotonic():
+        if precursor_df.nAA.is_monotonic and precursor_df.index.is_monotonic:
             self._predict_in_order = True
         else:
             self._predict_in_order = False
@@ -245,7 +244,7 @@ class ModelImplBase(object):
             precursor_df['nAA'] = precursor_df.sequence.str.len()
             precursor_df.sort_values('nAA', inplace=True)
             precursor_df.reset_index(drop=True,inplace=True)
-        self._check_predict_in_order()
+        self._check_predict_in_order(precursor_df)
         self._prepare_predict_data_df(precursor_df,**kwargs)
         self.model.eval()
 
@@ -254,23 +253,23 @@ class ModelImplBase(object):
             batch_tqdm = tqdm(_grouped)
         else:
             batch_tqdm = _grouped
+        with torch.no_grad():
+            for nAA, df_group in batch_tqdm:
+                for i in range(0, len(df_group), batch_size):
+                    batch_end = i+batch_size
 
-        for nAA, df_group in batch_tqdm:
-            for i in range(0, len(df_group), batch_size):
-                batch_end = i+batch_size
+                    batch_df = df_group.iloc[i:batch_end,:]
 
-                batch_df = df_group.iloc[i:batch_end,:]
+                    features = self._get_features_from_batch_df(
+                        batch_df, nAA, **kwargs
+                    )
 
-                features = self._get_features_from_batch_df(
-                    batch_df, nAA, **kwargs
-                )
+                    predicts = self._predict_one_batch(*features)
 
-                predicts = self._predict_one_batch(*features)
-
-                self._set_batch_predict_data(
-                    batch_df, predicts,
-                    **kwargs
-                )
+                    self._set_batch_predict_data(
+                        batch_df, predicts,
+                        **kwargs
+                    )
 
         torch.cuda.empty_cache()
         return self.predict_df

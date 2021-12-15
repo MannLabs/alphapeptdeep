@@ -6,14 +6,14 @@ __all__ = ['ScoreFeatureExtractor']
 import pandas as pd
 import numpy as np
 
-from alphadeep.pretrained_models import AlphaDeepModels
+from alphadeep.pretrained_models import ModelManager
 from alphadeep.model.ms2 import calc_ms2_similarity
 from alphadeep.mass_spec.match import PepSpecMatch
 from alphabase.peptide.fragment import get_charged_frag_types
 
 class ScoreFeatureExtractor(object):
     def __init__(self):
-        self.models = AlphaDeepModels()
+        self.models = ModelManager()
         self.models.load_installed_models()
 
         self.model_fine_tuning = True

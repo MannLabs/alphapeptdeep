@@ -11,9 +11,10 @@ from typing import IO
 
 from tqdm import tqdm
 
-from alphadeep.model.featurize import \
-    parse_aa_indices, \
+from alphadeep.model.featurize import (
+    parse_aa_indices,
     get_batch_mod_feature
+)
 
 from alphadeep._settings import model_const
 
@@ -107,7 +108,7 @@ class AlphaRTModel(model_base.ModelImplBase):
     def _prepare_predict_data_df(self,
         precursor_df:pd.DataFrame,
     ):
-        precursor_df['rt_pred'] = 0
+        precursor_df['rt_pred'] = 0.
         self.predict_df = precursor_df
 
     def _get_features_from_batch_df(self,
@@ -135,10 +136,10 @@ class AlphaRTModel(model_base.ModelImplBase):
         batch_df: pd.DataFrame,
         predicts,
     ):
+        predicts[predicts<0] = 0.0
         if self._predict_in_order:
-            self.predict_df.loc[
-                batch_df.index.min():batch_df.index.max()+1,
-                'rt_pred'
+            self.predict_df.loc[:'rt_pred'].values[
+                batch_df.index.values[0]:batch_df.index.values[-1]+1
             ] = predicts
         else:
             self.predict_df.loc[batch_df.index,'rt_pred'] = predicts

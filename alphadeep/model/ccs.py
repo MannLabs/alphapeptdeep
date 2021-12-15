@@ -39,10 +39,11 @@ class EncDecModelCCS(torch.nn.Module):
 
         hidden = 256
 
-        self.ccs_encoder = \
+        self.ccs_encoder = (
             model_base.Input_AA_CNN_LSTM_cat_Charge_Encoder(
                 hidden
             )
+        )
 
         self.ccs_decoder = model_base.LinearDecoder(
             hidden+1, 1
@@ -113,7 +114,7 @@ class AlphaCCSModel(model_base.ModelImplBase):
     def _prepare_predict_data_df(self,
         precursor_df:pd.DataFrame,
     ):
-        precursor_df['ccs_pred'] = 0
+        precursor_df['ccs_pred'] = 0.
         self.predict_df = precursor_df
 
     def _get_features_from_batch_df(self,
@@ -145,10 +146,10 @@ class AlphaCCSModel(model_base.ModelImplBase):
         batch_df: pd.DataFrame,
         predicts,
     ):
+        predicts[predicts<0] = 0.0
         if self._predict_in_order:
-            self.predict_df.loc[
-                batch_df.index.min():batch_df.index.max()+1,
-                'ccs_pred'
+            self.predict_df.loc[:'ccs_pred'].values[
+                batch_df.index.values[0]:batch_df.index.values[-1]+1
             ] = predicts
         else:
             self.predict_df.loc[batch_df.index,'ccs_pred'] = predicts

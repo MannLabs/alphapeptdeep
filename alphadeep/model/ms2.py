@@ -181,11 +181,14 @@ class pDeepModel(model_base.ModelImplBase):
         if np.all(precursor_df['nce'].values > 1):
             precursor_df['nce'] = precursor_df['nce']*self.NCE_factor
 
+    def _check_predict_in_order(self, precursor_df: pd.DataFrame):
+        pass
+
     def _prepare_predict_data_df(self,
         precursor_df:pd.DataFrame,
         reference_frag_df:pd.DataFrame=None,
     ):
-        if reference_frag_df is None and precursor_df.nAA.is_monotonic():
+        if reference_frag_df is None and precursor_df.nAA.is_monotonic:
             self._predict_in_order = True
             if 'frag_start_idx' in precursor_df.columns:
                 del precursor_df['frag_start_idx']
@@ -195,7 +198,7 @@ class pDeepModel(model_base.ModelImplBase):
 
         self.predict_df = init_fragment_by_precursor_dataframe(
             precursor_df, self.charged_frag_types, reference_frag_df
-        )
+        ).astype(np.float32, copy=False)
 
         if np.all(precursor_df['nce'].values > 1):
             precursor_df['nce'] = precursor_df['nce']*self.NCE_factor
@@ -248,7 +251,9 @@ class pDeepModel(model_base.ModelImplBase):
             self.predict_df.values[
                 batch_df.frag_start_idx.min():
                 batch_df.frag_end_idx.max(),
-            :] = predicts
+            :] = predicts.reshape(
+                    (-1, len(self.charged_frag_types))
+                )
         else:
             update_sliced_fragment_dataframe(
                 self.predict_df,
@@ -288,7 +293,7 @@ class pDeepModel(model_base.ModelImplBase):
     def grid_nce_search(self,
         psm_df:pd.DataFrame,
         fragment_intensity_df:pd.DataFrame,
-        nce_first=15, nce_last=45, nce_step=3,
+        nce_first=15., nce_last=45., nce_step=3.,
         search_instruments = ['Lumos'],
         charged_frag_types:List = None,
         metric = 'PCC>0.9', # or 'median PCC'
@@ -298,14 +303,14 @@ class pDeepModel(model_base.ModelImplBase):
         if len(psm_df) > max_psm_subset:
             psm_df = psm_df.sample(max_psm_subset).copy()
         best_pcc = -1
-        best_nce = 0
+        best_nce = 0.
         best_instrument = None
         if 'median' in metric:
             metric_row = '50%'
         else:
             metric_row = '>0.90'
         for inst in search_instruments:
-            for nce in range(nce_first, nce_last+1, nce_step):
+            for nce in np.arange(nce_first, nce_last+1, nce_step):
                 psm_df['nce'] = nce
                 psm_df['instrument'] = inst
                 predict_inten_df = self.predict(
