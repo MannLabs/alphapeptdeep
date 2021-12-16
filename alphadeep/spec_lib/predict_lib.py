@@ -41,6 +41,14 @@ class PredictSpecLib(SpecLibBase):
         self._precursor_df = df
         self.refine_df()
 
+    def sort_by_nAA(self):
+        if 'nAA' not in self._precursor_df.columns:
+            self._precursor_df[
+                'nAA'
+            ] = self._precursor_df.sequence.str.len().astype(np.int32)
+        self._precursor_df.sort_values('nAA', inplace=True)
+        self._precursor_df.reset_index(drop=True, inplace=True)
+
     def refine_df(self):
         """
         To make sure all columns have desired dtype.
@@ -49,17 +57,10 @@ class PredictSpecLib(SpecLibBase):
         if self._precursor_df.charge.dtype not in ['int','int8','int64','int32']:
             self._precursor_df['charge'] = self._precursor_df['charge'].astype(int)
 
-        if 'nAA' not in self._precursor_df.columns:
-            self._precursor_df['nAA'] = self._precursor_df['sequence'].str.len().astype(np.int32)
-
         if self._precursor_df.mod_sites.dtype not in ['O','U']:
             self._precursor_df['mod_sites'] = self._precursor_df.mod_sites.astype('U')
 
-        if 'precursor_mz' not in self._precursor_df.columns:
-            self.calc_precursor_mz()
-
-        self._precursor_df.sort_values('nAA', inplace=True)
-        self._precursor_df.reset_index(drop=True, inplace=True)
+        self.sort_by_nAA()
 
     def predict_rt(self):
         """ add 'rt_pred' and 'irt_pred' into columns """
@@ -69,6 +70,8 @@ class PredictSpecLib(SpecLibBase):
         self.model_manager.rt_model.rt_to_irt_pred(self._precursor_df)
 
     def predict_mobility(self):
+        if 'precursor_mz' not in self._precursor_df.columns:
+            self.calc_precursor_mz()
         """ add 'ccs_pred' and 'mobility_pred' into columns """
         self._precursor_df = self.model_manager.ccs_model.predict(
             self._precursor_df, verbose=self.verbose

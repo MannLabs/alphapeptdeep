@@ -425,6 +425,28 @@ class PredictFastaSpecLib(PredictSpecLib):
                 mod_set.add(mod[-1])
         return False
 
+    def import_fasta(self, fasta_file_list:list):
+        self.from_fasta_list(fasta_file_list)
+        self._predict_all_after_load_pep_seqs()
+
+    def import_protein_dict(self, protein_dict:dict):
+        self.from_protein_dict(protein_dict)
+        self._predict_all_after_load_pep_seqs()
+
+    def import_peptide_sequences(self,
+        pep_seq_list:list, protein_list
+    ):
+        self.from_peptide_sequence_list(pep_seq_list, protein_list)
+        self._predict_all_after_load_pep_seqs()
+
+    def _predict_all_after_load_pep_seqs(self):
+        self.add_modifications()
+        self.predict_rt()
+        self.add_charge()
+        self.predict_mobility()
+        self.calc_fragment_mz_df()
+        self.predict_fragment_intensity_df()
+
     def from_fasta_list(self, fasta_file_list:list):
         protein_dict = load_all_proteins(fasta_file_list)
         self.from_protein_dict(protein_dict)
@@ -459,10 +481,13 @@ class PredictFastaSpecLib(PredictSpecLib):
                 'is_prot_nterm','is_prot_cterm'
             ]
         )
-        self._precursor_df['sequence'] = self._precursor_df.index
-        self._precursor_df.reset_index(drop=True, inplace=True)
+        self._precursor_df.reset_index(drop=False, inplace=True)
+        self._precursor_df.rename(
+            columns={'index':'sequence'}, inplace=True
+        )
         self._precursor_df['mods'] = ''
         self._precursor_df['mod_sites'] = ''
+        self.sort_by_nAA()
 
     def from_peptide_sequence_list(self,
         pep_seq_list:list,
@@ -474,6 +499,11 @@ class PredictFastaSpecLib(PredictSpecLib):
             self._precursor_df['protein_name'] = protein_list
         self._precursor_df['is_prot_nterm'] = False
         self._precursor_df['is_prot_cterm'] = False
+        self.sort_by_nAA()
+
+    def predict_rt(self):
+        self.sort_by_nAA()
+        super().predict_rt()
 
     def add_mods_for_one_seq(self, sequence:str,
         is_prot_nterm, is_prot_cterm
