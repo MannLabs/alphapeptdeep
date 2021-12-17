@@ -245,12 +245,11 @@ class pDeepModel(model_base.ModelImplBase):
         predicts:np.array,
         **kwargs,
     ):
-        predicts = predicts.clip(max=1)
-        predicts[predicts<self.min_inten] = 0
+        predicts[predicts<self.min_inten] = 0.0
         if self._predict_in_order:
             self.predict_df.values[
-                batch_df.frag_start_idx.min():
-                batch_df.frag_end_idx.max(),
+                batch_df.frag_start_idx.values[0]:
+                batch_df.frag_end_idx.values[-1],
             :] = predicts.reshape(
                     (-1, len(self.charged_frag_types))
                 )

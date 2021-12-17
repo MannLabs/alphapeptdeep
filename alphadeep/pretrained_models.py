@@ -87,20 +87,17 @@ def load_models_by_model_type_in_zip(model_type_in_zip:str):
 
 # Cell
 class ModelManager(object):
-    def __init__(self, **kwargs):
+    def __init__(self):
         self.ms2_model:pDeepModel = None
         self.rt_model:AlphaRTModel = None
         self.ccs_model:AlphaCCSModel = None
 
-        if 'grid_nce_search' in kwargs:
-            self.grid_nce_search = kwargs['grid_nce_search']
-        else:
-            self.grid_nce_search = True
+        self.grid_nce_search = True
 
-        self.n_ms2_tune = 5000
-        self.epoch_ms2_tune = 10
-        self.n_rt_ccs_tune = 3000
-        self.epoch_rt_ccs_tune = 20
+        self.n_psm_to_tune_ms2 = 5000
+        self.epoch_to_tune_ms2 = 10
+        self.n_psm_to_tune_rt_ccs = 3000
+        self.epoch_to_tune_rt_ccs = 20
 
     def load_installed_models(self, model_type='regular', mask_modloss=True):
         """ Load built-in MS2/CCS/RT models.
@@ -127,6 +124,7 @@ class ModelManager(object):
             ) = load_models_by_model_type_in_zip(model_type)
 
     def load_external_models(self,
+        *,
         ms2_model_file: Tuple[str, io.BytesIO]=None,
         rt_model_file: Tuple[str, io.BytesIO]=None,
         ccs_model_file: Tuple[str, io.BytesIO]=None,
@@ -170,14 +168,14 @@ class ModelManager(object):
         Args:
             psm_df (pd.DataFrame): training psm_df which contains 'rt_norm' column.
         """
-        if self.n_rt_ccs_tune > 0:
+        if self.n_psm_to_tune_rt_ccs > 0:
             tr_df = uniform_sampling(
                 psm_df, target='rt_norm',
-                n_train=self.n_rt_ccs_tune,
+                n_train=self.n_psm_to_tune_rt_ccs,
                 return_test_df=False
             )
             self.rt_model.train(tr_df,
-                epoch=self.epoch_rt_ccs_tune
+                epoch=self.epoch_to_tune_rt_ccs
             )
 
     def fine_tune_ccs_model(self,
@@ -190,41 +188,42 @@ class ModelManager(object):
             psm_df (pd.DataFrame): training psm_df which contains 'ccs' column.
         """
 
-        if self.n_ms2_tune > 0:
+        if self.n_psm_to_tune_rt_ccs > 0:
             tr_df = uniform_sampling(
                 psm_df, target='ccs',
-                n_train=self.n_rt_ccs_tune,
+                n_train=self.n_psm_to_tune_rt_ccs,
                 return_test_df=False
             )
             self.ccs_model.train(tr_df,
-                epoch=self.epoch_rt_ccs_tune
+                epoch=self.epoch_to_tune_rt_ccs
             )
 
     def fine_tune_ms2_model(self,
         psm_df: pd.DataFrame,
         matched_intensity_df: pd.DataFrame
     ):
-        tr_df = psm_df.sample(self.n_ms2_tune).copy()
-        tr_df, frag_df = normalize_training_intensities(
-            tr_df, matched_intensity_df
-        )
-        tr_inten_df = pd.DataFrame()
-        for frag_type in self.ms2_model.charged_frag_types:
-            if frag_type in frag_df.columns:
-                tr_inten_df[frag_type] = frag_df[frag_type]
-            else:
-                tr_inten_df[frag_type] = 0
-
-        if self.grid_nce_search:
-            nce, instrument = self.ms2_model.grid_nce_search(
-                tr_df, tr_inten_df
+        if self.n_psm_to_tune_ms2 > 0:
+            tr_df = psm_df.sample(self.n_psm_to_tune_ms2).copy()
+            tr_df, frag_df = normalize_training_intensities(
+                tr_df, matched_intensity_df
             )
-            tr_df['nce'] = nce
-            tr_df['instrument'] = instrument
-            psm_df['nce'] = nce
-            psm_df['instrument'] = instrument
+            tr_inten_df = pd.DataFrame()
+            for frag_type in self.ms2_model.charged_frag_types:
+                if frag_type in frag_df.columns:
+                    tr_inten_df[frag_type] = frag_df[frag_type]
+                else:
+                    tr_inten_df[frag_type] = 0
 
-        self.ms2_model.train(tr_df,
-            fragment_inten_df=tr_inten_df,
-            epoch=self.epoch_ms2_tune
-        )
+            if self.grid_nce_search:
+                nce, instrument = self.ms2_model.grid_nce_search(
+                    tr_df, tr_inten_df
+                )
+                tr_df['nce'] = nce
+                tr_df['instrument'] = instrument
+                psm_df['nce'] = nce
+                psm_df['instrument'] = instrument
+
+            self.ms2_model.train(tr_df,
+                fragment_inten_df=tr_inten_df,
+                epoch=self.epoch_to_tune_ms2
+            )

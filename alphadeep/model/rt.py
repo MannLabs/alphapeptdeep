@@ -134,15 +134,17 @@ class AlphaRTModel(model_base.ModelImplBase):
 
     def _set_batch_predict_data(self,
         batch_df: pd.DataFrame,
-        predicts,
+        predicts: np.array,
     ):
         predicts[predicts<0] = 0.0
         if self._predict_in_order:
-            self.predict_df.loc[:'rt_pred'].values[
+            self.predict_df.loc[:,'rt_pred'].values[
                 batch_df.index.values[0]:batch_df.index.values[-1]+1
             ] = predicts
         else:
-            self.predict_df.loc[batch_df.index,'rt_pred'] = predicts
+            self.predict_df.loc[
+                batch_df.index,'rt_pred'
+            ] = predicts
 
     def rt_to_irt_pred(self,
         precursor_df: pd.DataFrame

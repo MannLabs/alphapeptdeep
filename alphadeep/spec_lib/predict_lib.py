@@ -28,6 +28,9 @@ class PredictSpecLib(SpecLibBase):
         self.intensity_factor = 1
         self.verbose = True
 
+        self.batch_size_ms2 = 1024
+        self.batch_size_rt_ccs = 1024
+
         self._precursor_df = pd.DataFrame()
         self._fragment_intensity_df = pd.DataFrame()
         self._fragment_mz_df = pd.DataFrame()
@@ -65,7 +68,9 @@ class PredictSpecLib(SpecLibBase):
     def predict_rt(self):
         """ add 'rt_pred' and 'irt_pred' into columns """
         self._precursor_df = self.model_manager.rt_model.predict(
-            self._precursor_df, verbose=self.verbose
+            self._precursor_df,
+            batch_size=self.batch_size_rt_ccs,
+            verbose=self.verbose
         )
         self.model_manager.rt_model.rt_to_irt_pred(self._precursor_df)
 
@@ -74,7 +79,9 @@ class PredictSpecLib(SpecLibBase):
             self.calc_precursor_mz()
         """ add 'ccs_pred' and 'mobility_pred' into columns """
         self._precursor_df = self.model_manager.ccs_model.predict(
-            self._precursor_df, verbose=self.verbose
+            self._precursor_df,
+            batch_size=self.batch_size_rt_ccs,
+            verbose=self.verbose
         )
         self.model_manager.ccs_model.ccs_to_mobility_pred(
             self._precursor_df
@@ -86,6 +93,7 @@ class PredictSpecLib(SpecLibBase):
     def predict_fragment_intensity_df(self, **kwargs):
         frag_inten_df = self.model_manager.ms2_model.predict(
             self._precursor_df,
+            batch_size=self.batch_size_ms2,
             verbose=self.verbose,
         )
 
