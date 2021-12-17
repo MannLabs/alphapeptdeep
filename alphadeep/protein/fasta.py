@@ -3,7 +3,7 @@
 __all__ = ['protease_dict', 'read_fasta_file', 'load_all_proteins', 'concat_proteins', 'cleave_sequence_with_cut_pos',
            'Digest', 'get_fix_mods', 'get_candidate_sites', 'get_var_mod_sites',
            'get_var_mods_per_sites_multi_mods_on_aa', 'get_var_mods_per_sites_single_mod_on_aa', 'get_var_mods',
-           'get_var_mods_per_sites', 'parse_term_mod', 'PredictFastaSpecLib']
+           'get_var_mods_per_sites', 'parse_term_mod', 'PredictFastaSpecLib', 'append_regular_modifications']
 
 # Cell
 import regex as re
@@ -578,3 +578,32 @@ class PredictFastaSpecLib(PredictSpecLib):
         self._precursor_df = self._precursor_df.explode('charge')
         self._precursor_df['charge'] = self._precursor_df.charge.astype(np.int8)
         self._precursor_df.reset_index(drop=True, inplace=True)
+
+
+# Cell
+def append_regular_modifications(df,
+    var_mods = ['Phospho@S','Phospho@T','Phospho@Y'],
+    max_mod_num=1, max_combs=100
+):
+    mod_dict = dict([(mod[-1],mod) for mod in var_mods])
+    var_mod_aas = ''.join(mod_dict.keys())
+    (
+        df['mods_app'],
+        df['mod_sites_app']
+    ) = zip(*df.sequence.apply(get_var_mods,
+            var_mod_aas=var_mod_aas, mod_dict=mod_dict,
+            max_var_mod=max_mod_num, max_combs=max_combs
+        )
+    )
+
+    df = df.explode(['mods_app','mod_sites_app'])
+    df['mods'] = df[['mods','mods_app']].apply(
+        lambda x: ';'.join(i for i in x if i), axis=1
+    )
+    df['mod_sites'] = df[['mod_sites','mod_sites_app']].apply(
+        lambda x: ';'.join(i for i in x if i), axis=1
+    )
+    del df['mods_app']
+    del df['mod_sites_app']
+    df.reset_index(drop=True, inplace=True)
+    return df
