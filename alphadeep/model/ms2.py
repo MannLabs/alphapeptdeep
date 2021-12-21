@@ -175,9 +175,9 @@ class pDeepModel(model_base.ModelImplBase):
 
     def _prepare_train_data_df(self,
         precursor_df:pd.DataFrame,
-        fragment_inten_df:pd.DataFrame=None,
+        fragment_intensity_df:pd.DataFrame=None,
     ):
-        self.frag_inten_df = fragment_inten_df[self.charged_frag_types]
+        self.frag_inten_df = fragment_intensity_df[self.charged_frag_types]
         if np.all(precursor_df['nce'].values > 1):
             precursor_df['nce'] = precursor_df['nce']*self.NCE_factor
 
@@ -229,11 +229,11 @@ class pDeepModel(model_base.ModelImplBase):
 
     def _get_targets_from_batch_df(self,
         batch_df: pd.DataFrame, nAA,
-        fragment_inten_df:pd.DataFrame=None
+        fragment_intensity_df:pd.DataFrame=None
     ) -> torch.Tensor:
         return torch.Tensor(
             get_sliced_fragment_dataframe(
-                fragment_inten_df,
+                fragment_intensity_df,
                 batch_df[
                     ['frag_start_idx','frag_end_idx']
                 ].values
@@ -264,6 +264,42 @@ class pDeepModel(model_base.ModelImplBase):
                 ].values,
                 self.charged_frag_types
             )
+
+    def train(self,
+        precursor_df: pd.DataFrame,
+        fragment_intensity_df,
+        *,
+        batch_size=1024,
+        epoch=20,
+        verbose=False,
+        verbose_each_epoch=False,
+        **kwargs
+    ):
+        return super().train(
+            precursor_df,
+            fragment_intensity_df=fragment_intensity_df,
+            batch_size=batch_size,
+            epoch=epoch,
+            verbose=verbose,
+            verbose_each_epoch=verbose_each_epoch,
+            **kwargs
+        )
+
+    def predict(self,
+        precursor_df: pd.DataFrame,
+        *,
+        batch_size=1024,
+        verbose=False,
+        reference_frag_df=None,
+        **kwargs
+    ) -> pd.DataFrame:
+        return super().predict(
+            precursor_df,
+            batch_size=batch_size,
+            verbose=verbose,
+            reference_frag_df=reference_frag_df,
+            **kwargs
+        )
 
     def bootstrap_nce_search(self,
         psm_df:pd.DataFrame,

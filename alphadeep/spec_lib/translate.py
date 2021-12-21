@@ -233,12 +233,12 @@ def speclib_to_single_df(
     if 'protein_group' in speclib._precursor_df.columns:
         df['ProteinGroups'] = speclib._precursor_df['protein_group']
 
-    frag_inten = speclib.clip_inten_by_fragment_mz()
+    speclib.mask_fragment_intensity_by_mz_()
 
     df = merge_precursor_fragment_df(
         df,
         speclib._fragment_mz_df,
-        frag_inten,
+        speclib._fragment_intensity_df,
         top_n_inten=keep_k_highest_intensity,
         frag_type_head=frag_type_head,
         frag_mass_head=frag_mass_head,

@@ -185,6 +185,7 @@ class MaxQuantMSMSReader(MaxQuantReader, PSMReader_w_FragBase):
                 frag_types, frag_intens.split(';')
             ):
                 if '-' in frag_type: continue
+                if any(_.isupper() for _ in frag_type): continue
                 idx = frag_type.find('(')
                 charge = '1'
                 if idx > 0:
@@ -194,7 +195,7 @@ class MaxQuantMSMSReader(MaxQuantReader, PSMReader_w_FragBase):
                     frag_pos = nAA - frag_pos -1
                 else:
                     frag_pos -= 1
-                frag_type += '_'+charge
+                frag_type += '_z'+charge
                 if frag_type not in frag_col_dict: continue
                 frag_col = frag_col_dict[frag_type]
 

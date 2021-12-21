@@ -187,6 +187,7 @@ class ModelImplBase(object):
 
     def train(self,
         precursor_df: pd.DataFrame,
+        *,
         batch_size=1024,
         epoch=20,
         verbose=False,
@@ -230,15 +231,19 @@ class ModelImplBase(object):
         torch.cuda.empty_cache()
 
     def _check_predict_in_order(self, precursor_df:pd.DataFrame):
-        if precursor_df.nAA.is_monotonic and precursor_df.index.is_monotonic:
+        if precursor_df.nAA.is_monotonic and np.all(
+            np.diff(precursor_df.index.values)==1
+        ):
             self._predict_in_order = True
         else:
             self._predict_in_order = False
 
     def predict(self,
         precursor_df:pd.DataFrame,
+        *,
         batch_size=1024,
-        verbose=False,**kwargs
+        verbose=False,
+        **kwargs
     )->pd.DataFrame:
         if 'nAA' not in precursor_df.columns:
             precursor_df['nAA'] = precursor_df.sequence.str.len()
