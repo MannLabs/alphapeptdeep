@@ -7,9 +7,6 @@ __all__ = ['uniform_sampling', 'mod_feature_size', 'EncDecModelRT', 'AlphaRTMode
 import torch
 import pandas as pd
 import numpy as np
-from typing import IO
-
-from tqdm import tqdm
 
 from alphadeep.model.featurize import (
     parse_aa_indices,
@@ -128,7 +125,7 @@ class AlphaRTModel(model_base.ModelImplBase):
 
     def _get_targets_from_batch_df(self,
         batch_df: pd.DataFrame,
-        nAA
+        **kwargs,
     ) -> torch.Tensor:
         return torch.Tensor(batch_df['rt_norm'].values)
 

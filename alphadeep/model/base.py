@@ -12,6 +12,8 @@ from tqdm import tqdm
 from zipfile import ZipFile
 from typing import IO, Tuple, List, Union
 from alphabase.yaml_utils import save_yaml
+from alphabase.peptide.precursor import is_precursor_sorted
+
 from alphadeep._settings import model_const
 
 from alphadeep.model.building_block import *
@@ -147,7 +149,7 @@ class ModelImplBase(object):
 
     def _get_targets_from_batch_df(self,
         batch_df:pd.DataFrame,
-        nAA, **kwargs,
+        nAA=None, **kwargs,
     )->Union[torch.Tensor,List]:
         raise NotImplementedError(
             'Must implement _get_targets_from_batch_df() method'
@@ -214,8 +216,8 @@ class ModelImplBase(object):
                     batch_end = i+batch_size-1 # DataFrame.loc[start:end] inlcudes the end
 
                     batch_df = df_group.loc[i:batch_end,:]
-                    targets = self._get_targets_from_batch_df(batch_df,nAA,**kwargs)
-                    features = self._get_features_from_batch_df(batch_df,nAA,**kwargs)
+                    targets = self._get_targets_from_batch_df(batch_df,nAA=nAA,**kwargs)
+                    features = self._get_features_from_batch_df(batch_df,nAA=nAA,**kwargs)
 
                     cost = self._train_one_batch(
                         targets,
@@ -231,9 +233,7 @@ class ModelImplBase(object):
         torch.cuda.empty_cache()
 
     def _check_predict_in_order(self, precursor_df:pd.DataFrame):
-        if precursor_df.nAA.is_monotonic and np.all(
-            np.diff(precursor_df.index.values)==1
-        ):
+        if is_precursor_sorted(precursor_df):
             self._predict_in_order = True
         else:
             self._predict_in_order = False
