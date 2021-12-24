@@ -64,8 +64,8 @@ class PepSpecMatch(object):
             if 'frag_start_idx' in self.psm_df.columns:
                 del self.psm_df['frag_start_idx']
                 del self.psm_df['frag_end_idx']
-            self.psm_df, self.fragment_mz_df = create_fragment_mz_dataframe(
-                psm_df, charged_frag_types
+            self.fragment_mz_df = create_fragment_mz_dataframe(
+                self.psm_df, charged_frag_types
             )
         self._ms2_file_dict = {}
 

@@ -35,36 +35,6 @@ class PredictSpecLib(SpecLibBase):
         self._fragment_intensity_df = pd.DataFrame()
         self._fragment_mz_df = pd.DataFrame()
 
-    @property
-    def precursor_df(self):
-        return self._precursor_df
-
-    @precursor_df.setter
-    def precursor_df(self, df):
-        self._precursor_df = df
-        self.refine_df()
-
-    def sort_by_nAA(self):
-        if 'nAA' not in self._precursor_df.columns:
-            self._precursor_df[
-                'nAA'
-            ] = self._precursor_df.sequence.str.len().astype(np.int32)
-        self._precursor_df.sort_values('nAA', inplace=True)
-        self._precursor_df.reset_index(drop=True, inplace=True)
-
-    def refine_df(self):
-        """
-        To make sure all columns have desired dtype.
-        This function also sorts `nAA`, and `reset_index` for fast prediction.
-        """
-        if self._precursor_df.charge.dtype not in ['int','int8','int64','int32']:
-            self._precursor_df['charge'] = self._precursor_df['charge'].astype(int)
-
-        if self._precursor_df.mod_sites.dtype not in ['O','U']:
-            self._precursor_df['mod_sites'] = self._precursor_df.mod_sites.astype('U')
-
-        self.sort_by_nAA()
-
     def predict_rt(self):
         """ add 'rt_pred' and 'irt_pred' into columns """
         self._precursor_df = self.model_manager.rt_model.predict(
