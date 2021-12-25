@@ -15,6 +15,7 @@ import itertools
 from Bio import SeqIO
 
 from alphabase.yaml_utils import load_yaml
+from alphabase.io.hdf import HDF_File
 from alphadeep.spec_lib.predict_lib import PredictSpecLib
 from alphadeep.pretrained_models import ModelManager
 
@@ -50,7 +51,7 @@ def read_fasta_file(fasta_filename:str=""):
                 sequence = str(record.seq)
                 entry = {
                     "id": id,
-                    "name": record.name,
+                    "full_name": record.name,
                     "description": record.description,
                     "sequence": sequence,
                 }
@@ -579,11 +580,23 @@ class PredictFastaSpecLib(PredictSpecLib):
         self._precursor_df['charge'] = self._precursor_df.charge.astype(np.int8)
         self._precursor_df.reset_index(drop=True, inplace=True)
 
+    def save_hdf(self, hdf_file):
+        super().save_hdf(hdf_file)
+        _hdf = HDF_File(
+            hdf_file,
+            read_only=False,
+            truncate=True,
+            delete_existing=False
+        )
+        _hdf.library = {
+            'protein_df': self.protein_df,
+        }
 
 # Cell
 def append_regular_modifications(df,
     var_mods = ['Phospho@S','Phospho@T','Phospho@Y'],
-    max_mod_num=1, max_combs=100
+    max_mod_num=1, max_combs=100,
+    keep_unmodified=True,
 ):
     mod_dict = dict([(mod[-1],mod) for mod in var_mods])
     var_mod_aas = ''.join(mod_dict.keys())
@@ -596,7 +609,12 @@ def append_regular_modifications(df,
         )
     )
 
-    df = df.explode(['mods_app','mod_sites_app'])
+    if keep_unmodified:
+        df = df.explode(['mods_app','mod_sites_app'])
+        df.fillna('', inplace=True)
+    else:
+        df.drop(df[df.mods_app.apply(lambda x: len(x)==0)].index, inplace=True)
+        df = df.explode(['mods_app','mod_sites_app'])
     df['mods'] = df[['mods','mods_app']].apply(
         lambda x: ';'.join(i for i in x if i), axis=1
     )
