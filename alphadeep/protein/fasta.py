@@ -308,6 +308,7 @@ class PredictFastaSpecLib(PredictSpecLib):
         var_mods:list = ['Acetyl@Protein N-term','Oxidation@M'],
         max_var_mod_num:int = 2,
         fix_mods:list = ['Carbamidomethyl@C'],
+        I_to_L=True,
     ):
         super().__init__(
             model_manager, charged_frag_types,
@@ -315,6 +316,7 @@ class PredictFastaSpecLib(PredictSpecLib):
             min_precursor_mz, max_precursor_mz
         )
         self.protein_df = pd.DataFrame()
+        self.I_to_L = I_to_L
         self.max_mod_combs = 100
         self._digest = Digest(
             protease, max_missed_cleavages,
@@ -459,8 +461,16 @@ class PredictFastaSpecLib(PredictSpecLib):
             protein_dict, orient='index'
         ).reset_index(drop=True)
 
+        if self.I_to_L:
+            self.protein_df[
+                'sequence_I2L'
+            ] = self.protein_df.sequence.str.replace('I','L')
+            digest_seq = 'sequence_I2L'
+        else:
+            digest_seq = 'sequence'
+
         for i,prot_seq in enumerate(
-            self.protein_df.sequence.values
+            self.protein_df[digest_seq].values
         ):
             (
                 seq_list, miss_list, nterm_list, cterm_list
