@@ -308,7 +308,7 @@ class PredictFastaSpecLib(PredictSpecLib):
         var_mods:list = ['Acetyl@Protein N-term','Oxidation@M'],
         max_var_mod_num:int = 2,
         fix_mods:list = ['Carbamidomethyl@C'],
-        I_to_L=True,
+        I_to_L=False,
     ):
         super().__init__(
             model_manager, charged_frag_types,
