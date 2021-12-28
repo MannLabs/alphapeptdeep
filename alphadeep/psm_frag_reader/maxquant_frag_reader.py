@@ -20,7 +20,7 @@ from alphadeep.psm_frag_reader.psm_frag_reader import (
 
 class MaxQuantMSMSReader(MaxQuantReader, PSMReader_w_FragBase):
     def __init__(self,
-        frag_types=['b','y','b-modloss','y-modloss'],
+        frag_types=['b','y','b_modloss','y_modloss'],
         max_frag_charge=2,
         score_threshold=100,
         **kwargs
@@ -47,6 +47,14 @@ class MaxQuantMSMSReader(MaxQuantReader, PSMReader_w_FragBase):
     def _post_process(self,
         mq_df
     ):
+        if (
+            'rt' in self._psm_df.columns and
+            not 'rt_norm' in self._psm_df.columns
+        ):
+            self._psm_df['rt_norm'] = (
+                self._psm_df.rt / self._psm_df.rt.max()
+            )
+
         self._fragment_intensity_df = init_fragment_by_precursor_dataframe(
             mq_df, self.charged_frag_types
         )
