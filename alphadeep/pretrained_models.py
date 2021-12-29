@@ -70,7 +70,7 @@ def load_HLA_models():
     ms2_model = pDeepModel(mask_modloss=True)
     ms2_model.load(model_zip, model_path_in_zip='HLA/ms2_hla_pt.pth')
     rt_model = AlphaRTModel()
-    rt_model.load(model_zip, model_path_in_zip='HLA/rt_hla_pt.pth')
+    rt_model.load(model_zip, model_path_in_zip='regular/rt.pth')
     ccs_model = AlphaCCSModel()
     ccs_model.load(model_zip, model_path_in_zip='regular/ccs.pth')
     return ms2_model, rt_model, ccs_model
