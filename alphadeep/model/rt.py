@@ -153,10 +153,10 @@ import statsmodels.api as sm
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-def evaluate_linear_regression(df, x='rt_pred', y='rt_norm', ci=0.95):
+def evaluate_linear_regression(df, x='rt_pred', y='rt_norm', ci=95):
     gls = sm.GLS(df[y], sm.add_constant(df[x]))
     res = gls.fit()
-    summary = res.summary(alpha=1-ci)
+    summary = res.summary(alpha=1-ci/100.0)
     dfs = []
     results_as_html = summary.tables[0].as_html()
     dfs.append(pd.read_html(results_as_html, index_col=None)[0])

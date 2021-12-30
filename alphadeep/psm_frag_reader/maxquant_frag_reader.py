@@ -39,7 +39,7 @@ class MaxQuantMSMSReader(MaxQuantReader, PSMReader_w_FragBase):
         return self._fragment_intensity_df
 
     def _load_file(self, filename):
-        df = super()._load_file(filename)
+        df = MaxQuantReader._load_file(self, filename)
         df = df[df.Score >= self._score_thres]
         df.reset_index(drop=True, inplace=True)
         return df
@@ -47,13 +47,7 @@ class MaxQuantMSMSReader(MaxQuantReader, PSMReader_w_FragBase):
     def _post_process(self,
         mq_df
     ):
-        if (
-            'rt' in self._psm_df.columns and
-            not 'rt_norm' in self._psm_df.columns
-        ):
-            self._psm_df['rt_norm'] = (
-                self._psm_df.rt / self._psm_df.rt.max()
-            )
+        MaxQuantReader.normalize_rt_by_raw_name(self)
 
         self._fragment_intensity_df = init_fragment_by_precursor_dataframe(
             mq_df, self.charged_frag_types
@@ -100,13 +94,6 @@ class MaxQuantMSMSReader(MaxQuantReader, PSMReader_w_FragBase):
         self._psm_df[
             ['frag_start_idx','frag_end_idx']
         ] = mq_df[['frag_start_idx','frag_end_idx']]
-
-    def load_fragment_intensity_df(self,
-        psm_df, ms_files=None
-    ):
-        raise NotImplementedError(
-            f'"{self.__class__}" must implement "load_fragment_intensity_df()"'
-        )
 
 
 psm_w_frag_reader_provider.register_reader('maxquant', MaxQuantMSMSReader)
