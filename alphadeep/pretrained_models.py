@@ -59,18 +59,18 @@ from alphadeep.model.ccs import AlphaCCSModel
 
 def load_phos_models(mask_phos_modloss=False):
     ms2_model = pDeepModel(mask_modloss=mask_phos_modloss)
-    ms2_model.load(model_zip, model_path_in_zip='phospho/ms2_phos.pth')
+    ms2_model.load(model_zip, model_path_in_zip='phospho/ms2.pth')
     rt_model = AlphaRTModel()
-    rt_model.load(model_zip, model_path_in_zip='phospho/irt_phos.pth')
+    rt_model.load(model_zip, model_path_in_zip='phospho/rt.pth')
     ccs_model = AlphaCCSModel()
     ccs_model.load(model_zip, model_path_in_zip='regular/ccs.pth')
     return ms2_model, rt_model, ccs_model
 
 def load_HLA_models():
     ms2_model = pDeepModel(mask_modloss=True)
-    ms2_model.load(model_zip, model_path_in_zip='HLA/ms2_hla_pt.pth')
+    ms2_model.load(model_zip, model_path_in_zip='HLA/ms2.pth')
     rt_model = AlphaRTModel()
-    rt_model.load(model_zip, model_path_in_zip='regular/rt.pth')
+    rt_model.load(model_zip, model_path_in_zip='HLA/rt.pth')
     ccs_model = AlphaCCSModel()
     ccs_model.load(model_zip, model_path_in_zip='regular/ccs.pth')
     return ms2_model, rt_model, ccs_model
