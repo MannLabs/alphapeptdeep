@@ -100,17 +100,13 @@ class PepSpecMatch(object):
                 else:
                     ms2_reader = ms2_reader_provider.get_reader(ms2_file_type)
                     ms2_reader.load(ms2_file_dict[raw_name])
-                if 'rt' not in df_group.columns:
+                if 'rt_norm' not in df_group.columns:
                     _df = df_group.merge(
                         ms2_reader.spectrum_df[['spec_idx','rt']],
                         how='left',
                         on='spec_idx',
                     )
-                    # min_rt = _df['rt_sec'].min()
-                    # _df['rt_norm'] = (
-                    #     _df['rt_sec']-min_rt
-                    # )/(_df['rt_sec'].max()-min_rt)
-                    _df['rt_norm'] = _df['rt']/_df['rt'].max()
+                    _df['rt_norm'] = _df.rt/_df.rt.max()
                     self.psm_df.loc[
                         _df.index, ['rt','rt_norm']
                     ] = _df[['rt','rt_norm']]

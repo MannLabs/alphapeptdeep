@@ -41,7 +41,7 @@ class Percolator:
         cv_fold = 2,
         n_iteration = 5,
         use_ms2_features=True,
-        ms2_ppm = True, ms2_tol=30,
+        ms2_ppm = True, ms2_tol=20,
         model_mgr:ModelManager = None,
         **sklearn_kwargs
     ):
@@ -67,7 +67,6 @@ class Percolator:
         if use_ms2_features:
             self.feature_extractor = ScoreFeatureExtractor(
                 model_mgr=model_mgr,
-                ppm=ms2_ppm, tol=ms2_tol
             )
         else:
             self.feature_extractor = ScoreFeatureExtractor_wo_MS2(
@@ -187,7 +186,6 @@ class Percolator:
         psm_df = self.feature_extractor.extract_features(
             psm_df, ms2_file_dict,
             ms2_file_type,
-            psm_tune_df=psm_df[(psm_df.fdr<0.01)&(psm_df.decoy==0)],
             frag_types_to_match=self.charged_frag_types,
             ms2_ppm=self.ms2_ppm, ms2_tol=self.ms2_tol
         )

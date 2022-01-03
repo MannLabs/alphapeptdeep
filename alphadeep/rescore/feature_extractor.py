@@ -34,13 +34,8 @@ class ScoreFeatureExtractor(object):
         psm_tune_df:pd.DataFrame = None
     ):
         if 'rt_norm' in self.psm_df.columns:
-            if self.model_fine_tuning:
-                if psm_tune_df is not None:
-                    self.models.n_psm_to_tune_rt_ccs = len(psm_tune_df)
-                    self.models.fine_tune_rt_model(psm_tune_df)
-                else:
-                    self.models.fine_tune_rt_model(self.psm_df)
-
+            if psm_tune_df is not None:
+                self.models.fine_tune_rt_model(psm_tune_df)
 
             self.psm_df = self.models.rt_model.predict(
                 self.psm_df
@@ -58,18 +53,15 @@ class ScoreFeatureExtractor(object):
         else:
             self.psm_df['rt_delta'] = 0
             self.psm_df['rt_delta_abs'] = 0
+
     def extract_mobility_features(self, *,
         psm_tune_df:pd.DataFrame = None
     ):
         if (
             'mobility' in self.psm_df.columns
         ):
-            if self.model_fine_tuning:
-                if psm_tune_df is not None:
-                    self.models.n_psm_to_tune_rt_ccs = len(psm_tune_df)
-                    self.model.fine_tune_ccs_model(psm_tune_df)
-                else:
-                    self.models.fine_tune_ccs_model(self.psm_df)
+            if psm_tune_df is not None:
+                self.models.fine_tune_ccs_model(self.psm_tune_df)
             self.psm_df = self.models.ccs_model.predict(
                 self.psm_df
             )
@@ -95,9 +87,8 @@ class ScoreFeatureExtractor(object):
         psm_df: pd.DataFrame,
         ms2_file_dict, #raw_name: ms2_file_path or ms_reader object
         ms2_file_type:str = 'alphapept', #or 'mgf', or 'thermo'
-        psm_tune_df: pd.DataFrame = None,
         frag_types_to_match:list = get_charged_frag_types(['b','y'], 2),
-        ms2_ppm=True, ms2_tol=30,
+        ms2_ppm=True, ms2_tol=20,
     )->pd.DataFrame:
         self.match = PepSpecMatch(psm_df,
             charged_frag_types=frag_types_to_match
@@ -111,6 +102,14 @@ class ScoreFeatureExtractor(object):
 
         self.psm_df = self.match.psm_df
 
+        if self.model_fine_tuning:
+            psm_tune_df = self.psm_df.sample(
+                n=self.models.n_psm_to_tune_ms2
+            ).copy()
+            self.models.n_psm_to_tune_rt_ccs = self.models.n_psm_to_tune_ms2
+        else:
+            psm_tune_df = None
+
         self.extract_rt_features(psm_tune_df=psm_tune_df)
         self.extract_mobility_features(psm_tune_df=psm_tune_df)
 
@@ -118,17 +117,10 @@ class ScoreFeatureExtractor(object):
         self.matched_mz_err_df = self.match.matched_mz_err_df
         self.matched_intensity_df = self.match.matched_intensity_df
 
-        if self.model_fine_tuning:
-
-            if psm_tune_df is not None:
-                self.models.n_psm_to_tune_ms2 = len(psm_tune_df)
-                self.models.fine_tune_ms2_model(
-                    psm_tune_df, self.matched_intensity_df
-                )
-            else:
-                self.models.fine_tune_ms2_model(
-                    self.psm_df, self.matched_intensity_df
-                )
+        if psm_tune_df is not None:
+            self.models.fine_tune_ms2_model(
+                psm_tune_df, self.matched_intensity_df
+            )
 
         self.predict_intensity_df = self.models.ms2_model.predict(
             self.psm_df, reference_frag_df=self.matched_intensity_df
@@ -246,10 +238,17 @@ class ScoreFeatureExtractor_wo_MS2(ScoreFeatureExtractor):
     def extract_features(self,
         psm_df: pd.DataFrame,
         *args,
-        psm_tune_df: pd.DataFrame = None,
         **kwargs
     ) -> pd.DataFrame:
         self.psm_df = psm_df
+
+        if self.model_fine_tuning:
+            psm_tune_df = self.psm_df.sample(
+                n=self.models.n_psm_to_tune_rt_ccs
+            )
+        else:
+            psm_tune_df = None
+
         self.extract_rt_features(psm_tune_df=psm_tune_df)
         self.extract_mobility_features(psm_tune_df=psm_tune_df)
 

@@ -103,7 +103,7 @@ class ModelManager(object):
 
         self.grid_nce_search = True
 
-        self.n_psm_to_tune_ms2 = 5000
+        self.n_psm_to_tune_ms2 = 3000
         self.epoch_to_tune_ms2 = 10
         self.n_psm_to_tune_rt_ccs = 3000
         self.epoch_to_tune_rt_ccs = 20
