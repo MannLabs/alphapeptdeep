@@ -30,12 +30,10 @@ class ScoreFeatureExtractor(object):
             'mobility_delta_abs',
         ]
 
-    def extract_rt_features(self, *,
-        psm_tune_df:pd.DataFrame = None
-    ):
+    def extract_rt_features(self):
         if 'rt_norm' in self.psm_df.columns:
-            if psm_tune_df is not None:
-                self.models.fine_tune_rt_model(psm_tune_df)
+            if self.model_fine_tuning:
+                self.models.fine_tune_rt_model(self.psm_df)
 
             self.psm_df = self.models.rt_model.predict(
                 self.psm_df
@@ -54,14 +52,13 @@ class ScoreFeatureExtractor(object):
             self.psm_df['rt_delta'] = 0
             self.psm_df['rt_delta_abs'] = 0
 
-    def extract_mobility_features(self, *,
-        psm_tune_df:pd.DataFrame = None
-    ):
+    def extract_mobility_features(self):
         if (
             'mobility' in self.psm_df.columns
         ):
-            if psm_tune_df is not None:
-                self.models.fine_tune_ccs_model(self.psm_tune_df)
+            if self.model_fine_tuning:
+                self.models.fine_tune_ccs_model(self.psm_df)
+
             self.psm_df = self.models.ccs_model.predict(
                 self.psm_df
             )
@@ -102,24 +99,16 @@ class ScoreFeatureExtractor(object):
 
         self.psm_df = self.match.psm_df
 
-        if self.model_fine_tuning:
-            psm_tune_df = self.psm_df.sample(
-                n=self.models.n_psm_to_tune_ms2
-            ).copy()
-            self.models.n_psm_to_tune_rt_ccs = self.models.n_psm_to_tune_ms2
-        else:
-            psm_tune_df = None
-
-        self.extract_rt_features(psm_tune_df=psm_tune_df)
-        self.extract_mobility_features(psm_tune_df=psm_tune_df)
+        self.extract_rt_features()
+        self.extract_mobility_features()
 
 
         self.matched_mz_err_df = self.match.matched_mz_err_df
         self.matched_intensity_df = self.match.matched_intensity_df
 
-        if psm_tune_df is not None:
+        if self.model_fine_tuning:
             self.models.fine_tune_ms2_model(
-                psm_tune_df, self.matched_intensity_df
+                self.psm_df, self.matched_intensity_df
             )
 
         self.predict_intensity_df = self.models.ms2_model.predict(
@@ -242,14 +231,7 @@ class ScoreFeatureExtractor_wo_MS2(ScoreFeatureExtractor):
     ) -> pd.DataFrame:
         self.psm_df = psm_df
 
-        if self.model_fine_tuning:
-            psm_tune_df = self.psm_df.sample(
-                n=self.models.n_psm_to_tune_rt_ccs
-            )
-        else:
-            psm_tune_df = None
-
-        self.extract_rt_features(psm_tune_df=psm_tune_df)
-        self.extract_mobility_features(psm_tune_df=psm_tune_df)
+        self.extract_rt_features()
+        self.extract_mobility_features()
 
         return self.psm_df

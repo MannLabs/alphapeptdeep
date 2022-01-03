@@ -239,6 +239,6 @@ class ModelManager(object):
                 psm_df['instrument'] = instrument
 
             self.ms2_model.train(tr_df,
-                fragment_inten_df=tr_inten_df,
+                fragment_intensity_df=tr_inten_df,
                 epoch=self.epoch_to_tune_ms2
             )
