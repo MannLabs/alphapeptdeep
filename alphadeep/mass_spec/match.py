@@ -43,10 +43,13 @@ def match_centroid_mz(
 # Cell
 import pandas as pd
 import numpy as np
-from alphadeep.mass_spec.ms_reader import \
+from alphadeep.mass_spec.ms_reader import (
     ms2_reader_provider, MSReaderBase
-from alphabase.peptide.fragment import \
-    create_fragment_mz_dataframe, get_charged_frag_types
+)
+from alphabase.peptide.fragment import (
+    create_fragment_mz_dataframe,
+    get_charged_frag_types
+)
 
 class PepSpecMatch(object):
     def __init__(self,
