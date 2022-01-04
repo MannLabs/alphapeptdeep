@@ -14,10 +14,10 @@ from alphabase.peptide.fragment import get_charged_frag_types
 class ScoreFeatureExtractor(object):
     def __init__(self, model_mgr=None):
         if model_mgr is None:
-            self.models = ModelManager()
-            self.models.load_installed_models()
+            self.model_mgr = ModelManager()
+            self.model_mgr.load_installed_models()
         else:
-            self.models = model_mgr
+            self.model_mgr = model_mgr
 
         self.model_fine_tuning = True
 
@@ -32,10 +32,10 @@ class ScoreFeatureExtractor(object):
 
     def extract_rt_features(self):
         if 'rt_norm' in self.psm_df.columns:
-            if self.model_fine_tuning:
-                self.models.fine_tune_rt_model(self.psm_df)
+            if self.psm_tune_df is not None:
+                self.model_mgr.fine_tune_rt_model(self.psm_tune_df)
 
-            self.psm_df = self.models.rt_model.predict(
+            self.psm_df = self.model_mgr.rt_model.predict(
                 self.psm_df
             )
 
@@ -56,10 +56,10 @@ class ScoreFeatureExtractor(object):
         if (
             'mobility' in self.psm_df.columns
         ):
-            if self.model_fine_tuning:
-                self.models.fine_tune_ccs_model(self.psm_df)
+            if self.psm_tune_df is not None:
+                self.model_mgr.fine_tune_ccs_model(self.psm_tune_df)
 
-            self.psm_df = self.models.ccs_model.predict(
+            self.psm_df = self.model_mgr.ccs_model.predict(
                 self.psm_df
             )
 
@@ -80,6 +80,17 @@ class ScoreFeatureExtractor(object):
             self.psm_df['mobility_delta'] = 0
             self.psm_df['mobility_delta_abs'] = 0
 
+    def _get_tuning_psm_df(self):
+        if self.model_fine_tuning:
+            self.psm_tune_df = self.psm_df[
+                (self.psm_df.fdr<0.01)
+                &(self.psm_df.decoy==0)
+            ].sample(
+                self.model_mgr.n_psm_to_tune_ms2
+            ).copy()
+        else:
+            self.psm_tune_df = None
+
     def extract_features(self,
         psm_df: pd.DataFrame,
         ms2_file_dict, #raw_name: ms2_file_path or ms_reader object
@@ -99,6 +110,8 @@ class ScoreFeatureExtractor(object):
 
         self.psm_df = self.match.psm_df
 
+        self._get_tuning_psm_df()
+
         self.extract_rt_features()
         self.extract_mobility_features()
 
@@ -106,17 +119,21 @@ class ScoreFeatureExtractor(object):
         self.matched_mz_err_df = self.match.matched_mz_err_df
         self.matched_intensity_df = self.match.matched_intensity_df
 
-        if self.model_fine_tuning:
-            self.models.fine_tune_ms2_model(
-                self.psm_df, self.matched_intensity_df
+        if self.psm_tune_df is not None:
+            self.model_mgr.fine_tune_ms2_model(
+                self.psm_tune_df, self.matched_intensity_df
             )
 
-        self.predict_intensity_df = self.models.ms2_model.predict(
+        if 'nce' not in self.psm_df.columns:
+            self.psm_df['nce'] = self.model_mgr.nce
+            self.psm_df['instrument'] = self.model_mgr.instrument
+
+        self.predict_intensity_df = self.model_mgr.ms2_model.predict(
             self.psm_df, reference_frag_df=self.matched_intensity_df
         )
         used_frag_types = []
         for frag_type in frag_types_to_match:
-            if frag_type in self.models.ms2_model.charged_frag_types:
+            if frag_type in self.model_mgr.ms2_model.charged_frag_types:
                 used_frag_types.append(frag_type)
         self.predict_intensity_df = self.predict_intensity_df[
             used_frag_types
@@ -230,6 +247,8 @@ class ScoreFeatureExtractor_wo_MS2(ScoreFeatureExtractor):
         **kwargs
     ) -> pd.DataFrame:
         self.psm_df = psm_df
+
+        self._get_tuning_psm_df()
 
         self.extract_rt_features()
         self.extract_mobility_features()

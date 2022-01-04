@@ -108,6 +108,9 @@ class ModelManager(object):
         self.n_psm_to_tune_rt_ccs = 3000
         self.epoch_to_tune_rt_ccs = 20
 
+        self.nce = 0.3
+        self.instrument = 'Lumos'
+
     def load_installed_models(self, model_type='regular', mask_modloss=True):
         """ Load built-in MS2/CCS/RT models.
         Args:
@@ -230,13 +233,11 @@ class ModelManager(object):
                     tr_inten_df[frag_type] = 0
 
             if self.grid_nce_search:
-                nce, instrument = self.ms2_model.grid_nce_search(
+                self.nce, self.instrument = self.ms2_model.grid_nce_search(
                     tr_df, tr_inten_df
                 )
-                tr_df['nce'] = nce
-                tr_df['instrument'] = instrument
-                psm_df['nce'] = nce
-                psm_df['instrument'] = instrument
+                tr_df['nce'] = self.nce
+                tr_df['instrument'] = self.instrument
 
             self.ms2_model.train(tr_df,
                 fragment_intensity_df=tr_inten_df,
