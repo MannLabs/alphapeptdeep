@@ -12,21 +12,26 @@ import pandas as pd
 class MSReaderBase:
     def __init__(self):
         self.spectrum_df:pd.DataFrame = pd.DataFrame()
-        self.mzs: np.array = None
-        self.intensities: np.array = None
+        self.mzs: np.array = np.array([])
+        self.intensities: np.array = np.array([])
 
     def load(self, file_path):
         raise NotImplementedError('load()')
 
     def build_spectrum_df(self, scan_list, scan_indices, rt_list, mobility_list = None):
         if mobility_list is None: mobility_list = np.nan
-        self.spectrum_df = pd.DataFrame({
-            'spec_idx': scan_list,
-            'peak_start_idx': scan_indices[:-1],
-            'peak_end_idx': scan_indices[1:],
-            'rt': rt_list,
-            'mobility': mobility_list,
-        }, index = scan_list)
+        def set_col(col, indexes, values, dtype, na_value):
+            self.spectrum_df.loc[indexes, col] = values
+            self.spectrum_df[col].fillna(na_value, inplace=True)
+            self.spectrum_df[col] = self.spectrum_df[col].astype(dtype)
+
+        idx_len = np.max(scan_list)+1
+        self.spectrum_df = pd.DataFrame(index=np.arange(idx_len, dtype=np.int64))
+        self.spectrum_df['spec_idx'] = self.spectrum_df.index.values
+        set_col('peak_start_idx', scan_list, scan_indices[:-1], np.int64, -1)
+        set_col('peak_end_idx', scan_list, scan_indices[1:], np.int64, -1)
+        set_col('rt', scan_list, rt_list, np.float64, np.nan)
+        set_col('mobility', scan_list, mobility_list, np.float64, np.nan)
 
     def get_peaks(self, spec_idx):
         if spec_idx not in self.spectrum_df.index:
@@ -289,4 +294,5 @@ try:
     ms1_reader_provider.register_reader('thermo_raw', ThermoRawMS1Reader)
 except Exception as e:
     # alphapept or RawFileReader is not installed
+    print('alphapept or RawFileReader is not installed')
     print(e)

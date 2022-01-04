@@ -1,3 +1,4 @@
+thread_num: 8
 model:
   frag_types:
   - b
@@ -5,53 +6,7 @@ model:
   - b_modloss
   - y_modloss
   max_frag_charge: 2
-  modifications: 
-  - Carbamidomethyl@C
-  - Oxidation@M
-  - Phospho@S
-  - Phospho@T
-  - Phospho@Y
-  max_peplen: 100
-  train_type: tune
-  msms_model: msms_model.pt
-  rt_model: rt_model.pt
-  mobility_model: ccs_model.pt
-model_path: pretrain-models.zip
-pytorch_cpu_threads: 2
-train:
-  psm_type: psmlabel
-  psm_file: []
-  ms_file:
-  - xxx_psmlabel_folder@30@QE
-  - xxx_psmlabel_folder@25@Lumos
-  tol: 20
-  ppm: true
-tune:
-  psm_type: maxquant
-  psm_file: []
-  ms_file:
-  - xxxx.ms_data.hdf@30@QE
-  - yyyy.ms_data.hdf@25@Lumos
-  tol: 20
-  ppm: true
-  epoch: 5
-  use_grid_search: false
-  grid_search_instruments:
-  - QE
-  - Lumos
-  grid_search_ce_min: 10
-  grid_search_ce_max: 50
-  grid_search_ce_step: 3
-  save_zip:
-test:
-  psm_type: alphapept
-  psm_file: []
-  ms_file:
-    - xxxx.ms_data.hdf@30@QE
-    - yyyy.ms_data.hdf@25@Lumos
-  tolerance: 20
-  ppm: true
-speclib:
+spec_lib:
   input:
     type: pfind3
     accepted_types:

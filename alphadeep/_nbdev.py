@@ -3,6 +3,8 @@
 __all__ = ["index", "modules", "custom_doc_links", "git_url"]
 
 index = {"match_centroid_mz": "match.ipynb",
+         "numba_match_one_raw": "match.ipynb",
+         "THREAD_NUM": "match.ipynb",
          "PepSpecMatch": "match.ipynb",
          "MSReaderBase": "ms_reader.ipynb",
          "AlphaPept_HDF_MS1_Reader": "ms_reader.ipynb",

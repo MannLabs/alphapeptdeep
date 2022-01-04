@@ -10,6 +10,9 @@ from alphadeep.pretrained_models import ModelManager
 from alphadeep.model.ms2 import calc_ms2_similarity
 from alphadeep.mass_spec.match import PepSpecMatch
 from alphabase.peptide.fragment import get_charged_frag_types
+from alphabase.peptide.precursor import (
+    refine_precursor_df
+)
 
 class ScoreFeatureExtractor(object):
     def __init__(self, model_mgr=None):
@@ -86,7 +89,8 @@ class ScoreFeatureExtractor(object):
                 (self.psm_df.fdr<0.01)
                 &(self.psm_df.decoy==0)
             ].sample(
-                self.model_mgr.n_psm_to_tune_ms2
+                self.model_mgr.n_psm_to_tune_ms2,
+                random_state=1337,
             ).copy()
         else:
             self.psm_tune_df = None
@@ -98,7 +102,8 @@ class ScoreFeatureExtractor(object):
         frag_types_to_match:list = get_charged_frag_types(['b','y'], 2),
         ms2_ppm=True, ms2_tol=20,
     )->pd.DataFrame:
-        self.match = PepSpecMatch(psm_df,
+
+        self.match = PepSpecMatch(refine_precursor_df(psm_df),
             charged_frag_types=frag_types_to_match
         )
 
@@ -129,7 +134,7 @@ class ScoreFeatureExtractor(object):
             self.psm_df['instrument'] = self.model_mgr.instrument
 
         self.predict_intensity_df = self.model_mgr.ms2_model.predict(
-            self.psm_df, reference_frag_df=self.matched_intensity_df
+            self.psm_df
         )
         used_frag_types = []
         for frag_type in frag_types_to_match:
@@ -246,7 +251,8 @@ class ScoreFeatureExtractor_wo_MS2(ScoreFeatureExtractor):
         *args,
         **kwargs
     ) -> pd.DataFrame:
-        self.psm_df = psm_df
+
+        self.psm_df = refine_precursor_df(psm_df)
 
         self._get_tuning_psm_df()
 

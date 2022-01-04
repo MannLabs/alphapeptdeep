@@ -74,7 +74,7 @@ class Percolator:
             )
         self.feature_list = self.feature_extractor.score_feature_list
         self.feature_list += ['score','nAA','charge']
-        #self.feature_list.append('ml_score')
+        self.feature_list.append('ml_score') #self-boosted
 
     def enable_model_fine_tuning(self):
         self.feature_extractor.model_fine_tuning = True
