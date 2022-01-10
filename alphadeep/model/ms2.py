@@ -190,9 +190,12 @@ class pDeepModel(model_base.ModelImplBase):
     ):
         if reference_frag_df is None and precursor_df.nAA.is_monotonic:
             self._predict_in_order = True
+
             if 'frag_start_idx' in precursor_df.columns:
-                del precursor_df['frag_start_idx']
-                del precursor_df['frag_end_idx']
+                precursor_df.drop(
+                    columns=['frag_start_idx','frag_end_idx'],
+                    inplace=True
+                )
         else:
             self._predict_in_order = False
 

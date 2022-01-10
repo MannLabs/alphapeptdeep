@@ -4,7 +4,6 @@ __all__ = ["index", "modules", "custom_doc_links", "git_url"]
 
 index = {"match_centroid_mz": "match.ipynb",
          "numba_match_one_raw": "match.ipynb",
-         "THREAD_NUM": "match.ipynb",
          "PepSpecMatch": "match.ipynb",
          "MSReaderBase": "ms_reader.ipynb",
          "AlphaPept_HDF_MS1_Reader": "ms_reader.ipynb",
@@ -123,15 +122,26 @@ index = {"match_centroid_mz": "match.ipynb",
          "calc_fdr_from_ref": "fdr.ipynb",
          "calc_fdr_for_df": "fdr.ipynb",
          "calc_fdr_from_ref_for_df": "fdr.ipynb",
+         "match_one_raw": "feature_extractor.ipynb",
+         "get_ms2_features": "feature_extractor.ipynb",
+         "match_one_raw_mp": "feature_extractor.ipynb",
+         "get_ms2_features_mp": "feature_extractor.ipynb",
          "ScoreFeatureExtractor": "feature_extractor.ipynb",
-         "ScoreFeatureExtractor_wo_MS2": "feature_extractor.ipynb",
+         "mp_init": "feature_extractor.ipynb",
+         "ScoreFeatureExtractorMP": "feature_extractor.ipynb",
+         "AD_THREAD_NUM": "feature_extractor.ipynb",
          "DeepLearningScore": "percolator.ipynb",
          "Percolator": "percolator.ipynb",
          "PredictSpecLib": "predict_lib.ipynb",
          "create_modified_sequence": "translate.ipynb",
          "merge_precursor_fragment_df": "translate.ipynb",
          "speclib_to_single_df": "translate.ipynb",
-         "alpha_to_other_mod_dict": "translate.ipynb"}
+         "alpha_to_other_mod_dict": "translate.ipynb",
+         "set_logger": "utils.ipynb",
+         "show_platform_info": "utils.ipynb",
+         "show_python_info": "utils.ipynb",
+         "BASE_PATH": "utils.ipynb",
+         "LOG_PATH": "utils.ipynb"}
 
 modules = ["mass_spec/match.py",
            "mass_spec/ms_reader.py",
@@ -150,7 +160,8 @@ modules = ["mass_spec/match.py",
            "rescore/feature_extractor.py",
            "rescore/percolator.py",
            "spec_lib/predict_lib.py",
-           "spec_lib/translate.py"]
+           "spec_lib/translate.py",
+           "utils.py"]
 
 doc_url = "https://MannLabs.github.io/alphadeep/"
 

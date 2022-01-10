@@ -10,10 +10,12 @@ import pandas as pd
 from tqdm import tqdm
 import torch
 
+from alphadeep.utils import logging
+
 from alphabase.peptide.fragment import get_charged_frag_types
 
 from alphadeep.rescore.feature_extractor import (
-    ScoreFeatureExtractor, ScoreFeatureExtractor_wo_MS2
+    ScoreFeatureExtractor
 )
 
 from alphadeep.rescore.fdr import (
@@ -40,7 +42,6 @@ class Percolator:
         ml_type='logistic_regression', #or 'random_forest'
         cv_fold = 2,
         n_iteration = 5,
-        use_ms2_features=True,
         ms2_ppm = True, ms2_tol=20,
         model_mgr:ModelManager = None,
         **sklearn_kwargs
@@ -64,22 +65,17 @@ class Percolator:
             )
         else:
             self.model = RandomForestClassifier(**sklearn_kwargs)
-        if use_ms2_features:
-            self.feature_extractor = ScoreFeatureExtractor(
-                model_mgr=model_mgr,
-            )
-        else:
-            self.feature_extractor = ScoreFeatureExtractor_wo_MS2(
-                model_mgr=model_mgr,
-            )
+        self.feature_extractor = ScoreFeatureExtractor(
+            model_mgr=model_mgr,
+        )
         self.feature_list = self.feature_extractor.score_feature_list
         self.feature_list += ['score','nAA','charge']
         self.feature_list.append('ml_score') #self-boosted
 
     def enable_model_fine_tuning(self):
-        self.feature_extractor.model_fine_tuning = True
+        self.feature_extractor.require_model_tuning = True
     def disable_model_fine_tuning(self):
-        self.feature_extractor.model_fine_tuning = False
+        self.feature_extractor.require_model_tuning = False
 
     def _estimate_fdr(self, df:pd.DataFrame)->pd.DataFrame:
         df = df.sort_values(['ml_score','decoy'], ascending=False)
@@ -182,25 +178,23 @@ class Percolator:
     )->pd.DataFrame:
         psm_df['ml_score'] = psm_df.score
         psm_df = self._estimate_fdr(psm_df)
-        print('Extracting features ...')
         psm_df = self.feature_extractor.extract_features(
             psm_df, ms2_file_dict,
             ms2_file_type,
             frag_types_to_match=self.charged_frag_types,
             ms2_ppm=self.ms2_ppm, ms2_tol=self.ms2_tol
         )
-        print('End extracting features ...')
         return psm_df
 
     def re_score(self, df:pd.DataFrame)->pd.DataFrame:
-        print(f'{len(df[(df.fdr<=self.fdr) & (df.decoy==0)])} target PSMs at {self.fdr} psm-level FDR')
+        logging.log(logging.INFO, f'{len(df[(df.fdr<=self.fdr) & (df.decoy==0)])} target PSMs at {self.fdr} psm-level FDR')
         for i in range(self.n_iter):
-            print(f'[RUN] Iteration {i+1} of Percolator ...')
+            logging.log(logging.INFO, f'[PERC] Iteration {i+1} of Percolator ...')
             df = self._cv_score(df)
             df = self._estimate_fdr(df)
-            print(f'[RUN] {len(df[(df.fdr<=self.fdr) & (df.decoy==0)])} target PSMs at {self.fdr} psm-level FDR')
+            logging.log(logging.INFO, f'[PERC] {len(df[(df.fdr<=self.fdr) & (df.decoy==0)])} target PSMs at {self.fdr} psm-level FDR')
         df = self._estimate_fdr(df)
-        print(f'[END] {len(df[(df.fdr<=self.fdr) & (df.decoy==0)])} target PSMs at {self.fdr} {self.fdr_level}-level FDR')
+        logging.log(logging.INFO, f'[END] {len(df[(df.fdr<=self.fdr) & (df.decoy==0)])} target PSMs at {self.fdr} {self.fdr_level}-level FDR')
         return df
 
     def run(self,

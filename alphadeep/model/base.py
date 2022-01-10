@@ -9,6 +9,9 @@ import pandas as pd
 import torch
 from tqdm import tqdm
 
+from alphadeep._settings import global_settings
+torch.set_num_threads(global_settings['thread_num'])
+
 from zipfile import ZipFile
 from typing import IO, Tuple, List, Union
 from alphabase.yaml_utils import save_yaml

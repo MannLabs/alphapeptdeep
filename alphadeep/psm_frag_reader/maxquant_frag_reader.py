@@ -47,6 +47,8 @@ class MaxQuantMSMSReader(MaxQuantReader, PSMReader_w_FragBase):
     def _post_process(self,
         mq_df
     ):
+        self._psm_df['nAA'] = self._psm_df.sequence.str.len()
+        mq_df['nAA'] = self._psm_df.nAA
         MaxQuantReader.normalize_rt_by_raw_name(self)
 
         self._fragment_intensity_df = init_fragment_by_precursor_dataframe(

@@ -94,6 +94,7 @@ class PSMLabelReader(pFindReader,PSMReader_w_FragBase):
 
     def _post_process(self, psmlabel_df: pd.DataFrame):
         psmlabel_df['nAA'] = psmlabel_df.peptide.str.len()
+        self._psm_df['nAA'] = psmlabel_df.nAA
         psmlabel_df = psmlabel_df[
             ~self._psm_df['mods'].isna()
         ].reset_index(drop=True)

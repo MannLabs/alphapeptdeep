@@ -190,8 +190,8 @@ class ModelManager(object):
             tr_df = uniform_sampling(
                 psm_df, target='rt_norm',
                 n_train=self.n_psm_to_tune_rt_ccs,
-                return_test_df=False
-            )
+                return_test_df=False,
+            ).copy()
             self.rt_model.train(tr_df,
                 epoch=self.epoch_to_tune_rt_ccs
             )
@@ -211,7 +211,7 @@ class ModelManager(object):
                 psm_df, target='ccs',
                 n_train=self.n_psm_to_tune_rt_ccs,
                 return_test_df=False
-            )
+            ).copy()
             self.ccs_model.train(tr_df,
                 epoch=self.epoch_to_tune_rt_ccs
             )

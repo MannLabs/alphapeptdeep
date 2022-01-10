@@ -21,7 +21,8 @@ mod_feature_size = len(model_const['mod_elements'])
 
 def uniform_sampling(psm_df:pd.DataFrame,
     target:str='rt_norm', n_train:int=1000,
-    return_test_df:bool=False
+    return_test_df:bool=False,
+    random_state=1337,
 )->pd.DataFrame:
     """
     Sampling training PSMs (rows) uniformly from the
@@ -36,6 +37,7 @@ def uniform_sampling(psm_df:pd.DataFrame,
         return_test_df (bool, optional): If also return `test_df`.
             `test_df` contains the PSMs that are not sampled.
             Defaults to False.
+        random_state: `random_state` in `df.sample()`.
 
     Returns:
         pd.DataFrame: The sampled training PSMs (dataframe)
@@ -51,9 +53,9 @@ def uniform_sampling(psm_df:pd.DataFrame,
         ]
         if len(_df) == 0: pass
         elif len(_df)//2 < sub_n:
-            df_list.append(_df.sample(len(_df)//2))
+            df_list.append(_df.sample(len(_df)//2, random_state=random_state))
         else:
-            df_list.append(_df.sample(sub_n))
+            df_list.append(_df.sample(sub_n, random_state=random_state))
     train_df = pd.concat(df_list)
     if return_test_df:
         test_df = psm_df.drop(train_df.index)
