@@ -151,7 +151,7 @@ class PepSpecMatch(object):
                 on='spec_idx',
             ).set_index('index')
 
-            psm_df['rt_norm'] = psm_df.rt/psm_df.rt.max()
+            psm_df['rt_norm'] = psm_df.rt/ms2_reader.spectrum_df.rt.max()
 
         fragment_mz_df = create_fragment_mz_dataframe(
             psm_df, self.charged_frag_types
@@ -232,7 +232,7 @@ class PepSpecMatch(object):
                     on='spec_idx',
                 ).set_index('index')
 
-                _df['rt_norm'] = _df.rt/_df.rt.max()
+                _df['rt_norm'] = _df.rt/ms2_reader.spectrum_df.rt.max()
                 self.psm_df.loc[
                     _df.index, ['rt','rt_norm']
                 ] = _df[['rt','rt_norm']]
