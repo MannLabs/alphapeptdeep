@@ -9,7 +9,7 @@ import numpy as np
 import pandas as pd
 from tqdm import tqdm
 import torch
-from alphadeep._settings import global_settings
+from alphadeep.settings import global_settings
 
 from alphadeep.utils import logging
 

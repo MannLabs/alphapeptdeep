@@ -13,7 +13,7 @@ from alphadeep.model.featurize import (
     get_batch_mod_feature
 )
 
-from alphadeep._settings import model_const
+from alphadeep.settings import model_const
 
 import alphadeep.model.base as model_base
 

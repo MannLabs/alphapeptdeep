@@ -9,6 +9,7 @@ model:
 percolator:
   cv_fold: 1
   max_train_sample: 50000
+  n_raw_to_tune: 8
   min_train_sample: 100
   ms2_ppm: True
   ms2_tol: 20

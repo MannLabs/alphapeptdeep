@@ -14,7 +14,7 @@ from typing import IO, Tuple, List, Union
 from alphabase.yaml_utils import save_yaml
 from alphabase.peptide.precursor import is_precursor_sorted
 
-from alphadeep._settings import model_const
+from alphadeep.settings import model_const
 
 from alphadeep.model.building_block import *
 

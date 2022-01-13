@@ -26,7 +26,7 @@ from alphadeep.model.featurize import (
     get_batch_mod_feature
 )
 
-from alphadeep._settings import (
+from alphadeep.settings import (
     global_settings as settings,
     model_const
 )
