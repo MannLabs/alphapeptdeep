@@ -182,7 +182,8 @@ class ModelManager(object):
             self.ccs_model.load(model_zip, model_path_in_zip='regular/ccs.pth')
 
     def fine_tune_rt_model(self,
-        psm_df:pd.DataFrame
+        psm_df:pd.DataFrame,
+        random_state=1337,
     ):
         """ Fine-tune the RT model. The fine-tuning will be skipped
             if `n_rt_ccs_tune` is zero.
@@ -195,6 +196,7 @@ class ModelManager(object):
                 psm_df, target='rt_norm',
                 n_train=self.n_psm_to_tune_rt_ccs,
                 return_test_df=False,
+                random_state=random_state
             ).copy()
             self.rt_model.train(tr_df,
                 epoch=self.epoch_to_tune_rt_ccs
@@ -202,6 +204,7 @@ class ModelManager(object):
 
     def fine_tune_ccs_model(self,
         psm_df:pd.DataFrame,
+        random_state=1337
     ):
         """ Fine-tune the CCS model. The fine-tuning will be skipped
             if `n_rt_ccs_tune` is zero.
@@ -214,7 +217,8 @@ class ModelManager(object):
             tr_df = uniform_sampling(
                 psm_df, target='ccs',
                 n_train=self.n_psm_to_tune_rt_ccs,
-                return_test_df=False
+                return_test_df=False,
+                random_state=random_state
             ).copy()
             self.ccs_model.train(tr_df,
                 epoch=self.epoch_to_tune_rt_ccs
@@ -222,11 +226,15 @@ class ModelManager(object):
 
     def fine_tune_ms2_model(self,
         psm_df: pd.DataFrame,
-        matched_intensity_df: pd.DataFrame
+        matched_intensity_df: pd.DataFrame,
+        random_state=1337
     ):
         if self.n_psm_to_tune_ms2 > 0:
             if len(psm_df) > self.n_psm_to_tune_ms2:
-                tr_df = psm_df.sample(self.n_psm_to_tune_ms2).copy()
+                tr_df = psm_df.sample(
+                    self.n_psm_to_tune_ms2,
+                    random_state=random_state
+                ).copy()
             else:
                 tr_df = psm_df.copy()
             tr_df, frag_df = normalize_training_intensities(

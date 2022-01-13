@@ -416,10 +416,6 @@ class ScoreFeatureExtractorMP(ScoreFeatureExtractor):
         if self.n_raw_to_tune > AD_THREAD_NUM:
             self.n_raw_to_tune = AD_THREAD_NUM
 
-        self.mp_pool = mp.Pool(
-            processes=AD_THREAD_NUM,
-        )
-
         self.model_mgr.ms2_model.model.share_memory()
         self.model_mgr.rt_model.model.share_memory()
         self.model_mgr.ccs_model.model.share_memory()
@@ -465,7 +461,7 @@ class ScoreFeatureExtractorMP(ScoreFeatureExtractor):
         logging.info('Preparing for fine-tuning ...')
         psm_df_list = []
         matched_intensity_df_list = []
-        with self.mp_pool as p:
+        with mp.Pool(AD_THREAD_NUM) as p:
             for df, _, inten_df, _ in p.imap_unordered(
                 match_one_raw_mp,
                 one_raw_param_generator(df_groupby_raw)
@@ -591,26 +587,26 @@ class ScoreFeatureExtractorMP(ScoreFeatureExtractor):
                             frag_inten_df, frag_merr_df,
                         )
 
-            with self.mp_pool as p:
+            with mp.Pool(AD_THREAD_NUM) as p:
                 for i, df in enumerate(p.imap_unordered(
                     get_ms2_features_mp,
                     prediction_gen(df_groupby_raw)
                 )):
                     result_psm_list.append(df)
                     logging.info(
-                        f'Finished extracting features of raw file #{i}'
+                        f'Finished extracting features for raw file #{i}'
                     )
         else:
             # use multiprocessing for prediction
             # only when no GPUs are available
-            with self.mp_pool as p:
+            with mp.Pool(AD_THREAD_NUM) as p:
                 for i, _df in enumerate(p.imap_unordered(
                     self.extract_features_one_raw,
                     one_raw_param_generator(df_groupby_raw)
                 )):
                     result_psm_list.append(_df)
                     logging.info(
-                        f'Finished extracting features of raw file #{i}'
+                        f'Finished extracting features for raw file #{i}'
                     )
 
         logging.info('Finished feature extraction multiprocessing')

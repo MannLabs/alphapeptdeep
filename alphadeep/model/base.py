@@ -8,9 +8,7 @@ import numpy as np
 import pandas as pd
 import torch
 from tqdm import tqdm
-
-from alphadeep._settings import global_settings
-torch.set_num_threads(global_settings['thread_num'])
+torch.set_num_threads(3)
 
 from zipfile import ZipFile
 from typing import IO, Tuple, List, Union

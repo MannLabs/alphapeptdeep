@@ -310,7 +310,7 @@ class pDeepModel(model_base.ModelImplBase):
         nce_first=15, nce_last=45, nce_step=3,
         charged_frag_types:List = None,
         metric = 'PCC>0.9', # or 'median PCC'
-        max_psm_subset = 1000,
+        max_psm_subset = 3000,
         n_bootstrap = 3,
         callback = None
     ):
@@ -335,7 +335,7 @@ class pDeepModel(model_base.ModelImplBase):
         search_instruments = ['Lumos'],
         charged_frag_types:List = None,
         metric = 'PCC>0.9', # or 'median PCC'
-        max_psm_subset = 5000,
+        max_psm_subset = 1000000,
         callback = None
     ):
         if len(psm_df) > max_psm_subset:
