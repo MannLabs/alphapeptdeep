@@ -111,6 +111,10 @@ class ModelManager(object):
         self.nce = 0.3
         self.instrument = 'Lumos'
 
+    def set_default_nce(self, df):
+        df['nce'] = self.nce
+        df['instrument'] = self.instrument
+
     def load_installed_models(self, model_type='regular', mask_modloss=True):
         """ Load built-in MS2/CCS/RT models.
         Args:
@@ -221,7 +225,10 @@ class ModelManager(object):
         matched_intensity_df: pd.DataFrame
     ):
         if self.n_psm_to_tune_ms2 > 0:
-            tr_df = psm_df.sample(self.n_psm_to_tune_ms2).copy()
+            if len(psm_df) > self.n_psm_to_tune_ms2:
+                tr_df = psm_df.sample(self.n_psm_to_tune_ms2).copy()
+            else:
+                tr_df = psm_df.copy()
             tr_df, frag_df = normalize_training_intensities(
                 tr_df, matched_intensity_df
             )
@@ -243,3 +250,26 @@ class ModelManager(object):
                 fragment_intensity_df=tr_inten_df,
                 epoch=self.epoch_to_tune_ms2
             )
+
+    def predict_ms2(self, psm_df:pd.DataFrame,
+        *, batch_size=1024
+    ):
+        if 'nce' not in psm_df.columns:
+            self.set_default_nce(psm_df)
+        return self.ms2_model.predict(psm_df,
+            batch_size=batch_size
+        )
+
+    def predict_rt(self, psm_df:pd.DataFrame,
+        *, batch_size=1024
+    ):
+        return self.rt_model.predict(psm_df,
+            batch_size=batch_size
+        )
+
+    def predict_mobility(self, psm_df:pd.DataFrame,
+        *, batch_size=1024
+    ):
+        return self.ccs_model.predict(psm_df,
+            batch_size=batch_size
+        )

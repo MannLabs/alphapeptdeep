@@ -84,9 +84,9 @@ class PSMLabelReader(pFindReader,PSMReader_w_FragBase):
             self._psm_df['mods'], self._psm_df['mod_sites']
         ) = zip(*psmlabel_df['modinfo'].apply(get_pFind_mods))
 
-    def _translate_decoy(self):
+    def _translate_decoy(self, df):
         pass
-    def _translate_score(self):
+    def _translate_score(self, df):
         pass
 
     def _translate_modifications(self):

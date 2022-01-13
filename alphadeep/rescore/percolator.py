@@ -9,6 +9,7 @@ import numpy as np
 import pandas as pd
 from tqdm import tqdm
 import torch
+from alphadeep._settings import global_settings
 
 from alphadeep.utils import logging
 
@@ -72,8 +73,15 @@ class Percolator:
         self.feature_list += ['score','nAA','charge']
         self.feature_list.append('ml_score') #self-boosted
 
-    def enable_model_fine_tuning(self):
-        self.feature_extractor.require_model_tuning = True
+        self.max_train_sample = global_settings[
+            'percolator'
+        ]['max_train_sample']
+        self.min_train_sample = global_settings[
+            'percolator'
+        ]['min_train_sample']
+
+    def enable_model_fine_tuning(self, flag=True):
+        self.feature_extractor.require_model_tuning = flag
     def disable_model_fine_tuning(self):
         self.feature_extractor.require_model_tuning = False
 
@@ -110,10 +118,49 @@ class Percolator:
             )
         return df
 
+    def _train(self, train_t_df, train_d_df):
+        if len(train_t_df) > self.max_train_sample:
+            train_t_df = train_t_df.sample(
+                n=self.max_train_sample,
+                random_state=1337
+            )
+        if len(train_d_df) > self.max_train_sample:
+            train_d_df = train_d_df.sample(
+                n=self.max_train_sample,
+                random_state=1337
+            )
+
+        train_df = pd.concat((train_t_df, train_d_df))
+        train_label = np.ones(len(train_df),dtype=np.int32)
+        train_label[len(train_t_df):] = 0
+
+        self.model.fit(
+            train_df[self.feature_list].values,
+            train_label
+        )
+
+    def _predict(self, test_df):
+        if self.ml_type == 'lr':
+            test_df['ml_score'] = self.model.decision_function(
+                test_df[self.feature_list].values
+            )
+        else:
+            test_df['ml_score'] = self.model.predict_proba(
+                test_df[self.feature_list].values
+            )[:,1]
+        return test_df
+
     def _cv_score(self, df:pd.DataFrame)->pd.DataFrame:
-        df = df.sample(frac=1).reset_index(drop=True)
+        df = df.sample(
+            frac=1, random_state=1337
+        ).reset_index(drop=True)
         df_target = df[df.decoy == 0]
         df_decoy = df[df.decoy != 0]
+        if (
+            len(df_target) < self.min_train_sample
+            or len(df_decoy) < self.min_train_sample
+        ):
+            return df
 
         if self.cv_fold > 1:
             test_df_list = []
@@ -133,45 +180,19 @@ class Percolator:
                 train_d_df = df_decoy[d_mask]
                 test_d_df = df_decoy[_slice]
 
-                train_df = pd.concat((train_t_df, train_d_df))
-                train_label = np.ones(len(train_df),dtype=np.int32)
-                train_label[len(train_t_df):] = 0
-                test_df = pd.concat((test_t_df, test_d_df))
+                self._train(train_t_df, train_d_df)
 
-                self.model.fit(
-                    train_df[
-                        self.feature_list
-                    ].values, train_label
-                )
-                if self.ml_type == 'lr':
-                    test_df['ml_score'] = self.model.decision_function(
-                        test_df[self.feature_list].values
-                    )
-                else:
-                    test_df['ml_score'] = self.model.predict_proba(
-                        test_df[self.feature_list].values
-                    )[:,1]
-                test_df_list.append(test_df)
+                test_df = pd.concat((test_t_df, test_d_df))
+                test_df_list.append(self._predict(test_df))
 
             return pd.concat(test_df_list)
         else:
             train_t_df = df_target[df_target.fdr <= self.fdr]
-            train_df = pd.concat((train_t_df, df_decoy))
-            train_label = np.ones(len(train_df),dtype=np.int32)
-            train_label[len(train_t_df):] = 0
+
+            self._train(train_t_df, df_decoy)
             test_df = pd.concat((df_target, df_decoy))
 
-            self.model.fit(train_df[self.feature_list].values, train_label)
-            if self.ml_type == 'lr':
-                test_df['ml_score'] = self.model.decision_function(
-                    test_df[self.feature_list].values
-                )
-            else:
-                test_df['ml_score'] = self.model.predict_proba(
-                    test_df[self.feature_list].values
-                )[:,1]
-
-            return test_df
+            return self._predict(test_df)
 
     def extract_features(self,
         psm_df:pd.DataFrame, ms2_file_dict:dict, ms2_file_type:str
@@ -187,14 +208,14 @@ class Percolator:
         return psm_df
 
     def re_score(self, df:pd.DataFrame)->pd.DataFrame:
-        logging.log(logging.INFO, f'{len(df[(df.fdr<=self.fdr) & (df.decoy==0)])} target PSMs at {self.fdr} psm-level FDR')
+        logging.info(f'{len(df[(df.fdr<=self.fdr) & (df.decoy==0)])} target PSMs at {self.fdr} psm-level FDR')
         for i in range(self.n_iter):
-            logging.log(logging.INFO, f'[PERC] Iteration {i+1} of Percolator ...')
+            logging.info(f'[PERC] Iteration {i+1} of Percolator ...')
             df = self._cv_score(df)
             df = self._estimate_fdr(df)
-            logging.log(logging.INFO, f'[PERC] {len(df[(df.fdr<=self.fdr) & (df.decoy==0)])} target PSMs at {self.fdr} psm-level FDR')
+            logging.info(f'[PERC] {len(df[(df.fdr<=self.fdr) & (df.decoy==0)])} target PSMs at {self.fdr} psm-level FDR')
         df = self._estimate_fdr(df)
-        logging.log(logging.INFO, f'[END] {len(df[(df.fdr<=self.fdr) & (df.decoy==0)])} target PSMs at {self.fdr} {self.fdr_level}-level FDR')
+        logging.info(f'[END] {len(df[(df.fdr<=self.fdr) & (df.decoy==0)])} target PSMs at {self.fdr} {self.fdr_level}-level FDR')
         return df
 
     def run(self,

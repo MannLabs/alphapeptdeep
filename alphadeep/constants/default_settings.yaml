@@ -6,6 +6,12 @@ model:
   - b_modloss
   - y_modloss
   max_frag_charge: 2
+percolator:
+  cv_fold: 1
+  max_train_sample: 50000
+  min_train_sample: 100
+  ms2_ppm: True
+  ms2_tol: 20
 spec_lib:
   input:
     type: pfind3
