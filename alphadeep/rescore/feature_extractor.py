@@ -188,27 +188,41 @@ class ScoreFeatureExtractor:
 
         self.n_raw_to_tune = 3
 
-    def fine_tune_models(self,
-        df_groupby_raw,
-        ms2_file_dict,
-        ms2_file_type,
-        frag_types_to_match,
-        ms2_ppm, ms2_tol,
+    def _select_raw_to_tune(self,
+        psm_df,
     ):
+        psm_df = calc_fdr_for_df(psm_df, 'score')
+        df_fdr = psm_df[(psm_df.fdr<0.01)&(psm_df.decoy==0)]
+
+        df_groupby_raw = df_fdr.groupby('raw_name')
+
         if df_groupby_raw.ngroups < self.n_raw_to_tune:
             tune_raw_num = df_groupby_raw.ngroups
         else:
             tune_raw_num = self.n_raw_to_tune
 
-        rs = np.random.RandomState(1337)
-
-        raw_list = rs.choice(
-            list(df_groupby_raw.groups.keys()),
-            tune_raw_num,
-            replace=False
+        raw_list = list(
+            df_groupby_raw['score'].count().rank(
+                ascending=True
+            ).nlargest(tune_raw_num).index
         )
 
+        return df_groupby_raw, raw_list
+
+
+    def fine_tune_models(self,
+        psm_df,
+        ms2_file_dict,
+        ms2_file_type,
+        frag_types_to_match,
+        ms2_ppm, ms2_tol,
+    ):
         logging.info('Preparing for fine-tuning ...')
+
+        (
+            df_groupby_raw, raw_list
+        ) = self._select_raw_to_tune(psm_df)
+
         psm_df_list = []
         matched_intensity_df_list = []
         for raw_name, df in df_groupby_raw:
@@ -217,9 +231,6 @@ class ScoreFeatureExtractor:
                 or raw_name not in ms2_file_dict
             ):
                 continue
-
-            df = calc_fdr_for_df(df, 'score')
-            df = df[(df.fdr<0.01)&(df.decoy==0)]
             (
                 df, _, inten_df, _
             ) = match_one_raw(
@@ -343,19 +354,17 @@ class ScoreFeatureExtractor:
             if frag_type in self.model_mgr.ms2_model.charged_frag_types:
                 frag_types.append(frag_type)
 
-        df_groupby_raw = psm_df.groupby('raw_name')
-
         if self.require_model_tuning:
             logging.info('Fine-tuning models ...')
             self.fine_tune_models(
-                df_groupby_raw,
+                psm_df,
                 ms2_file_dict, ms2_file_type,
                 frag_types, ms2_ppm, ms2_tol
             )
 
         logging.info('Extracting alphadeep features ...')
         result_psm_list = []
-        for raw_name, df in df_groupby_raw:
+        for raw_name, df in psm_df.groupby('raw_name'):
             if raw_name not in ms2_file_dict:
                 continue
             (
@@ -416,29 +425,22 @@ class ScoreFeatureExtractorMP(ScoreFeatureExtractor):
         if self.n_raw_to_tune > AD_THREAD_NUM:
             self.n_raw_to_tune = AD_THREAD_NUM
 
+        # share_memory to same memory
         self.model_mgr.ms2_model.model.share_memory()
         self.model_mgr.rt_model.model.share_memory()
         self.model_mgr.ccs_model.model.share_memory()
 
 
     def fine_tune_models(self,
-        df_groupby_raw,
+        psm_df,
         ms2_file_dict,
         ms2_file_type,
         frag_types_to_match,
         ms2_ppm, ms2_tol,
     ):
-        if df_groupby_raw.ngroups < self.n_raw_to_tune:
-            tune_raw_num = df_groupby_raw.ngroups
-        else:
-            tune_raw_num = self.n_raw_to_tune
-
-        rs = np.random.RandomState(1337)
-        raw_list = rs.choice(
-            list(df_groupby_raw.groups.keys()),
-            tune_raw_num,
-            replace=False
-        )
+        (
+            df_groupby_raw, raw_list
+        ) = self._select_raw_to_tune(psm_df)
 
         def one_raw_param_generator(df_groupby_raw):
             for raw_name, df in df_groupby_raw:
@@ -448,8 +450,6 @@ class ScoreFeatureExtractorMP(ScoreFeatureExtractor):
                 ):
                     continue
 
-                df = calc_fdr_for_df(df, 'score')
-                df = df[(df.fdr<0.01)&(df.decoy==0)]
                 yield (
                     df,
                     ms2_file_dict[raw_name],
@@ -536,12 +536,10 @@ class ScoreFeatureExtractorMP(ScoreFeatureExtractor):
             if frag_type in self.model_mgr.ms2_model.charged_frag_types:
                 frag_types.append(frag_type)
 
-        df_groupby_raw = psm_df.groupby('raw_name')
-
         if self.require_model_tuning:
             logging.info('Fine-tuning models ...')
             self.fine_tune_models(
-                df_groupby_raw,
+                psm_df,
                 ms2_file_dict, ms2_file_type,
                 frag_types, ms2_ppm, ms2_tol
             )
@@ -590,7 +588,7 @@ class ScoreFeatureExtractorMP(ScoreFeatureExtractor):
             with mp.Pool(AD_THREAD_NUM) as p:
                 for i, df in enumerate(p.imap_unordered(
                     get_ms2_features_mp,
-                    prediction_gen(df_groupby_raw)
+                    prediction_gen(psm_df.groupby('raw_name'))
                 )):
                     result_psm_list.append(df)
                     logging.info(
@@ -602,7 +600,7 @@ class ScoreFeatureExtractorMP(ScoreFeatureExtractor):
             with mp.Pool(AD_THREAD_NUM) as p:
                 for i, _df in enumerate(p.imap_unordered(
                     self.extract_features_one_raw,
-                    one_raw_param_generator(df_groupby_raw)
+                    one_raw_param_generator(psm_df.groupby('raw_name'))
                 )):
                     result_psm_list.append(_df)
                     logging.info(
