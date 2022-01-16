@@ -6,13 +6,39 @@ model:
   - b_modloss
   - y_modloss
   max_frag_charge: 2
+model_mgr:
+  predict:
+    batch_size_ms2: 512
+    batch_size_rt_ccs: 1024
+    default_nce: 0.3
+    default_instrument: Lumos
+  fine_tune:
+    epoch_ms2: 10
+    epoch_rt_ccs: 20
+    grid_nce_search: True
+    grid_nce_first: 0.15
+    grid_nce_last: 0.45
+    grid_nce_step: 0.03
+    grid_instrument: ['Lumos']
 percolator:
-  cv_fold: 1
   max_train_sample: 50000
-  n_raw_to_tune: 8
   min_train_sample: 100
+  multiprocessing: True
+  require_model_tuning: True
+  n_raw_to_tune: 8
+  n_ms2_tune: 10000
+  n_rt_ccs_tune: 5000
+  model_type: regular # or phos, or HLA
+  mask_modloss: True
+
   ms2_ppm: True
   ms2_tol: 20
+  ml_type: logistic_regression
+  n_ml_iter: 5
+  cv_fold: 1
+  fdr: 0.01
+  fdr_level: psm
+  frag_types: ['b_z1','b_z2','y_z1','y_z2']
 spec_lib:
   input:
     type: pfind3
