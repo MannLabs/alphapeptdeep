@@ -32,6 +32,8 @@ percolator:
   mask_modloss: True
 
   require_raw_specific_rt_tuning: True
+  n_tune_per_raw: 200
+  epoch_tune_per_raw: 5
 
   multiprocessing: True
 

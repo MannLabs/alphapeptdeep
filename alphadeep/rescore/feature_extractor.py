@@ -282,9 +282,13 @@ class ScoreFeatureExtractor:
 
     def extract_rt_features(self, psm_df):
         if self.require_raw_specific_rt_tuning:
-            self.model_mgr.n_psm_to_tune_rt_ccs = 200
+            (
+                self.model_mgr.n_psm_to_tune_rt_ccs
+            ) = perc_settings['n_tune_per_raw']
             self.model_mgr.n_mod_psm_to_tune_rt_ccs = 0
-            self.model_mgr.epoch_to_tune_rt_ccs = 5
+            (
+                self.model_mgr.epoch_to_tune_rt_ccs
+            ) = perc_settings['epoch_tune_per_raw']
             self.model_mgr.fine_tune_rt_model(
                 psm_df[(psm_df.fdr<0.01)&(psm_df.decoy==0)]
             )
