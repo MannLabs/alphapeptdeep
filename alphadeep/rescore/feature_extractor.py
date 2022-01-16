@@ -179,15 +179,20 @@ class ScoreFeatureExtractor:
 
         self.n_raw_to_tune = perc_settings['n_raw_to_tune']
         self.model_mgr.n_psm_to_tune_ms2 = perc_settings['n_ms2_tune']
-        self.model_mgr.n_mod_psm_to_tune_ms2 = perc_settings['n_mod_ms2_tune']
+        (
+            self.model_mgr.n_mod_psm_to_tune_ms2
+        ) = perc_settings['n_ms2_per_mod_tune']
         self.model_mgr.n_psm_to_tune_rt_ccs = perc_settings['n_rt_ccs_tune']
         (
             self.model_mgr.n_mod_psm_to_tune_rt_ccs
-        ) = perc_settings['n_mod_rt_ccs_tune']
+        ) = perc_settings['n_rt_ccs_per_mod_tune']
         self.model_mgr.top_n_mods_to_tune = perc_settings['top_n_mods_tune']
 
         self.require_model_tuning = perc_settings[
             'require_model_tuning'
+        ]
+        self.require_raw_specific_rt_tuning = perc_settings[
+            'require_raw_specific_rt_tuning'
         ]
 
         self.score_feature_list = [
@@ -202,7 +207,8 @@ class ScoreFeatureExtractor:
     def _select_raw_to_tune(self,
         psm_df,
     ):
-        psm_df = calc_fdr_for_df(psm_df, 'score')
+        if 'fdr' not in psm_df.columns:
+            psm_df = calc_fdr_for_df(psm_df, 'score')
         df_fdr = psm_df[(psm_df.fdr<0.01)&(psm_df.decoy==0)]
 
         df_groupby_raw = df_fdr.groupby('raw_name')
@@ -275,6 +281,14 @@ class ScoreFeatureExtractor:
         )
 
     def extract_rt_features(self, psm_df):
+        if self.require_raw_specific_rt_tuning:
+            self.model_mgr.n_psm_to_tune_rt_ccs = 200
+            self.model_mgr.n_mod_psm_to_tune_rt_ccs = 0
+            self.model_mgr.epoch_to_tune_rt_ccs = 5
+            self.model_mgr.fine_tune_rt_model(
+                psm_df[(psm_df.fdr<0.01)&(psm_df.decoy==0)]
+            )
+
         if 'rt_norm' in psm_df.columns:
             psm_df = self.model_mgr.predict_rt(
                 psm_df
@@ -297,10 +311,6 @@ class ScoreFeatureExtractor:
             'mobility' in psm_df.columns
         ):
             psm_df = self.model_mgr.predict_mobility(
-                psm_df
-            )
-
-            psm_df = self.ccs_model.ccs_to_mobility_pred(
                 psm_df
             )
 
@@ -573,7 +583,20 @@ class ScoreFeatureExtractorMP(ScoreFeatureExtractor):
         )
         df_groupby_raw = psm_df.groupby('raw_name')
         result_psm_list = []
-        if torch.cuda.is_available():
+        if (
+            not torch.cuda.is_available() and
+            not self.require_raw_specific_rt_tuning
+        ):
+            # use multiprocessing for prediction
+            # only when no GPUs are available
+            with mp.Pool(AD_THREAD_NUM) as p:
+                for _df in process_bar(p.imap_unordered(
+                    self.extract_features_one_raw,
+                    one_raw_param_generator(df_groupby_raw)
+                ), df_groupby_raw.ngroups):
+                    result_psm_list.append(_df)
+
+        else:
             # multiprocessing is only used for ms2 matching
             def prediction_gen(df_groupby_raw):
                 with mp.Pool(AD_THREAD_NUM) as _p:
@@ -601,18 +624,9 @@ class ScoreFeatureExtractorMP(ScoreFeatureExtractor):
                     prediction_gen(df_groupby_raw)
                 ), df_groupby_raw.ngroups):
                     result_psm_list.append(df)
-        else:
-            # use multiprocessing for prediction
-            # only when no GPUs are available
-            with mp.Pool(AD_THREAD_NUM) as p:
-                for _df in process_bar(p.imap_unordered(
-                    self.extract_features_one_raw,
-                    one_raw_param_generator(df_groupby_raw)
-                ), df_groupby_raw.ngroups):
-                    result_psm_list.append(_df)
 
         self.psm_df = pd.concat(
             result_psm_list
         ).reset_index(drop=True)
-        logging.info('Finished feature extraction multiprocessing')
+        logging.info('Finished feature extraction with multiprocessing')
         return self.psm_df

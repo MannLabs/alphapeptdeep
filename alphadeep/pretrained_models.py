@@ -102,7 +102,8 @@ def psm_samping_with_important_mods(
         def _sample(psm_df, n):
             if n < len(psm_df):
                 return psm_df.sample(
-                    n, random_state=random_state
+                    n, replace=False,
+                    random_state=random_state
                 ).copy()
             else:
                 return psm_df.copy()
@@ -116,18 +117,18 @@ def psm_samping_with_important_mods(
     psm_df_list.append(_sample(psm_df, n_sample))
     if n_sample_each_mod > 0:
         mod_df = count_mods(psm_df)
-        mod_df = mod_df[mod_df!='mutation']
+        mod_df = mod_df[mod_df['mod']!='mutation']
 
         if len(mod_df) > top_n_mods:
             mod_df = mod_df.iloc[:top_n_mods,:]
-        for mod in mod_df.mod.values:
+        for mod in mod_df['mod'].values:
             psm_df_list.append(
                 _sample(
-                    psm_df[psm_df.mods.str.contains(mod)],
+                    psm_df[psm_df.mods.str.contains(mod, regex=False)],
                     n_sample_each_mod,
                 )
             )
-    return pd.concat(psm_df_list)
+    return pd.concat(psm_df_list).reset_index(drop=True)
 
 def load_phos_models(mask_phos_modloss=False):
     ms2_model = pDeepModel(mask_modloss=mask_phos_modloss)
@@ -377,6 +378,9 @@ class ModelManager(object):
              'predict'
            ]['batch_size_rt_ccs']
     ):
-        return self.ccs_model.predict(psm_df,
+        psm_df = self.ccs_model.predict(psm_df,
             batch_size=batch_size
+        )
+        return self.ccs_model.ccs_to_mobility_pred(
+            psm_df
         )

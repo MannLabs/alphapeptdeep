@@ -21,21 +21,24 @@ model_mgr:
     grid_nce_step: 0.03
     grid_instrument: ['Lumos']
 percolator:
-  max_train_sample: 50000
-  min_train_sample: 100
-  multiprocessing: True
   require_model_tuning: True
   n_raw_to_tune: 8
-  n_ms2_tune: 10000
-  n_mod_ms2_tune: 100
+  n_ms2_tune: 5000
+  n_ms2_per_mod_tune: 100
   n_rt_ccs_tune: 5000
-  n_mod_rt_ccs_tune: 100
+  n_rt_ccs_per_mod_tune: 100
   top_n_mods_tune: 10
   model_type: regular # or phos, or HLA
   mask_modloss: True
 
+  require_raw_specific_rt_tuning: True
+
+  multiprocessing: True
+
   ms2_ppm: True
   ms2_tol: 20
+  max_perc_train_sample: 50000
+  min_perc_train_sample: 100
   ml_type: logistic_regression
   n_ml_iter: 5
   cv_fold: 1

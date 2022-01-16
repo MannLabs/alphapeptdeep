@@ -53,9 +53,17 @@ def uniform_sampling(psm_df:pd.DataFrame,
         ]
         if len(_df) == 0: pass
         elif len(_df)//2 < sub_n:
-            df_list.append(_df.sample(len(_df)//2, random_state=random_state))
+            df_list.append(_df.sample(
+                len(_df)//2,
+                replace=False,
+                random_state=random_state
+            ))
         else:
-            df_list.append(_df.sample(sub_n, random_state=random_state))
+            df_list.append(_df.sample(
+                sub_n,
+                replace=False,
+                random_state=random_state
+            ))
     train_df = pd.concat(df_list)
     if return_test_df:
         test_df = psm_df.drop(train_df.index)
@@ -155,7 +163,12 @@ import statsmodels.api as sm
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-def evaluate_linear_regression(df, x='rt_pred', y='rt_norm', ci=95):
+def evaluate_linear_regression(
+    df:pd.DataFrame, x='rt_pred', y='rt_norm',
+    ci=95, n_sample=100000
+):
+    if len(df) > n_sample:
+        df = df.sample(n_sample, replace=False)
     gls = sm.GLS(df[y], sm.add_constant(df[x]))
     res = gls.fit()
     summary = res.summary(alpha=1-ci/100.0)
@@ -175,8 +188,16 @@ def evaluate_linear_regression(df, x='rt_pred', y='rt_norm', ci=95):
         )
     )
 
-def evaluate_linear_regression_plot(df, x='rt_pred', y='rt_norm', ci=95):
-    sns.regplot(data=df, x=x, y=y, color='r', ci=ci, scatter_kws={'s':0.05, 'alpha':0.05, 'color':'b'})
+def evaluate_linear_regression_plot(
+    df:pd.DataFrame, x='rt_pred', y='rt_norm',
+    ci=95, n_sample=100000
+):
+    if len(df) > n_sample:
+        df = df.sample(n_sample)
+    sns.regplot(
+        data=df, x=x, y=y, color='r', ci=ci,
+        scatter_kws={'s':0.05, 'alpha':0.05, 'color':'b'}
+    )
     plt.show()
 
 # Cell
