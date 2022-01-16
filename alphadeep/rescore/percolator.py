@@ -217,7 +217,7 @@ class Percolator:
         psm_df = self.feature_extractor.extract_features(
             psm_df, ms2_file_dict,
             ms2_file_type,
-            frag_types_to_match=self.charged_frag_types,
+            frag_types=self.charged_frag_types,
             ms2_ppm=self.ms2_ppm, ms2_tol=self.ms2_tol
         )
         return psm_df
