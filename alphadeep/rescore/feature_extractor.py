@@ -179,7 +179,12 @@ class ScoreFeatureExtractor:
 
         self.n_raw_to_tune = perc_settings['n_raw_to_tune']
         self.model_mgr.n_psm_to_tune_ms2 = perc_settings['n_ms2_tune']
+        self.model_mgr.n_mod_psm_to_tune_ms2 = perc_settings['n_mod_ms2_tune']
         self.model_mgr.n_psm_to_tune_rt_ccs = perc_settings['n_rt_ccs_tune']
+        (
+            self.model_mgr.n_mod_psm_to_tune_rt_ccs
+        ) = perc_settings['n_mod_rt_ccs_tune']
+        self.model_mgr.top_n_mods_to_tune = perc_settings['top_n_mods_tune']
 
         self.require_model_tuning = perc_settings[
             'require_model_tuning'
@@ -411,9 +416,11 @@ import torch.multiprocessing as mp
 
 def process_bar(iterator, len_iter):
     with tqdm(total=len_iter) as bar:
-        for iter in iterator:
+        for i,iter in enumerate(iterator):
             yield iter
             bar.update()
+        bar.update(len_iter-i-1)
+
 
 class ScoreFeatureExtractorMP(ScoreFeatureExtractor):
     def __init__(self,

@@ -27,7 +27,10 @@ percolator:
   require_model_tuning: True
   n_raw_to_tune: 8
   n_ms2_tune: 10000
+  n_mod_ms2_tune: 100
   n_rt_ccs_tune: 5000
+  n_mod_rt_ccs_tune: 100
+  top_n_mods_tune: 10
   model_type: regular # or phos, or HLA
   mask_modloss: True
 

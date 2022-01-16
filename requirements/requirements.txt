@@ -7,3 +7,5 @@ wget
 seaborn
 matplotlib
 regex
+tqdm
+numba
