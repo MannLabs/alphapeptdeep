@@ -93,6 +93,10 @@ class Percolator:
         ]
         self.feature_list += ['score','nAA','charge']
         self.feature_list.append('ml_score') #self-boosted
+        psm_type = perc_settings['input_files']['psm_type']
+        self.feature_list += perc_settings['input_files'][
+            'other_score_column_mapping'
+        ][psm_type].values()
 
         self.max_train_sample = perc_settings['max_perc_train_sample']
         self.min_train_sample = perc_settings['min_perc_train_sample']
@@ -223,6 +227,10 @@ class Percolator:
     def extract_features(self,
         psm_df:pd.DataFrame, ms2_file_dict:dict, ms2_file_type:str
     )->pd.DataFrame:
+        for feat in self.feature_list:
+            if feat not in psm_df.columns:
+                self.feature_list.remove(feat)
+
         psm_df['ml_score'] = psm_df.score
         psm_df = self._estimate_fdr(psm_df, 'psm')
         psm_df = self.feature_extractor.extract_features(

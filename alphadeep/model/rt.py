@@ -194,9 +194,14 @@ def evaluate_linear_regression_plot(
 ):
     if len(df) > n_sample:
         df = df.sample(n_sample)
+    alpha = 0.05
+    if len(df) < 5000:
+        alpha = 1
+    elif len(df) < 50000:
+        alpha = 5000.0/len(df)
     sns.regplot(
         data=df, x=x, y=y, color='r', ci=ci,
-        scatter_kws={'s':0.05, 'alpha':0.05, 'color':'b'}
+        scatter_kws={'s':0.05, 'alpha':alpha, 'color':'b'}
     )
     plt.show()
 

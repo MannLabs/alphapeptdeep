@@ -47,6 +47,29 @@ percolator:
   fdr: 0.01
   fdr_level: psm
   frag_types: ['b_z1','b_z2','y_z1','y_z2']
+  input_files:
+    psm_type: alphapept
+    candidate_psm_types:
+      - alphapept
+      - pfind
+      - maxquant
+      - msfragger_pepxml
+    psm_files: []
+    raw_type: alphapept_hdf
+    candidate_raw_types:
+      - hdf
+      - mgf
+      - thermo_raw
+      - mzml
+    raw_files: []
+    other_score_column_mapping:
+      alphapept: []
+      pfind: 
+        raw_score: Raw_Score
+      msfragger:
+        hyperscore: hyperscore
+        nextscore: nextscore
+      maxquant: []
 spec_lib:
   input:
     type: pfind3
