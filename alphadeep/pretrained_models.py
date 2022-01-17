@@ -354,14 +354,17 @@ class ModelManager(object):
             )
 
     def predict_ms2(self, psm_df:pd.DataFrame,
-        *, batch_size=mgr_settings[
-             'predict'
-           ]['batch_size_ms2']
+        *,
+        batch_size=mgr_settings[
+            'predict'
+        ]['batch_size_ms2'],
+        reference_frag_df = None,
     ):
         if 'nce' not in psm_df.columns:
             self.set_default_nce(psm_df)
         return self.ms2_model.predict(psm_df,
-            batch_size=batch_size
+            batch_size=batch_size,
+            reference_frag_df=reference_frag_df
         )
 
     def predict_rt(self, psm_df:pd.DataFrame,
