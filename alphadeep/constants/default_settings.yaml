@@ -31,7 +31,8 @@ percolator:
   model_type: regular # or phos, or HLA
   mask_modloss: True
 
-  require_raw_specific_rt_tuning: True
+  require_raw_specific_tuning: True
+  raw_specific_ms2_tuning: False
   n_tune_per_raw: 200
   epoch_tune_per_raw: 5
 
@@ -63,13 +64,13 @@ percolator:
       - mzml
     raw_files: []
     other_score_column_mapping:
-      alphapept: []
+      alphapept: {}
       pfind: 
         raw_score: Raw_Score
       msfragger:
         hyperscore: hyperscore
         nextscore: nextscore
-      maxquant: []
+      maxquant: {}
 spec_lib:
   input:
     type: pfind3

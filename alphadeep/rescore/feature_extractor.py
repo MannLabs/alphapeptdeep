@@ -170,10 +170,7 @@ class ScoreFeatureExtractor:
               with a single process.
 
         Args:
-            model_mgr (ModelManager, optional): The external ModelManager.
-              If it is None, the models will be init by
-              `ModelManager.load_installed_models()`.
-              Defaults to None.
+            model_mgr (ModelManager): The ModelManager in alphadeep.pretrained_models.
         """
         self.model_mgr = model_mgr
 
@@ -191,8 +188,11 @@ class ScoreFeatureExtractor:
         self.require_model_tuning = perc_settings[
             'require_model_tuning'
         ]
-        self.require_raw_specific_rt_tuning = perc_settings[
-            'require_raw_specific_rt_tuning'
+        self.require_raw_specific_tuning = perc_settings[
+            'require_raw_specific_tuning'
+        ]
+        self.raw_specific_ms2_tuning = perc_settings[
+            'raw_specific_ms2_tuning'
         ]
 
         self.score_feature_list = [
@@ -281,7 +281,7 @@ class ScoreFeatureExtractor:
         )
 
     def extract_rt_features(self, psm_df):
-        if self.require_raw_specific_rt_tuning:
+        if self.require_raw_specific_tuning:
             (
                 self.model_mgr.n_psm_to_tune_rt_ccs
             ) = perc_settings['n_tune_per_raw']
@@ -444,10 +444,7 @@ class ScoreFeatureExtractorMP(ScoreFeatureExtractor):
               with multiprocessing.
 
         Args:
-            model_mgr (ModelManager, optional): The external ModelManager.
-              If it is None, the models will be init by
-              `ModelManager.load_installed_models()`.
-              Defaults to None.
+            model_mgr (ModelManager): The ModelManager in alphadeep.pretrained_models.
         """
         super().__init__(model_mgr=model_mgr)
 
@@ -589,7 +586,7 @@ class ScoreFeatureExtractorMP(ScoreFeatureExtractor):
         result_psm_list = []
         if (
             not torch.cuda.is_available() and
-            not self.require_raw_specific_rt_tuning
+            not self.require_raw_specific_tuning
         ):
             # use multiprocessing for prediction
             # only when no GPUs are available
@@ -613,6 +610,24 @@ class ScoreFeatureExtractorMP(ScoreFeatureExtractor):
 
                         self.extract_rt_features(df)
                         self.extract_mobility_features(df)
+
+                        if (
+                            self.require_raw_specific_tuning
+                            and self.raw_specific_ms2_tuning
+                        ):
+
+                            (
+                                self.model_mgr.n_psm_to_tune_ms2
+                            ) = perc_settings['n_tune_per_raw']
+                            self.model_mgr.n_mod_psm_to_tune_ms2 = 0
+                            (
+                                self.model_mgr.epoch_to_tune_ms2
+                            ) = 2
+
+                            self.model_mgr.fine_tune_ms2_model(
+                                df[(df.fdr<0.01)&(df.decoy==0)],
+                                frag_inten_df
+                            )
 
                         predict_inten_df = self.model_mgr.predict_ms2(df)
 
