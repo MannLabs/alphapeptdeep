@@ -67,7 +67,15 @@ def load_all_proteins(fasta_file_list:list):
             protein_dict[protein['id']] = protein
     return protein_dict
 
-def concat_proteins(protein_dict):
+def concat_proteins(protein_dict:dict)->str:
+    """Concatenate all protein sequences into a single sequence
+
+    Args:
+        protein_dict (dict): protein_dict by read_fasta_file()
+
+    Returns:
+        str: concatenated sequence
+    """
     seq_list = ['']
     seq_count = 1
     for key in protein_dict:
@@ -200,6 +208,15 @@ def get_fix_mods(
 def get_candidate_sites(
     sequence:str, target_mod_aas:str
 )->list:
+    """get candidate modification sites
+
+    Args:
+        sequence (str): peptide sequence
+        target_mod_aas (str): AAs that may have modifications
+
+    Returns:
+        list: candiadte mod sites in alphabase format (0: N-term, -1: C-term, 1-n:others)
+    """
     candidate_sites = []
     for i,aa in enumerate(sequence):
         if aa in target_mod_aas:
@@ -212,6 +229,17 @@ def get_var_mod_sites(
     max_var_mod: int,
     max_combs: int
 )->list:
+    """get all combinations of variable modification sites
+
+    Args:
+        sequence (str): peptide sequence
+        target_mod_aas (str): AAs that may have modifications
+        max_var_mod (int): max number of mods in a sequence
+        max_combs (int): max number of combinations for a sequence
+
+    Returns:
+        list: list of combinations of (tuple) modification sites
+    """
     candidate_sites = get_candidate_sites(
         sequence, target_mod_aas
     )

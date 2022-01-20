@@ -12,6 +12,15 @@ import pandas as pd
 def fdr_to_q_values(
     fdr_values:np.array
 )->np.array:
+    """convert FDR values to q_values.
+
+    Args:
+        fdr_values (np.array): FDR values, they should be
+        sorted according to the descending order of the `score`
+
+    Returns:
+        np.array: q_values
+    """
     q_values = np.zeros_like(fdr_values)
     min_q_value = np.max(fdr_values)
     for i in range(len(fdr_values) - 1, -1, -1):
@@ -26,6 +35,17 @@ def calc_fdr(
     score_column:str,
     decoy_column:str='decoy'
 )->pd.DataFrame:
+    """Calculate FDR values (q_values in fact) for the given dataframe
+
+    Args:
+        df (pd.DataFrame): PSM dataframe to calculate FDRs
+        score_column (str): score column to sort in decending order
+        decoy_column (str, optional): decoy column in the dataframe.
+        1=target, 0=decoy. Defaults to 'decoy'.
+
+    Returns:
+        pd.DataFrame: PSM dataframe with 'fdr' column added
+    """
     df = df.reset_index(drop=True).sort_values(
         [score_column,decoy_column], ascending=False
     )
@@ -36,23 +56,38 @@ def calc_fdr(
     df['fdr'] = fdr_to_q_values(fdr_values)
     return df
 
+#wrapper
 calc_fdr_for_df = calc_fdr
 
 @numba.njit
 def fdr_from_ref(
-    scores:np.array,
+    sorted_scores:np.array,
     ref_scores:np.array,
     ref_fdr_values:np.array
 )->np.array:
-    q_values = np.zeros_like(scores)
+    """ Calculate FDR values from the given reference scores and fdr_values.
+    It is used to extend peptide-level or sequence-level FDR (reference)
+    to each PSM, as PSMs are more useful for quantification.
+
+    Args:
+        sorted_scores (np.array): the scores to calculate FDRs,
+          they must be sorted in decending order.
+        ref_scores (np.array): reference scores that used to
+          calculate ref_fdr_values, also sorted in decending order.
+        ref_fdr_values (np.array): fdr values corresponding to ref_scores
+
+    Returns:
+        np.array: fdr values corresponding to sorted_scores.
+    """
+    q_values = np.zeros_like(sorted_scores)
     i,j = 0,0
-    while i < len(scores) and j < len(ref_scores):
-        if scores[i] >= ref_scores[j]:
+    while i < len(sorted_scores) and j < len(ref_scores):
+        if sorted_scores[i] >= ref_scores[j]:
             q_values[i] = ref_fdr_values[j]
             i += 1
         else:
             j += 1
-    while i < len(scores):
+    while i < len(sorted_scores):
         q_values[i] = ref_fdr_values[-1]
         i += 1
     return q_values
@@ -64,6 +99,24 @@ def calc_fdr_from_ref(
     score_column:str,
     decoy_column:str='decoy'
 )->pd.DataFrame:
+    """ Calculate FDR values for a PSM dataframe from the given reference
+     scores and fdr_values. It is used to extend peptide-level or
+     sequence-level FDR (reference) to each PSM, as PSMs are more useful
+     for quantification.
+    ``
+
+    Args:
+        df (pd.DataFrame): PSM dataframe
+        ref_scores (np.array): reference scores that used to
+          calculate ref_fdr_values, also sorted in decending order.
+        ref_fdr_values (np.array): fdr values corresponding to ref_scores
+        score_column (str): score column in the dataframe
+        decoy_column (str, optional): decoy column in the dataframe.
+        1=target, 0=decoy. Defaults to 'decoy'.
+
+    Returns:
+        pd.DataFrame: dataframe with 'fdr' column added
+    """
     df = df.reset_index(drop=True).sort_values(
         [score_column,decoy_column], ascending=False
     )

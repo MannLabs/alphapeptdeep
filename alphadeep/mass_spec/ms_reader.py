@@ -34,6 +34,15 @@ class MSReaderBase:
         set_col('mobility', scan_list, mobility_list, np.float64, np.nan)
 
     def get_peaks(self, spec_idx):
+        """Get peak (mz and intensity) values by `spec_idx`
+
+        Args:
+            spec_idx (object): indicator for a spectrum, could be scan no for thermo data.
+
+        Returns:
+            np.array: mz values for the given spec_idx (scan)
+            np.array: intensity values for the given spec_idx
+        """
         if spec_idx not in self.spectrum_df.index:
             return None, None
         start_idx, end_idx = self.spectrum_df.loc[

@@ -7,7 +7,7 @@ __all__ = ['match_centroid_mz', 'numba_match_one_raw', 'PepSpecMatch']
 import numpy as np
 import numba
 
-@numba.njit(nogil=True)
+@numba.njit
 def match_centroid_mz(
     spec_mzs:np.array,
     query_mzs:np.array,
@@ -52,7 +52,7 @@ from alphabase.peptide.fragment import (
     get_charged_frag_types
 )
 
-@numba.njit(nogil=True, cache=True)
+@numba.njit
 def numba_match_one_raw(
     spec_idxes, frag_start_idxes, frag_end_idxes,
     all_frag_mzs,
@@ -61,6 +61,7 @@ def numba_match_one_raw(
     matched_intensities, matched_mz_errs,
     ppm, tol,
 ):
+    """ Internel function to match fragment mz values to spectrum mz values """
     for spec_idx, frag_start, frag_end in zip(
         spec_idxes, frag_start_idxes, frag_end_idxes
     ):
@@ -101,9 +102,6 @@ def numba_match_one_raw(
 
 
 # Cell
-from alphabase.peptide.precursor import (
-    refine_precursor_df
-)
 
 class PepSpecMatch(object):
     def __init__(self,
