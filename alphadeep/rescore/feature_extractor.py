@@ -667,14 +667,17 @@ class ScoreFeatureExtractorMP(ScoreFeatureExtractor):
                             self.require_raw_specific_tuning
                             and self.raw_specific_ms2_tuning
                         ):
-
                             (
                                 self.model_mgr.n_psm_to_tune_ms2
                             ) = perc_settings['n_tune_per_raw']
                             self.model_mgr.n_mod_psm_to_tune_ms2 = 0
                             (
                                 self.model_mgr.epoch_to_tune_ms2
-                            ) = 2
+                            ) = 3
+                            self.model_mgr.grid_nce_search = False
+
+                            if 'nce' not in df.columns:
+                                self.model_mgr.set_default_nce(df)
 
                             self.model_mgr.fine_tune_ms2_model(
                                 df[(df.fdr<0.01)&(df.decoy==0)],
