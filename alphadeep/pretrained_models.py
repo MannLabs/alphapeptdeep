@@ -128,7 +128,10 @@ def psm_samping_with_important_mods(
                     n_sample_each_mod,
                 )
             )
-    return pd.concat(psm_df_list).reset_index(drop=True)
+    if len(psm_df_list) > 0:
+        return pd.concat(psm_df_list).reset_index(drop=True)
+    else:
+        return pd.DataFrame()
 
 def load_phos_models(mask_phos_modloss=False):
     ms2_model = pDeepModel(mask_modloss=mask_phos_modloss)
@@ -178,13 +181,13 @@ class ModelManager(object):
             'fine_tune'
         ]['grid_nce_search']
 
-        self.n_psm_to_tune_ms2 = 5000
-        self.n_mod_psm_to_tune_ms2 = 100
+        self.psm_num_to_tune_ms2 = 5000
+        self.psm_num_per_mod_to_tune_ms2 = 100
         self.epoch_to_tune_ms2 = mgr_settings[
             'fine_tune'
         ]['epoch_ms2']
-        self.n_psm_to_tune_rt_ccs = 3000
-        self.n_mod_psm_to_tune_rt_ccs = 100
+        self.psm_num_to_tune_rt_ccs = 3000
+        self.psm_num_per_mod_to_tune_rt_ccs = 100
         self.epoch_to_tune_rt_ccs = mgr_settings[
             'fine_tune'
         ]['epoch_rt_ccs']
@@ -277,16 +280,17 @@ class ModelManager(object):
         Args:
             psm_df (pd.DataFrame): training psm_df which contains 'rt_norm' column.
         """
-        if self.n_psm_to_tune_rt_ccs > 0:
+        if self.psm_num_to_tune_rt_ccs > 0:
             tr_df = psm_samping_with_important_mods(
-                psm_df, self.n_psm_to_tune_rt_ccs,
+                psm_df, self.psm_num_to_tune_rt_ccs,
                 self.top_n_mods_to_tune,
-                self.n_mod_psm_to_tune_rt_ccs,
+                self.psm_num_per_mod_to_tune_rt_ccs,
                 uniform_sampling_column='rt_norm'
             )
-            self.rt_model.train(tr_df,
-                epoch=self.epoch_to_tune_rt_ccs
-            )
+            if len(tr_df) > 0:
+                self.rt_model.train(tr_df,
+                    epoch=self.epoch_to_tune_rt_ccs
+                )
 
     def fine_tune_ccs_model(self,
         psm_df:pd.DataFrame,
@@ -298,60 +302,62 @@ class ModelManager(object):
             psm_df (pd.DataFrame): training psm_df which contains 'ccs' column.
         """
 
-        if self.n_psm_to_tune_rt_ccs > 0:
+        if self.psm_num_to_tune_rt_ccs > 0:
             tr_df = psm_samping_with_important_mods(
-                psm_df, self.n_psm_to_tune_rt_ccs,
+                psm_df, self.psm_num_to_tune_rt_ccs,
                 self.top_n_mods_to_tune,
-                self.n_mod_psm_to_tune_rt_ccs,
+                self.psm_num_per_mod_to_tune_rt_ccs,
                 uniform_sampling_column='ccs'
             )
-            self.rt_model.train(tr_df,
-                epoch=self.epoch_to_tune_rt_ccs
-            )
+            if len(tr_df) > 0:
+                self.ccs_model.train(tr_df,
+                    epoch=self.epoch_to_tune_rt_ccs
+                )
 
     def fine_tune_ms2_model(self,
         psm_df: pd.DataFrame,
         matched_intensity_df: pd.DataFrame,
     ):
-        if self.n_psm_to_tune_ms2 > 0:
+        if self.psm_num_to_tune_ms2 > 0:
             tr_df = psm_samping_with_important_mods(
-                psm_df, self.n_psm_to_tune_ms2,
+                psm_df, self.psm_num_to_tune_ms2,
                 self.top_n_mods_to_tune,
-                self.n_mod_psm_to_tune_ms2
+                self.psm_num_per_mod_to_tune_ms2
             )
-            tr_df, frag_df = normalize_training_intensities(
-                tr_df, matched_intensity_df
-            )
-            tr_inten_df = pd.DataFrame()
-            for frag_type in self.ms2_model.charged_frag_types:
-                if frag_type in frag_df.columns:
-                    tr_inten_df[frag_type] = frag_df[frag_type]
-                else:
-                    tr_inten_df[frag_type] = 0
-
-            if self.grid_nce_search:
-                self.nce, self.instrument = self.ms2_model.grid_nce_search(
-                    tr_df, tr_inten_df,
-                    nce_first=mgr_settings['fine_tune'][
-                        'grid_nce_first'
-                    ],
-                    nce_last=mgr_settings['fine_tune'][
-                        'grid_nce_last'
-                    ],
-                    nce_step=mgr_settings['fine_tune'][
-                        'grid_nce_step'
-                    ],
-                    search_instruments=mgr_settings['fine_tune'][
-                        'grid_instrument'
-                    ],
+            if len(tr_df) > 0:
+                tr_df, frag_df = normalize_training_intensities(
+                    tr_df, matched_intensity_df
                 )
-                tr_df['nce'] = self.nce
-                tr_df['instrument'] = self.instrument
+                tr_inten_df = pd.DataFrame()
+                for frag_type in self.ms2_model.charged_frag_types:
+                    if frag_type in frag_df.columns:
+                        tr_inten_df[frag_type] = frag_df[frag_type]
+                    else:
+                        tr_inten_df[frag_type] = 0
 
-            self.ms2_model.train(tr_df,
-                fragment_intensity_df=tr_inten_df,
-                epoch=self.epoch_to_tune_ms2
-            )
+                if self.grid_nce_search:
+                    self.nce, self.instrument = self.ms2_model.grid_nce_search(
+                        tr_df, tr_inten_df,
+                        nce_first=mgr_settings['fine_tune'][
+                            'grid_nce_first'
+                        ],
+                        nce_last=mgr_settings['fine_tune'][
+                            'grid_nce_last'
+                        ],
+                        nce_step=mgr_settings['fine_tune'][
+                            'grid_nce_step'
+                        ],
+                        search_instruments=mgr_settings['fine_tune'][
+                            'grid_instrument'
+                        ],
+                    )
+                    tr_df['nce'] = self.nce
+                    tr_df['instrument'] = self.instrument
+
+                self.ms2_model.train(tr_df,
+                    fragment_intensity_df=tr_inten_df,
+                    epoch=self.epoch_to_tune_ms2
+                )
 
     def predict_ms2(self, psm_df:pd.DataFrame,
         *,

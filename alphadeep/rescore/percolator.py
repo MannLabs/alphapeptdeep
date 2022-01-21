@@ -36,7 +36,7 @@ class Percolator:
         *,
         ml_type=perc_settings['ml_type'],
         cv_fold = perc_settings['cv_fold'],
-        n_iteration = perc_settings['n_ml_iter'],
+        iter_num = perc_settings['ml_iter_num'],
         ms2_ppm = perc_settings['ms2_ppm'],
         ms2_tol = perc_settings['ms2_tol'],
         model_mgr:ModelManager = None,
@@ -75,7 +75,7 @@ class Percolator:
         self.fdr_level = perc_settings['fdr_level']
         self.fdr = perc_settings['fdr']
         self.cv_fold = cv_fold
-        self.n_iter = n_iteration
+        self.iter_num = iter_num
 
         if ml_type == 'lr':
             self.model = LogisticRegression(
@@ -250,7 +250,7 @@ class Percolator:
             f'{np.sum((df.fdr<=self.fdr) & (df.decoy==0))} '
             f'target PSMs at {self.fdr} psm-level FDR'
         )
-        for i in range(self.n_iter):
+        for i in range(self.iter_num):
             logging.info(f'[PERC] Iteration {i+1} of Percolator ...')
             df = self._cv_score(df)
             df = self._estimate_fdr(df, 'psm')

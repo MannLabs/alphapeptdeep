@@ -22,19 +22,19 @@ model_mgr:
     grid_instrument: ['Lumos']
 percolator:
   require_model_tuning: True
-  n_raw_to_tune: 8
-  n_ms2_tune: 5000
-  n_ms2_per_mod_tune: 100
-  n_rt_ccs_tune: 5000
-  n_rt_ccs_per_mod_tune: 100
-  top_n_mods_tune: 10
+  raw_num_to_tune: 8
+  psm_num_to_tune_ms2: 5000
+  psm_num_per_mod_to_tune_ms2: 100
+  psm_num_to_tune_rt_ccs: 5000
+  mod_psm_num_to_tune_rt_ccs: 100
+  top_n_mods_to_tune: 10
   model_type: regular # or phos, or HLA
   mask_modloss: True
 
   require_raw_specific_tuning: True
   raw_specific_ms2_tuning: False
-  n_tune_per_raw: 200
-  epoch_tune_per_raw: 5
+  psm_num_per_raw_to_tune: 200
+  epoch_per_raw_to_tune: 5
 
   multiprocessing: True
 
@@ -49,7 +49,7 @@ percolator:
     - lr
     - random_forest
     - rf
-  n_ml_iter: 5
+  ml_iter_num: 5
   cv_fold: 1
   fdr: 0.01
   fdr_level: psm

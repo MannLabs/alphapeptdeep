@@ -191,16 +191,27 @@ class ScoreFeatureExtractor:
         """
         self.model_mgr = model_mgr
 
-        self.n_raw_to_tune = perc_settings['n_raw_to_tune']
-        self.model_mgr.n_psm_to_tune_ms2 = perc_settings['n_ms2_tune']
+        self.raw_num_to_tune = perc_settings['raw_num_to_tune']
+
         (
-            self.model_mgr.n_mod_psm_to_tune_ms2
-        ) = perc_settings['n_ms2_per_mod_tune']
-        self.model_mgr.n_psm_to_tune_rt_ccs = perc_settings['n_rt_ccs_tune']
+            self.model_mgr.psm_num_to_tune_ms2
+        ) = perc_settings['psm_num_to_tune_ms2']
+
         (
-            self.model_mgr.n_mod_psm_to_tune_rt_ccs
-        ) = perc_settings['n_rt_ccs_per_mod_tune']
-        self.model_mgr.top_n_mods_to_tune = perc_settings['top_n_mods_tune']
+            self.model_mgr.psm_num_per_mod_to_tune_ms2
+        ) = perc_settings['psm_num_per_mod_to_tune_ms2']
+
+        (
+            self.model_mgr.psm_num_to_tune_rt_ccs
+        ) = perc_settings['psm_num_to_tune_rt_ccs']
+
+        (
+            self.model_mgr.mod_psm_num_to_tune_rt_ccs
+        ) = perc_settings['mod_psm_num_to_tune_rt_ccs']
+
+        (
+            self.model_mgr.top_n_mods_to_tune
+        ) = perc_settings['top_n_mods_to_tune']
 
         self.require_model_tuning = perc_settings[
             'require_model_tuning'
@@ -224,8 +235,8 @@ class ScoreFeatureExtractor:
     def _select_raw_to_tune(self,
         psm_df:pd.DataFrame,
     )->tuple:
-        """ Randomly select `self.n_raw_to_tune` raw files
-        to tune the models. If # raw files is less than `self.n_raw_to_tune`,
+        """ Randomly select `self.raw_num_to_tune` raw files
+        to tune the models. If # raw files is less than `self.raw_num_to_tune`,
         all raw files will be used to tune the model.
 
         Args:
@@ -241,10 +252,10 @@ class ScoreFeatureExtractor:
 
         df_groupby_raw = df_fdr.groupby('raw_name')
 
-        if df_groupby_raw.ngroups < self.n_raw_to_tune:
+        if df_groupby_raw.ngroups < self.raw_num_to_tune:
             tune_raw_num = df_groupby_raw.ngroups
         else:
-            tune_raw_num = self.n_raw_to_tune
+            tune_raw_num = self.raw_num_to_tune
 
         raw_list = list(
             df_groupby_raw['score'].count().rank(
@@ -322,12 +333,14 @@ class ScoreFeatureExtractor:
     def extract_rt_features(self, psm_df):
         if self.require_raw_specific_tuning:
             (
-                self.model_mgr.n_psm_to_tune_rt_ccs
-            ) = perc_settings['n_tune_per_raw']
-            self.model_mgr.n_mod_psm_to_tune_rt_ccs = 0
+                self.model_mgr.psm_num_to_tune_rt_ccs
+            ) = perc_settings['psm_num_per_raw_to_tune']
+
+            self.model_mgr.mod_psm_num_to_tune_rt_ccs = 0
+
             (
                 self.model_mgr.epoch_to_tune_rt_ccs
-            ) = perc_settings['epoch_tune_per_raw']
+            ) = perc_settings['epoch_per_raw_to_tune']
             self.model_mgr.fine_tune_rt_model(
                 psm_df[(psm_df.fdr<0.01)&(psm_df.decoy==0)]
             )
@@ -668,12 +681,13 @@ class ScoreFeatureExtractorMP(ScoreFeatureExtractor):
                             and self.raw_specific_ms2_tuning
                         ):
                             (
-                                self.model_mgr.n_psm_to_tune_ms2
-                            ) = perc_settings['n_tune_per_raw']
-                            self.model_mgr.n_mod_psm_to_tune_ms2 = 0
-                            (
-                                self.model_mgr.epoch_to_tune_ms2
-                            ) = 3
+                                self.model_mgr.psm_num_to_tune_ms2
+                            ) = perc_settings['psm_num_per_raw_to_tune']
+
+                            self.model_mgr.psm_num_per_mod_to_tune_ms2 = 0
+
+                            self.model_mgr.epoch_to_tune_ms2 = 3
+
                             self.model_mgr.grid_nce_search = False
 
                             if 'nce' not in df.columns:
