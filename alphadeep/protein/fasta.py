@@ -321,27 +321,28 @@ def parse_term_mod(term_mod_name:str):
         return '', term
 
 # Cell
+
 class PredictFastaSpecLib(PredictSpecLib):
     def __init__(self,
         model_manager:ModelManager,
         charged_frag_types:list = ['b_z1','b_z2','y_z1','y_z2'],
-        min_frag_mz = 50, max_frag_mz = 2000,
         min_precursor_mz = 400, max_precursor_mz = 1800,
         protease:str = 'trypsin',
         max_missed_cleavages:int = 2,
         pep_length_min:int = 7,
-        pep_length_max:int = 30,
+        pep_length_max:int = 35,
         min_charge:int = 2,
         max_charge:int = 4,
         var_mods:list = ['Acetyl@Protein N-term','Oxidation@M'],
         max_var_mod_num:int = 2,
         fix_mods:list = ['Carbamidomethyl@C'],
+        decoy: str = 'pseudo_reverse', # or diann
         I_to_L=False,
     ):
         super().__init__(
             model_manager, charged_frag_types,
-            min_frag_mz, max_frag_mz,
-            min_precursor_mz, max_precursor_mz
+            min_precursor_mz, max_precursor_mz,
+            decoy=decoy
         )
         self.protein_df = pd.DataFrame()
         self.I_to_L = I_to_L
@@ -356,6 +357,8 @@ class PredictFastaSpecLib(PredictSpecLib):
         self.var_mods = var_mods
         self.fix_mods = fix_mods
         self.max_var_mod_num = max_var_mod_num
+
+        self.decoy = decoy
 
         self.fix_mod_aas = ''
         self.fix_mod_prot_nterm_dict = {}
@@ -471,12 +474,10 @@ class PredictFastaSpecLib(PredictSpecLib):
         self._predict_all_after_load_pep_seqs()
 
     def _predict_all_after_load_pep_seqs(self):
+        self.append_decoy_sequence()
         self.add_modifications()
-        self.predict_rt()
         self.add_charge()
-        self.predict_mobility()
-        self.calc_fragment_mz_df()
-        self.predict_fragment_intensity_df()
+        self.predict_all()
 
     def from_fasta_list(self, fasta_file_list:list):
         protein_dict = load_all_proteins(fasta_file_list)
@@ -526,7 +527,7 @@ class PredictFastaSpecLib(PredictSpecLib):
         )
         self._precursor_df['mods'] = ''
         self._precursor_df['mod_sites'] = ''
-        self.sort_by_nAA()
+        self.refine_df()
 
     def from_peptide_sequence_list(self,
         pep_seq_list:list,
@@ -538,11 +539,7 @@ class PredictFastaSpecLib(PredictSpecLib):
             self._precursor_df['protein_name'] = protein_list
         self._precursor_df['is_prot_nterm'] = False
         self._precursor_df['is_prot_cterm'] = False
-        self.sort_by_nAA()
-
-    def predict_rt(self):
-        self.sort_by_nAA()
-        super().predict_rt()
+        self.refine_df()
 
     def add_mods_for_one_seq(self, sequence:str,
         is_prot_nterm, is_prot_cterm

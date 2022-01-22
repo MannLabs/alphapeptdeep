@@ -11,6 +11,7 @@ import wget
 import pandas as pd
 from zipfile import ZipFile
 from typing import Tuple
+import torch
 
 sandbox_dir = os.path.join(
     os.path.dirname(
@@ -171,6 +172,21 @@ def load_models_by_model_type_in_zip(model_type_in_zip:str):
 
 
 # Cell
+from alphabase.peptide.fragment import (
+    create_fragment_mz_dataframe,
+    get_charged_frag_types,
+    concat_precursor_fragment_dataframes
+)
+from alphabase.peptide.precursor import (
+    refine_precursor_df,
+    update_precursor_mz
+)
+from alphadeep.settings import global_settings
+
+import torch.multiprocessing as mp
+from typing import Dict
+from alphadeep.utils import logging, process_bar
+
 class ModelManager(object):
     def __init__(self):
         self.ms2_model:pDeepModel = None
@@ -359,37 +375,190 @@ class ModelManager(object):
                     epoch=self.epoch_to_tune_ms2
                 )
 
-    def predict_ms2(self, psm_df:pd.DataFrame,
+    def predict_ms2(self, precursor_df:pd.DataFrame,
         *,
         batch_size=mgr_settings[
             'predict'
         ]['batch_size_ms2'],
         reference_frag_df = None,
     ):
-        if 'nce' not in psm_df.columns:
-            self.set_default_nce(psm_df)
-        return self.ms2_model.predict(psm_df,
+        if 'nce' not in precursor_df.columns:
+            self.set_default_nce(precursor_df)
+        return self.ms2_model.predict(precursor_df,
             batch_size=batch_size,
             reference_frag_df=reference_frag_df
         )
 
-    def predict_rt(self, psm_df:pd.DataFrame,
+    def predict_rt(self, precursor_df:pd.DataFrame,
         *, batch_size=mgr_settings[
              'predict'
            ]['batch_size_rt_ccs']
     ):
-        return self.rt_model.predict(psm_df,
+        df = self.rt_model.predict(precursor_df,
             batch_size=batch_size
         )
+        df['rt_norm_pred'] = df.rt_pred
+        return df
 
-    def predict_mobility(self, psm_df:pd.DataFrame,
+    def predict_mobility(self, precursor_df:pd.DataFrame,
         *, batch_size=mgr_settings[
              'predict'
            ]['batch_size_rt_ccs']
     ):
-        psm_df = self.ccs_model.predict(psm_df,
+        precursor_df = self.ccs_model.predict(precursor_df,
             batch_size=batch_size
         )
         return self.ccs_model.ccs_to_mobility_pred(
-            psm_df
+            precursor_df
         )
+
+    def _predict_all_for_mp(self, arg_dict):
+        return self.predict_all(
+            multiprocessing=False, **arg_dict
+        )
+
+    def predict_all(self, precursor_df:pd.DataFrame,
+        *,
+        predict_items:list = [
+            'rt','mobility' # ,'ms2'
+        ],
+        frag_types:list = get_charged_frag_types(
+            ['b','y'],2
+        ),
+        multiprocessing:bool = True,
+        thread_num:int = global_settings['thread_num']
+    )->Dict[str, pd.DataFrame]:
+        """ predict all items defined by `predict_items`,
+        which may include rt, mobility, fragment_mz
+        and fragment_intensity.
+
+        Args:
+            precursor_df (pd.DataFrame): precursor dataframe contains
+              `sequence`, `mods`, `mod_sites`, `charge` ... columns.
+            predict_items (list, optional): items ('rt', 'mobility',
+              'ms2') to predict.
+              Defaults to [ 'rt','mobility' ].
+            frag_types (list, optional): fragment types to predict.
+              Defaults to ['b_z1','b_z2','y_z1','y_z2'].
+            multiprocessing (bool, optional): if use multiprocessing.
+              Defaults to True.
+            thread_num (int, optional): Defaults to global_settings['thread_num']
+        Returns:
+            Dict[str, pd.DataFrame]: {'precursor_df': precursor_df}
+              if 'ms2' in predict_items, it also contains:
+              {
+                  'fragment_mz_df': fragment_mz_df,
+                  'fragment_intensity_df': fragment_intensity_df
+              }
+
+        """
+        def refine_df(df):
+            if 'ms2' in predict_items:
+                refine_precursor_df(df)
+            else:
+                refine_precursor_df(df, drop_frag_idx=False)
+
+        if 'precursor_mz' not in precursor_df.columns:
+            update_precursor_mz(precursor_df)
+
+        if torch.cuda.is_available() or not multiprocessing:
+            refine_df(precursor_df)
+            if 'rt' in predict_items:
+                self.predict_rt(precursor_df)
+            if 'mobility' in predict_items:
+                self.predict_mobility(precursor_df)
+            if 'ms2' in predict_items:
+                fragment_intensity_df = self.predict_ms2(
+                    precursor_df
+                )
+
+                fragment_intensity_df.drop(
+                    columns=[
+                        col for col in fragment_intensity_df.columns
+                        if col not in frag_types
+                    ], inplace=True
+                )
+
+                precursor_df.drop(
+                    columns=['frag_start_idx'], inplace=True
+                )
+                fragment_mz_df = create_fragment_mz_dataframe(
+                    precursor_df, frag_types
+                )
+                fragment_mz_df.drop(
+                    columns=[
+                        col for col in fragment_mz_df.columns
+                        if col not in frag_types
+                    ], inplace=True
+                )
+
+                # clear error modloss intensities
+                for col in fragment_mz_df.columns.values:
+                    if 'modloss' in col:
+                        fragment_intensity_df.loc[
+                            fragment_mz_df[col]==0,col
+                        ] = 0
+
+                return {
+                    'precursor_df': precursor_df,
+                    'fragment_mz_df': fragment_mz_df,
+                    'fragment_intensity_df': fragment_intensity_df,
+                }
+            else:
+                return {'precursor_df': precursor_df}
+        else:
+            self.ms2_model.model.share_memory()
+            self.rt_model.model.share_memory()
+            self.ccs_model.model.share_memory()
+
+            df_groupby = precursor_df.groupby('nAA')
+
+            def param_generator(df_groupby):
+                for nAA, df in df_groupby:
+                    yield {
+                        'precursor_df': df,
+                        'predict_items': predict_items,
+                        'frag_types': frag_types,
+                    }
+
+            precursor_df_list = []
+            if 'ms2' in predict_items:
+                fragment_mz_df_list = []
+                fragment_intensity_df_list = []
+            else:
+                fragment_mz_df_list = None
+
+            with mp.Pool(thread_num) as p:
+                for ret_dict in process_bar(
+                    p.imap_unordered(
+                        self._predict_all_for_mp,
+                        param_generator(df_groupby)
+                    ), df_groupby.ngroups
+                ):
+                    precursor_df_list.append(ret_dict['precursor_df'])
+                    if fragment_mz_df_list is not None:
+                        fragment_mz_df_list.append(
+                            ret_dict['fragment_mz_df']
+                        )
+                        fragment_intensity_df_list.append(
+                            ret_dict['fragment_intensity_df']
+                        )
+            if fragment_mz_df_list is not None:
+                (
+                    precursor_df, fragment_mz_df, fragment_intensity_df
+                ) = concat_precursor_fragment_dataframes(
+                    precursor_df_list,
+                    fragment_mz_df_list,
+                    fragment_intensity_df_list,
+                )
+
+                return {
+                    'precursor_df': precursor_df,
+                    'fragment_mz_df': fragment_mz_df,
+                    'fragment_intensity_df': fragment_intensity_df,
+                }
+            else:
+                precursor_df = pd.concat(precursor_df_list)
+                precursor_df.reset_index(drop=True, inplace=True)
+
+                return {'precursor_df': precursor_df}

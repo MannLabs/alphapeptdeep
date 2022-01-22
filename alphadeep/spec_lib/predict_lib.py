@@ -14,68 +14,47 @@ class PredictSpecLib(SpecLibBase):
     def __init__(self,
         model_manager: ModelManager,
         charged_frag_types = ['b_z1','b_z2','y_z1','y_z2'],#['b_modloss_z1', ...]
-        min_frag_mz = 50, max_frag_mz = 2000,
         min_precursor_mz = 400, max_precursor_mz = 2000,
+        decoy:str = 'pseudo_reverse'
     ):
         super().__init__(
             charged_frag_types,
-            min_frag_mz=min_frag_mz,
-            max_frag_mz=max_frag_mz,
             min_precursor_mz=min_precursor_mz,
-            max_precursor_mz=max_precursor_mz
+            max_precursor_mz=max_precursor_mz,
+            decoy = decoy
         )
         self.model_manager = model_manager
 
         self.intensity_factor = 1
-        self.verbose = True
-
-        self.batch_size_ms2 = 1024
-        self.batch_size_rt_ccs = 1024
 
         self._precursor_df = pd.DataFrame()
         self._fragment_intensity_df = pd.DataFrame()
         self._fragment_mz_df = pd.DataFrame()
 
-    def predict_rt(self):
+    def set_precursor_and_fragment(self,
+        *,
+        precursor_df: pd.DataFrame,
+        fragment_mz_df: pd.DataFrame,
+        fragment_intensity_df: pd.DataFrame,
+    ):
+        self._precursor_df = precursor_df
+        self._fragment_intensity_df = fragment_intensity_df
+        self._fragment_mz_df = fragment_mz_df
+
+        self._fragment_mz_df.drop(columns=[
+            col for col in self._fragment_mz_df.columns
+            if col not in self.charged_frag_types
+        ], inplace=True)
+
+        self._fragment_intensity_df.drop(columns=[
+            col for col in self._fragment_intensity_df.columns
+            if col not in self.charged_frag_types
+        ], inplace=True)
+
+    def predict_all(self):
         """ add 'rt_pred' and 'irt_pred' into columns """
-        self._precursor_df = self.model_manager.rt_model.predict(
+        res = self.model_manager.predict_all(
             self._precursor_df,
-            batch_size=self.batch_size_rt_ccs,
-            verbose=self.verbose
+            predict_items=['rt','mobility','ms2'],
         )
-        self.model_manager.rt_model.rt_to_irt_pred(self._precursor_df)
-
-    def predict_mobility(self):
-        if 'precursor_mz' not in self._precursor_df.columns:
-            self.calc_precursor_mz()
-        """ add 'ccs_pred' and 'mobility_pred' into columns """
-        self._precursor_df = self.model_manager.ccs_model.predict(
-            self._precursor_df,
-            batch_size=self.batch_size_rt_ccs,
-            verbose=self.verbose
-        )
-        self.model_manager.ccs_model.ccs_to_mobility_pred(
-            self._precursor_df
-        )
-
-    def load_fragment_intensity_df(self, **kwargs):
-        self.predict_fragment_intensity_df(**kwargs)
-
-    def predict_fragment_intensity_df(self, **kwargs):
-        frag_inten_df = self.model_manager.ms2_model.predict(
-            self._precursor_df,
-            batch_size=self.batch_size_ms2,
-            verbose=self.verbose,
-        )
-
-        charged_frag_list = []
-        for frag_type in self._fragment_mz_df.columns.values:
-            if frag_type in frag_inten_df:
-                charged_frag_list.append(frag_type)
-        self._fragment_mz_df = self._fragment_mz_df[
-            charged_frag_list
-        ]
-        self._fragment_intensity_df = frag_inten_df[
-            charged_frag_list
-        ]*self.intensity_factor
-        self._fragment_intensity_df[self._fragment_mz_df==0] = 0
+        self.set_precursor_and_fragment(**res)
