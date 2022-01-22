@@ -104,6 +104,7 @@ class Percolator:
 
         self.max_train_sample = perc_settings['max_perc_train_sample']
         self.min_train_sample = perc_settings['min_perc_train_sample']
+        self.per_raw_fdr = perc_settings['per_raw_fdr']
 
     def enable_model_fine_tuning(self, flag=True):
         self.feature_extractor.require_model_tuning = flag
@@ -112,10 +113,25 @@ class Percolator:
         self.feature_extractor.require_model_tuning = False
         self.feature_extractor.require_raw_specific_rt_tuning = False
 
-    def _estimate_fdr(self, df:pd.DataFrame, fdr_level=None)->pd.DataFrame:
+    def _estimate_fdr(self,
+        df:pd.DataFrame,
+        fdr_level:str=None,
+        per_raw_fdr:bool=None,
+    )->pd.DataFrame:
         df = df.sort_values(['ml_score','decoy'], ascending=False)
         df = df.reset_index(drop=True)
-        if not fdr_level: fdr_level = self.fdr_level
+        if fdr_level is None:
+            fdr_level = self.fdr_level
+        if per_raw_fdr is None:
+            per_raw_fdr = self.per_raw_fdr
+        if per_raw_fdr:
+            df_list = []
+            for raw_name, df_raw in df.groupby('raw_name'):
+                df_list.append(self._estimate_fdr(df_raw,
+                    fdr_level = fdr_level,
+                    per_raw_fdr = False
+                ))
+            return pd.concat(df_list)
         if fdr_level == 'psm':
             target_values = 1-df['decoy'].values
             decoy_cumsum = np.cumsum(df['decoy'].values)
@@ -191,8 +207,8 @@ class Percolator:
         ):
             logging.info(
                 f'#target={np.sum(df_target.fdr<0.01)} or #decoy={len(df_decoy)} '
-                f'less then minimum training sample {self.min_train_sample} '
-                f'for cv-fold={self.cv_fold}'
+                f'< minimal training sample={self.min_train_sample} '
+                f'for cv-fold={self.cv_fold}. Skip rescoring!!!'
             )
             return df
 
@@ -253,7 +269,7 @@ class Percolator:
         for i in range(self.iter_num):
             logging.info(f'[PERC] Iteration {i+1} of Percolator ...')
             df = self._cv_score(df)
-            df = self._estimate_fdr(df, 'psm')
+            df = self._estimate_fdr(df, 'psm', False)
             logging.info(
                 f'[PERC] {len(df[(df.fdr<=self.fdr) & (df.decoy==0)])} '
                 f'target PSMs at {self.fdr} psm-level FDR'

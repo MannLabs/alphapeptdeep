@@ -5,6 +5,7 @@ __all__ = ['PredictSpecLib']
 # Cell
 import pandas as pd
 import numpy as np
+import torch
 
 from alphabase.spectrum_library.library_base import SpecLibBase
 from alphadeep.pretrained_models import ModelManager

@@ -64,12 +64,16 @@ def uniform_sampling(psm_df:pd.DataFrame,
                 replace=False,
                 random_state=random_state
             ))
-    train_df = pd.concat(df_list)
     if return_test_df:
+        if len(df_list) == 0:
+            return pd.DataFrame(), pd.DataFrame()
+        train_df = pd.concat(df_list)
         test_df = psm_df.drop(train_df.index)
         return train_df, test_df
     else:
-        return train_df
+        if len(df_list) == 0:
+            return pd.DataFrame()
+        return pd.concat(df_list)
 
 
 # Cell

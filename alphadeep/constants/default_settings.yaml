@@ -53,6 +53,7 @@ percolator:
   cv_fold: 1
   fdr: 0.01
   fdr_level: psm
+  per_raw_fdr: False
   fdr_level_choices:
     - psm
     - precursor
