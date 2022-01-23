@@ -200,8 +200,9 @@ class pDeepModel(model_base.ModelImplBase):
             self._predict_in_order = False
 
         self.predict_df = init_fragment_by_precursor_dataframe(
-            precursor_df, self.charged_frag_types, reference_frag_df
-        ).astype(np.float32, copy=False)
+            precursor_df, self.charged_frag_types,
+            reference_frag_df, dtype=np.float32
+        )
 
         if np.all(precursor_df['nce'].values > 1):
             precursor_df['nce'] = precursor_df['nce']*self.NCE_factor

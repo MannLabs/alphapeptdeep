@@ -12,6 +12,7 @@ model_mgr:
     batch_size_rt_ccs: 1024
     default_nce: 0.3
     default_instrument: Lumos
+    verbose: True
   fine_tune:
     epoch_ms2: 10
     epoch_rt_ccs: 20

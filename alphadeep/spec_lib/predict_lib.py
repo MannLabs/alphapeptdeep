@@ -6,6 +6,7 @@ __all__ = ['PredictSpecLib']
 import pandas as pd
 import numpy as np
 import torch
+from alphadeep.utils import logging
 
 from alphabase.spectrum_library.library_base import SpecLibBase
 from alphadeep.pretrained_models import ModelManager
@@ -53,8 +54,10 @@ class PredictSpecLib(SpecLibBase):
 
     def predict_all(self):
         """ add 'rt_pred' and 'irt_pred' into columns """
+        logging.info('predicting RT/IM/MS2 ...')
         res = self.model_manager.predict_all(
             self._precursor_df,
             predict_items=['rt','mobility','ms2'],
         )
         self.set_precursor_and_fragment(**res)
+        logging.info('End Predicting RT/IM/MS2')

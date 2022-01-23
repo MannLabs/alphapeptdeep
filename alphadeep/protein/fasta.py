@@ -623,9 +623,7 @@ class PredictFastaSpecLib(PredictSpecLib):
             truncate=True,
             delete_existing=False
         )
-        _hdf.library = {
-            'protein_df': self.protein_df,
-        }
+        _hdf.library.protein_df = self.protein_df
 
 # Cell
 def append_regular_modifications(df,

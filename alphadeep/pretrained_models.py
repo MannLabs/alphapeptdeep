@@ -216,6 +216,9 @@ class ModelManager(object):
         self.instrument = mgr_settings[
             'predict'
         ]['default_instrument']
+        self.verbose = mgr_settings[
+            'predict'
+        ]['verbose']
 
     def set_default_nce(self, df):
         df['nce'] = self.nce
@@ -384,9 +387,12 @@ class ModelManager(object):
     ):
         if 'nce' not in precursor_df.columns:
             self.set_default_nce(precursor_df)
+        if self.verbose:
+            logging.info('Predicting MS2 ...')
         return self.ms2_model.predict(precursor_df,
             batch_size=batch_size,
-            reference_frag_df=reference_frag_df
+            reference_frag_df=reference_frag_df,
+            verbose=self.verbose
         )
 
     def predict_rt(self, precursor_df:pd.DataFrame,
@@ -394,8 +400,10 @@ class ModelManager(object):
              'predict'
            ]['batch_size_rt_ccs']
     ):
+        if self.verbose:
+            logging.info("Predicting RT ...")
         df = self.rt_model.predict(precursor_df,
-            batch_size=batch_size
+            batch_size=batch_size, verbose=self.verbose
         )
         df['rt_norm_pred'] = df.rt_pred
         return df
@@ -405,8 +413,10 @@ class ModelManager(object):
              'predict'
            ]['batch_size_rt_ccs']
     ):
+        if self.verbose:
+            logging.info("Predicting mobility ...")
         precursor_df = self.ccs_model.predict(precursor_df,
-            batch_size=batch_size
+            batch_size=batch_size, verbose=self.verbose
         )
         return self.ccs_model.ccs_to_mobility_pred(
             precursor_df
@@ -528,6 +538,13 @@ class ModelManager(object):
             else:
                 fragment_mz_df_list = None
 
+            if self.verbose:
+                logging.info(
+                    f'Predicting {",".join(predict_items)} ...'
+                )
+            verbose_bak = self.verbose
+            self.verbose = False
+
             with mp.Pool(thread_num) as p:
                 for ret_dict in process_bar(
                     p.imap_unordered(
@@ -543,6 +560,8 @@ class ModelManager(object):
                         fragment_intensity_df_list.append(
                             ret_dict['fragment_intensity_df']
                         )
+            self.verbose = verbose_bak
+
             if fragment_mz_df_list is not None:
                 (
                     precursor_df, fragment_mz_df, fragment_intensity_df
