@@ -44,13 +44,13 @@ percolator:
   max_perc_train_sample: 50000
   min_perc_train_sample: 100
 
-  ml_type: logistic_regression
+  ml_type: nn
   ml_type_choices:
-    - logistic_regression
-    - lr
-    - random_forest
-    - rf
+    - lr # logistic regression
+    - nn # pytorch neural network
+    - rf # random forest
   ml_iter_num: 5
+  # min_ml_multirocessing_num: 3000000
   cv_fold: 1
   fdr: 0.01
   fdr_level: psm
@@ -86,18 +86,14 @@ percolator:
       maxquant: {}
 spec_lib:
   input:
-    type: pfind3
-    accepted_types:
+    type: fasta
+    type_choices:
     - fasta
-    - pfind3
-    - maxquant
-    - alphapept
+    - sequence_list
+    - peptide_list # sequence with mods and mod_sites
+    - precursor_list # peptide with charge state
     files: 
     - xxx.fasta
-    ms_files:
-    - /x/xx/xxx.raw
-    instrument: QE
-    ce: 27
     fasta:
       max_miss_cleave: 3
       fixmod: 
@@ -110,27 +106,27 @@ spec_lib:
       min_target_mod: 0
       max_target_mod: 2
   output:
-    type: spectronaut
-    accepted_types:
-    - spectronaut
-    - diann
+    type: hdf
+    type_choices:
+    - hdf
+    - diann # and can also be used by spectronaut
     - msp
-    library: xxx.csv
+    library: xxx.speclib.hdf
     min_fragment_mz: 300
     max_fragment_mz: 2000
-    min_intensity: 0.1
+    min_relative_intensity: 0.1
     least_n_peaks: 6
-    max_ion_charge: 2
-    ion_types:
+    max_frag_charge: 2
+    frag_types:
     - b
     - y
-    - b-modloss
-    - y-modloss
     min_precursor_charge: 2
     max_precursor_charge: 4
     min_precursor_mz: 400
-    max_precursor_mz: 1200
+    max_precursor_mz: 2000
     min_peptide_len: 6
-    max_peptide_len: 60
-    decoy: no_decoy
-    modname_as_mass: false
+    max_peptide_len: 35
+    decoy: pseudo_reverse
+    decoy_choices:
+    - pseudo_reverse
+    - diann

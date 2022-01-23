@@ -188,6 +188,7 @@ class ScoreFeatureExtractor:
             model_mgr (ModelManager): The ModelManager in alphadeep.pretrained_models.
         """
         self.model_mgr = model_mgr
+        self.model_mgr.verbose = False
 
         self.raw_num_to_tune = perc_settings['raw_num_to_tune']
 
