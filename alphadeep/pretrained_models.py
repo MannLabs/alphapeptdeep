@@ -430,7 +430,7 @@ class ModelManager(object):
     def predict_all(self, precursor_df:pd.DataFrame,
         *,
         predict_items:list = [
-            'rt','mobility' # ,'ms2'
+            'rt' #,'mobility' ,'ms2'
         ],
         frag_types:list = get_charged_frag_types(
             ['b','y'],2
@@ -447,7 +447,7 @@ class ModelManager(object):
               `sequence`, `mods`, `mod_sites`, `charge` ... columns.
             predict_items (list, optional): items ('rt', 'mobility',
               'ms2') to predict.
-              Defaults to [ 'rt','mobility' ].
+              Defaults to [ 'rt' ].
             frag_types (list, optional): fragment types to predict.
               Defaults to ['b_z1','b_z2','y_z1','y_z2'].
             multiprocessing (bool, optional): if use multiprocessing.

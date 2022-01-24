@@ -13,6 +13,7 @@ import numba
 import os
 import itertools
 from Bio import SeqIO
+from typing import Union
 
 from alphabase.yaml_utils import load_yaml
 from alphabase.io.hdf import HDF_File
@@ -459,8 +460,8 @@ class PredictFastaSpecLib(PredictSpecLib):
                 mod_set.add(mod[-1])
         return False
 
-    def import_fasta(self, fasta_file_list:list):
-        self.from_fasta_list(fasta_file_list)
+    def import_fasta(self, fasta_files:list):
+        self.from_fasta_list(fasta_files)
         self._predict_all_after_load_pep_seqs()
 
     def import_protein_dict(self, protein_dict:dict):
@@ -479,8 +480,44 @@ class PredictFastaSpecLib(PredictSpecLib):
         self.add_charge()
         self.predict_all()
 
-    def from_fasta_list(self, fasta_file_list:list):
-        protein_dict = load_all_proteins(fasta_file_list)
+    def load_peptide_sequences(self,
+        *source,
+        source_type="fasta"
+    ):
+        """Wrapper for loading peptide sequences
+
+        Args:
+            source_type (str, optional): could be .
+             Defaults to "fasta".
+        """
+        if source_type == "fasta":
+            self.from_fasta(*source)
+        elif source_type == "protein_dict":
+            self.from_protein_dict(*source)
+        elif source_type == "peptide_list":
+            self.from_peptide_sequence_list(*source)
+        else:
+            self.from_fasta_list(*source)
+
+    def from_fasta(self, fasta_file:Union[str,list]):
+        """Load peptide sequence from fasta file.
+
+        Args:
+            fasta_path (Union[str,list]): could be a fasta path
+              or a list of fasta paths
+        """
+        if isinstance(fasta_file, 'str'):
+            self.from_fasta_list([fasta_file])
+        else:
+            self.from_fasta_list(fasta_file)
+
+    def from_fasta_list(self, fasta_files:list):
+        """Load peptide sequences from fasta file list
+
+        Args:
+            fasta_files (list): fasta file list
+        """
+        protein_dict = load_all_proteins(fasta_files)
         self.from_protein_dict(protein_dict)
 
     def from_protein_dict(self, protein_dict:dict):
