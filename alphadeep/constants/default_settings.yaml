@@ -1,4 +1,4 @@
-thread_num: 8
+# CONST CONFIG
 model:
   frag_types:
   - b
@@ -6,6 +6,8 @@ model:
   - b_modloss
   - y_modloss
   max_frag_charge: 2
+# overwritable config
+thread_num: 8
 model_mgr:
   predict:
     batch_size_ms2: 512
@@ -29,7 +31,7 @@ percolator:
   psm_num_to_tune_rt_ccs: 5000
   mod_psm_num_to_tune_rt_ccs: 100
   top_n_mods_to_tune: 10
-  model_type: regular # or phos, or HLA
+  alphadeep_model_type: regular # or phos, or HLA
   mask_modloss: True
 
   require_raw_specific_tuning: True
@@ -44,22 +46,22 @@ percolator:
   max_perc_train_sample: 50000
   min_perc_train_sample: 100
 
-  ml_type: nn
-  ml_type_choices:
-    - lr # logistic regression
-    - nn # pytorch neural network
+  percolator_model: linear
+  percolator_model_choices:
+    - linear # logistic regression
+    - nn # pytorch neural network (results are not stable)
     - rf # random forest
-  ml_iter_num: 5
-  # min_ml_multirocessing_num: 3000000
+  lr_percolator_nn_model: 0.1 # learning rate, only used when percolator_model==nn 
+  ml_iter_num: 5 # percolator iteration number
   cv_fold: 1
   fdr: 0.01
   fdr_level: psm
-  per_raw_fdr: False
   fdr_level_choices:
     - psm
     - precursor
     - peptide
     - sequence
+  per_raw_fdr: False
   frag_types: ['b_z1','b_z2','y_z1','y_z2']
   input_files:
     psm_type: alphapept
@@ -70,10 +72,10 @@ percolator:
       - msfragger_pepxml
     psm_files: []
     raw_type: alphapept_hdf
-    psm_type_choices:
+    raw_type_choices:
       - hdf
+      - thermo_raw # if alphapept is installed
       - mgf
-      - thermo_raw
       - mzml
     raw_files: []
     other_score_column_mapping:

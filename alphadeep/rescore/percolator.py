@@ -41,8 +41,9 @@ class LogisticRegressionTorch(torch.nn.Module):
         return self.linear(x)
 
 class DLRescore:
-    def __init__(self, num_features, dl_model_type='lr'):
-        if dl_model_type == 'lr':
+    def __init__(self, num_features, dl_model_type='linear'):
+        self.model_type = dl_model_type
+        if dl_model_type == 'linear':
             self.dl_model = LogisticRegressionTorch(
                 num_features
             )
@@ -50,10 +51,11 @@ class DLRescore:
             self.predict_batch_size = 100000
         else:
             raise NotImplementedError(
-                'Only lr model is implemented'
+                "Only lr model is implemented"
             )
         self.optimizer = torch.optim.Adam(
-            self.dl_model.parameters(), lr=0.01
+            self.dl_model.parameters(),
+            lr=perc_settings['lr_percolator_nn_model']
         )
         self.loss_func = torch.nn.CrossEntropyLoss()
         if torch.cuda.is_available():
@@ -103,31 +105,51 @@ class DLRescore:
 class Percolator:
     def __init__(self,
         *,
-        ml_type=perc_settings['ml_type'],
-        cv_fold = perc_settings['cv_fold'],
-        iter_num = perc_settings['ml_iter_num'],
-        ms2_ppm = perc_settings['ms2_ppm'],
-        ms2_tol = perc_settings['ms2_tol'],
+        percolator_model:str=perc_settings['percolator_model'],
+        cv_fold:int = perc_settings['cv_fold'],
+        iter_num:int = perc_settings['ml_iter_num'],
+        ms2_ppm:bool = perc_settings['ms2_ppm'],
+        ms2_tol:float = perc_settings['ms2_tol'],
         model_mgr:ModelManager = None
     ):
-        """
+        """Percolator model
+        Note that
+        ```
+          perc_settings = alphadeep.settings.global_settings['percolator']
+        ```
 
         Args:
-            ml_type ([type], optional): machine learning type,
-              Defaults to perc_settings['ml_type'].
-            n_iteration ([type], optional): [description].
-              Defaults to perc_settings['n_ml_iter'].
-            ms2_ppm ([type], optional): [description].
+            percolator_model (str, optional): machine learning
+              model type for rescoring, could be:
+                "linear" or ("logistic_regression"): logistic regression
+                "nn": pytorch neural network model. Its results are not stable.
+                "rf" or "random_forest": random forest
+              Defaults to perc_settings['percolator_model'].
+            cv_fold (int, optional): cross-validation fold.
+              Defaults to perc_settings['cv_fold'].
+            iter_num (int, optional): percolator iteration number.
+              Defaults to perc_settings['ml_iter_num'].
+            ms2_ppm (bool, optional): is ms2 tolerance the ppm.
               Defaults to perc_settings['ms2_ppm'].
-            ms2_tol ([type], optional): [description].
+            ms2_tol (float, optional): ms2 tolerance.
               Defaults to perc_settings['ms2_tol'].
-            model_mgr (ModelManager, optional): [description].
+            model_mgr (ModelManager, optional): alphadeep.pretrained_model.ModelManager.
+              If None, self.model_mgr will be init by:
+              ```
+              self.model_mgr = ModelManager()
+              self.model_mgr.load_installed_models(
+                perc_settings['alphadeep_model_type'],
+                mask_modloss=perc_settings[
+                    'mask_modloss'
+                ]
+              )
+              ```
               Defaults to None.
         """
         if model_mgr is None:
             self.model_mgr = ModelManager()
             self.model_mgr.load_installed_models(
-                perc_settings['model_type'],
+                perc_settings['alphadeep_model_type'],
                 mask_modloss=perc_settings[
                     'mask_modloss'
                 ]
@@ -137,20 +159,15 @@ class Percolator:
         self.charged_frag_types = perc_settings['frag_types']
         self.ms2_ppm = ms2_ppm
         self.ms2_tol = ms2_tol
-        if ml_type == 'logistic_regression':
-            ml_type = 'lr'
-        elif ml_type == 'neural_network':
-            ml_type = 'nn'
-        self.ml_type = ml_type
+        if percolator_model == 'logistic_regression':
+            percolator_model = 'linear'
+        elif percolator_model == 'neural_network':
+            percolator_model = 'nn'
         self.fdr_level = perc_settings['fdr_level']
         self.fdr = perc_settings['fdr']
         self.cv_fold = cv_fold
         self.iter_num = iter_num
 
-        # self.multiprocessing = perc_settings['multiprocessing']
-        # self.min_ml_multiprocessing_num = perc_settings[
-        #     'min_ml_multirocessing_num'
-        # ]
         if perc_settings['multiprocessing']:
             self.feature_extractor = ScoreFeatureExtractorMP(
                 model_mgr=self.model_mgr,
@@ -173,23 +190,26 @@ class Percolator:
         self.min_train_sample = perc_settings['min_perc_train_sample']
         self.per_raw_fdr = perc_settings['per_raw_fdr']
 
-        if ml_type == 'nn':
+        self.percolator_model = percolator_model
+        if percolator_model == 'nn':
             self.model = DLRescore(len(self.feature_list))
-        elif ml_type == 'lr':
+        elif percolator_model == 'linear':
             self.model = LogisticRegression(
                 solver='liblinear'
             )
-        elif ml_type == 'rf':
+        elif percolator_model == 'rf':
             self.model = RandomForestClassifier()
         else:
             if torch.cuda.is_available():
                 self.model = DLRescore(
-                    len(self.feature_list), model_type='lr'
+                    len(self.feature_list), model_type='linear'
                 )
+                self.percolator_model = 'nn'
             else:
                 self.model = LogisticRegression(
-                solver='liblinear'
-            )
+                    solver='liblinear'
+                )
+                self.percolator_model = 'linear'
 
     def enable_model_fine_tuning(self, flag=True):
         self.feature_extractor.require_model_tuning = flag
@@ -268,34 +288,8 @@ class Percolator:
             train_label
         )
 
-    # def _predict_mp(self, test_df):
-    #     thread_num = global_settings['thread_num']
-    #     features = test_df[self.feature_list].values
-    #     thread_div = len(features)//thread_num
-    #     splits = np.arange(thread_div, len(features), thread_div)
-    #     feature_splits = np.split(features, splits)
-    #     with mp.Pool(thread_num) as p:
-    #         if self.ml_type == 'lr':
-    #             results = p.map(
-    #                 self.model.decision_function,
-    #                 feature_splits
-    #             )
-    #         else:
-    #             results = p.map(
-    #                 self.model.predict_proba,
-    #                 feature_splits
-    #             )
-    #             results = [result[:,1] for result in results]
-    #     test_df['ml_score'] = np.concatenate(results)
-    #     return test_df
-
     def _predict(self, test_df):
-        # if (
-        #     self.multiprocessing and
-        #     len(test_df) >= self.min_ml_multiprocessing_num
-        # ):
-        #     return self._predict_mp(test_df)
-        if self.ml_type == 'lr' or self.ml_type == 'lr_torch':
+        if self.percolator_model == 'linear' or self.percolator_model == 'nn':
             test_df['ml_score'] = self.model.decision_function(
                 test_df[self.feature_list].values
             )
@@ -358,9 +352,6 @@ class Percolator:
     def extract_features(self,
         psm_df:pd.DataFrame, ms2_file_dict:dict, ms2_file_type:str
     )->pd.DataFrame:
-        for feat in self.feature_list:
-            if feat not in psm_df.columns:
-                self.feature_list.remove(feat)
 
         psm_df['ml_score'] = psm_df.score
         psm_df = self._estimate_fdr(psm_df, 'psm')
@@ -370,6 +361,7 @@ class Percolator:
             frag_types=self.charged_frag_types,
             ms2_ppm=self.ms2_ppm, ms2_tol=self.ms2_tol
         )
+
         return psm_df
 
     def re_score(self, df:pd.DataFrame)->pd.DataFrame:
