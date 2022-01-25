@@ -679,6 +679,18 @@ class ScoreFeatureExtractorMP(ScoreFeatureExtractor):
                             and self.raw_specific_ms2_tuning
                         ):
                             (
+                                psm_num_to_tune_ms2,
+                                psm_num_per_mod_to_tune_ms2,
+                                epoch_to_tune_ms2,
+                                grid_nce_search
+                            ) = (
+                                self.model_mgr.psm_num_to_tune_ms2,
+                                self.model_mgr.psm_num_per_mod_to_tune_ms2,
+                                self.model_mgr.epoch_to_tune_ms2,
+                                self.model_mgr.grid_nce_search
+                            )
+
+                            (
                                 self.model_mgr.psm_num_to_tune_ms2
                             ) = perc_settings['psm_num_per_raw_to_tune']
 
@@ -694,6 +706,18 @@ class ScoreFeatureExtractorMP(ScoreFeatureExtractor):
                             self.model_mgr.fine_tune_ms2_model(
                                 df[(df.fdr<0.01)&(df.decoy==0)],
                                 frag_inten_df
+                            )
+
+                            (
+                                self.model_mgr.psm_num_to_tune_ms2,
+                                self.model_mgr.psm_num_per_mod_to_tune_ms2,
+                                self.model_mgr.epoch_to_tune_ms2,
+                                self.model_mgr.grid_nce_search
+                            ) = (
+                                psm_num_to_tune_ms2,
+                                psm_num_per_mod_to_tune_ms2,
+                                epoch_to_tune_ms2,
+                                grid_nce_search
                             )
 
                         predict_inten_df = self.model_mgr.predict_ms2(df)

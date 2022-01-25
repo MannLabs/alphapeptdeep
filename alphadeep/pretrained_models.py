@@ -372,6 +372,8 @@ class ModelManager(object):
                     )
                     tr_df['nce'] = self.nce
                     tr_df['instrument'] = self.instrument
+                elif 'nce' not in tr_df.columns:
+                    self.set_default_nce(tr_df)
 
                 self.ms2_model.train(tr_df,
                     fragment_intensity_df=tr_inten_df,
