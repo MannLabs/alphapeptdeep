@@ -11,33 +11,46 @@ import pandas as pd
 
 class MSReaderBase:
     def __init__(self):
-        self.spectrum_df:pd.DataFrame = None
-        self.masses: np.array = None
-        self.intens: np.array = None
+        self.spectrum_df:pd.DataFrame = pd.DataFrame()
+        self.mzs: np.array = np.array([])
+        self.intensities: np.array = np.array([])
 
     def load(self, file_path):
         raise NotImplementedError('load()')
 
     def build_spectrum_df(self, scan_list, scan_indices, rt_list, mobility_list = None):
-        if not mobility_list: mobility_list = np.nan
-        self.spectrum_df = pd.DataFrame({
-            'scan_no': scan_list,
-            'peak_start_idx': scan_indices[:-1],
-            'peak_end_idx': scan_indices[1:],
-            'RT': rt_list,
-            'mobility': mobility_list,
-        }, index = scan_list)
-        self.spectrum_df.RT /= self.spectrum.RT.max()
+        if mobility_list is None: mobility_list = np.nan
+        def set_col(col, indexes, values, dtype, na_value):
+            self.spectrum_df.loc[indexes, col] = values
+            self.spectrum_df[col].fillna(na_value, inplace=True)
+            self.spectrum_df[col] = self.spectrum_df[col].astype(dtype)
 
-    def get_peaks(self, scan_no):
-        if scan_no not in self.spectrum_df.index:
+        idx_len = np.max(scan_list)+1
+        self.spectrum_df = pd.DataFrame(index=np.arange(idx_len, dtype=np.int64))
+        self.spectrum_df['spec_idx'] = self.spectrum_df.index.values
+        set_col('peak_start_idx', scan_list, scan_indices[:-1], np.int64, -1)
+        set_col('peak_end_idx', scan_list, scan_indices[1:], np.int64, -1)
+        set_col('rt', scan_list, rt_list, np.float64, np.nan)
+        set_col('mobility', scan_list, mobility_list, np.float64, np.nan)
+
+    def get_peaks(self, spec_idx):
+        """Get peak (mz and intensity) values by `spec_idx`
+
+        Args:
+            spec_idx (object): indicator for a spectrum, could be scan no for thermo data.
+
+        Returns:
+            np.array: mz values for the given spec_idx (scan)
+            np.array: intensity values for the given spec_idx
+        """
+        if spec_idx not in self.spectrum_df.index:
             return None, None
         start_idx, end_idx = self.spectrum_df.loc[
-            scan_no, ['peak_start_idx','peak_end_idx']
+            spec_idx, ['peak_start_idx','peak_end_idx']
         ].values.astype(np.int64)
         return (
-            self.masses[start_idx:end_idx],
-            self.intens[start_idx:end_idx]
+            self.mzs[start_idx:end_idx],
+            self.intensities[start_idx:end_idx]
         )
 
 class AlphaPept_HDF_MS1_Reader(MSReaderBase):
@@ -51,12 +64,12 @@ class AlphaPept_HDF_MS1_Reader(MSReaderBase):
                 group_name="Raw/MS1_scans",
             )
             self.ms_data[dataset_name] = values
-        self.masses = self.ms_data['mass_list_ms1']
-        self.intens = self.ms_data['int_list_ms1']
+        self.mzs = self.ms_data['mass_list_ms1']
+        self.intensities = self.ms_data['int_list_ms1']
         self.build_spectrum_df(
             scan_list=self.ms_data['scan_list_ms1'],
             scan_indices=self.ms_data['indices_ms1'],
-            rt_list=self.ms_dat['rt_list_ms1'],
+            rt_list=self.ms_data['rt_list_ms1'],
             mobility_list=self.ms_data['mobility'] if 'mobility' in self.ms_data else None,
         )
 
@@ -71,12 +84,16 @@ class AlphaPept_HDF_MS2_Reader(MSReaderBase):
                 group_name="Raw/MS2_scans",
             )
             self.ms_data[dataset_name] = values
-        self.masses = self.ms_data['mass_list_ms2']
-        self.intens = self.ms_data['int_list_ms2']
+        self.mzs = self.ms_data['mass_list_ms2']
+        self.intensities = self.ms_data['int_list_ms2']
+        if 'mobility2' in self.ms_data:
+            scan_list = np.arange(len(self.ms_data['rt_list_ms2']))
+        else:
+            scan_list = self.ms_data['scan_list_ms2']
         self.build_spectrum_df(
-            scan_list=self.ms_data['scan_list_ms2'],
+            scan_list=scan_list,
             scan_indices=self.ms_data['indices_ms2'],
-            rt_list=self.ms_dat['rt_list_ms2'],
+            rt_list=self.ms_data['rt_list_ms2'],
             mobility_list=self.ms_data['mobility2'] if 'mobility2' in self.ms_data else None,
         )
 
@@ -146,7 +163,7 @@ class MGFReader(MSReaderBase):
                     elif line.startswith('SCAN='):
                         scan = int(line.split('=')[1])
                     elif line.startswith('RTINSECOND'):
-                        RT = float(line.split('=')[1])
+                        RT = float(line.split('=')[1])/60
                 if not scan:
                     title = find_line(lines, 'TITLE=')
                     scan = parse_pfind_scan_from_TITLE(title)
@@ -163,8 +180,8 @@ class MGFReader(MSReaderBase):
             index_ragged_list(masses_list),
             rt_list
         )
-        self.masses = np.concatenate(masses_list)
-        self.intens = np.concatenate(intens_list)
+        self.mzs = np.concatenate(masses_list)
+        self.intensities = np.concatenate(intens_list)
 
 
 class MSReaderProvider:
@@ -231,8 +248,8 @@ try:
                 index_ragged_list(masses_list),
                 rt_list,
             )
-            self.masses = np.concatenate(masses_list)
-            self.intens = np.concatenate(intens_list)
+            self.mzs = np.concatenate(masses_list)
+            self.intensities = np.concatenate(intens_list)
             rawfile.Close()
 
     class ThermoRawMS2Reader(MSReaderBase):
@@ -260,7 +277,7 @@ try:
                         else:
                             masses, intens = rawfile.GetCentroidMassListFromScanNum(i)
                         scan_list.append(i)
-                        rt_list.append(rawfile.RTInSecondsFromScanNum(i))
+                        rt_list.append(rawfile.RTFromScanNum(i))
                         masses_list.append(masses)
                         intens_list.append(intens)
 
@@ -276,8 +293,8 @@ try:
                 index_ragged_list(masses_list),
                 rt_list,
             )
-            self.masses = np.concatenate(masses_list)
-            self.intens = np.concatenate(intens_list)
+            self.mzs = np.concatenate(masses_list)
+            self.intensities = np.concatenate(intens_list)
             rawfile.Close()
 
     ms2_reader_provider.register_reader('thermo', ThermoRawMS2Reader)
@@ -286,4 +303,5 @@ try:
     ms1_reader_provider.register_reader('thermo_raw', ThermoRawMS1Reader)
 except Exception as e:
     # alphapept or RawFileReader is not installed
+    print('alphapept or RawFileReader is not installed')
     print(e)

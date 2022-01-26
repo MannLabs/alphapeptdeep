@@ -10,9 +10,10 @@ __all__ = ['mod_feature_size', 'max_instrument_num', 'frag_types', 'max_frag_cha
 
 # Cell
 import torch
+torch.set_num_threads(2)
 
-from alphadeep._settings import model_const
-from alphadeep._settings import global_settings as settings
+from alphadeep.settings import model_const
+from alphadeep.settings import global_settings as settings
 
 mod_feature_size = len(model_const['mod_elements'])
 max_instrument_num = model_const['max_instrument_num']

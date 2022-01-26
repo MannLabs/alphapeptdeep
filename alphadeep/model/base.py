@@ -12,7 +12,9 @@ from tqdm import tqdm
 from zipfile import ZipFile
 from typing import IO, Tuple, List, Union
 from alphabase.yaml_utils import save_yaml
-from alphadeep._settings import model_const
+from alphabase.peptide.precursor import is_precursor_sorted
+
+from alphadeep.settings import model_const
 
 from alphadeep.model.building_block import *
 
@@ -102,14 +104,14 @@ class ModelImplBase(object):
     def load(
         self,
         model_file: Tuple[str, IO],
-        model_name_in_zip: str = None,
+        model_path_in_zip: str = None,
         **kwargs
     ):
         if isinstance(model_file, str):
             # We may release all models (msms, rt, ccs, ...) in a single zip file
             if model_file.lower().endswith('.zip'):
-                with ZipFile(model_file, 'rb') as model_zip:
-                    with model_zip.open(model_name_in_zip) as pt_file:
+                with ZipFile(model_file) as model_zip:
+                    with model_zip.open(model_path_in_zip,'r') as pt_file:
                         self._load_model_file(pt_file)
             else:
                 with open(model_file,'rb') as pt_file:
@@ -147,7 +149,7 @@ class ModelImplBase(object):
 
     def _get_targets_from_batch_df(self,
         batch_df:pd.DataFrame,
-        nAA, **kwargs,
+        nAA=None, **kwargs,
     )->Union[torch.Tensor,List]:
         raise NotImplementedError(
             'Must implement _get_targets_from_batch_df() method'
@@ -187,12 +189,15 @@ class ModelImplBase(object):
 
     def train(self,
         precursor_df: pd.DataFrame,
+        *,
         batch_size=1024,
         epoch=20,
         verbose=False,
         verbose_each_epoch=False,
         **kwargs
     ):
+        if 'nAA' not in precursor_df.columns:
+            precursor_df['nAA'] = precursor_df.sequence.str.len()
         self._prepare_train_data_df(precursor_df, **kwargs)
         self.model.train()
 
@@ -211,8 +216,8 @@ class ModelImplBase(object):
                     batch_end = i+batch_size-1 # DataFrame.loc[start:end] inlcudes the end
 
                     batch_df = df_group.loc[i:batch_end,:]
-                    targets = self._get_targets_from_batch_df(batch_df,nAA,**kwargs)
-                    features = self._get_features_from_batch_df(batch_df,nAA,**kwargs)
+                    targets = self._get_targets_from_batch_df(batch_df,nAA=nAA,**kwargs)
+                    features = self._get_features_from_batch_df(batch_df,nAA=nAA,**kwargs)
 
                     cost = self._train_one_batch(
                         targets,
@@ -227,11 +232,24 @@ class ModelImplBase(object):
 
         torch.cuda.empty_cache()
 
+    def _check_predict_in_order(self, precursor_df:pd.DataFrame):
+        if is_precursor_sorted(precursor_df):
+            self._predict_in_order = True
+        else:
+            self._predict_in_order = False
+
     def predict(self,
         precursor_df:pd.DataFrame,
+        *,
         batch_size=1024,
-        verbose=False,**kwargs
+        verbose=False,
+        **kwargs
     )->pd.DataFrame:
+        if 'nAA' not in precursor_df.columns:
+            precursor_df['nAA'] = precursor_df.sequence.str.len()
+            precursor_df.sort_values('nAA', inplace=True)
+            precursor_df.reset_index(drop=True,inplace=True)
+        self._check_predict_in_order(precursor_df)
         self._prepare_predict_data_df(precursor_df,**kwargs)
         self.model.eval()
 
@@ -240,23 +258,23 @@ class ModelImplBase(object):
             batch_tqdm = tqdm(_grouped)
         else:
             batch_tqdm = _grouped
+        with torch.no_grad():
+            for nAA, df_group in batch_tqdm:
+                for i in range(0, len(df_group), batch_size):
+                    batch_end = i+batch_size
 
-        for nAA, df_group in batch_tqdm:
-            for i in range(0, len(df_group), batch_size):
-                batch_end = i+batch_size
+                    batch_df = df_group.iloc[i:batch_end,:]
 
-                batch_df = df_group.iloc[i:batch_end,:]
+                    features = self._get_features_from_batch_df(
+                        batch_df, nAA, **kwargs
+                    )
 
-                features = self._get_features_from_batch_df(
-                    batch_df, nAA, **kwargs
-                )
+                    predicts = self._predict_one_batch(*features)
 
-                predicts = self._predict_one_batch(*features)
-
-                self._set_batch_predict_data(
-                    batch_df, predicts,
-                    **kwargs
-                )
+                    self._set_batch_predict_data(
+                        batch_df, predicts,
+                        **kwargs
+                    )
 
         torch.cuda.empty_cache()
         return self.predict_df

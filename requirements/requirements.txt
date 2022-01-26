@@ -1,6 +1,12 @@
-click==8.0.1
-
+click
 pandas
 numpy
 torch
 statsmodels
+wget
+seaborn
+matplotlib
+regex
+tqdm
+numba
+biopython
