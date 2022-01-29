@@ -39,7 +39,7 @@ class LogisticRegressionTorch(torch.nn.Module):
         torch.manual_seed(1337)
         self.linear = torch.nn.Linear(input_dim, 1)
     def forward(self, x):
-        return self.linear(x).sequeeze(1)
+        return self.linear(x).squeeze(1)
 
 class RescoreModelProvider:
     def __init__(self):
@@ -50,6 +50,7 @@ class RescoreModelProvider:
     def get_model(self, model_name, input_dim, **kwargs):
         if model_name.lower() not in self.model_dict:
             logging.info(
+                "[PERC] "
                 f"PyTorch rescoring model '{model_name}' is not "
                 "implemented, switch to 'linear' model."
             )
@@ -225,6 +226,11 @@ class Percolator:
             self.model = RandomForestClassifier()
         else:
             if torch.cuda.is_available():
+                logging.info(
+                    "[PERC] "
+                    f"Rescoring model '{percolator_model}' is not "
+                    "implemented, switch to pytorch 'linear' model."
+                )
                 self.model = NNRescore(
                     len(self.feature_list),
                     nn_model_type='linear'
@@ -232,6 +238,11 @@ class Percolator:
                 self.percolator_model = 'linear'
                 self.percolator_backend = 'pytorch'
             else:
+                logging.info(
+                    "[PERC] "
+                    f"Rescoring model '{percolator_model}' is not "
+                    "implemented, switch to sklearn 'linear' model."
+                )
                 self.model = LogisticRegression(
                     solver='liblinear'
                 )
@@ -338,6 +349,7 @@ class Percolator:
             or len(df_decoy) < self.min_train_sample*self.cv_fold
         ):
             logging.info(
+                "[PERC] "
                 f'#target={np.sum(df_target.fdr<0.01)} or #decoy={len(df_decoy)} '
                 f'< minimal training sample={self.min_train_sample} '
                 f'for cv-fold={self.cv_fold}. Skip rescoring!!!'
@@ -393,6 +405,7 @@ class Percolator:
 
     def re_score(self, df:pd.DataFrame)->pd.DataFrame:
         logging.info(
+            "[PERC] "
             f'{np.sum((df.fdr<=self.fdr) & (df.decoy==0))} '
             f'target PSMs at {self.fdr} psm-level FDR'
         )
@@ -406,6 +419,7 @@ class Percolator:
             )
         df = self._estimate_fdr(df)
         logging.info(
+            "[PERC] "
             f'{len(df[(df.fdr<=self.fdr) & (df.decoy==0)])} '
             f'target PSMs at {self.fdr} {self.fdr_level}-level FDR'
         )
