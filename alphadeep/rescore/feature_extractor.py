@@ -376,9 +376,14 @@ class ScoreFeatureExtractor:
                 psm_df.rt_pred-psm_df.rt_norm
             )
 
-            psm_df[
-                'rt_delta_abs'
-            ] = psm_df.rt_delta.abs()
+            mean_delta = psm_df.loc[
+                (psm_df.fdr<0.01)&(psm_df.decoy==0),
+                'rt_delta'
+            ].mean()
+
+            psm_df['rt_delta_abs'] = (
+                psm_df.rt_delta-mean_delta
+            ).abs()
         else:
             psm_df['rt_delta'] = 0
             psm_df['rt_delta_abs'] = 0
@@ -396,10 +401,15 @@ class ScoreFeatureExtractor:
             ] = (
                 psm_df.mobility_pred-psm_df.mobility
             )
-            psm_df.loc[
-                psm_df.mobility_delta.isna(),'mobility_delta'
-            ] = 0
-            psm_df['mobility_delta_abs'] = psm_df.mobility_delta.abs()
+
+            mean_delta = psm_df.loc[
+                (psm_df.fdr<0.01)&(psm_df.decoy==0),
+                'mobility_delta'
+            ].mean()
+
+            psm_df['mobility_delta_abs'] = (
+                psm_df.mobility_delta-mean_delta
+            ).abs()
         else:
             psm_df['mobility_delta'] = 0
             psm_df['mobility_delta_abs'] = 0

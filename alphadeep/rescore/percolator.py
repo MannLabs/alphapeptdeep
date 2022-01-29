@@ -51,7 +51,7 @@ class RescoreModelProvider:
         if model_name.lower() not in self.model_dict:
             logging.info(
                 f"PyTorch rescoring model '{model_name}' is not "
-                "implemented yet, switch to 'linear' model."
+                "implemented, switch to 'linear' model."
             )
             return self.model_dict['linear'](
                 input_dim, **kwargs
@@ -64,21 +64,21 @@ class RescoreModelProvider:
 rescore_model_provider = RescoreModelProvider()
 
 class NNRescore:
-    def __init__(self, num_features, dl_model_type='linear'):
-        self.dl_model = rescore_model_provider.get_model(
-            dl_model_type, num_features
+    def __init__(self, num_features, nn_model_type='linear'):
+        self.nn_model = rescore_model_provider.get_model(
+            nn_model_type, num_features
         )
         self.train_batch_size = 10000
         self.predict_batch_size = 100000
 
         self.optimizer = torch.optim.Adam(
-            self.dl_model.parameters(),
+            self.nn_model.parameters(),
             lr=perc_settings['lr_percolator_torch_model']
         )
         self.loss_func = torch.nn.BCEWithLogitsLoss()
         if torch.cuda.is_available():
             self.device = torch.device('cuda')
-            self.dl_model.to(self.device)
+            self.nn_model.to(self.device)
         else:
             self.device = torch.device('cpu')
         self.epoch = 20
@@ -93,7 +93,7 @@ class NNRescore:
             for i in range(0, len(features), self.train_batch_size):
                 self.optimizer.zero_grad()
 
-                outputs = self.dl_model(
+                outputs = self.nn_model(
                     features[
                         sample_idxes[i:i+self.train_batch_size]
                     ]
@@ -113,7 +113,7 @@ class NNRescore:
         for i in range(0, len(features), self.predict_batch_size):
             outputs[
                 i:i+self.predict_batch_size
-            ] = self.dl_model(
+            ] = self.nn_model(
                 features[
                     i:i+self.predict_batch_size
                 ].to(self.device)
@@ -135,7 +135,7 @@ class Percolator:
         model_mgr:ModelManager = None
     ):
         """Percolator model
-        Note that
+        Note that in the `Args` list,
         ```
           perc_settings = alphadeep.settings.global_settings['percolator']
         ```
@@ -143,10 +143,11 @@ class Percolator:
         Args:
             percolator_model (str, optional): machine learning
               model type for rescoring, could be:
-                "linear" or ("logistic_regression"): logistic regression
-                "nn": pytorch neural network model. Its results are not stable.
-                "rf" or "random_forest": random forest
+                "linear": logistic regression
+                "random_forest": random forest
               Defaults to perc_settings['percolator_model'].
+            percolator_backend(str, optional): `sklearn` or `pytorch`.
+              Defaults to perc_settings['percolator_backend']
             cv_fold (int, optional): cross-validation fold.
               Defaults to perc_settings['cv_fold'].
             iter_num (int, optional): percolator iteration number.
@@ -155,7 +156,8 @@ class Percolator:
               Defaults to perc_settings['ms2_ppm'].
             ms2_tol (float, optional): ms2 tolerance.
               Defaults to perc_settings['ms2_tol'].
-            model_mgr (ModelManager, optional): alphadeep.pretrained_model.ModelManager.
+            model_mgr (ModelManager, optional):
+              alphadeep.pretrained_model.ModelManager.
               If None, self.model_mgr will be init by:
               ```
               self.model_mgr = ModelManager()
@@ -219,7 +221,7 @@ class Percolator:
             self.model = LogisticRegression(
                 solver='liblinear'
             )
-        elif percolator_model == 'rf':
+        elif percolator_model == 'random_forest':
             self.model = RandomForestClassifier()
         else:
             if torch.cuda.is_available():
