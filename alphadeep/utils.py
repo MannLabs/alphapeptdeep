@@ -14,6 +14,7 @@ LOG_PATH = os.path.join(BASE_PATH, "logs")
 # from alphatims
 def process_bar(iterator, len_iter):
     with tqdm.tqdm(total=len_iter) as bar:
+        i = 0
         for i,iter in enumerate(iterator):
             yield iter
             bar.update()

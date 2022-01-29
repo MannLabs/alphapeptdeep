@@ -19,7 +19,6 @@ class MSReaderBase:
         raise NotImplementedError('load()')
 
     def build_spectrum_df(self, scan_list, scan_indices, rt_list, mobility_list = None):
-        if mobility_list is None: mobility_list = np.nan
         def set_col(col, indexes, values, dtype, na_value):
             self.spectrum_df.loc[indexes, col] = values
             self.spectrum_df[col].fillna(na_value, inplace=True)
@@ -31,7 +30,8 @@ class MSReaderBase:
         set_col('peak_start_idx', scan_list, scan_indices[:-1], np.int64, -1)
         set_col('peak_end_idx', scan_list, scan_indices[1:], np.int64, -1)
         set_col('rt', scan_list, rt_list, np.float64, np.nan)
-        set_col('mobility', scan_list, mobility_list, np.float64, np.nan)
+        if mobility_list is not None:
+            set_col('mobility', scan_list, mobility_list, np.float64, np.nan)
 
     def get_peaks(self, spec_idx):
         """Get peak (mz and intensity) values by `spec_idx`
@@ -70,7 +70,8 @@ class AlphaPept_HDF_MS1_Reader(MSReaderBase):
             scan_list=self.ms_data['scan_list_ms1'],
             scan_indices=self.ms_data['indices_ms1'],
             rt_list=self.ms_data['rt_list_ms1'],
-            mobility_list=self.ms_data['mobility'] if 'mobility' in self.ms_data else None,
+            mobility_list=self.ms_data['mobility']
+            if 'mobility' in self.ms_data else None,
         )
 
 class AlphaPept_HDF_MS2_Reader(MSReaderBase):
@@ -94,7 +95,8 @@ class AlphaPept_HDF_MS2_Reader(MSReaderBase):
             scan_list=scan_list,
             scan_indices=self.ms_data['indices_ms2'],
             rt_list=self.ms_data['rt_list_ms2'],
-            mobility_list=self.ms_data['mobility2'] if 'mobility2' in self.ms_data else None,
+            mobility_list=self.ms_data['mobility2']
+            if 'mobility2' in self.ms_data else None,
         )
 
 def read_until(file, until):

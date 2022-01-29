@@ -334,6 +334,16 @@ class ScoreFeatureExtractor:
     def extract_rt_features(self, psm_df):
         if self.require_raw_specific_tuning:
             (
+                psm_num_to_tune_rt_ccs,
+                mod_psm_num_to_tune_rt_ccs,
+                epoch_to_tune_rt_ccs
+            ) = (
+                self.model_mgr.psm_num_to_tune_rt_ccs,
+                self.model_mgr.mod_psm_num_to_tune_rt_ccs,
+                self.model_mgr.epoch_to_tune_rt_ccs
+            )
+
+            (
                 self.model_mgr.psm_num_to_tune_rt_ccs
             ) = perc_settings['psm_num_per_raw_to_tune']
 
@@ -344,6 +354,16 @@ class ScoreFeatureExtractor:
             ) = perc_settings['epoch_per_raw_to_tune']
             self.model_mgr.fine_tune_rt_model(
                 psm_df[(psm_df.fdr<0.01)&(psm_df.decoy==0)]
+            )
+
+            (
+                self.model_mgr.psm_num_to_tune_rt_ccs,
+                self.model_mgr.mod_psm_num_to_tune_rt_ccs,
+                self.model_mgr.epoch_to_tune_rt_ccs
+            ) = (
+                psm_num_to_tune_rt_ccs,
+                mod_psm_num_to_tune_rt_ccs,
+                epoch_to_tune_rt_ccs
             )
 
         if 'rt_norm' in psm_df.columns:
@@ -376,7 +396,7 @@ class ScoreFeatureExtractor:
             ] = (
                 psm_df.mobility_pred-psm_df.mobility
             )
-            psm_df[
+            psm_df.loc[
                 psm_df.mobility_delta.isna(),'mobility_delta'
             ] = 0
             psm_df['mobility_delta_abs'] = psm_df.mobility_delta.abs()
