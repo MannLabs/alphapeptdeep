@@ -161,6 +161,7 @@ class ModelImplBase(object):
         else:
             cost = self.loss_func(predicts, targets.to(self.device))
         cost.backward()
+        torch.nn.utils.clip_grad_norm_(self.model.parameters(), 1.0)
         self.optimizer.step()
         return cost.item()
 
