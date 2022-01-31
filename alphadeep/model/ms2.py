@@ -40,13 +40,13 @@ class ModelMS2Transformer(torch.nn.Module):
         num_modloss_types=0,
         mask_modloss=True,
         dropout=0.2,
+        nlayers=3,
     ):
         super().__init__()
 
         self.dropout = torch.nn.Dropout(dropout)
 
         hidden=256
-        nlayers = 2
 
         self.input_nn = model_base.MS2TransformerEncoding(hidden)
 
