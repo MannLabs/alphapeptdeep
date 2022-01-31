@@ -237,13 +237,13 @@ class ModelImplBase(object):
                         *features,
                     )
                     batch_cost.append(cost)
+                    lr_scheduler.step()
                 if verbose_each_epoch:
                     batch_tqdm.set_description(
                         f'Epoch={epoch+1}, nAA={nAA}, Batch={len(batch_cost)}, Loss={cost:.4f}'
                     )
             if verbose: print(f'[Training] Epoch={epoch+1}, Mean Loss={np.mean(batch_cost)}')
 
-            lr_scheduler.step()
         torch.cuda.empty_cache()
 
 
