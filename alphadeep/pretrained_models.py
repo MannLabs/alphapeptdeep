@@ -258,6 +258,10 @@ from alphabase.peptide.precursor import (
     refine_precursor_df,
     update_precursor_mz
 )
+from alphabase.peptide.mobility import (
+    mobility_to_ccs_for_df
+)
+
 from alphadeep.settings import global_settings
 
 import torch.multiprocessing as mp
@@ -397,6 +401,13 @@ class ModelManager(object):
         Args:
             psm_df (pd.DataFrame): training psm_df which contains 'ccs' column.
         """
+
+        if 'mobility' not in psm_df.columns:
+            return
+        if 'ccs' not in psm_df.columns:
+            psm_df['ccs'] = mobility_to_ccs_for_df(
+                psm_df, 'mobility'
+            )
 
         if self.psm_num_to_tune_rt_ccs > 0:
             tr_df = psm_sampling_with_important_mods(
