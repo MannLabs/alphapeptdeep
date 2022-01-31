@@ -187,6 +187,62 @@ class ModelImplBase(object):
             'Must implement _set_batch_predict_data_df() method'
         )
 
+    def train_with_warmup(self,
+        precursor_df: pd.DataFrame,
+        *,
+        batch_size=1024,
+        epoch=20,
+        verbose=False,
+        verbose_each_epoch=False,
+        **kwargs
+    ):
+        if 'nAA' not in precursor_df.columns:
+            precursor_df['nAA'] = precursor_df.sequence.str.len()
+        self._prepare_train_data_df(precursor_df, **kwargs)
+        self.model.train()
+
+        from transformers.optimization import Adafactor, AdafactorSchedule
+
+        optimizer = Adafactor(
+            self.model.parameters(),
+            scale_parameter=True, relative_step=True,
+            warmup_init=True, lr=None
+        )
+        lr_scheduler = AdafactorSchedule(optimizer)
+
+        for epoch in range(epoch):
+            batch_cost = []
+            _grouped = list(precursor_df.sample(frac=1).groupby('nAA'))
+            rnd_nAA = np.random.permutation(len(_grouped))
+            if verbose_each_epoch:
+                batch_tqdm = tqdm(rnd_nAA)
+            else:
+                batch_tqdm = rnd_nAA
+            for i_group in batch_tqdm:
+                nAA, df_group = _grouped[i_group]
+                df_group = df_group.reset_index(drop=True)
+                for i in range(0, len(df_group), batch_size):
+                    batch_end = i+batch_size-1 # DataFrame.loc[start:end] inlcudes the end
+
+                    batch_df = df_group.loc[i:batch_end,:]
+                    targets = self._get_targets_from_batch_df(batch_df,nAA=nAA,**kwargs)
+                    features = self._get_features_from_batch_df(batch_df,nAA=nAA,**kwargs)
+
+                    cost = self._train_one_batch(
+                        targets,
+                        *features,
+                    )
+                    batch_cost.append(cost)
+                if verbose_each_epoch:
+                    batch_tqdm.set_description(
+                        f'Epoch={epoch+1}, nAA={nAA}, Batch={len(batch_cost)}, Loss={cost:.4f}'
+                    )
+            if verbose: print(f'[Training] Epoch={epoch+1}, Mean Loss={np.mean(batch_cost)}')
+
+            lr_scheduler.step()
+        torch.cuda.empty_cache()
+
+
     def train(self,
         precursor_df: pd.DataFrame,
         *,

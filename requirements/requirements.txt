@@ -10,3 +10,4 @@ regex
 tqdm
 numba
 biopython
+einops

@@ -1,3 +1,6 @@
+ipykernel
+notebook
+
 click
 pandas
 numpy
@@ -10,3 +13,4 @@ regex
 tqdm
 numba
 biopython
+einops

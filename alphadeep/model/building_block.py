@@ -6,7 +6,8 @@ __all__ = ['mod_feature_size', 'max_instrument_num', 'frag_types', 'max_frag_cha
            'InputModNetFixFirstK', 'InputAALSTM', 'InputAALSTM_cat_Meta', 'InputAALSTM_cat_Charge', 'InputAAEmbedding',
            'Input_AA_CNN_LSTM_Encoder', 'Input_AA_CNN_Encoder', 'Input_AA_CNN_LSTM_cat_Charge_Encoder',
            'Input_AA_CNN_Encoder', 'Input_AA_LSTM_Encoder', 'SeqLSTMDecoder', 'SeqGRUDecoder', 'OutputLSTM_cat_Meta',
-           'OutputLinear_cat_Meta', 'LinearDecoder', 'HiddenTransformer']
+           'OutputLinear_cat_Meta', 'LinearDecoder', 'PositionalEncoding', 'MS2TransformerEncoding',
+           'HiddenTransformer']
 
 # Cell
 import torch
@@ -139,14 +140,14 @@ class SeqGRU(torch.nn.Module):
 class SeqTransformer(torch.nn.Module):
     def __init__(self,
         in_features,
-        out_features,
+        hidden_features,
         nhead=8,
         nlayers=2,
         dropout=0.2
     ):
         super().__init__()
         encoder_layers = torch.nn.TransformerEncoderLayer(
-            in_features, nhead, out_features, dropout
+            in_features, nhead, hidden_features, dropout
         )
         self.transformer_encoder = torch.nn.TransformerEncoder(
             encoder_layers, nlayers
@@ -513,11 +514,56 @@ class LinearDecoder(torch.nn.Module):
         return self.nn(x)
 
 # Cell
+import numpy as np
+class PositionalEncoding(torch.nn.Module):
+
+    def __init__(self, dim=128, max_len = 200):
+        super().__init__()
+
+        position = torch.arange(max_len).unsqueeze(1)
+        div_term = torch.exp(
+            torch.arange(0, dim, 2) * (-np.log(max_len) / dim)
+        )
+        pe = torch.zeros(1, max_len, dim)
+        pe[0, :, 0::2] = torch.sin(position * div_term)
+        pe[0, :, 1::2] = torch.cos(position * div_term)
+        self.register_buffer('pe', pe)
+
+    def forward(self, x):
+        return x + self.pe[:,:x.size(1),:]
+
+class MS2TransformerEncoding(torch.nn.Module):
+    def __init__(self, out_features):
+        super().__init__()
+        meta_dim = 4
+        mod_hidden = 8
+        self.mod_nn = InputModNetFixFirstK(mod_hidden)
+        self.meta_nn = InputMetaNet(meta_dim)
+        self.aa_emb = aa_embedding(
+            out_features-meta_dim-mod_hidden
+        )
+        self.pos_encoder = PositionalEncoding(
+            out_features
+        )
+
+    def forward(self,
+        aa_indices, mod_x, charges, NCEs, instrument_indices
+    ):
+        mod_x = self.mod_nn(mod_x)
+        x = self.aa_emb(aa_indices)
+        meta_x = self.meta_nn(
+            charges, NCEs, instrument_indices
+        ).unsqueeze(1).repeat(1, mod_x.size(1), 1)
+        return self.pos_encoder(torch.cat((x, mod_x, meta_x), 2))
+
 class HiddenTransformer(torch.nn.Module):
-    def __init__(self, hidden, nlayers=1, dropout=0.2):
+    def __init__(self,
+        hidden, hidden_expand=4,
+        nhead=8, nlayers=2, dropout=0.2
+    ):
         super().__init__()
         self.transormer = SeqTransformer(
-            hidden, hidden, nhead=8,
+            hidden, hidden*hidden_expand, nhead=nhead,
             nlayers=nlayers, dropout=dropout
         )
     def forward(self, x):
