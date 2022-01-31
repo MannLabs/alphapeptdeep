@@ -40,15 +40,16 @@ class ModelMS2Transformer(torch.nn.Module):
         num_modloss_types=0,
         mask_modloss=True,
         dropout=0.2,
-        nlayers=3,
+        nlayers=4,
+        hidden=256,
     ):
         super().__init__()
 
         self.dropout = torch.nn.Dropout(dropout)
 
-        hidden=256
+        self.input_nn = model_base.AATransformerEncoding(hidden)
 
-        self.input_nn = model_base.MS2TransformerEncoding(hidden)
+        self.meta_nn = model_base.InputMetaNet(hidden)
 
         self.hidden_nn = model_base.HiddenTransformer(
             hidden, nlayers=nlayers, dropout=dropout
@@ -84,13 +85,15 @@ class ModelMS2Transformer(torch.nn.Module):
     ):
 
         in_x = self.input_nn(
-            aa_indices, mod_x,
-            charges, NCEs, instrument_indices
+            aa_indices, mod_x
         )
-        in_x = self.dropout(in_x)
+        meta_x = self.meta_nn(
+            charges, NCEs, instrument_indices
+        ).unsqueeze(1)
+        in_x = self.dropout(in_x+meta_x)
 
         hidden_x = self.hidden_nn(in_x)
-        hidden_x = self.dropout(hidden_x)
+        hidden_x = self.dropout(hidden_x+meta_x)
 
         out_x = self.output_nn(
             hidden_x
