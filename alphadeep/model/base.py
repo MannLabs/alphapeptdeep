@@ -220,13 +220,17 @@ class ModelImplBase(object):
                 batch_tqdm = rnd_nAA
             for i_group in batch_tqdm:
                 nAA, df_group = _grouped[i_group]
-                df_group = df_group.reset_index(drop=True)
+                # df_group = df_group.reset_index(drop=True)
                 for i in range(0, len(df_group), batch_size):
-                    batch_end = i+batch_size-1 # DataFrame.loc[start:end] inlcudes the end
+                    batch_end = i+batch_size
 
-                    batch_df = df_group.loc[i:batch_end,:]
-                    targets = self._get_targets_from_batch_df(batch_df,nAA=nAA,**kwargs)
-                    features = self._get_features_from_batch_df(batch_df,nAA=nAA,**kwargs)
+                    batch_df = df_group.iloc[i:batch_end,:]
+                    targets = self._get_targets_from_batch_df(
+                        batch_df,nAA=nAA,**kwargs
+                    )
+                    features = self._get_features_from_batch_df(
+                        batch_df,nAA=nAA,**kwargs
+                    )
 
                     cost = self._train_one_batch(
                         targets,
@@ -267,11 +271,11 @@ class ModelImplBase(object):
                 batch_tqdm = rnd_nAA
             for i_group in batch_tqdm:
                 nAA, df_group = _grouped[i_group]
-                df_group = df_group.reset_index(drop=True)
+                # df_group = df_group.reset_index(drop=True)
                 for i in range(0, len(df_group), batch_size):
-                    batch_end = i+batch_size-1 # DataFrame.loc[start:end] inlcudes the end
+                    batch_end = i+batch_size
 
-                    batch_df = df_group.loc[i:batch_end,:]
+                    batch_df = df_group.iloc[i:batch_end,:]
                     targets = self._get_targets_from_batch_df(batch_df,nAA=nAA,**kwargs)
                     features = self._get_features_from_batch_df(batch_df,nAA=nAA,**kwargs)
 
