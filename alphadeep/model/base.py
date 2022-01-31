@@ -232,12 +232,13 @@ class ModelImplBase(object):
                         batch_df,nAA=nAA,**kwargs
                     )
 
-                    cost = self._train_one_batch(
-                        targets,
-                        *features,
-                    )
-                    batch_cost.append(cost)
+                    optimizer.zero_grad()
+                    predicts = self.model(*[fea.to(self.device) for fea in features])
+                    cost = self.loss_func(predicts, targets.to(self.device))
+                    cost.backward()
+                    optimizer.step()
                     lr_scheduler.step()
+                    batch_cost.append(cost.item())
                 if verbose_each_epoch:
                     batch_tqdm.set_description(
                         f'Epoch={epoch+1}, nAA={nAA}, Batch={len(batch_cost)}, Loss={cost:.4f}'
