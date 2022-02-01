@@ -141,15 +141,27 @@ class PepSpecMatch(object):
                 ms2_file_type
             )
             ms2_reader.load(ms2_file)
+
+        add_spec_info_list = []
         if 'rt_norm' not in psm_df.columns:
+            add_spec_info_list.append('rt')
+
+        if (
+            'mobility' not in psm_df.columns and
+            'mobility' in ms2_reader.spectrum_df.columns
+        ):
+            add_spec_info_list.append('mobility')
+
+        if len(add_spec_info_list) > 0:
             # pfind does not report RT in the result file
             psm_df = psm_df.reset_index().merge(
-                ms2_reader.spectrum_df[['spec_idx','rt']],
+                ms2_reader.spectrum_df[['spec_idx']+add_spec_info_list],
                 how='left',
                 on='spec_idx',
             ).set_index('index')
 
-            psm_df['rt_norm'] = psm_df.rt/ms2_reader.spectrum_df.rt.max()
+            if 'rt' in add_spec_info_list:
+                psm_df['rt_norm'] = psm_df.rt/ms2_reader.spectrum_df.rt.max()
 
         fragment_mz_df = create_fragment_mz_dataframe(
             psm_df, self.charged_frag_types
