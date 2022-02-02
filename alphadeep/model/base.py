@@ -34,12 +34,12 @@ def get_cosine_schedule_with_warmup(
 
     def lr_lambda(current_step):
         if current_step < num_warmup_steps:
-            return float(current_step) / float(max(1, num_warmup_steps))
+            return float(current_step) / max(1, num_warmup_steps)
         progress = float(
             current_step - num_warmup_steps
-        ) / float(max(1, num_training_steps - num_warmup_steps))
+        ) / max(1, num_training_steps - num_warmup_steps)
         return max(0.0, 0.5 * (
-            1.0 + np.cos(np.pi * float(num_cycles) * 2.0 * progress)
+            1.0 + np.cos(np.pi * num_cycles * 2.0 * progress)
         ))
 
     return LambdaLR(optimizer, lr_lambda, last_epoch)
@@ -47,7 +47,7 @@ def get_cosine_schedule_with_warmup(
 # Cell
 class ModelImplBase(object):
     def __init__(self, **kwargs):
-        self.model = None
+        self.model:torch.nn.Module = None
         if 'GPU' in kwargs:
             self.use_GPU(kwargs['GPU'])
         else:

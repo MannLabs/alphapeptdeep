@@ -39,19 +39,24 @@ class ModelMS2Transformer(torch.nn.Module):
         num_frag_types,
         num_modloss_types=0,
         mask_modloss=True,
-        dropout=0.2,
+        dropout=0.1,
         nlayers=4,
         hidden=256,
+        **kwargs,
     ):
         super().__init__()
 
         self.dropout = torch.nn.Dropout(dropout)
 
-        meta_dim = 8
+        self._num_modloss_types = num_modloss_types
+        self._num_non_modloss = num_frag_types-num_modloss_types
+        self._mask_modloss = mask_modloss
+        if num_modloss_types == 0:
+            self._mask_modloss = True
 
-        self.input_nn = model_base.AATransformerEncoding(hidden-meta_dim)
+        self.input_nn = model_base.AATransformerEncoding(hidden)
 
-        self.meta_nn = model_base.InputMetaNet(meta_dim)
+        self.meta_nn = model_base.InputMetaNet(hidden)
 
         self.hidden_nn = model_base.HiddenTransformer(
             hidden, nlayers=nlayers, dropout=dropout
@@ -59,11 +64,10 @@ class ModelMS2Transformer(torch.nn.Module):
 
         self.output_nn = model_base.LinearDecoder(
             hidden,
-            num_frag_types,
+            self._num_non_modloss,
         )
 
-        self._num_modloss_types = num_modloss_types
-        if num_modloss_types:
+        if num_modloss_types > 0:
             # for transfer learning of modloss frags
             self.modloss_nn = torch.nn.ModuleList([
                 model_base.HiddenTransformer(
@@ -73,10 +77,8 @@ class ModelMS2Transformer(torch.nn.Module):
                     hidden, num_modloss_types,
                 ),
             ])
-            self._mask_modloss = mask_modloss
-            self._non_modloss = num_frag_types-num_modloss_types
         else:
-            self._mask_modloss = True
+            self.modloss_nn = None
 
     def forward(self,
         aa_indices,
@@ -91,28 +93,32 @@ class ModelMS2Transformer(torch.nn.Module):
         ))
         meta_x = self.meta_nn(
             charges, NCEs, instrument_indices
-        ).unsqueeze(1).repeat(1,in_x.size(1),1)
-        in_x = torch.cat((in_x,meta_x),dim=2)
+        ).unsqueeze(1)
+        in_x += meta_x
 
         hidden_x = self.hidden_nn(in_x)
-        hidden_x = self.dropout(hidden_x)
+        hidden_x = self.dropout(hidden_x+in_x*0.1)
 
         out_x = self.output_nn(
             hidden_x
         )
 
-        # modloss is mainly only for Phospho@S/T
-        if not self._mask_modloss:
-            modloss_x = self.modloss_nn[0](
-                in_x
-            ) + hidden_x
-            modloss_x = self.modloss_nn[-1](
-                modloss_x
-            )
-            out_x = torch.cat((
-                out_x[:,:,:self._non_modloss],
-                out_x[:,:,self._non_modloss:]+modloss_x
-            ),2)
+        if self._num_modloss_types > 0:
+            if self._mask_modloss:
+                out_x = torch.cat((out_x, torch.zeros(
+                    *out_x.size()[:2],self._num_modloss_types,
+                    device=in_x.device
+                )), 2)
+            else:
+                modloss_x = self.modloss_nn[0](
+                    in_x
+                ) + hidden_x
+                modloss_x = self.modloss_nn[-1](
+                    modloss_x
+                )
+                out_x = torch.cat((
+                    out_x, modloss_x
+                ),2)
 
         return out_x[:,3:,:]
 
@@ -123,6 +129,7 @@ class ModelMSMSpDeep(torch.nn.Module):
         num_modloss_types=0,
         mask_modloss=True,
         dropout=0.2,
+        **kwargs,
     ):
         super().__init__()
 
