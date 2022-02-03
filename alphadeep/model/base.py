@@ -52,6 +52,7 @@ class ModelImplBase(object):
             self.use_GPU(kwargs['GPU'])
         else:
             self.use_GPU(True)
+        self.optimizer = None
 
     def use_GPU(self, GPU=True):
         if not torch.cuda.is_available():
@@ -60,14 +61,15 @@ class ModelImplBase(object):
         if self.model:
             self.model.to(self.device)
 
-    def _init_for_train(self, lr=0.001):
-        self.optimizer = torch.optim.Adam(self.model.parameters(), lr=lr)
+    def _init_for_train(self):
         self.loss_func = torch.nn.L1Loss()
+
+    def _init_optimizer(self, lr):
+        self.optimizer = torch.optim.Adam(self.model.parameters(), lr=lr)
 
     def build_from_py_codes(self,
         model_code_file:str,
         code_file_in_zip:str=None,
-        lr = 0.001,
         **kwargs
     ):
         if model_code_file.lower().endswith('.zip'):
@@ -86,17 +88,16 @@ class ModelImplBase(object):
         self.model = Model(**kwargs)
         self.model_params = kwargs
         self.model.to(self.device)
-        self._init_for_train(lr)
+        self._init_for_train()
 
     def build(self,
         model_class: torch.nn.Module,
-        lr = 0.001,
         **kwargs
     ):
         self.model = model_class(**kwargs)
         self.model_params = kwargs
         self.model.to(self.device)
-        self._init_for_train(lr)
+        self._init_for_train()
 
     def get_parameter_num(self):
         return np.sum([p.numel() for p in self.model.parameters()])
@@ -220,6 +221,7 @@ class ModelImplBase(object):
         batch_size=1024,
         epoch=20,
         warmup_epoch=10,
+        lr=0.001,
         verbose=False,
         verbose_each_epoch=False,
         **kwargs
@@ -228,6 +230,9 @@ class ModelImplBase(object):
             precursor_df['nAA'] = precursor_df.sequence.str.len()
         self._prepare_train_data_df(precursor_df, **kwargs)
         self.model.train()
+
+        if self.optimizer is None:
+            self._init_optimizer(lr)
 
         lr_scheduler = get_cosine_schedule_with_warmup(
             self.optimizer, warmup_epoch, epoch
@@ -276,6 +281,7 @@ class ModelImplBase(object):
         *,
         batch_size=1024,
         epoch=20,
+        lr=0.001,
         verbose=False,
         verbose_each_epoch=False,
         **kwargs
@@ -284,6 +290,9 @@ class ModelImplBase(object):
             precursor_df['nAA'] = precursor_df.sequence.str.len()
         self._prepare_train_data_df(precursor_df, **kwargs)
         self.model.train()
+
+        if self.optimizer is None:
+            self._init_optimizer(lr)
 
         for epoch in range(epoch):
             batch_cost = []

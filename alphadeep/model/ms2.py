@@ -251,7 +251,6 @@ class pDeepModel(model_base.ModelImplBase):
             num_modloss_types = len(self._modloss_frag_types),
             mask_modloss=mask_modloss,
             dropout=dropout,
-            lr=lr,
             **kwargs, # other model params
         )
 
