@@ -46,7 +46,9 @@ def get_cosine_schedule_with_warmup(
 
 # Cell
 class ModelImplBase(object):
-    def __init__(self, **kwargs):
+    def __init__(self,
+        **kwargs
+    ):
         self.model:torch.nn.Module = None
         if 'GPU' in kwargs:
             self.use_GPU(kwargs['GPU'])
@@ -63,9 +65,6 @@ class ModelImplBase(object):
 
     def _init_for_train(self):
         self.loss_func = torch.nn.L1Loss()
-
-    def _init_optimizer(self, lr):
-        self.optimizer = torch.optim.Adam(self.model.parameters(), lr=lr)
 
     def build_from_py_codes(self,
         model_code_file:str,
@@ -215,12 +214,17 @@ class ModelImplBase(object):
             'Must implement _set_batch_predict_data_df() method'
         )
 
+    def _init_optimizer(self, lr):
+        self.optimizer = torch.optim.Adam(
+            self.model.parameters(), lr=lr
+        )
+
     def train_with_warmup(self,
         precursor_df: pd.DataFrame,
         *,
         batch_size=1024,
-        epoch=20,
-        warmup_epoch=10,
+        epoch=10,
+        warmup_epoch=5,
         lr=0.001,
         verbose=False,
         verbose_each_epoch=False,
@@ -280,8 +284,8 @@ class ModelImplBase(object):
         precursor_df: pd.DataFrame,
         *,
         batch_size=1024,
-        epoch=20,
-        lr=0.001,
+        epoch=10,
+        lr=1e-4,
         verbose=False,
         verbose_each_epoch=False,
         **kwargs
