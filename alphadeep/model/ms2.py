@@ -236,7 +236,7 @@ class pDeepModel(model_base.ModelImplBase):
         lr=0.001,
         mask_modloss=True,
         modloss_type='modloss',
-        model_class:torch.nn.Module=ModelMSMSpDeep,
+        model_class:torch.nn.Module=ModelMS2Transformer,
         **kwargs, #model params
     ):
         super().__init__()
@@ -254,7 +254,7 @@ class pDeepModel(model_base.ModelImplBase):
             lr=lr,
             **kwargs, # other model params
         )
-        # self.loss_func = IntenAwareLoss()
+
         self.loss_func = torch.nn.L1Loss()
         self.min_inten = 1e-4
 
