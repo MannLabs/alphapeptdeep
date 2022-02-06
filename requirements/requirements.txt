@@ -10,3 +10,5 @@ regex
 tqdm
 numba
 biopython
+streamlit
+transformers

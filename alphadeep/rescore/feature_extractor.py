@@ -78,6 +78,7 @@ def get_ms2_features(
         matched_intensity_df,
         charged_frag_types=used_frag_types,
         metrics=['COS','SA','SPC'],
+        spc_top_k=perc_settings['top_k_frags_to_calc_spc']
     )
     psm_df.rename(
         columns={
@@ -381,6 +382,9 @@ class ScoreFeatureExtractor:
                 'rt_delta'
             ].mean()
 
+            if np.isnan(mean_delta):
+                mean_delta = 0
+
             psm_df['rt_delta_abs'] = (
                 psm_df.rt_delta-mean_delta
             ).abs()
@@ -406,6 +410,9 @@ class ScoreFeatureExtractor:
                 (psm_df.fdr<0.01)&(psm_df.decoy==0),
                 'mobility_delta'
             ].mean()
+
+            if np.isnan(mean_delta):
+                mean_delta = 0
 
             psm_df['mobility_delta_abs'] = (
                 psm_df.mobility_delta-mean_delta
