@@ -168,7 +168,7 @@ class ModelRT_LSTM(torch.nn.Module):
 class AlphaRTModel(model_base.ModelImplBase):
     def __init__(self,
         dropout=0.1, lr=0.001,
-        model_class:torch.nn.Module=ModelRT_Bert,
+        model_class:torch.nn.Module=ModelRT_LSTM,
         **kwargs,
     ):
         super().__init__()
