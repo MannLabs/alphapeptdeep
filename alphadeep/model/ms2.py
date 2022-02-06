@@ -179,6 +179,7 @@ class ModelMS2Bert(torch.nn.Module):
     @property
     def output_attentions(self):
         return self._output_attentions
+
     @output_attentions.setter
     def output_attentions(self, val:bool):
         self._output_attentions = val
