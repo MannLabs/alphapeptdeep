@@ -62,7 +62,7 @@ jobs:
       - name: Test installer for Linux
         shell: bash -l {0}
         run: |
-          sudo dpkg -i release/one_click_linux_gui/dist/alphadeep_gui_installer_linux.deb
+          sudo dpkg -i release/one_click_linux_gui/dist/peptdeep_gui_installer_linux.deb
       - name: Upload Linux Installer
         id: upload-release-asset
         uses: actions/upload-release-asset@v1
@@ -70,8 +70,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ needs.Create_Draft_On_GitHub.outputs.upload_url }}
-          asset_path: release/one_click_linux_gui/dist/alphadeep_gui_installer_linux.deb
-          asset_name: alphadeep_gui_installer_linux.deb
+          asset_path: release/one_click_linux_gui/dist/peptdeep_gui_installer_linux.deb
+          asset_name: peptdeep_gui_installer_linux.deb
           asset_content_type: application/octet-stream
   Create_MacOS_Release:
     runs-on: macos-latest
@@ -94,7 +94,7 @@ jobs:
       - name: Test installer for MacOS
         shell: bash -l {0}
         run: |
-          sudo installer -pkg release/one_click_macos_gui/dist/alphadeep_gui_installer_macos.pkg -target /
+          sudo installer -pkg release/one_click_macos_gui/dist/peptdeep_gui_installer_macos.pkg -target /
       - name: Upload MacOS Installer
         id: upload-release-asset
         uses: actions/upload-release-asset@v1
@@ -102,8 +102,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ needs.Create_Draft_On_GitHub.outputs.upload_url }}
-          asset_path: release/one_click_macos_gui/dist/alphadeep_gui_installer_macos.pkg
-          asset_name: alphadeep_gui_installer_macos.pkg
+          asset_path: release/one_click_macos_gui/dist/peptdeep_gui_installer_macos.pkg
+          asset_name: peptdeep_gui_installer_macos.pkg
           asset_content_type: application/octet-stream
   Create_Windows_Release:
     runs-on: windows-latest
@@ -128,7 +128,7 @@ jobs:
         run: |
           cd release/one_click_windows_gui/dist/
           echo "TODO, this test seems to freeze the runner..."
-          # ./alphadeep_gui_installer_windows.exe //verysilent //log=log.txt //noicons //tasks= //portable=1
+          # ./peptdeep_gui_installer_windows.exe //verysilent //log=log.txt //noicons //tasks= //portable=1
           # cat log.txt
       - name: Upload Windows Installer
         id: upload-release-asset
@@ -137,8 +137,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ needs.Create_Draft_On_GitHub.outputs.upload_url }}
-          asset_path: release/one_click_windows_gui/dist/alphadeep_gui_installer_windows.exe
-          asset_name: alphadeep_gui_installer_windows.exe
+          asset_path: release/one_click_windows_gui/dist/peptdeep_gui_installer_windows.exe
+          asset_name: peptdeep_gui_installer_windows.exe
           asset_content_type: application/octet-stream
   Create_PyPi_Release:
     runs-on: ubuntu-latest

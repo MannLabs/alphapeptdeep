@@ -3,7 +3,6 @@
 
 # external
 import click
-from sqlalchemy import over
 
 # local
 import peptdeep

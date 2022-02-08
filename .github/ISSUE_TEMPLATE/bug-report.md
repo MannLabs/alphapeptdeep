@@ -8,7 +8,7 @@ assignees: ''
 ---
 
 **Describe the bug**
-Make sure your bug is not addressed in the [troubleshooting section](https://github.com/MannLabs/alphadeep#troubleshooting) or in [previous issues](https://github.com/MannLabs/alphadeep/issues?q=is%3Aissue). If not, provide a clear and concise description of what the bug is.
+Make sure your bug is not addressed in the [troubleshooting section](https://github.com/MannLabs/peptdeep#troubleshooting) or in [previous issues](https://github.com/MannLabs/peptdeep/issues?q=is%3Aissue). If not, provide a clear and concise description of what the bug is.
 
 **To Reproduce**
 Steps to reproduce the behavior:
@@ -21,7 +21,7 @@ Steps to reproduce the behavior:
 A clear and concise description of what you expected to happen.
 
 **Logs**
-Please provide the log (see the alphadeep terminal on where to find it).
+Please provide the log (see the peptdeep terminal on where to find it).
 
 **Screenshots**
 If applicable, add screenshots to help explain your problem.
@@ -37,7 +37,7 @@ If applicable, add screenshots to help explain your problem.
      - processor [e.g. i386]
      - cpu count [e.g. 8]
    - Python information:
-     - alphadeep version [e.g. 0.1.2]
+     - peptdeep version [e.g. 0.1.2]
      - [other packages]
 
 **Additional context**
