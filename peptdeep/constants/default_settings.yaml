@@ -8,6 +8,10 @@ model:
   max_frag_charge: 2
 
 # overwritable config
+model_url: "https://datashare.biochem.mpg.de/s/ABnQuD2KkXfIGF3/download"
+model_url_zip_name: "released_models"
+local_model_file_name: "pretrained_models.zip"
+
 thread_num: 8
 model_mgr:
   predict:
