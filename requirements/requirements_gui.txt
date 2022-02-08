@@ -1,6 +1,3 @@
-ipykernel
-notebook
-
 click
 pandas
 numpy
@@ -13,6 +10,6 @@ regex
 tqdm
 numba
 biopython
-streamlit
 transformers
 scikit-learn
+streamlit

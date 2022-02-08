@@ -9,8 +9,8 @@ __author__ = "Mann Labs"
 __author_email__ = "jalew188@gmail.com"
 __github__ = "https://github.com/MannLabs/peptdeep"
 __keywords__ = [
-    "bioinformatics",
-    "software",
+    "deep learning",
+    "proteomics",
     "AlphaPept ecosystem",
 ]
 __python_version__ = ">=3.8,<3.10"
@@ -41,4 +41,5 @@ __urls__ = {
 }
 __extra_requirements__ = {
     "development": "requirements_development.txt",
+    "gui": "requirements_gui.txt",
 }
