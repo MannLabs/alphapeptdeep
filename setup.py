@@ -5,7 +5,7 @@ import setuptools
 import re
 import os
 # local
-import alphadeep as package2install
+import peptdeep as package2install
 
 
 def get_long_description():
