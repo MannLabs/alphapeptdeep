@@ -77,6 +77,7 @@ class NNRescore:
             lr=perc_settings['lr_percolator_torch_model']
         )
         self.loss_func = torch.nn.BCEWithLogitsLoss()
+
         if torch.cuda.is_available():
             self.device = torch.device('cuda')
             self.nn_model.to(self.device)
@@ -84,9 +85,12 @@ class NNRescore:
             self.device = torch.device('cpu')
         self.epoch = 20
 
+
+
     def fit(self, features, labels):
-        features = torch.Tensor(features).to(self.device)
-        labels = torch.Tensor(labels).to(self.device)
+        labels = torch.tensor(
+            labels, dtype=torch.float, device=self.device
+        )
         sample_idxes = np.random.RandomState(
             1337
         ).permutation(len(features))
@@ -95,9 +99,9 @@ class NNRescore:
                 self.optimizer.zero_grad()
 
                 outputs = self.nn_model(
-                    features[
+                    torch.tensor(features[
                         sample_idxes[i:i+self.train_batch_size]
-                    ]
+                    ], dtype=torch.float, device=self.device)
                 )
                 loss = self.loss_func(
                     outputs, labels[
@@ -109,15 +113,14 @@ class NNRescore:
                 self.optimizer.step()
 
     def decision_function(self, features):
-        features = torch.Tensor(features)
         outputs = np.empty(len(features))
         for i in range(0, len(features), self.predict_batch_size):
             outputs[
                 i:i+self.predict_batch_size
             ] = self.nn_model(
-                features[
+                torch.tensor(features[
                     i:i+self.predict_batch_size
-                ].to(self.device)
+                ], dtype=torch.float, device=self.device)
             ).detach().cpu().numpy()
         return outputs
 
@@ -211,6 +214,12 @@ class Percolator:
         self.min_train_sample = perc_settings['min_perc_train_sample']
         self.per_raw_fdr = perc_settings['per_raw_fdr']
 
+        self.init_percolator_model(percolator_model, percolator_backend)
+
+    def init_percolator_model(self,
+        percolator_model="linear",
+        percolator_backend="pytorch"
+    ):
         self.percolator_model = percolator_model.lower()
         self.percolator_backend = percolator_backend.lower()
         if percolator_backend.lower() == 'pytorch':
@@ -327,7 +336,7 @@ class Percolator:
         )
 
     def _predict(self, test_df):
-        if self.percolator_model == 'linear' or self.percolator_model == 'nn':
+        if self.percolator_model != 'random_forest':
             test_df['ml_score'] = self.model.decision_function(
                 test_df[self.feature_list].values
             )

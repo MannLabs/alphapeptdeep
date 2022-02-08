@@ -42,9 +42,10 @@ percolator:
 
   multiprocessing: True
 
+  top_k_frags_to_calc_spc: 10
   ms2_ppm: True
   ms2_tol: 20
-  max_perc_train_sample: 50000
+  max_perc_train_sample: 1000000
   min_perc_train_sample: 100
 
   percolator_backend: sklearn
@@ -56,7 +57,6 @@ percolator:
     pytorch_as_backend:
       - linear # not fully tested, performance may be unstable
       - mlp # not implemented yet
-      - mlp_bagging # not implemented yet
     sklearn_as_backend:
       - linear # logistic regression
       - random_forest
