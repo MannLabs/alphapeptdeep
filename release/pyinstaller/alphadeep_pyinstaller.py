@@ -1,9 +1,9 @@
 if __name__ == "__main__":
     try:
-        import alphadeep.gui
+        import peptdeep.gui
         import multiprocessing
         multiprocessing.freeze_support()
-        alphadeep.gui.run()
+        peptdeep.gui.run()
     except e:
         import traceback
         import sys

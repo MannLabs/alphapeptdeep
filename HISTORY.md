@@ -2,4 +2,4 @@
 
 ### 0.0.1
 
-* FEAT: Initial creation of alphadeep.
+* FEAT: Initial creation of peptdeep.

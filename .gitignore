@@ -129,6 +129,7 @@ dmypy.json
 .pyre/
 
 # User defined:
-alphadeep/logs
+peptdeep/logs
 *.DS_Store
 *sandbox*
+*installed_models*
