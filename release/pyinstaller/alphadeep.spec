@@ -7,21 +7,21 @@ from PyInstaller.building.build_main import Analysis, PYZ, EXE, COLLECT, BUNDLE,
 import PyInstaller.utils.hooks
 import pkg_resources
 import importlib.metadata
-import alphadeep
+import peptdeep
 
 
 ##################### User definitions
-exe_name = 'alphadeep_gui'
-script_name = 'alphadeep_pyinstaller.py'
+exe_name = 'peptdeep_gui'
+script_name = 'peptdeep_pyinstaller.py'
 if sys.platform[:6] == "darwin":
 	icon = '../logos/alpha_logo.icns'
 else:
 	icon = '../logos/alpha_logo.ico'
 block_cipher = None
 location = os.getcwd()
-project = "alphadeep"
+project = "peptdeep"
 remove_tests = True
-bundle_name = "alphadeep"
+bundle_name = "peptdeep"
 #####################
 
 

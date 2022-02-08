@@ -1,0 +1,147 @@
+# CONST CONFIG
+model:
+  frag_types:
+  - b
+  - y
+  - b_modloss
+  - y_modloss
+  max_frag_charge: 2
+
+# overwritable config
+model_url: "https://datashare.biochem.mpg.de/s/ABnQuD2KkXfIGF3/download"
+model_url_zip_name: "released_models"
+local_model_file_name: "pretrained_models.zip"
+
+thread_num: 8
+model_mgr:
+  predict:
+    batch_size_ms2: 512
+    batch_size_rt_ccs: 1024
+    default_nce: 0.3
+    default_instrument: Lumos
+    verbose: True
+  fine_tune:
+    epoch_ms2: 10
+    epoch_rt_ccs: 20
+    grid_nce_search: True
+    grid_nce_first: 0.15
+    grid_nce_last: 0.45
+    grid_nce_step: 0.03
+    grid_instrument: ['Lumos']
+percolator:
+  require_model_tuning: True
+  raw_num_to_tune: 8
+  psm_num_to_tune_ms2: 5000
+  psm_num_per_mod_to_tune_ms2: 100
+  psm_num_to_tune_rt_ccs: 5000
+  mod_psm_num_to_tune_rt_ccs: 100
+  top_n_mods_to_tune: 10
+  peptdeep_model_type: regular # or phos, or HLA
+  mask_modloss: True
+
+  require_raw_specific_tuning: True
+  raw_specific_ms2_tuning: False
+  psm_num_per_raw_to_tune: 200
+  epoch_per_raw_to_tune: 5
+
+  multiprocessing: True
+
+  top_k_frags_to_calc_spc: 10
+  ms2_ppm: True
+  ms2_tol: 20
+  max_perc_train_sample: 1000000
+  min_perc_train_sample: 100
+
+  percolator_backend: sklearn
+  percolator_backend_choices:
+    - sklearn
+    - pytorch
+  percolator_model: linear
+  percolator_model_choices:
+    pytorch_as_backend:
+      - linear # not fully tested, performance may be unstable
+      - mlp # not implemented yet
+    sklearn_as_backend:
+      - linear # logistic regression
+      - random_forest
+  lr_percolator_torch_model: 0.1 # learning rate, only used when percolator_backend==pytorch 
+  ml_iter_num: 5 # percolator iteration number
+  cv_fold: 1
+  fdr: 0.01
+  fdr_level: psm
+  fdr_level_choices:
+    - psm
+    - precursor
+    - peptide
+    - sequence
+  per_raw_fdr: False
+  frag_types: ['b_z1','b_z2','y_z1','y_z2']
+  input_files:
+    psm_type: alphapept
+    psm_type_choices:
+      - alphapept
+      - pfind
+      - maxquant
+      - msfragger_pepxml
+    psm_files: []
+    raw_type: alphapept_hdf
+    raw_type_choices:
+      - hdf
+      - thermo_raw # if alphapept is installed
+      - mgf
+      - mzml
+    raw_files: []
+    other_score_column_mapping:
+      alphapept: {}
+      pfind: 
+        raw_score: Raw_Score
+      msfragger:
+        hyperscore: hyperscore
+        nextscore: nextscore
+      maxquant: {}
+spec_lib:
+  input:
+    type: fasta
+    type_choices:
+    - fasta
+    - sequence_list
+    - peptide_list # sequence with mods and mod_sites
+    - precursor_list # peptide with charge state
+    files: 
+    - xxx.fasta
+    fasta:
+      max_miss_cleave: 3
+      fixmod: 
+      - Carbamidomethyl@C
+      varmod:
+      - Oxidation@M
+      min_varmod: 0
+      max_varmod: 1
+      target_mod: []
+      min_target_mod: 0
+      max_target_mod: 2
+  output:
+    type: hdf
+    type_choices:
+    - hdf
+    - diann # and can also be used by spectronaut
+    - msp
+    library: xxx.speclib.hdf
+    min_fragment_mz: 300
+    max_fragment_mz: 2000
+    min_relative_intensity: 0.1
+    least_n_peaks: 6
+    max_frag_charge: 2
+    frag_types:
+    - b
+    - y
+    min_precursor_charge: 2
+    max_precursor_charge: 4
+    min_precursor_mz: 400
+    max_precursor_mz: 2000
+    min_peptide_len: 6
+    max_peptide_len: 35
+    decoy: pseudo_reverse
+    decoy_choices:
+    - pseudo_reverse
+    - diann

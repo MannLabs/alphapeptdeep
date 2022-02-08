@@ -1,0 +1,15 @@
+click
+pandas
+numpy
+torch
+statsmodels
+wget
+seaborn
+matplotlib
+regex
+tqdm
+numba
+biopython
+transformers
+scikit-learn
+streamlit
