@@ -1,1 +1,13 @@
-click==8.0.1
+click
+pandas
+numpy
+torch
+statsmodels
+seaborn
+matplotlib
+regex
+tqdm
+numba
+biopython
+transformers
+scikit-learn
