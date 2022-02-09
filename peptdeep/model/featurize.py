@@ -131,6 +131,7 @@ unknown_inst_index = model_const['max_instrument_num']-1
 # Cell
 def parse_instrument_indices(instrument_list):
     instrument_list = [inst.upper() for inst in instrument_list]
+    instrument_list = [inst if inst!='FUSION' else 'LUMOS' for inst in instrument_list]
     return [
         instrument_dict[inst] if inst in instrument_dict
         else unknown_inst_index for inst in instrument_list
