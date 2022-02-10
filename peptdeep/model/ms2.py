@@ -213,21 +213,19 @@ class ModelMS2Bert(torch.nn.Module):
             hidden_x
         )
 
+        self.modloss_attentions = None
         if self._num_modloss_types > 0:
             if self._mask_modloss:
                 out_x = torch.cat((out_x, torch.zeros(
                     *out_x.size()[:2],self._num_modloss_types,
                     device=in_x.device
                 )), 2)
-                self.modloss_attentions = None
             else:
                 modloss_x = self.modloss_nn[0](
                     in_x
                 )
                 if self.output_attentions:
                     self.modloss_attentions = modloss_x[-1]
-                else:
-                    self.modloss_attentions = None
                 modloss_x = modloss_x[0] + hidden_x
                 modloss_x = self.modloss_nn[-1](
                     modloss_x
@@ -235,8 +233,6 @@ class ModelMS2Bert(torch.nn.Module):
                 out_x = torch.cat((
                     out_x, modloss_x
                 ),2)
-        else:
-            self.modloss_attentions = None
 
         return out_x[:,3:,:]
 
