@@ -8,6 +8,9 @@ matplotlib
 regex
 tqdm
 numba
+psutil
 biopython
 transformers
 scikit-learn
+
+alphabase
