@@ -213,6 +213,7 @@ class ModelMS2Bert(torch.nn.Module):
             hidden_x
         )
 
+        self.modloss_attentions = None
         if self._num_modloss_types > 0:
             if self._mask_modloss:
                 out_x = torch.cat((out_x, torch.zeros(

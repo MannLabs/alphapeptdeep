@@ -133,3 +133,4 @@ peptdeep/logs
 *.DS_Store
 *sandbox*
 *installed_models*
+*.last_checked*
