@@ -1,11 +1,10 @@
 ######## ALWAYS TODO ########
 
 Versions updated
-  conda activate alphabase
-  cd misc
-  bumpversion patch --config-file bumpversion.cfg
+  conda activate peptdeep
+  bumpversion patch
   conda deactivate
-  # bumpversion patch --new-version VERSION --config-file bumpversion.cfg
+  # bumpversion patch --new-version VERSION
 
 No TODOs left?
 
@@ -13,15 +12,15 @@ README updated?
   - Update CHANGELOG
 
 Manuals updated?
-  if [ misc/gui_manual.docx -nt alphabase/docs/gui_manual.pdf ]; then
+  if [ misc/gui_manual.docx -nt peptdeep/docs/gui_manual.pdf ]; then
    echo "GUI manual was not updated"
   fi
-  if [ misc/cli_manual.docx -nt alphabase/docs/cli_manual.pdf ]; then
+  if [ misc/cli_manual.docx -nt peptdeep/docs/cli_manual.pdf ]; then
    echo "CLI manual was not updated"
   fi
 
 Tutorial and performance?
-  conda activate alphabase
+  conda activate peptdeep
   jupyter nbconvert --execute --inplace --to notebook --NotebookClient.kernel_name="python" nbs/tutorial.ipynb nbs/performance.ipynb
   jupyter nbconvert --to html --NotebookClient.kernel_name="python" nbs/tutorial.ipynb nbs/performance.ipynb
   conda deactivate
@@ -43,7 +42,7 @@ ReadTheDocs up-to-date?
     cd docs
     make html
   # https://docs.readthedocs.io/en/stable/
-  https://alphabase.readthedocs.io/en/latest/
+  https://peptdeep.readthedocs.io/en/latest/
 
 Releases for all Windows, MacOS and Linux?
 
@@ -58,14 +57,14 @@ Releases for all Windows, MacOS and Linux?
 
 PyPi up-to-date?
   # https://realpython.com/pypi-publish-python-package/
-  conda activate alphabase_pip
+  conda activate peptdeep_pip
   rm -rf dist
   rm -rf build
   python setup.py sdist bdist_wheel
   twine check dist/*
   twine upload --repository-url https://test.pypi.org/legacy/ dist/*
-  conda create -n alphabase_pip_test python=3.8 -y
-  conda activate alphabase_pip_test
+  conda create -n peptdeep_pip_test python=3.8 -y
+  conda activate peptdeep_pip_test
   # WARNING!!!!! Test on all OS
-  pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple "alphabase"
+  pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple "peptdeep"
   twine upload --repository-url https://upload.pypi.org/legacy/ dist/*
