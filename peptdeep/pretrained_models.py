@@ -214,8 +214,8 @@ def psm_sampling_with_important_mods(
     else:
         return pd.DataFrame()
 
-def load_phos_models(mask_phos_modloss=False):
-    ms2_model = pDeepModel(mask_modloss=mask_phos_modloss)
+def load_phos_models(mask_modloss=True):
+    ms2_model = pDeepModel(mask_modloss=mask_modloss)
     ms2_model.load(model_zip, model_path_in_zip='phospho/ms2.pth')
     rt_model = AlphaRTModel()
     rt_model.load(model_zip, model_path_in_zip='phospho/rt.pth')
@@ -223,8 +223,8 @@ def load_phos_models(mask_phos_modloss=False):
     ccs_model.load(model_zip, model_path_in_zip='regular/ccs.pth')
     return ms2_model, rt_model, ccs_model
 
-def load_HLA_models():
-    ms2_model = pDeepModel(mask_modloss=True)
+def load_HLA_models(mask_modloss=True):
+    ms2_model = pDeepModel(mask_modloss=mask_modloss)
     ms2_model.load(model_zip, model_path_in_zip='HLA/ms2.pth')
     rt_model = AlphaRTModel()
     rt_model.load(model_zip, model_path_in_zip='HLA/rt.pth')
@@ -232,8 +232,8 @@ def load_HLA_models():
     ccs_model.load(model_zip, model_path_in_zip='regular/ccs.pth')
     return ms2_model, rt_model, ccs_model
 
-def load_models():
-    ms2_model = pDeepModel()
+def load_models(mask_modloss=True):
+    ms2_model = pDeepModel(mask_modloss=mask_modloss)
     ms2_model.load(model_zip, model_path_in_zip='regular/ms2.pth')
     rt_model = AlphaRTModel()
     rt_model.load(model_zip, model_path_in_zip='regular/rt.pth')
@@ -241,8 +241,8 @@ def load_models():
     ccs_model.load(model_zip, model_path_in_zip='regular/ccs.pth')
     return ms2_model, rt_model, ccs_model
 
-def load_models_by_model_type_in_zip(model_type_in_zip:str):
-    ms2_model = pDeepModel()
+def load_models_by_model_type_in_zip(model_type_in_zip:str, mask_modloss=True):
+    ms2_model = pDeepModel(mask_modloss=mask_modloss)
     ms2_model.load(model_zip, model_path_in_zip=f'{model_type_in_zip}/ms2.pth')
     rt_model = AlphaRTModel()
     rt_model.load(model_zip, model_path_in_zip=f'{model_type_in_zip}/rt.pth')
@@ -326,13 +326,13 @@ class ModelManager(object):
         elif model_type.lower() in ['regular','common']:
             (
                 self.ms2_model, self.rt_model, self.ccs_model
-            ) = load_models()
+            ) = load_models(mask_modloss)
         elif model_type.lower() in [
             'hla','unspecific','non-specific', 'nonspecific'
         ]:
             (
                 self.ms2_model, self.rt_model, self.ccs_model
-            ) = load_HLA_models()
+            ) = load_HLA_models(mask_modloss)
         else:
             (
                 self.ms2_model, self.rt_model, self.ccs_model
