@@ -235,13 +235,13 @@ def speclib_to_single_df(
 
     df['PrecursorMz'] = speclib._precursor_df['precursor_mz']
 
-    if 'protein_name' in speclib._precursor_df.columns:
-        df['ProteinName'] = speclib._precursor_df['protein_name']
+    if 'proteins' in speclib._precursor_df.columns:
+        df['ProteinName'] = speclib._precursor_df['proteins']
         df['UniprotID'] = df['ProteinName']
         df['ProteinGroups'] = df['ProteinName']
 
-    if 'uniprot_id' in speclib._precursor_df.columns:
-        df['UniprotID'] = speclib._precursor_df['uniprot_id']
+    if 'uniprot_ids' in speclib._precursor_df.columns:
+        df['UniprotID'] = speclib._precursor_df['uniprot_ids']
         if 'ProteinName' not in df.columns:
             df['ProteinName'] = df['UniprotID']
             df['ProteinGroups'] = df['UniprotID']
