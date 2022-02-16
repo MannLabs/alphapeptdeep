@@ -32,9 +32,34 @@ class SpectronautMSMSReader(SpectronautReader, PSMReader_w_FragBase):
 
         SpectronautReader.__init__(self)
 
+        self.min_allow_frag_num = 6
+        self.groupby_raw_name = False
+
     @property
     def fragment_intensity_df(self):
         return self._fragment_intensity_df
+
+    def _find_mapped_columns(self, lib_df):
+        self.seq_col = None
+        for col in self.column_mapping['sequence']:
+            if col in lib_df.columns:
+                self.seq_col = col
+                break
+        self.rt_col = None
+        for col in self.column_mapping['rt']:
+            if col in lib_df.columns:
+                self.rt_col = col
+                break
+        self.raw_col = None
+        if self.groupby_raw_name:
+            if isinstance(self.column_mapping['raw_name'],str):
+                if self.column_mapping['raw_name'] in lib_df.columns:
+                    self.raw_col = self.column_mapping['raw_name']
+            else:
+                for col in self.column_mapping['raw_name']:
+                    if col in lib_df.columns:
+                        self.raw_col = col
+                        break
 
     def _get_fragment_intensity(self, lib_df):
 
@@ -51,12 +76,21 @@ class SpectronautMSMSReader(SpectronautReader, PSMReader_w_FragBase):
         rt_list = []
         frag_intens_list = []
         nAA_list = []
+        raw_list = []
 
+        group_cols = [self.mod_seq_column, self.seq_col, 'PrecursorCharge']
 
-        for (mod_seq, seq, charge), df_group in lib_df.groupby(
-            [self.mod_seq_column, self.seq_col, 'PrecursorCharge']
+        if self.raw_col is not None:
+            group_cols.append(self.raw_col)
+
+        for keys, df_group in lib_df.groupby(
+            group_cols
         ):
-            if len(df_group) < 5: continue
+            if len(df_group) < self.min_allow_frag_num: continue
+            if self.raw_col is None:
+                mod_seq, seq, charge = keys
+            else:
+                mod_seq, seq, charge, raw = keys
             nAA = len(seq)
             intens = np.zeros(
                 (nAA-1, len(self.charged_frag_types)),dtype=np.float32
@@ -95,6 +129,8 @@ class SpectronautMSMSReader(SpectronautReader, PSMReader_w_FragBase):
             rt_list.append(df_group[self.rt_col].values[0])
             frag_intens_list.append(intens)
             nAA_list.append(nAA)
+            if self.raw_col is not None:
+                raw_list.append(raw)
 
         df = pd.DataFrame({
             self.mod_seq_column: mod_seq_list,
@@ -102,6 +138,9 @@ class SpectronautMSMSReader(SpectronautReader, PSMReader_w_FragBase):
             'PrecursorCharge': charge_list,
             self.rt_col: rt_list,
         })
+
+        if self.raw_col is not None:
+            df[self.raw_col] = raw_list
 
         self._fragment_intensity_df = pd.DataFrame(
             np.concatenate(frag_intens_list),
@@ -116,18 +155,6 @@ class SpectronautMSMSReader(SpectronautReader, PSMReader_w_FragBase):
         df['frag_end_idx'] = indices[1:]
 
         return df
-
-    def _find_mapped_columns(self, lib_df):
-        self.seq_col = None
-        for col in self.column_mapping['sequence']:
-            if col in lib_df.columns:
-                self.seq_col = col
-                break
-        self.rt_col = None
-        for col in self.column_mapping['rt']:
-            if col in lib_df.columns:
-                self.rt_col = col
-                break
 
     def _load_file(self, filename):
         df = pd.read_csv(filename, sep=self.csv_sep)
