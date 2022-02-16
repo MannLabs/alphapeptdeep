@@ -528,7 +528,7 @@ class ModelManager(object):
         frag_types:list = get_charged_frag_types(
             ['b','y'],2
         ),
-        multiprocessing:bool = True,
+        multiprocessing:bool = mgr_settings['predict']['multiprocessing'],
         thread_num:int = global_settings['thread_num']
     )->Dict[str, pd.DataFrame]:
         """ predict all items defined by `predict_items`,
