@@ -277,7 +277,7 @@ class ModelManager(object):
         self.rt_model:AlphaRTModel = None
         self.ccs_model:AlphaCCSModel = None
 
-        self.grid_nce_search = mgr_settings[
+        self.use_grid_nce_search = mgr_settings[
             'fine_tune'
         ]['grid_nce_search']
 
@@ -445,7 +445,7 @@ class ModelManager(object):
                     else:
                         tr_inten_df[frag_type] = 0
 
-                if self.grid_nce_search:
+                if self.use_grid_nce_search:
                     self.nce, self.instrument = self.ms2_model.grid_nce_search(
                         tr_df, tr_inten_df,
                         nce_first=mgr_settings['fine_tune'][

@@ -719,12 +719,12 @@ class ScoreFeatureExtractorMP(ScoreFeatureExtractor):
                                 psm_num_to_tune_ms2,
                                 psm_num_per_mod_to_tune_ms2,
                                 epoch_to_tune_ms2,
-                                grid_nce_search
+                                use_grid_nce_search
                             ) = (
                                 self.model_mgr.psm_num_to_tune_ms2,
                                 self.model_mgr.psm_num_per_mod_to_tune_ms2,
                                 self.model_mgr.epoch_to_tune_ms2,
-                                self.model_mgr.grid_nce_search
+                                self.model_mgr.use_grid_nce_search
                             )
 
                             (
@@ -735,7 +735,7 @@ class ScoreFeatureExtractorMP(ScoreFeatureExtractor):
 
                             self.model_mgr.epoch_to_tune_ms2 = 3
 
-                            self.model_mgr.grid_nce_search = False
+                            self.model_mgr.use_grid_nce_search = False
 
                             if 'nce' not in df.columns:
                                 self.model_mgr.set_default_nce(df)
@@ -749,12 +749,12 @@ class ScoreFeatureExtractorMP(ScoreFeatureExtractor):
                                 self.model_mgr.psm_num_to_tune_ms2,
                                 self.model_mgr.psm_num_per_mod_to_tune_ms2,
                                 self.model_mgr.epoch_to_tune_ms2,
-                                self.model_mgr.grid_nce_search
+                                self.model_mgr.use_grid_nce_search
                             ) = (
                                 psm_num_to_tune_ms2,
                                 psm_num_per_mod_to_tune_ms2,
                                 epoch_to_tune_ms2,
-                                grid_nce_search
+                                use_grid_nce_search
                             )
 
                         predict_inten_df = self.model_mgr.predict_ms2(df)

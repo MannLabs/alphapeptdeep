@@ -87,7 +87,7 @@ class MaxQuantMSMSReader(MaxQuantReader, PSMReader_w_FragBase):
     ):
         self._psm_df['nAA'] = self._psm_df.sequence.str.len()
         mq_df['nAA'] = self._psm_df.nAA
-        MaxQuantReader.normalize_rt_by_raw_name(self)
+        self.normalize_rt_by_raw_name()
 
         self._fragment_intensity_df = init_fragment_by_precursor_dataframe(
             mq_df, self.charged_frag_types
@@ -115,12 +115,18 @@ class MaxQuantMSMSReader(MaxQuantReader, PSMReader_w_FragBase):
                 if idx > 0:
                     frag_type, charge = frag_type[:idx], frag_type[idx+1:-2]
                 if not frag_type[1].isdigit(): continue
-                frag_type, frag_pos = frag_type[0], int(frag_type[1:].strip('*'))
+                frag_type, frag_pos = frag_type[0], frag_type[1:]
+                if frag_pos.endswith('*'):
+                    frag_pos = int(frag_pos[:-1])
+                    modloss=True
+                else:
+                    frag_pos = int(frag_pos)
+                    modloss=False
                 if frag_type in 'xyz':
                     frag_pos = nAA - frag_pos -1
                 else:
                     frag_pos -= 1
-                frag_type += '_z'+charge
+                frag_type += ('_modloss_z' if modloss else '_z') +charge
                 if frag_type not in frag_col_dict: continue
                 frag_col = frag_col_dict[frag_type]
                 intens[frag_pos,frag_col] = float(frag_inten)
@@ -131,10 +137,11 @@ class MaxQuantMSMSReader(MaxQuantReader, PSMReader_w_FragBase):
                 start:end,:
             ] = intens
 
-
         self._psm_df[
             ['frag_start_idx','frag_end_idx']
         ] = mq_df[['frag_start_idx','frag_end_idx']]
+
+        self._psm_df = self._psm_df[~self._psm_df.mods.isna()]
 
 
 psm_w_frag_reader_provider.register_reader('maxquant', MaxQuantMSMSReader)
