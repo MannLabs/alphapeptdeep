@@ -67,7 +67,7 @@ class MaxQuantMSMSReader(MaxQuantReader, PSMReader_w_FragBase):
 
         self.column_mapping['phos_probs'] = 'PhosProbs'
         self._score_thres = score_threshold
-        self.phos_prob = 0.75
+        self._phos_prob = 0.75
 
     @property
     def fragment_intensity_df(self):
@@ -75,7 +75,7 @@ class MaxQuantMSMSReader(MaxQuantReader, PSMReader_w_FragBase):
 
     def _load_file(self, filename):
         df = MaxQuantReader._load_file(self, filename)
-        df = filter_phos(df, self.phos_prob)
+        df = filter_phos(df, self._phos_prob)
         df = df[
             (df.Score >= self._score_thres)|
             ((df.Score>=60)&(df.PhosProbs!=''))]
