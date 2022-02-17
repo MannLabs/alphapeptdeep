@@ -6,9 +6,6 @@ __all__ = ['SpectronautMSMSReader']
 import pandas as pd
 import numpy as np
 
-from alphabase.peptide.fragment import (
-    init_fragment_by_precursor_dataframe
-)
 from alphabase.io.psm_reader.dia_search_reader import (
     SpectronautReader
 )
@@ -162,11 +159,6 @@ class SpectronautMSMSReader(SpectronautReader, PSMReader_w_FragBase):
 
         df = self._get_fragment_intensity(df)
 
-        min_rt = df[self.rt_col].min()
-        df[self.rt_col] = (
-            df[self.rt_col] - min_rt
-        )/(df[self.rt_col].max() - min_rt)
-
         return df
 
     def _post_process(self,
@@ -178,6 +170,11 @@ class SpectronautMSMSReader(SpectronautReader, PSMReader_w_FragBase):
         ] = lib_df[['frag_start_idx','frag_end_idx']]
 
         self.normalize_rt_by_raw_name()
+
+        self._psm_df = self._psm_df[
+            ~self._psm_df.mods.isna()
+        ].reset_index(drop=False)
+
 
 
 psm_w_frag_reader_provider.register_reader('spectronaut', SpectronautMSMSReader)
