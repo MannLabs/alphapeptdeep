@@ -2,7 +2,7 @@
 
 __all__ = ['is_model_zip', 'download_models', 'install_models', 'sandbox_dir', 'model_name', 'model_url',
            'url_zip_name', 'model_zip', 'count_mods', 'psm_sampling_with_important_mods', 'load_phos_models',
-           'load_HLA_models', 'load_models', 'load_models_by_model_type_in_zip', 'mgr_settings', 'ModelManager']
+           'load_models', 'load_models_by_model_type_in_zip', 'mgr_settings', 'ModelManager']
 
 # Cell
 import os
@@ -216,18 +216,9 @@ def psm_sampling_with_important_mods(
 
 def load_phos_models(mask_modloss=True):
     ms2_model = pDeepModel(mask_modloss=mask_modloss)
-    ms2_model.load(model_zip, model_path_in_zip='phospho/ms2.pth')
+    ms2_model.load(model_zip, model_path_in_zip='phospho/ms2_phos.pth')
     rt_model = AlphaRTModel()
-    rt_model.load(model_zip, model_path_in_zip='phospho/rt.pth')
-    ccs_model = AlphaCCSModel()
-    ccs_model.load(model_zip, model_path_in_zip='regular/ccs.pth')
-    return ms2_model, rt_model, ccs_model
-
-def load_HLA_models(mask_modloss=True):
-    ms2_model = pDeepModel(mask_modloss=mask_modloss)
-    ms2_model.load(model_zip, model_path_in_zip='HLA/ms2.pth')
-    rt_model = AlphaRTModel()
-    rt_model.load(model_zip, model_path_in_zip='HLA/rt.pth')
+    rt_model.load(model_zip, model_path_in_zip='phospho/rt_phos.pth')
     ccs_model = AlphaCCSModel()
     ccs_model.load(model_zip, model_path_in_zip='regular/ccs.pth')
     return ms2_model, rt_model, ccs_model
@@ -313,7 +304,7 @@ class ModelManager(object):
         Args:
             model_type (str, optional): To load the installed MS2/RT/CCS models
                 or phos MS2/RT/CCS models. It could be 'phospho', 'HLA', 'regular', or
-                model_type (model sub-folder) in peptdeep_models.zip.
+                model_type (model sub-folder) in pretrained_models.zip.
                 Defaults to 'regular'.
             mask_modloss (bool, optional): If modloss ions are masked to zeros
                 in the ms2 model. `modloss` ions are mostly useful for phospho
@@ -332,7 +323,7 @@ class ModelManager(object):
         ]:
             (
                 self.ms2_model, self.rt_model, self.ccs_model
-            ) = load_HLA_models(mask_modloss)
+            ) = load_models(mask_modloss)
         else:
             (
                 self.ms2_model, self.rt_model, self.ccs_model

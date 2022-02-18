@@ -43,6 +43,7 @@ def keep_high_prob_phos(mods, prob_seq, prob):
 
 def filter_phos(mq_df, prob):
     if 'Phospho (STY) Probabilities' not in mq_df.columns:
+        mq_df['PhosProbs'] = ''
         return mq_df
     mq_df['PhosProbs'] = mq_df[['Modifications','Phospho (STY) Probabilities']].apply(
         lambda x: keep_high_prob_phos(x[0],x[1],prob), axis=1
@@ -114,7 +115,7 @@ class MaxQuantMSMSReader(MaxQuantReader, PSMReader_w_FragBase):
                 charge = '1'
                 if idx > 0:
                     frag_type, charge = frag_type[:idx], frag_type[idx+1:-2]
-                if not frag_type[1].isdigit(): continue
+                if not frag_type[1].isdigit(): continue # no H2O or NH3 loss
                 frag_type, frag_pos = frag_type[0], frag_type[1:]
                 if frag_pos.endswith('*'):
                     frag_pos = int(frag_pos[:-1])
