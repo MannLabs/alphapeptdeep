@@ -2,7 +2,8 @@
 
 __all__ = ['is_model_zip', 'download_models', 'install_models', 'sandbox_dir', 'model_name', 'model_url',
            'url_zip_name', 'model_zip', 'count_mods', 'psm_sampling_with_important_mods', 'load_phos_models',
-           'load_models', 'load_models_by_model_type_in_zip', 'mgr_settings', 'ModelManager']
+           'load_models', 'load_models_by_model_type_in_zip', 'mgr_settings', 'clear_error_modloss_intensities',
+           'ModelManager']
 
 # Cell
 import os
@@ -261,6 +262,16 @@ from peptdeep.settings import global_settings
 import torch.multiprocessing as mp
 from typing import Dict
 from peptdeep.utils import logging, process_bar
+
+def clear_error_modloss_intensities(
+    fragment_mz_df, fragment_intensity_df
+):
+    # clear error modloss intensities
+    for col in fragment_mz_df.columns.values:
+        if 'modloss' in col:
+            fragment_intensity_df.loc[
+                fragment_mz_df[col]==0,col
+            ] = 0
 
 class ModelManager(object):
     def __init__(self):
@@ -562,6 +573,14 @@ class ModelManager(object):
             if 'mobility' in predict_items:
                 self.predict_mobility(precursor_df)
             if 'ms2' in predict_items:
+                fragment_mz_df = create_fragment_mz_dataframe(
+                    precursor_df, frag_types
+                )
+
+                precursor_df.drop(
+                    columns=['frag_start_idx'], inplace=True
+                )
+
                 fragment_intensity_df = self.predict_ms2(
                     precursor_df
                 )
@@ -573,25 +592,9 @@ class ModelManager(object):
                     ], inplace=True
                 )
 
-                precursor_df.drop(
-                    columns=['frag_start_idx'], inplace=True
+                clear_error_modloss_intensities(
+                    fragment_mz_df, fragment_intensity_df
                 )
-                fragment_mz_df = create_fragment_mz_dataframe(
-                    precursor_df, frag_types
-                )
-                fragment_mz_df.drop(
-                    columns=[
-                        col for col in fragment_mz_df.columns
-                        if col not in frag_types
-                    ], inplace=True
-                )
-
-                # clear error modloss intensities
-                for col in fragment_mz_df.columns.values:
-                    if 'modloss' in col:
-                        fragment_intensity_df.loc[
-                            fragment_mz_df[col]==0,col
-                        ] = 0
 
                 return {
                     'precursor_df': precursor_df,

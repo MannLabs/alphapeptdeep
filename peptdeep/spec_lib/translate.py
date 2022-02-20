@@ -187,7 +187,7 @@ def speclib_to_single_df(
     speclib:SpecLibBase,
     *,
     translate_mod_dict:dict = None,
-    keep_k_highest_intensity:int=16,
+    keep_k_highest_intensity:int=12,
     modloss='H3PO4',
     frag_type_head:str='FragmentType',
     frag_mass_head:str='FragmentMz',
@@ -196,7 +196,8 @@ def speclib_to_single_df(
     frag_loss_head:str='FragmentLossType',
     frag_num_head:str='FragmentNumber',
     min_frag_mz = 200,
-    max_frag_mz = 2000
+    max_frag_mz = 2000,
+    min_frag_intensity = 0.02,
 ):
     '''
     Convert alphabase library to diann (or Spectronaut) library dataframe
@@ -222,17 +223,23 @@ def speclib_to_single_df(
     df['frag_end_idx'] = speclib._precursor_df['frag_end_idx']
 
     df['PrecursorCharge'] = speclib._precursor_df['charge']
-    if 'irt_pred' in speclib._precursor_df.columns:
-        df['iRT'] = speclib._precursor_df['irt_pred']
-    elif 'rt_pred' in speclib._precursor_df.columns:
+    if 'rt_pred' in speclib._precursor_df.columns:
         df['iRT'] = speclib._precursor_df['rt_pred']
+    elif 'rt_norm' in speclib._precursor_df.columns:
+        df['iRT'] = speclib._precursor_df['rt_norm']
+    else:
+        raise ValueError('precursor_df must contain the "rt_pred" or "rt_norm" column')
 
-    ccs_to_mobility_pred_df(speclib._precursor_df)
-    df['IonMobility'] = speclib._precursor_df.mobility_pred
+    if 'mobility_pred' in speclib._precursor_df.columns:
+        df['IonMobility'] = speclib._precursor_df.mobility_pred
+    elif 'mobility' in speclib._precursor_df.columns:
+        df['IonMobility'] = speclib._precursor_df.mobility
 
     df['LabelModifiedSequence'] = df['ModifiedPeptide']
     df['StrippedPeptide'] = speclib._precursor_df['sequence']
 
+    if 'precursor_mz' not in speclib._precursor_df.columns:
+        speclib.calc_precursor_mz()
     df['PrecursorMz'] = speclib._precursor_df['precursor_mz']
 
     if 'proteins' in speclib._precursor_df.columns:
@@ -270,7 +277,7 @@ def speclib_to_single_df(
         frag_loss_head=frag_loss_head,
         frag_num_head=frag_num_head,
     )
-    df = df[df['RelativeIntensity']>0]
+    df = df[df['RelativeIntensity']>min_frag_intensity]
     df.loc[df[frag_loss_head]=='modloss',frag_loss_head] = modloss
 
     return df.drop(['frag_start_idx','frag_end_idx'], axis=1)
