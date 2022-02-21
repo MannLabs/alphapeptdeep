@@ -306,9 +306,17 @@ class ModelManager(object):
             'predict'
         ]['verbose']
 
+    def set_default_nce_instrument(self, df):
+        if 'nce' not in df.columns and 'instrument' not in df.columns:
+            df['nce'] = self.nce
+            df['instrument'] = self.instrument
+        elif 'nce' not in df.columns:
+            df['nce'] = self.nce
+        elif 'instrument' not in df.columns:
+            df['instrument'] = self.instrument
+
     def set_default_nce(self, df):
-        df['nce'] = self.nce
-        df['instrument'] = self.instrument
+        self.set_default_nce_instrument(df)
 
     def load_installed_models(self, model_type='regular', mask_modloss=True):
         """ Load built-in MS2/CCS/RT models.
@@ -430,6 +438,15 @@ class ModelManager(object):
         psm_df: pd.DataFrame,
         matched_intensity_df: pd.DataFrame,
     ):
+        """Using matched_intensity_df to fine-tune the ms2 model.
+        1. It will sample `n=self.psm_num_to_tune_ms2` PSMs into training dataframe (`tr_df`) to for fine-tuning.
+        2. This method will also consider some important PTMs (`n=self.top_n_mods_to_tune`) into `tr_df` for fine-tuning.
+        3. If `self.use_grid_nce_search==True`, this method will call `self.ms2_model.grid_nce_search` to find the best NCE and instrument.
+
+        Args:
+            psm_df (pd.DataFrame): PSM dataframe for fine-tuning.
+            matched_intensity_df (pd.DataFrame): The matched fragment intensities for `psm_df`.
+        """
         if self.psm_num_to_tune_ms2 > 0:
             tr_df = psm_sampling_with_important_mods(
                 psm_df, self.psm_num_to_tune_ms2,
@@ -465,8 +482,8 @@ class ModelManager(object):
                     )
                     tr_df['nce'] = self.nce
                     tr_df['instrument'] = self.instrument
-                elif 'nce' not in tr_df.columns:
-                    self.set_default_nce(tr_df)
+                else:
+                    self.set_default_nce_instrument(tr_df)
 
                 self.ms2_model.train(tr_df,
                     fragment_intensity_df=tr_inten_df,
@@ -475,13 +492,24 @@ class ModelManager(object):
 
     def predict_ms2(self, precursor_df:pd.DataFrame,
         *,
-        batch_size=mgr_settings[
+        batch_size:int=mgr_settings[
             'predict'
         ]['batch_size_ms2'],
-        reference_frag_df = None,
-    ):
-        if 'nce' not in precursor_df.columns:
-            self.set_default_nce(precursor_df)
+        reference_frag_df:pd.DataFrame = None,
+    )->pd.DataFrame:
+        """[summary]
+
+        Args:
+            precursor_df (pd.DataFrame): precursor dataframe for MS2 prediction.
+            batch_size (int, optional): Batch size for prediction.
+              Defaults to mgr_settings[ 'predict' ]['batch_size_ms2'].
+            reference_frag_df (pd.DataFrame, optional):
+              If precursor_df has 'frag_start_idx' pointing to this dataframe. Defaults to None.
+
+        Returns:
+            pd.DataFrame: predicted fragment intensity dataframe. The will be 'frag_start_idx' and `frag_end_idx` in precursor_df pointing
+        """
+        self.set_default_nce_instrument(precursor_df)
         if self.verbose:
             logging.info('Predicting MS2 ...')
         return self.ms2_model.predict(precursor_df,
@@ -491,10 +519,22 @@ class ModelManager(object):
         )
 
     def predict_rt(self, precursor_df:pd.DataFrame,
-        *, batch_size=mgr_settings[
-             'predict'
-           ]['batch_size_rt_ccs']
-    ):
+        *,
+        batch_size:int=mgr_settings[
+            'predict'
+        ]['batch_size_rt_ccs']
+    )->pd.DataFrame:
+        """ Predict RT ('rt_pred') inplace into `precursor_df`.
+
+        Args:
+            precursor_df (pd.DataFrame): precursor_df for RT prediction
+            batch_size (int, optional): Batch size for prediction.
+              Defaults to mgr_settings[ 'predict' ]['batch_size_rt_ccs'].
+              mgr_settings=peptdeep.settings.global_settings['model_mgr'].
+
+        Returns:
+            pd.DataFrame: df with 'rt_pred' and 'rt_norm_pred' columns.
+        """
         if self.verbose:
             logging.info("Predicting RT ...")
         df = self.rt_model.predict(precursor_df,
@@ -504,10 +544,22 @@ class ModelManager(object):
         return df
 
     def predict_mobility(self, precursor_df:pd.DataFrame,
-        *, batch_size=mgr_settings[
-             'predict'
-           ]['batch_size_rt_ccs']
-    ):
+        *,
+        batch_size:int=mgr_settings[
+            'predict'
+        ]['batch_size_rt_ccs']
+    )->pd.DataFrame:
+        """ Predict mobility ('ccs_pred' and `mobility_pred`) inplace into `precursor_df`.
+
+        Args:
+            precursor_df (pd.DataFrame): precursor_df for CCS/mobility prediction
+            batch_size (int, optional): Batch size for prediction.
+              Defaults to mgr_settings[ 'predict' ]['batch_size_rt_ccs'].
+              mgr_settings=peptdeep.settings.global_settings['model_mgr'].
+
+        Returns:
+            pd.DataFrame: df with 'ccs_pred' and 'mobility_pred' columns.
+        """
         if self.verbose:
             logging.info("Predicting mobility ...")
         precursor_df = self.ccs_model.predict(precursor_df,
@@ -518,6 +570,7 @@ class ModelManager(object):
         )
 
     def _predict_all_for_mp(self, arg_dict):
+        """Internal function, for multiprocessing"""
         return self.predict_all(
             multiprocessing=False, **arg_dict
         )
