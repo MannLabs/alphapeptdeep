@@ -171,7 +171,7 @@ mod_to_other_mod_dict = {
 from alphabase.constants.modification import MOD_DF
 mod_to_unimod_dict = {}
 for mod_name,unimod_id in MOD_DF[['name','unimod_id']].values:
-    mod_to_unimod_dict[mod_name] = unimod_id
+    mod_to_unimod_dict[mod_name] = f"UniMod:{unimod_id}"
 
 def mask_fragment_intensity_by_mz_(
     fragment_mz_df:pd.DataFrame,
