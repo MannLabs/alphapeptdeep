@@ -412,7 +412,8 @@ class pDeepModel(model_base.ModelImplBase):
 
         self.predict_df = init_fragment_by_precursor_dataframe(
             precursor_df, self.charged_frag_types,
-            reference_frag_df, dtype=np.float32
+            reference_fragment_df=reference_frag_df,
+            dtype=np.float32
         )
 
         if np.all(precursor_df['nce'].values > 1):
