@@ -56,6 +56,7 @@ def get_ms2_features(
     """ Extract ms2 features from the given
     predict_intensity_df and matched_intensity_df. It will add columns:
       cos: cosine similarity between predicted and matched fragments
+      pcc: pearson correlation between predicted and matched fragments
       sa: spectral angle between predicted and matched fragments
       spc: Spearman's rank correlation between predicted and matched fragments.
       cos_bion: ...
@@ -77,12 +78,12 @@ def get_ms2_features(
         psm_df, predict_intensity_df,
         matched_intensity_df,
         charged_frag_types=used_frag_types,
-        metrics=['COS','SA','SPC'],
+        metrics=['COS','SA','SPC','PCC'],
         spc_top_k=perc_settings['top_k_frags_to_calc_spc']
     )
     psm_df.rename(
         columns={
-            'COS':'cos','SA':'sa','SPC':'spc'
+            'COS':'cos','SA':'sa','SPC':'spc','PCC':'pcc',
         },
         inplace=True
     )
@@ -113,11 +114,12 @@ def get_ms2_features(
             psm_df, predict_intensity_df,
             matched_intensity_df,
             charged_frag_types=b_frag_types,
-            metrics=['COS','SA','SPC'],
+            metrics=['COS','SA','SPC','PCC'],
         )
         psm_df.rename(
             columns={
-                'COS':'cos_bion','SA':'sa_bion','SPC':'spc_bion'
+                'COS':'cos_bion','SA':'sa_bion','SPC':'spc_bion',
+                'PCC':'pcc_bion'
             },
             inplace=True
         )
@@ -134,7 +136,7 @@ def get_ms2_features(
             )
         psm_df['frag_ratio_bion'] = frag_ratio_ion
     else:
-        psm_df[['cos_bion','sa_bion','spc_bion']] = 0
+        psm_df[['cos_bion','sa_bion','spc_bion','pcc_bion']] = 0
         psm_df[['frag_ratio_bion']] = 0
 
     if len(y_frag_types) > 0:
@@ -146,7 +148,8 @@ def get_ms2_features(
         )
         psm_df.rename(
             columns={
-                'COS':'cos_yion','SA':'sa_yion','SPC':'spc_yion'
+                'COS':'cos_yion','SA':'sa_yion','SPC':'spc_yion',
+                'PCC':'pcc_yion',
             },
             inplace=True
         )
@@ -162,7 +165,7 @@ def get_ms2_features(
             )
         psm_df['frag_ratio_yion'] = frag_ratio_ion
     else:
-        psm_df[['cos_yion','sa_yion','spc_yion']] = 0
+        psm_df[['cos_yion','sa_yion','spc_yion','pcc_yion']] = 0
         psm_df[['frag_ratio_yion']] = 0
 
     return psm_df
@@ -224,9 +227,9 @@ class ScoreFeatureExtractor:
         ]
 
         self.score_feature_list = [
-            'cos','sa','spc',
-            'cos_bion','sa_bion','spc_bion',
-            'cos_yion','sa_yion','spc_yion',
+            'sa','spc','pcc',
+            'sa_bion','spc_bion','pcc_bion',
+            'sa_yion','spc_yion','pcc_yion',
             'frag_ratio','frag_ratio_bion',
             'frag_ratio_yion','rt_delta_abs',
             'mobility_delta_abs',

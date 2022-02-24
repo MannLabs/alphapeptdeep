@@ -288,11 +288,14 @@ class ModelManager(object):
         self.epoch_to_tune_ms2 = mgr_settings[
             'fine_tune'
         ]['epoch_ms2']
+        self.batch_size_to_tune_ms2 = 512
+
         self.psm_num_to_tune_rt_ccs = 3000
         self.psm_num_per_mod_to_tune_rt_ccs = 100
         self.epoch_to_tune_rt_ccs = mgr_settings[
             'fine_tune'
         ]['epoch_rt_ccs']
+        self.batch_size_to_tune_rt_ccs = 1024
 
         self.top_n_mods_to_tune = 10
 
@@ -402,6 +405,7 @@ class ModelManager(object):
             )
             if len(tr_df) > 0:
                 self.rt_model.train(tr_df,
+                    batch_size=self.batch_size_to_tune_rt_ccs,
                     epoch=self.epoch_to_tune_rt_ccs
                 )
 
@@ -431,6 +435,7 @@ class ModelManager(object):
             )
             if len(tr_df) > 0:
                 self.ccs_model.train(tr_df,
+                    batch_size=self.batch_size_to_tune_rt_ccs,
                     epoch=self.epoch_to_tune_rt_ccs
                 )
 
@@ -487,6 +492,7 @@ class ModelManager(object):
 
                 self.ms2_model.train(tr_df,
                     fragment_intensity_df=tr_inten_df,
+                    batch_size=self.batch_size_to_tune_ms2,
                     epoch=self.epoch_to_tune_ms2
                 )
 
