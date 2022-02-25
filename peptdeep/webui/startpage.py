@@ -7,7 +7,7 @@ import peptdeep
 def show():
     """Streamlit page that displays information on how to get started."""
     st.write("# Getting started")
-    st.text("Welcome to PeptDeep.")
+    st.text("Welcome to AlphaPeptDeep.")
 
     with st.expander("Navigation"):
         st.write("Use the sidebar to the left to navigate through the different menus.")
@@ -22,9 +22,9 @@ def show():
 
     with st.expander("Resources"):
         st.write(
-            "On the following pages you can find additional information about PeptDeep:"
+            "On the following pages you can find additional information about AlphaPeptDeep:"
         )
-        markdown_link("PeptDeep on GitHub", peptdeep.__github__)
+        markdown_link("AlphaPeptDeep on GitHub", peptdeep.__github__)
         markdown_link("Code documentation", peptdeep.__doc__)
         markdown_link(
             "Report an issue or requirement a feature (GitHub)",
@@ -38,13 +38,13 @@ def show():
     with st.expander("Server"):
 
         st.write(
-            "When starting PeptDeep you launch a server that can be closed when closing the terminal window."
+            "When starting AlphaPeptDeep you launch a server that can be closed when closing the terminal window."
         )
         st.write(
             "If your firewall policy allows external access, this page can also be accessed from other computers in the network."
         )
         st.write(
-            "The server starts an PeptDeep process in the background that will process new experiments once they are submitted."
+            "The server starts an AlphaPeptDeep process in the background that will process new experiments once they are submitted."
         )
 
     with st.expander("Sample Run"):
