@@ -232,7 +232,7 @@ import seaborn as sns
 
 def evaluate_linear_regression(
     df:pd.DataFrame, x='rt_pred', y='rt_norm',
-    ci=95, n_sample=100000
+    ci=95, n_sample=10000000
 ):
     if len(df) > n_sample:
         df = df.sample(n_sample, replace=False)
@@ -251,7 +251,7 @@ def evaluate_linear_regression(
     return pd.DataFrame(
         dict(
             R_square=[R_square],R=[R],
-            slope=[w],intercept=[b],n_sample=[n]
+            slope=[w],intercept=[b],test_num=[n]
         )
     )
 

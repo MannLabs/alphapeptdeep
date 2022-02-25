@@ -478,7 +478,6 @@ class pDeepModel(model_base.ModelImplBase):
                 batch_df[
                     ['frag_start_idx','frag_end_idx']
                 ].values,
-                self.charged_frag_types
             )
 
     def train_with_warmup(self,
