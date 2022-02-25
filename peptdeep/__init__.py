@@ -2,9 +2,9 @@
 
 
 __project__ = "peptdeep"
-__version__ = "1.0.0"
+__version__ = "0.0.3"
 __license__ = "Apache 2.0"
-__description__ = "A Deep Learning Platform for Proteomics"
+__description__ = "The AlphaPept Deep (PeptDeep) Learning Platform for Proteomics"
 __author__ = "Mann Labs"
 __author_email__ = "jalew188@gmail.com"
 __github__ = "https://github.com/MannLabs/peptdeep"

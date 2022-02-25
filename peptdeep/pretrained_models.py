@@ -2,7 +2,8 @@
 
 __all__ = ['is_model_zip', 'download_models', 'install_models', 'sandbox_dir', 'model_name', 'model_url',
            'url_zip_name', 'model_zip', 'count_mods', 'psm_sampling_with_important_mods', 'load_phos_models',
-           'load_HLA_models', 'load_models', 'load_models_by_model_type_in_zip', 'mgr_settings', 'ModelManager']
+           'load_models', 'load_models_by_model_type_in_zip', 'mgr_settings', 'clear_error_modloss_intensities',
+           'ModelManager']
 
 # Cell
 import os
@@ -214,26 +215,17 @@ def psm_sampling_with_important_mods(
     else:
         return pd.DataFrame()
 
-def load_phos_models(mask_phos_modloss=False):
-    ms2_model = pDeepModel(mask_modloss=mask_phos_modloss)
-    ms2_model.load(model_zip, model_path_in_zip='phospho/ms2.pth')
+def load_phos_models(mask_modloss=True):
+    ms2_model = pDeepModel(mask_modloss=mask_modloss)
+    ms2_model.load(model_zip, model_path_in_zip='phospho/ms2_phos.pth')
     rt_model = AlphaRTModel()
-    rt_model.load(model_zip, model_path_in_zip='phospho/rt.pth')
+    rt_model.load(model_zip, model_path_in_zip='phospho/rt_phos.pth')
     ccs_model = AlphaCCSModel()
     ccs_model.load(model_zip, model_path_in_zip='regular/ccs.pth')
     return ms2_model, rt_model, ccs_model
 
-def load_HLA_models():
-    ms2_model = pDeepModel(mask_modloss=True)
-    ms2_model.load(model_zip, model_path_in_zip='HLA/ms2.pth')
-    rt_model = AlphaRTModel()
-    rt_model.load(model_zip, model_path_in_zip='HLA/rt.pth')
-    ccs_model = AlphaCCSModel()
-    ccs_model.load(model_zip, model_path_in_zip='regular/ccs.pth')
-    return ms2_model, rt_model, ccs_model
-
-def load_models():
-    ms2_model = pDeepModel()
+def load_models(mask_modloss=True):
+    ms2_model = pDeepModel(mask_modloss=mask_modloss)
     ms2_model.load(model_zip, model_path_in_zip='regular/ms2.pth')
     rt_model = AlphaRTModel()
     rt_model.load(model_zip, model_path_in_zip='regular/rt.pth')
@@ -241,8 +233,8 @@ def load_models():
     ccs_model.load(model_zip, model_path_in_zip='regular/ccs.pth')
     return ms2_model, rt_model, ccs_model
 
-def load_models_by_model_type_in_zip(model_type_in_zip:str):
-    ms2_model = pDeepModel()
+def load_models_by_model_type_in_zip(model_type_in_zip:str, mask_modloss=True):
+    ms2_model = pDeepModel(mask_modloss=mask_modloss)
     ms2_model.load(model_zip, model_path_in_zip=f'{model_type_in_zip}/ms2.pth')
     rt_model = AlphaRTModel()
     rt_model.load(model_zip, model_path_in_zip=f'{model_type_in_zip}/rt.pth')
@@ -271,13 +263,23 @@ import torch.multiprocessing as mp
 from typing import Dict
 from peptdeep.utils import logging, process_bar
 
+def clear_error_modloss_intensities(
+    fragment_mz_df, fragment_intensity_df
+):
+    # clear error modloss intensities
+    for col in fragment_mz_df.columns.values:
+        if 'modloss' in col:
+            fragment_intensity_df.loc[
+                fragment_mz_df[col]==0,col
+            ] = 0
+
 class ModelManager(object):
     def __init__(self):
         self.ms2_model:pDeepModel = None
         self.rt_model:AlphaRTModel = None
         self.ccs_model:AlphaCCSModel = None
 
-        self.grid_nce_search = mgr_settings[
+        self.use_grid_nce_search = mgr_settings[
             'fine_tune'
         ]['grid_nce_search']
 
@@ -304,16 +306,24 @@ class ModelManager(object):
             'predict'
         ]['verbose']
 
+    def set_default_nce_instrument(self, df):
+        if 'nce' not in df.columns and 'instrument' not in df.columns:
+            df['nce'] = self.nce
+            df['instrument'] = self.instrument
+        elif 'nce' not in df.columns:
+            df['nce'] = self.nce
+        elif 'instrument' not in df.columns:
+            df['instrument'] = self.instrument
+
     def set_default_nce(self, df):
-        df['nce'] = self.nce
-        df['instrument'] = self.instrument
+        self.set_default_nce_instrument(df)
 
     def load_installed_models(self, model_type='regular', mask_modloss=True):
         """ Load built-in MS2/CCS/RT models.
         Args:
             model_type (str, optional): To load the installed MS2/RT/CCS models
                 or phos MS2/RT/CCS models. It could be 'phospho', 'HLA', 'regular', or
-                model_type (model sub-folder) in peptdeep_models.zip.
+                model_type (model sub-folder) in pretrained_models.zip.
                 Defaults to 'regular'.
             mask_modloss (bool, optional): If modloss ions are masked to zeros
                 in the ms2 model. `modloss` ions are mostly useful for phospho
@@ -326,13 +336,13 @@ class ModelManager(object):
         elif model_type.lower() in ['regular','common']:
             (
                 self.ms2_model, self.rt_model, self.ccs_model
-            ) = load_models()
+            ) = load_models(mask_modloss)
         elif model_type.lower() in [
             'hla','unspecific','non-specific', 'nonspecific'
         ]:
             (
                 self.ms2_model, self.rt_model, self.ccs_model
-            ) = load_HLA_models()
+            ) = load_models(mask_modloss)
         else:
             (
                 self.ms2_model, self.rt_model, self.ccs_model
@@ -428,6 +438,15 @@ class ModelManager(object):
         psm_df: pd.DataFrame,
         matched_intensity_df: pd.DataFrame,
     ):
+        """Using matched_intensity_df to fine-tune the ms2 model.
+        1. It will sample `n=self.psm_num_to_tune_ms2` PSMs into training dataframe (`tr_df`) to for fine-tuning.
+        2. This method will also consider some important PTMs (`n=self.top_n_mods_to_tune`) into `tr_df` for fine-tuning.
+        3. If `self.use_grid_nce_search==True`, this method will call `self.ms2_model.grid_nce_search` to find the best NCE and instrument.
+
+        Args:
+            psm_df (pd.DataFrame): PSM dataframe for fine-tuning.
+            matched_intensity_df (pd.DataFrame): The matched fragment intensities for `psm_df`.
+        """
         if self.psm_num_to_tune_ms2 > 0:
             tr_df = psm_sampling_with_important_mods(
                 psm_df, self.psm_num_to_tune_ms2,
@@ -445,7 +464,7 @@ class ModelManager(object):
                     else:
                         tr_inten_df[frag_type] = 0
 
-                if self.grid_nce_search:
+                if self.use_grid_nce_search:
                     self.nce, self.instrument = self.ms2_model.grid_nce_search(
                         tr_df, tr_inten_df,
                         nce_first=mgr_settings['fine_tune'][
@@ -463,8 +482,8 @@ class ModelManager(object):
                     )
                     tr_df['nce'] = self.nce
                     tr_df['instrument'] = self.instrument
-                elif 'nce' not in tr_df.columns:
-                    self.set_default_nce(tr_df)
+                else:
+                    self.set_default_nce_instrument(tr_df)
 
                 self.ms2_model.train(tr_df,
                     fragment_intensity_df=tr_inten_df,
@@ -473,13 +492,24 @@ class ModelManager(object):
 
     def predict_ms2(self, precursor_df:pd.DataFrame,
         *,
-        batch_size=mgr_settings[
+        batch_size:int=mgr_settings[
             'predict'
         ]['batch_size_ms2'],
-        reference_frag_df = None,
-    ):
-        if 'nce' not in precursor_df.columns:
-            self.set_default_nce(precursor_df)
+        reference_frag_df:pd.DataFrame = None,
+    )->pd.DataFrame:
+        """[summary]
+
+        Args:
+            precursor_df (pd.DataFrame): precursor dataframe for MS2 prediction.
+            batch_size (int, optional): Batch size for prediction.
+              Defaults to mgr_settings[ 'predict' ]['batch_size_ms2'].
+            reference_frag_df (pd.DataFrame, optional):
+              If precursor_df has 'frag_start_idx' pointing to this dataframe. Defaults to None.
+
+        Returns:
+            pd.DataFrame: predicted fragment intensity dataframe. The will be 'frag_start_idx' and `frag_end_idx` in precursor_df pointing
+        """
+        self.set_default_nce_instrument(precursor_df)
         if self.verbose:
             logging.info('Predicting MS2 ...')
         return self.ms2_model.predict(precursor_df,
@@ -489,10 +519,22 @@ class ModelManager(object):
         )
 
     def predict_rt(self, precursor_df:pd.DataFrame,
-        *, batch_size=mgr_settings[
-             'predict'
-           ]['batch_size_rt_ccs']
-    ):
+        *,
+        batch_size:int=mgr_settings[
+            'predict'
+        ]['batch_size_rt_ccs']
+    )->pd.DataFrame:
+        """ Predict RT ('rt_pred') inplace into `precursor_df`.
+
+        Args:
+            precursor_df (pd.DataFrame): precursor_df for RT prediction
+            batch_size (int, optional): Batch size for prediction.
+              Defaults to mgr_settings[ 'predict' ]['batch_size_rt_ccs'].
+              mgr_settings=peptdeep.settings.global_settings['model_mgr'].
+
+        Returns:
+            pd.DataFrame: df with 'rt_pred' and 'rt_norm_pred' columns.
+        """
         if self.verbose:
             logging.info("Predicting RT ...")
         df = self.rt_model.predict(precursor_df,
@@ -502,10 +544,22 @@ class ModelManager(object):
         return df
 
     def predict_mobility(self, precursor_df:pd.DataFrame,
-        *, batch_size=mgr_settings[
-             'predict'
-           ]['batch_size_rt_ccs']
-    ):
+        *,
+        batch_size:int=mgr_settings[
+            'predict'
+        ]['batch_size_rt_ccs']
+    )->pd.DataFrame:
+        """ Predict mobility ('ccs_pred' and `mobility_pred`) inplace into `precursor_df`.
+
+        Args:
+            precursor_df (pd.DataFrame): precursor_df for CCS/mobility prediction
+            batch_size (int, optional): Batch size for prediction.
+              Defaults to mgr_settings[ 'predict' ]['batch_size_rt_ccs'].
+              mgr_settings=peptdeep.settings.global_settings['model_mgr'].
+
+        Returns:
+            pd.DataFrame: df with 'ccs_pred' and 'mobility_pred' columns.
+        """
         if self.verbose:
             logging.info("Predicting mobility ...")
         precursor_df = self.ccs_model.predict(precursor_df,
@@ -516,6 +570,7 @@ class ModelManager(object):
         )
 
     def _predict_all_for_mp(self, arg_dict):
+        """Internal function, for multiprocessing"""
         return self.predict_all(
             multiprocessing=False, **arg_dict
         )
@@ -528,7 +583,7 @@ class ModelManager(object):
         frag_types:list = get_charged_frag_types(
             ['b','y'],2
         ),
-        multiprocessing:bool = True,
+        multiprocessing:bool = mgr_settings['predict']['multiprocessing'],
         thread_num:int = global_settings['thread_num']
     )->Dict[str, pd.DataFrame]:
         """ predict all items defined by `predict_items`,
@@ -571,6 +626,14 @@ class ModelManager(object):
             if 'mobility' in predict_items:
                 self.predict_mobility(precursor_df)
             if 'ms2' in predict_items:
+                fragment_mz_df = create_fragment_mz_dataframe(
+                    precursor_df, frag_types
+                )
+
+                precursor_df.drop(
+                    columns=['frag_start_idx'], inplace=True
+                )
+
                 fragment_intensity_df = self.predict_ms2(
                     precursor_df
                 )
@@ -582,25 +645,9 @@ class ModelManager(object):
                     ], inplace=True
                 )
 
-                precursor_df.drop(
-                    columns=['frag_start_idx'], inplace=True
+                clear_error_modloss_intensities(
+                    fragment_mz_df, fragment_intensity_df
                 )
-                fragment_mz_df = create_fragment_mz_dataframe(
-                    precursor_df, frag_types
-                )
-                fragment_mz_df.drop(
-                    columns=[
-                        col for col in fragment_mz_df.columns
-                        if col not in frag_types
-                    ], inplace=True
-                )
-
-                # clear error modloss intensities
-                for col in fragment_mz_df.columns.values:
-                    if 'modloss' in col:
-                        fragment_intensity_df.loc[
-                            fragment_mz_df[col]==0,col
-                        ] = 0
 
                 return {
                     'precursor_df': precursor_df,

@@ -20,6 +20,7 @@ model_mgr:
     default_nce: 0.3
     default_instrument: Lumos
     verbose: True
+    multiprocessing: True
   fine_tune:
     epoch_ms2: 10
     epoch_rt_ccs: 20
