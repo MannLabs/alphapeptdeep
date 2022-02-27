@@ -627,7 +627,8 @@ class ModelManager(object):
             ['b','y'],2
         ),
         multiprocessing:bool = mgr_settings['predict']['multiprocessing'],
-        thread_num:int = global_settings['thread_num']
+        thread_num:int = global_settings['thread_num'],
+        min_precursor_num_for_mp:int = 1000,
     )->Dict[str, pd.DataFrame]:
         """ predict all items defined by `predict_items`,
         which may include rt, mobility, fragment_mz
@@ -662,7 +663,10 @@ class ModelManager(object):
         if 'precursor_mz' not in precursor_df.columns:
             update_precursor_mz(precursor_df)
 
-        if torch.cuda.is_available() or not multiprocessing:
+        if (
+            torch.cuda.is_available() or not multiprocessing
+            or len(precursor_df) < min_precursor_num_for_mp
+        ):
             refine_df(precursor_df)
             if 'rt' in predict_items:
                 self.predict_rt(precursor_df)
