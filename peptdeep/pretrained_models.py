@@ -274,24 +274,53 @@ def clear_error_modloss_intensities(
             ] = 0
 
 class ModelManager(object):
-    def __init__(self):
-        self.ms2_model:pDeepModel = None
-        self.rt_model:AlphaRTModel = None
-        self.ccs_model:AlphaCCSModel = None
+    def __init__(self, mask_modloss=True):
+        """ The manager class to access MS2/RT/CCS models.
+        Args:
+            mask_modloss (bool, optional): If modloss ions are masked to zeros
+                in the ms2 model. `modloss` ions are mostly useful for phospho
+                MS2 prediciton model. Defaults to True.
+        Attributes:
+            ms2_model (:py:class:`peptdeep.model.ms2.pDeepModel`): The MS2 (pDeep)
+                prediction.
+            rt_model (:py:class:`peptdeep.model.rt.AlphaRTModel`): The RT prediction model.
+            ccs_model (:py:class:`peptdeep.model.ccs.AlphaCCSModel`): The CCS prediciton model.
+            psm_num_to_tune_ms2 (int): Number of PSMs to fine-tune the MS2 model.
+                Defaults to 5000.
+            epoch_to_tune_ms2 (int): Number of epoches to fine-tune the MS2 model.
+                Defaults to global_settings['model_mgr']['fine_tune']['epoch_ms2'].
+            psm_num_to_tune_rt_ccs (int): Number of PSMs to fine-tune RT/CCS model.
+                Defaults to 3000.
+            epoch_to_tune_rt_ccs (int): Number of epoches to fine-tune RT/CCS model.
+                Defaults to global_settings['model_mgr']['fine_tune']['epoch_rt_ccs'].
+            nce (float): Default NCE value for a precursor_df without the 'nce' column.
+                Defaults to global_settings['model_mgr']['predict']['default_nce'].
+            instrument (str): Default instrument type for a precursor_df without the 'instrument' column.
+                Defaults to global_settings['model_mgr']['predict']['default_instrument'].
+            use_grid_nce_search (bool): If self.ms2_model uses
+                :py:meth:`peptdeep.model.ms2.pDeepModel.grid_nce_search` to determine optimal
+                NCE and instrument type. This will change `self.nce` and `self.instrument` values.
+                Defaults to global_settings['model_mgr']['fine_tune']['grid_nce_search'].
+        """
+        self.ms2_model:pDeepModel = pDeepModel(mask_modloss=mask_modloss)
+        self.rt_model:AlphaRTModel = AlphaRTModel()
+        self.ccs_model:AlphaCCSModel = AlphaCCSModel()
+
+        self.load_installed_models()
 
         self.use_grid_nce_search = mgr_settings[
             'fine_tune'
         ]['grid_nce_search']
 
         self.psm_num_to_tune_ms2 = 5000
-        self.psm_num_per_mod_to_tune_ms2 = 100
+        self.psm_num_per_mod_to_tune_ms2 = 0
         self.epoch_to_tune_ms2 = mgr_settings[
             'fine_tune'
         ]['epoch_ms2']
         self.batch_size_to_tune_ms2 = 512
 
         self.psm_num_to_tune_rt_ccs = 3000
-        self.psm_num_per_mod_to_tune_rt_ccs = 100
+        self.psm_num_per_mod_to_tune_rt_ccs = 0
         self.epoch_to_tune_rt_ccs = mgr_settings[
             'fine_tune'
         ]['epoch_rt_ccs']
@@ -321,42 +350,50 @@ class ModelManager(object):
     def set_default_nce(self, df):
         self.set_default_nce_instrument(df)
 
-    def load_installed_models(self, model_type='regular', mask_modloss=True):
+    def load_installed_models(self, model_type='regular'):
         """ Load built-in MS2/CCS/RT models.
         Args:
             model_type (str, optional): To load the installed MS2/RT/CCS models
-                or phos MS2/RT/CCS models. It could be 'phospho', 'HLA', 'regular', or
-                model_type (model sub-folder) in pretrained_models.zip.
+                or phos MS2/RT/CCS models. It could be 'phospho', 'HLA', or 'regular'.
+                Currently, HLA and regular share the same models.
                 Defaults to 'regular'.
-            mask_modloss (bool, optional): If modloss ions are masked to zeros
-                in the ms2 model. `modloss` ions are mostly useful for phospho
-                MS2 prediciton model. Defaults to True.
         """
         if model_type.lower() in ['phospho','phos']:
-            (
-                self.ms2_model, self.rt_model, self.ccs_model
-            ) = load_phos_models(mask_modloss)
+            self.ms2_model.load(
+                model_zip,
+                model_path_in_zip='phospho/ms2_phos.pth'
+            )
+            self.rt_model.load(
+                model_zip,
+                model_path_in_zip='phospho/rt_phos.pth'
+            )
+            self.ccs_model.load(
+                model_zip,
+                model_path_in_zip='regular/ccs.pth'
+            )
         elif model_type.lower() in ['regular','common']:
-            (
-                self.ms2_model, self.rt_model, self.ccs_model
-            ) = load_models(mask_modloss)
+            self.ms2_model.load(
+                model_zip, model_path_in_zip='regular/ms2.pth'
+            )
+            self.rt_model.load(
+                model_zip, model_path_in_zip='regular/rt.pth'
+            )
+            self.ccs_model.load(
+                model_zip, model_path_in_zip='regular/ccs.pth'
+            )
         elif model_type.lower() in [
             'hla','unspecific','non-specific', 'nonspecific'
         ]:
-            (
-                self.ms2_model, self.rt_model, self.ccs_model
-            ) = load_models(mask_modloss)
+            self.load_installed_models(model_type="regular")
         else:
-            (
-                self.ms2_model, self.rt_model, self.ccs_model
-            ) = load_models_by_model_type_in_zip(model_type)
+            logging.warn(f"model_type='{model_type}' is not supported, use 'regular'")
+            self.load_installed_models(model_type="regular")
 
     def load_external_models(self,
         *,
         ms2_model_file: Tuple[str, io.BytesIO]=None,
         rt_model_file: Tuple[str, io.BytesIO]=None,
         ccs_model_file: Tuple[str, io.BytesIO]=None,
-        mask_modloss=True
     ):
         """Load external MS2/RT/CCS models
 
@@ -370,10 +407,6 @@ class ModelManager(object):
             mask_modloss (bool, optional): If modloss ions are masked to zeros
                 in the ms2 model. Defaults to True.
         """
-        self.ms2_model = pDeepModel(mask_modloss=mask_modloss)
-        self.rt_model = AlphaRTModel()
-        self.ccs_model = AlphaCCSModel()
-
         if ms2_model_file is not None:
             self.ms2_model.load(ms2_model_file)
         else:
@@ -391,7 +424,7 @@ class ModelManager(object):
         psm_df:pd.DataFrame,
     ):
         """ Fine-tune the RT model. The fine-tuning will be skipped
-            if `n_rt_ccs_tune` is zero.
+            if `self.psm_num_to_tune_rt_ccs` is zero.
 
         Args:
             psm_df (pd.DataFrame): training psm_df which contains 'rt_norm' column.
@@ -413,7 +446,7 @@ class ModelManager(object):
         psm_df:pd.DataFrame,
     ):
         """ Fine-tune the CCS model. The fine-tuning will be skipped
-            if `n_rt_ccs_tune` is zero.
+            if `self.psm_num_to_tune_rt_ccs` is zero.
 
         Args:
             psm_df (pd.DataFrame): training psm_df which contains 'ccs' column.
@@ -503,17 +536,21 @@ class ModelManager(object):
         ]['batch_size_ms2'],
         reference_frag_df:pd.DataFrame = None,
     )->pd.DataFrame:
-        """[summary]
+        """Predict MS2 for the given precursor_df
 
         Args:
             precursor_df (pd.DataFrame): precursor dataframe for MS2 prediction.
             batch_size (int, optional): Batch size for prediction.
               Defaults to mgr_settings[ 'predict' ]['batch_size_ms2'].
             reference_frag_df (pd.DataFrame, optional):
-              If precursor_df has 'frag_start_idx' pointing to this dataframe. Defaults to None.
+              If precursor_df has 'frag_start_idx' pointing to reference_frag_df.
+              Defaults to None.
 
         Returns:
-            pd.DataFrame: predicted fragment intensity dataframe. The will be 'frag_start_idx' and `frag_end_idx` in precursor_df pointing
+            pd.DataFrame: predicted fragment intensity dataframe.
+              If there are no such two columns in precursor_df,
+              it will insert 'frag_start_idx' and `frag_end_idx` in
+              precursor_df pointing to this predicted fragment dataframe.
         """
         self.set_default_nce_instrument(precursor_df)
         if self.verbose:
