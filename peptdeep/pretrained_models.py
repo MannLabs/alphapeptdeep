@@ -276,10 +276,12 @@ def clear_error_modloss_intensities(
 class ModelManager(object):
     def __init__(self, mask_modloss=True):
         """ The manager class to access MS2/RT/CCS models.
+
         Args:
             mask_modloss (bool, optional): If modloss ions are masked to zeros
                 in the ms2 model. `modloss` ions are mostly useful for phospho
                 MS2 prediciton model. Defaults to True.
+
         Attributes:
             ms2_model (:py:class:`peptdeep.model.ms2.pDeepModel`): The MS2 (pDeep)
                 prediction.
@@ -628,7 +630,7 @@ class ModelManager(object):
         ),
         multiprocessing:bool = mgr_settings['predict']['multiprocessing'],
         thread_num:int = global_settings['thread_num'],
-        min_precursor_num_for_mp:int = 1000,
+        min_required_precursor_num_for_mp:int = 3000,
     )->Dict[str, pd.DataFrame]:
         """ predict all items defined by `predict_items`,
         which may include rt, mobility, fragment_mz
@@ -645,6 +647,10 @@ class ModelManager(object):
             multiprocessing (bool, optional): if use multiprocessing.
               Defaults to True.
             thread_num (int, optional): Defaults to global_settings['thread_num']
+            min_required_precursor_num_for_mp (int, optional): It will not use
+              multiprocessing when the number of precursors in precursor_df
+              is lower than this value. Defaults to 5000.
+
         Returns:
             Dict[str, pd.DataFrame]: {'precursor_df': precursor_df}
               if 'ms2' in predict_items, it also contains:
@@ -652,7 +658,6 @@ class ModelManager(object):
                   'fragment_mz_df': fragment_mz_df,
                   'fragment_intensity_df': fragment_intensity_df
               }
-
         """
         def refine_df(df):
             if 'ms2' in predict_items:
@@ -665,7 +670,7 @@ class ModelManager(object):
 
         if (
             torch.cuda.is_available() or not multiprocessing
-            or len(precursor_df) < min_precursor_num_for_mp
+            or len(precursor_df) < min_required_precursor_num_for_mp
         ):
             refine_df(precursor_df)
             if 'rt' in predict_items:

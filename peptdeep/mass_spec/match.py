@@ -15,6 +15,7 @@ def match_centroid_mz(
 )->np.array:
     """
     Matched query masses against sorted MS2/spec centroid masses.
+
     Args:
         spec_mzs (np.array): MS2 or spec mz values, 1-D float array
         query_mzs (np.array): query mz values, n-D float array

@@ -266,11 +266,10 @@ def evaluate_linear_regression_plot(
         alpha = 1
     elif len(df) < 50000:
         alpha = 5000.0/len(df)
-    sns.regplot(
+    return sns.regplot(
         data=df, x=x, y=y, color='r', ci=ci,
         scatter_kws={'s':0.05, 'alpha':alpha, 'color':'b'}
     )
-    plt.show()
 
 # Cell
 irt_pep = pd.DataFrame(
