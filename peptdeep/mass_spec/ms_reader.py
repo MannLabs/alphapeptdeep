@@ -18,12 +18,32 @@ class MSReaderBase:
     def load(self, file_path):
         raise NotImplementedError('load()')
 
-    def build_spectrum_df(self, scan_list, scan_indices, rt_list, mobility_list = None):
+    def build_spectrum_df(self,
+        scan_list:list,
+        scan_indices:np.array,
+        rt_list:list,
+        mobility_list:list = None,
+        scan_starts_from_one:bool = True,
+    ):
+        """Build spectrum_df by the given information
+
+        Args:
+            scan_list (list): scan number list
+            scan_indices (np.array): starts and end positions of ms2
+                peaks for each scan
+            rt_list (list): retention time for each scan
+            mobility_list (list, optional): mobility for each scan. Defaults to None.
+            scan_starts_from_one (bool, optional): Thermo RAW scan number
+                always starts from one. Defaults to True.
+        """
         def set_col(col, indexes, values, dtype, na_value):
             self.spectrum_df.loc[indexes, col] = values
             self.spectrum_df[col].fillna(na_value, inplace=True)
             self.spectrum_df[col] = self.spectrum_df[col].astype(dtype)
 
+        scan_list = np.array(scan_list, dtype=np.int32)
+        if scan_starts_from_one:
+            scan_list -= 1
         idx_len = np.max(scan_list)+1
         self.spectrum_df = pd.DataFrame(index=np.arange(idx_len, dtype=np.int64))
         self.spectrum_df['spec_idx'] = self.spectrum_df.index.values
@@ -33,14 +53,15 @@ class MSReaderBase:
         if mobility_list is not None:
             set_col('mobility', scan_list, mobility_list, np.float64, np.nan)
 
-    def get_peaks(self, spec_idx):
+    def get_peaks(self, spec_idx:int):
         """Get peak (mz and intensity) values by `spec_idx`
 
         Args:
-            spec_idx (object): indicator for a spectrum, could be scan no for thermo data.
+            spec_idx (int): indicator for a spectrum,
+                could be scan_num-1 for thermo data.
 
         Returns:
-            np.array: mz values for the given spec_idx (scan)
+            np.array: mz values for the given spec_idx
             np.array: intensity values for the given spec_idx
         """
         if spec_idx not in self.spectrum_df.index:
@@ -52,6 +73,18 @@ class MSReaderBase:
             self.mzs[start_idx:end_idx],
             self.intensities[start_idx:end_idx]
         )
+
+    def get_peaks_by_scan_num(self, scan_num:int):
+        """Get peak (mz and intensity) values by `spec_idx`
+
+        Args:
+            scan_num (int): scan_num of thermodata
+
+        Returns:
+            np.array: mz values for the given spec_idx (scan)
+            np.array: intensity values for the given spec_idx
+        """
+        return self.get_peaks(scan_num-1)
 
 class AlphaPept_HDF_MS1_Reader(MSReaderBase):
     def load(self, file_path):
