@@ -565,7 +565,7 @@ class pDeepModel(model_base.ModelImplBase):
     def grid_nce_search(self,
         psm_df:pd.DataFrame,
         fragment_intensity_df:pd.DataFrame,
-        nce_first=0.15, nce_last=0.45, nce_step=0.03,
+        nce_first=15, nce_last=45, nce_step=3,
         search_instruments = ['Lumos'],
         charged_frag_types:List = None,
         metric = 'PCC>0.9', # or 'median PCC'
