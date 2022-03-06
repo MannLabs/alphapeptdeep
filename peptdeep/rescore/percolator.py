@@ -164,23 +164,25 @@ class Percolator:
               peptdeep.pretrained_model.ModelManager.
               If None, self.model_mgr will be init by:
               ```
-              self.model_mgr = ModelManager()
+              self.model_mgr = ModelManager(
+                  mask_modloss=perc_settings[
+                      'mask_modloss'
+                  ]
+              )
               self.model_mgr.load_installed_models(
-                perc_settings['peptdeep_model_type'],
-                mask_modloss=perc_settings[
-                    'mask_modloss'
-                ]
+                  perc_settings['peptdeep_model_type'],
               )
               ```
               Defaults to None.
         """
         if model_mgr is None:
-            self.model_mgr = ModelManager()
-            self.model_mgr.load_installed_models(
-                perc_settings['peptdeep_model_type'],
+            self.model_mgr = ModelManager(
                 mask_modloss=perc_settings[
                     'mask_modloss'
                 ]
+            )
+            self.model_mgr.load_installed_models(
+                perc_settings['peptdeep_model_type'],
             )
         else:
             self.model_mgr = model_mgr

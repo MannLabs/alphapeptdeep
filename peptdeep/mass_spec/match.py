@@ -15,6 +15,7 @@ def match_centroid_mz(
 )->np.array:
     """
     Matched query masses against sorted MS2/spec centroid masses.
+
     Args:
         spec_mzs (np.array): MS2 or spec mz values, 1-D float array
         query_mzs (np.array): query mz values, n-D float array
@@ -121,9 +122,12 @@ class PepSpecMatch(object):
         """Matching psm_df_one_raw against ms2_file
 
         Args:
-            psm_df_one_raw (pd.DataFrame): psm dataframe contains only one raw file
+            psm_df_one_raw (pd.DataFrame): psm dataframe
+                that contains only one raw file
             ms2_file (str): ms2 file path
-            ms2_file_type (str, optional): ms2 file type. Default to 'alphapept'
+            ms2_file_type (str, optional): ms2 file type,
+                could be ["thermo","alphapept","mgf"].
+                Default to 'alphapept'
             ppm (bool, optional): ppm tolerance. Defaults to True.
             tol (int, optional): tolerance. Defaults to 20.
 

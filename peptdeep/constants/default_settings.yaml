@@ -17,7 +17,7 @@ model_mgr:
   predict:
     batch_size_ms2: 512
     batch_size_rt_ccs: 1024
-    default_nce: 0.3
+    default_nce: 30
     default_instrument: Lumos
     verbose: True
     multiprocessing: True
@@ -25,9 +25,9 @@ model_mgr:
     epoch_ms2: 10
     epoch_rt_ccs: 20
     grid_nce_search: True
-    grid_nce_first: 0.15
-    grid_nce_last: 0.45
-    grid_nce_step: 0.03
+    grid_nce_first: 15
+    grid_nce_last: 45
+    grid_nce_step: 3
     grid_instrument: ['Lumos']
 percolator:
   require_model_tuning: True

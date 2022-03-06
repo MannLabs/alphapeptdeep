@@ -389,8 +389,8 @@ class pDeepModel(model_base.ModelImplBase):
         fragment_intensity_df:pd.DataFrame=None,
     ):
         self.frag_inten_df = fragment_intensity_df[self.charged_frag_types]
-        if np.all(precursor_df['nce'].values > 1):
-            precursor_df['nce'] = precursor_df['nce']*self.NCE_factor
+        # if np.all(precursor_df['nce'].values > 1):
+        #     precursor_df['nce'] = precursor_df['nce']*self.NCE_factor
 
     def _check_predict_in_order(self, precursor_df: pd.DataFrame):
         pass
@@ -416,8 +416,8 @@ class pDeepModel(model_base.ModelImplBase):
             dtype=np.float32
         )
 
-        if np.all(precursor_df['nce'].values > 1):
-            precursor_df['nce'] = precursor_df['nce']*self.NCE_factor
+        # if np.all(precursor_df['nce'].values > 1):
+        #     precursor_df['nce'] = precursor_df['nce']*self.NCE_factor
 
     def _get_features_from_batch_df(self,
         batch_df: pd.DataFrame,
@@ -436,7 +436,9 @@ class pDeepModel(model_base.ModelImplBase):
             batch_df['charge'].values
         ).unsqueeze(1)*self.charge_factor
 
-        nces = torch.Tensor(batch_df['nce'].values).unsqueeze(1)
+        nces = torch.Tensor(
+            batch_df['nce'].values*self.NCE_factor
+        ).unsqueeze(1)
 
         instrument_indices = torch.LongTensor(
             parse_instrument_indices(batch_df['instrument'])
@@ -478,7 +480,6 @@ class pDeepModel(model_base.ModelImplBase):
                 batch_df[
                     ['frag_start_idx','frag_end_idx']
                 ].values,
-                self.charged_frag_types
             )
 
     def train_with_warmup(self,
@@ -564,7 +565,7 @@ class pDeepModel(model_base.ModelImplBase):
     def grid_nce_search(self,
         psm_df:pd.DataFrame,
         fragment_intensity_df:pd.DataFrame,
-        nce_first=0.15, nce_last=0.45, nce_step=0.03,
+        nce_first=15, nce_last=45, nce_step=3,
         search_instruments = ['Lumos'],
         charged_frag_types:List = None,
         metric = 'PCC>0.9', # or 'median PCC'
