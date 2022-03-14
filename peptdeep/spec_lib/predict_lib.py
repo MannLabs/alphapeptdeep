@@ -10,6 +10,7 @@ from peptdeep.utils import logging
 
 from alphabase.spectrum_library.library_base import SpecLibBase
 from peptdeep.pretrained_models import ModelManager
+from peptdeep.model.rt import convert_predicted_rt_to_irt
 
 class PredictSpecLib(SpecLibBase):
     def __init__(self,
@@ -52,8 +53,14 @@ class PredictSpecLib(SpecLibBase):
             if col not in self.charged_frag_types
         ], inplace=True)
 
+    def rt_to_irt_pred(self):
+        """ Add 'irt_pred' into columns based on 'rt_pred' """
+        return convert_predicted_rt_to_irt(
+            self._precursor_df, self.model_manager.rt_model
+        )
+
     def predict_all(self):
-        """ add 'rt_pred' and 'irt_pred' into columns """
+        """ Add 'rt_pred' into columns """
         logging.info('predicting RT/IM/MS2 ...')
         res = self.model_manager.predict_all(
             self._precursor_df,

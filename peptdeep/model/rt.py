@@ -272,6 +272,10 @@ def evaluate_linear_regression_plot(
     )
 
 # Cell
+
+# If there are copyright problems for these peptides,
+# we can easily choose different peptides those have the same
+# predicted retention time.
 irt_pep = pd.DataFrame(
     [['LGGNEQVTR', 'RT-pep a', -24.92, '', ''],
     ['GAGSSEPVTGLDAK', 'RT-pep b', 0.00, '', ''],
