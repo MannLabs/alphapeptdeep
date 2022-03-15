@@ -460,6 +460,9 @@ class pDeepModel(model_base.ModelImplBase):
         predicts:np.array,
         **kwargs,
     ):
+        apex_intens = predicts.reshape((len(batch_df), -1)).max(axis=1)
+        apex_intens[apex_intens<=0] = 1
+        predicts /= apex_intens.reshape((-1,1,1))
         predicts[predicts<self.min_inten] = 0.0
         if self._predict_in_order:
             self.predict_df.values[
