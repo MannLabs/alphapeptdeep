@@ -484,7 +484,9 @@ class pDeepModel(model_base.ModelImplBase):
         fragment_intensity_df,
         *,
         batch_size=1024,
-        epoch=20,
+        epoch=10,
+        warmup_epoch=5,
+        lr = 1e-4,
         verbose=False,
         verbose_each_epoch=False,
         **kwargs
@@ -494,6 +496,8 @@ class pDeepModel(model_base.ModelImplBase):
             fragment_intensity_df=fragment_intensity_df,
             batch_size=batch_size,
             epoch=epoch,
+            warmup_epoch=warmup_epoch,
+            lr=lr,
             verbose=verbose,
             verbose_each_epoch=verbose_each_epoch,
             **kwargs
