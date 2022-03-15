@@ -36,15 +36,6 @@ def varmod_range():
         ),
     )
 
-def charge_range():
-    return(
-        st.selectbox('precursor charge from',
-        ('1','2','3','4'),index = 1),
-        st.selectbox(
-            'to',
-            ('1','2','3','4','5','6'),index=3
-        )
-    )
 
 
 def show():
@@ -80,10 +71,13 @@ def show():
         global_settings['library']['input']['max_varmod'] = max_varmod
 
 
-        from_charge,to_charge = charge_range()
-        if to_charge < from_charge:
-            st.text("ERROR, num of to_charge should be larger than from_charge")
-            st.text('Please select again.')
+        from_charge = st.selectbox('precursor charge from',
+        ('1','2','3','4'),index = 1)
+        options = range(int(from_charge),int(7))
+        to_charge = st.selectbox(
+            'to',
+            (options)
+        )
         global_settings['library']['output']['min_precursor_charge'] = from_charge
         global_settings['library']['output']['max_precursor_charge'] = to_charge
 
@@ -102,18 +96,26 @@ def show():
         global_settings['library']['input']['min_varmod'] = min_varmod
         global_settings['library']['input']['max_varmod'] = max_varmod
 
-        from_charge,to_charge = charge_range()
-        if to_charge < from_charge:
-            st.text("ERROR, num of to_charge should be larger than from_charge")
-            st.text('Please select again.')
+        from_charge = st.selectbox('precursor charge from',
+        ('1','2','3','4'),index = 1)
+        options = range(int(from_charge),int(7))
+        to_charge = st.selectbox(
+            'to',
+            (options)
+        )
         global_settings['library']['output']['min_precursor_charge'] = from_charge
         global_settings['library']['output']['max_precursor_charge'] = to_charge
 
     if input_type == 'peptide_table':
-        from_charge,to_charge = charge_range()
-        if to_charge < from_charge:
-            st.text("ERROR, num of to_charge should be larger than from_charge")
-            st.text('Please select again.')
+   
+        from_charge = st.selectbox('precursor charge from',
+        ('1','2','3','4'),index = 1)
+        options = range(int(from_charge),int(7))
+        to_charge = st.selectbox(
+            'to',
+            (options)
+        )
+
         global_settings['library']['output']['min_precursor_charge'] = from_charge
         global_settings['library']['output']['max_precursor_charge'] = to_charge
    
