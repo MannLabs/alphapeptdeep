@@ -65,6 +65,7 @@ class PredictSpecLib(SpecLibBase):
         res = self.model_manager.predict_all(
             self._precursor_df,
             predict_items=['rt','mobility','ms2'],
+            frag_types=self.charged_frag_types,
         )
         self.set_precursor_and_fragment(**res)
         logging.info('End Predicting RT/IM/MS2')
