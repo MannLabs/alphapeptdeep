@@ -670,12 +670,12 @@ class ModelManager(object):
 
         if frag_types is None:
             if self.ms2_model.model._mask_modloss:
-                frag_types = self.ms2_model.charged_frag_types
-            else:
                 frag_types = [
                     frag for frag in self.ms2_model.charged_frag_types
                     if 'modloss' not in frag
                 ]
+            else:
+                frag_types = self.ms2_model.charged_frag_types
 
         if 'precursor_mz' not in precursor_df.columns:
             update_precursor_mz(precursor_df)
