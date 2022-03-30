@@ -441,9 +441,10 @@ class ModelManager(object):
                 uniform_sampling_column='rt_norm'
             )
             if len(tr_df) > 0:
-                self.rt_model.train(tr_df,
+                self.rt_model.train_with_warmup(tr_df,
                     batch_size=self.batch_size_to_tune_rt_ccs,
-                    epoch=self.epoch_to_tune_rt_ccs
+                    epoch=self.epoch_to_tune_rt_ccs,
+                    warmup_epoch=self.epoch_to_tune_rt_ccs//2,
                 )
 
     def fine_tune_ccs_model(self,
@@ -471,9 +472,10 @@ class ModelManager(object):
                 uniform_sampling_column='ccs'
             )
             if len(tr_df) > 0:
-                self.ccs_model.train(tr_df,
+                self.ccs_model.train_with_warmup(tr_df,
                     batch_size=self.batch_size_to_tune_rt_ccs,
-                    epoch=self.epoch_to_tune_rt_ccs
+                    epoch=self.epoch_to_tune_rt_ccs,
+                    warmup_epoch=self.epoch_to_tune_rt_ccs//2,
                 )
 
     def fine_tune_ms2_model(self,
@@ -626,7 +628,7 @@ class ModelManager(object):
     def predict_all(self, precursor_df:pd.DataFrame,
         *,
         predict_items:list = [
-            'rt' #,'mobility' ,'ms2'
+            'rt' ,'mobility' ,'ms2'
         ],
         frag_types:list =  None,
         multiprocessing:bool = mgr_settings['predict']['multiprocessing'],
