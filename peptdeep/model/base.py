@@ -219,6 +219,13 @@ class ModelImplBase(object):
             self.model.parameters(), lr=lr
         )
 
+    def set_lr(self, lr):
+        if self.optimizer is None:
+            self._init_optimizer(lr)
+        else:
+            for g in self.optimizer.param_groups:
+                g['lr'] = lr
+
     def train_with_warmup(self,
         precursor_df: pd.DataFrame,
         *,
@@ -235,8 +242,7 @@ class ModelImplBase(object):
         self._prepare_train_data_df(precursor_df, **kwargs)
         self.model.train()
 
-        if self.optimizer is None:
-            self._init_optimizer(lr)
+        self.set_lr(lr)
 
         lr_scheduler = get_cosine_schedule_with_warmup(
             self.optimizer, warmup_epoch, epoch
@@ -295,8 +301,7 @@ class ModelImplBase(object):
         self._prepare_train_data_df(precursor_df, **kwargs)
         self.model.train()
 
-        if self.optimizer is None:
-            self._init_optimizer(lr)
+        self.set_lr(lr)
 
         for epoch in range(epoch):
             batch_cost = []
