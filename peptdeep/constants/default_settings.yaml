@@ -20,6 +20,7 @@ model_mgr:
     default_nce: 0.3
     default_instrument: Lumos
     verbose: True
+    multiprocessing: True
   fine_tune:
     epoch_ms2: 10
     epoch_rt_ccs: 20
@@ -99,49 +100,46 @@ percolator:
         hyperscore: hyperscore
         nextscore: nextscore
       maxquant: {}
-spec_lib:
+library:
   input:
     type: fasta
     type_choices:
     - fasta
-    - sequence_list
-    - peptide_list # sequence with mods and mod_sites
-    - precursor_list # peptide with charge state
-    files: 
+    - sequence_table
+    - peptide_table # sequence with mods and mod_sites
+    - precursor_table # peptide with charge state
+    paths: 
     - xxx.fasta
     fasta:
-      max_miss_cleave: 3
-      fixmod: 
-      - Carbamidomethyl@C
-      varmod:
-      - Oxidation@M
-      min_varmod: 0
-      max_varmod: 1
-      target_mod: []
-      min_target_mod: 0
-      max_target_mod: 2
-  output:
-    type: hdf
-    type_choices:
-    - hdf
-    - diann # and can also be used by spectronaut
-    - msp
-    library: xxx.speclib.hdf
-    min_fragment_mz: 300
-    max_fragment_mz: 2000
-    min_relative_intensity: 0.1
-    least_n_peaks: 6
-    max_frag_charge: 2
-    frag_types:
-    - b
-    - y
+      enzyme: '([KR])'
+      max_miss_cleave: 2
+    fixmod: 
+    - Carbamidomethyl@C
+    varmod:
+    - Oxidation@M
+    min_varmod: 0
+    max_varmod: 2
     min_precursor_charge: 2
     max_precursor_charge: 4
-    min_precursor_mz: 400
-    max_precursor_mz: 2000
     min_peptide_len: 6
     max_peptide_len: 35
     decoy: pseudo_reverse
     decoy_choices:
     - pseudo_reverse
     - diann
+    max_frag_charge: 2
+    frag_types:
+    - b
+    - y
+  output:
+    type: hdf
+    type_choices:
+    - hdf
+    - tsv (diann/spectronaut) # and can also be used by spectronaut
+    path: xxx.speclib.hdf
+    min_fragment_mz: 300
+    max_fragment_mz: 2000
+    min_relative_intensity: 0.02
+    least_n_peaks: 12
+    min_precursor_mz: 400
+    max_precursor_mz: 2000
