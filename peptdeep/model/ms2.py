@@ -460,6 +460,9 @@ class pDeepModel(model_base.ModelImplBase):
         predicts:np.array,
         **kwargs,
     ):
+        apex_intens = predicts.reshape((len(batch_df), -1)).max(axis=1)
+        apex_intens[apex_intens<=0] = 1
+        predicts /= apex_intens.reshape((-1,1,1))
         predicts[predicts<self.min_inten] = 0.0
         if self._predict_in_order:
             self.predict_df.values[
@@ -484,7 +487,9 @@ class pDeepModel(model_base.ModelImplBase):
         fragment_intensity_df,
         *,
         batch_size=1024,
-        epoch=20,
+        epoch=10,
+        warmup_epoch=5,
+        lr = 1e-4,
         verbose=False,
         verbose_each_epoch=False,
         **kwargs
@@ -494,6 +499,8 @@ class pDeepModel(model_base.ModelImplBase):
             fragment_intensity_df=fragment_intensity_df,
             batch_size=batch_size,
             epoch=epoch,
+            warmup_epoch=warmup_epoch,
+            lr=lr,
             verbose=verbose,
             verbose_each_epoch=verbose_each_epoch,
             **kwargs

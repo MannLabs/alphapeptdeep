@@ -525,10 +525,11 @@ class ModelManager(object):
                 else:
                     self.set_default_nce_instrument(tr_df)
 
-                self.ms2_model.train(tr_df,
+                self.ms2_model.train_with_warmup(tr_df,
                     fragment_intensity_df=tr_inten_df,
                     batch_size=self.batch_size_to_tune_ms2,
-                    epoch=self.epoch_to_tune_ms2
+                    epoch=self.epoch_to_tune_ms2,
+                    warmup_epoch=self.epoch_to_tune_ms2//2,
                 )
 
     def predict_ms2(self, precursor_df:pd.DataFrame,
