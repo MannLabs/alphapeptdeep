@@ -232,7 +232,7 @@ class ModelImplBase(object):
         batch_size=1024,
         epoch=10,
         warmup_epoch=5,
-        lr=5e-4,
+        lr=1e-4,
         verbose=False,
         verbose_each_epoch=False,
         **kwargs

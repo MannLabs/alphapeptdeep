@@ -68,7 +68,9 @@ def download_models(
 
         logging.info(f'Downloading {model_name} ...')
         try:
-            requests = urllib.request.urlopen(url, timeout=10)
+            import ssl
+            context = ssl._create_unverified_context()
+            requests = urllib.request.urlopen(url, context=context, timeout=10)
             with open(downloaded_zip, 'wb') as f:
                 f.write(requests.read())
         except (
@@ -211,7 +213,7 @@ def psm_sampling_with_important_mods(
                 )
             )
     if len(psm_df_list) > 0:
-        return pd.concat(psm_df_list).reset_index(drop=True)
+        return pd.concat(psm_df_list, ignore_index=True)
     else:
         return pd.DataFrame()
 
@@ -439,9 +441,10 @@ class ModelManager(object):
                 uniform_sampling_column='rt_norm'
             )
             if len(tr_df) > 0:
-                self.rt_model.train(tr_df,
+                self.rt_model.train_with_warmup(tr_df,
                     batch_size=self.batch_size_to_tune_rt_ccs,
-                    epoch=self.epoch_to_tune_rt_ccs
+                    epoch=self.epoch_to_tune_rt_ccs,
+                    warmup_epoch=self.epoch_to_tune_rt_ccs//2,
                 )
 
     def fine_tune_ccs_model(self,
@@ -469,9 +472,10 @@ class ModelManager(object):
                 uniform_sampling_column='ccs'
             )
             if len(tr_df) > 0:
-                self.ccs_model.train(tr_df,
+                self.ccs_model.train_with_warmup(tr_df,
                     batch_size=self.batch_size_to_tune_rt_ccs,
-                    epoch=self.epoch_to_tune_rt_ccs
+                    epoch=self.epoch_to_tune_rt_ccs,
+                    warmup_epoch=self.epoch_to_tune_rt_ccs//2,
                 )
 
     def fine_tune_ms2_model(self,
@@ -525,10 +529,11 @@ class ModelManager(object):
                 else:
                     self.set_default_nce_instrument(tr_df)
 
-                self.ms2_model.train(tr_df,
+                self.ms2_model.train_with_warmup(tr_df,
                     fragment_intensity_df=tr_inten_df,
                     batch_size=self.batch_size_to_tune_ms2,
-                    epoch=self.epoch_to_tune_ms2
+                    epoch=self.epoch_to_tune_ms2,
+                    warmup_epoch=self.epoch_to_tune_ms2//2,
                 )
 
     def predict_ms2(self, precursor_df:pd.DataFrame,
@@ -623,11 +628,9 @@ class ModelManager(object):
     def predict_all(self, precursor_df:pd.DataFrame,
         *,
         predict_items:list = [
-            'rt' #,'mobility' ,'ms2'
+            'rt' ,'mobility' ,'ms2'
         ],
-        frag_types:list = get_charged_frag_types(
-            ['b','y'],2
-        ),
+        frag_types:list =  None,
         multiprocessing:bool = mgr_settings['predict']['multiprocessing'],
         thread_num:int = global_settings['thread_num'],
         min_required_precursor_num_for_mp:int = 3000,
@@ -642,8 +645,10 @@ class ModelManager(object):
             predict_items (list, optional): items ('rt', 'mobility',
               'ms2') to predict.
               Defaults to [ 'rt' ].
-            frag_types (list, optional): fragment types to predict.
-              Defaults to ['b_z1','b_z2','y_z1','y_z2'].
+            frag_types (list, optional): fragment types to predict. If it is None,
+            it then depends on `self.ms2_model.charged_frag_types` and
+            `self.ms2_model.model._mask_modloss`.
+              Defaults to None.
             multiprocessing (bool, optional): if use multiprocessing.
               Defaults to True.
             thread_num (int, optional): Defaults to global_settings['thread_num']
@@ -664,6 +669,15 @@ class ModelManager(object):
                 refine_precursor_df(df)
             else:
                 refine_precursor_df(df, drop_frag_idx=False)
+
+        if frag_types is None:
+            if self.ms2_model.model._mask_modloss:
+                frag_types = [
+                    frag for frag in self.ms2_model.charged_frag_types
+                    if 'modloss' not in frag
+                ]
+            else:
+                frag_types = self.ms2_model.charged_frag_types
 
         if 'precursor_mz' not in precursor_df.columns:
             update_precursor_mz(precursor_df)
