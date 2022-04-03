@@ -213,7 +213,7 @@ def psm_sampling_with_important_mods(
                 )
             )
     if len(psm_df_list) > 0:
-        return pd.concat(psm_df_list).reset_index(drop=True)
+        return pd.concat(psm_df_list, ignore_index=True)
     else:
         return pd.DataFrame()
 

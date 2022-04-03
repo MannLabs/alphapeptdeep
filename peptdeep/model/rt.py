@@ -244,7 +244,7 @@ def evaluate_linear_regression(
     dfs.append(pd.read_html(results_as_html, index_col=None)[0])
     results_as_html = summary.tables[1].as_html()
     dfs.append(pd.read_html(results_as_html, index_col=None)[0])
-    summary = pd.concat(dfs).reset_index(drop=True)
+    summary = pd.concat(dfs, ignore_index=True)
     R_square = float(summary.loc[0,3])
     R = np.sqrt(R_square)
     n,b,w = summary.loc[[5,10,11],1].values.astype(float)

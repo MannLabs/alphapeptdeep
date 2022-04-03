@@ -29,6 +29,10 @@ model_mgr:
     grid_nce_last: 45
     grid_nce_step: 3
     grid_instrument: ['Lumos']
+  model_choices:
+  - regular
+  - phos
+  - hla # same as regular
 percolator:
   require_model_tuning: True
   raw_num_to_tune: 8
@@ -66,7 +70,7 @@ percolator:
       - linear # logistic regression
       - random_forest
   lr_percolator_torch_model: 0.1 # learning rate, only used when percolator_backend==pytorch 
-  ml_iter_num: 5 # percolator iteration number
+  percolator_iter_num: 5 # percolator iteration number
   cv_fold: 1
   fdr: 0.01
   fdr_level: psm
@@ -75,7 +79,7 @@ percolator:
     - precursor
     - peptide
     - sequence
-  per_raw_fdr: False
+  use_fdr_for_each_raw: False
   frag_types: ['b_z1','b_z2','y_z1','y_z2']
   input_files:
     psm_type: alphapept
@@ -85,13 +89,13 @@ percolator:
       - maxquant
       - msfragger_pepxml
     psm_files: []
-    raw_type: alphapept_hdf
-    raw_type_choices:
+    ms_file_type: alphapept_hdf
+    ms_file_type_choices:
       - hdf
       - thermo_raw # if alphapept is installed
       - mgf
       - mzml
-    raw_files: []
+    ms_files: []
     other_score_column_mapping:
       alphapept: {}
       pfind: 
@@ -100,49 +104,45 @@ percolator:
         hyperscore: hyperscore
         nextscore: nextscore
       maxquant: {}
-spec_lib:
+  output_dir: C:/datasets/percolaotr
+library:
+  peptdeep_model_type: regular
   input:
-    type: fasta
+    type: peptide_table
     type_choices:
     - fasta
-    - sequence_list
-    - peptide_list # sequence with mods and mod_sites
-    - precursor_list # peptide with charge state
-    files: 
-    - xxx.fasta
+    - sequence_table
+    - peptide_table # sequence with mods and mod_sites
+    - precursor_table # peptide with charge state
+    paths: 
+    - xxx.tsv
     fasta:
-      max_miss_cleave: 3
-      fixmod: 
-      - Carbamidomethyl@C
-      varmod:
-      - Oxidation@M
-      min_varmod: 0
-      max_varmod: 1
-      target_mod: []
-      min_target_mod: 0
-      max_target_mod: 2
-  output:
-    type: hdf
-    type_choices:
-    - hdf
-    - diann # and can also be used by spectronaut
-    - msp
-    library: xxx.speclib.hdf
-    min_fragment_mz: 300
-    max_fragment_mz: 2000
-    min_relative_intensity: 0.1
-    least_n_peaks: 6
+      protease: “([KR])”
+      max_miss_cleave: 2
+    fix_mods: 
+    - Carbamidomethyl@C
+    var_mods:
+    - Oxidation@M
+    max_var_mod_num: 2
+    min_precursor_charge: 2
+    max_precursor_charge: 4
+    min_peptide_len: 6
+    max_peptide_len: 35
+    min_precursor_mz: 200.0
+    max_precursor_mz: 2000.0
+    decoy: None
+    decoy_choices:
+    - pseudo_reverse
+    - diann
+    - None
     max_frag_charge: 2
     frag_types:
     - b
     - y
-    min_precursor_charge: 2
-    max_precursor_charge: 4
-    min_precursor_mz: 400
-    max_precursor_mz: 2000
-    min_peptide_len: 6
-    max_peptide_len: 35
-    decoy: pseudo_reverse
-    decoy_choices:
-    - pseudo_reverse
-    - diann
+  output_dir: C:/xxx/xxx
+  output_tsv:
+    enable: False
+    min_fragment_mz: 300
+    max_fragment_mz: 2000
+    min_relative_intensity: 0.02
+    keep_higest_k_peaks: 12
