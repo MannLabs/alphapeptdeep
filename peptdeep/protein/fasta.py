@@ -679,13 +679,14 @@ class PredictFastaSpecLib(PredictSpecLib):
         _hdf.library.protein_df = self.protein_df
 
 # Cell
-def append_regular_modifications(df,
+def append_regular_modifications(df:pd.DataFrame,
     var_mods = ['Phospho@S','Phospho@T','Phospho@Y'],
     max_mod_num=1, max_combs=100,
     keep_unmodified=True,
 ):
     mod_dict = dict([(mod[-1],mod) for mod in var_mods])
     var_mod_aas = ''.join(mod_dict.keys())
+
     (
         df['mods_app'],
         df['mod_sites_app']
@@ -707,7 +708,6 @@ def append_regular_modifications(df,
     df['mod_sites'] = df[['mod_sites','mod_sites_app']].apply(
         lambda x: ';'.join(i for i in x if i), axis=1
     )
-    del df['mods_app']
-    del df['mod_sites_app']
+    df.drop(columns=['mods_app', 'mod_sites_app'], inplace=True)
     df.reset_index(drop=True, inplace=True)
     return df
