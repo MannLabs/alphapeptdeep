@@ -87,7 +87,6 @@ percolator:
       - alphapept
       - pfind
       - maxquant
-      - msfragger_pepxml
     psm_files: []
     ms_file_type: alphapept_hdf
     ms_file_type_choices:
