@@ -116,7 +116,7 @@ library:
     paths: 
     - xxx.tsv
     fasta:
-      protease: “([KR])”
+      protease: "([KR])"
       max_miss_cleave: 2
     fix_mods: 
     - Carbamidomethyl@C
