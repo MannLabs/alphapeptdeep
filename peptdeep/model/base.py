@@ -60,34 +60,8 @@ class ModelImplBase(object):
         if not torch.cuda.is_available():
             GPU=False
         self.device = torch.device('cuda' if GPU else 'cpu')
-        if self.model:
+        if self.model is not None:
             self.model.to(self.device)
-
-    def _init_for_train(self):
-        self.loss_func = torch.nn.L1Loss()
-
-    def build_from_py_codes(self,
-        model_code_file:str,
-        code_file_in_zip:str=None,
-        **kwargs
-    ):
-        if model_code_file.lower().endswith('.zip'):
-            with ZipFile(model_code_file, 'r') as model_zip:
-                with model_zip.open(code_file_in_zip) as f:
-                    codes = f.read()
-        else:
-            with open(model_code_file, 'r') as f:
-                codes = f.read()
-        codes = compile(
-            codes,
-            filename='model_file_py',
-            mode='exec'
-        )
-        exec(codes) #codes must contains torch model codes 'class Model(...'
-        self.model = Model(**kwargs)
-        self.model_params = kwargs
-        self.model.to(self.device)
-        self._init_for_train()
 
     def build(self,
         model_class: torch.nn.Module,
@@ -97,134 +71,6 @@ class ModelImplBase(object):
         self.model_params = kwargs
         self.model.to(self.device)
         self._init_for_train()
-
-    def get_parameter_num(self):
-        return np.sum([p.numel() for p in self.model.parameters()])
-
-    def _save_codes(self, save_as):
-        import inspect
-        code = '''import torch\nimport peptdeep.model.base as model_base\n'''
-        class_code = inspect.getsource(self.model.__class__)
-        code += 'class Model' + class_code[class_code.find('('):]
-        with open(save_as, 'w') as f:
-            f.write(code)
-
-    def save(self, save_as):
-        dir = os.path.dirname(save_as)
-        if not dir: dir = './'
-        if not os.path.exists(dir): os.makedirs(dir)
-        torch.save(self.model.state_dict(), save_as)
-        with open(save_as+'.txt','w') as f: f.write(str(self.model))
-        save_yaml(save_as+'.model_const.yaml', model_const)
-        self._save_codes(save_as+'.model.py')
-        save_yaml(save_as+'.param.yaml', self.model_params)
-
-    def _load_model_file(self, stream):
-        (
-            missing_keys, unexpect_keys
-        ) = self.model.load_state_dict(torch.load(
-            stream, map_location=self.device),
-            strict=False
-        )
-
-    def load(
-        self,
-        model_file: Tuple[str, IO],
-        model_path_in_zip: str = None,
-        **kwargs
-    ):
-        if isinstance(model_file, str):
-            # We may release all models (msms, rt, ccs, ...) in a single zip file
-            if model_file.lower().endswith('.zip'):
-                with ZipFile(model_file) as model_zip:
-                    with model_zip.open(model_path_in_zip,'r') as pt_file:
-                        self._load_model_file(pt_file)
-            else:
-                with open(model_file,'rb') as pt_file:
-                    self._load_model_file(pt_file)
-        else:
-            self._load_model_file(model_file)
-
-    def _train_one_batch(
-        self,
-        targets:Union[torch.Tensor,List[torch.Tensor]],
-        *features,
-    ):
-        self.optimizer.zero_grad()
-        predicts = self.model(*[fea.to(self.device) for fea in features])
-        if isinstance(targets, list):
-            # predicts must be a list or tuple as well
-            cost = self.loss_func(
-                predicts,
-                [t.to(self.device) for t in targets]
-            )
-        else:
-            cost = self.loss_func(predicts, targets.to(self.device))
-        cost.backward()
-        torch.nn.utils.clip_grad_norm_(self.model.parameters(), 1.0)
-        self.optimizer.step()
-        return cost.item()
-
-    def _predict_one_batch(self,
-        *features
-    ):
-        predicts = self.model(*[fea.to(self.device) for fea in features])
-        if isinstance(predicts, torch.Tensor):
-            return predicts.cpu().detach().numpy()
-        else:
-            return [p.cpu().detach().numpy() for p in predicts]
-
-    def _get_targets_from_batch_df(self,
-        batch_df:pd.DataFrame,
-        nAA=None, **kwargs,
-    )->Union[torch.Tensor,List]:
-        raise NotImplementedError(
-            'Must implement _get_targets_from_batch_df() method'
-        )
-
-    def _get_features_from_batch_df(self,
-        batch_df:pd.DataFrame,
-        nAA, **kwargs,
-    )->Tuple[torch.Tensor]:
-        raise NotImplementedError(
-            'Must implement _get_features_from_batch_df() method'
-        )
-
-    def _prepare_predict_data_df(self,
-        precursor_df:pd.DataFrame,
-        **kwargs
-    ):
-        '''
-        This method must create a `self.predict_df` dataframe.
-        '''
-        self.predict_df = pd.DataFrame()
-
-    def _prepare_train_data_df(self,
-        precursor_df:pd.DataFrame,
-        **kwargs
-    ):
-        pass
-
-    def _set_batch_predict_data(self,
-        batch_df:pd.DataFrame,
-        predicts:Union[torch.Tensor, List],
-        **kwargs
-    ):
-        raise NotImplementedError(
-            'Must implement _set_batch_predict_data_df() method'
-        )
-
-    def _init_optimizer(self, lr):
-        self.optimizer = torch.optim.Adam(
-            self.model.parameters(), lr=lr
-        )
-
-    def set_lr(self, lr):
-        if self.optimizer is None:
-            self._init_optimizer(lr)
-        else:
-            for g in self.optimizer.param_groups:
-                g['lr'] = lr
 
     def train_with_warmup(self,
         precursor_df: pd.DataFrame,
@@ -237,54 +83,24 @@ class ModelImplBase(object):
         verbose_each_epoch=False,
         **kwargs
     ):
-        if 'nAA' not in precursor_df.columns:
-            precursor_df['nAA'] = precursor_df.sequence.str.len()
-        self._prepare_train_data_df(precursor_df, **kwargs)
-        self.model.train()
-
-        self.set_lr(lr)
+        self._pre_training(precursor_df, lr, **kwargs)
 
         lr_scheduler = get_cosine_schedule_with_warmup(
             self.optimizer, warmup_epoch, epoch
         )
 
         for epoch in range(epoch):
-            batch_cost = []
-            _grouped = list(precursor_df.sample(frac=1).groupby('nAA'))
-            rnd_nAA = np.random.permutation(len(_grouped))
-            if verbose_each_epoch:
-                batch_tqdm = tqdm(rnd_nAA)
-            else:
-                batch_tqdm = rnd_nAA
-            for i_group in batch_tqdm:
-                nAA, df_group = _grouped[i_group]
-                # df_group = df_group.reset_index(drop=True)
-                for i in range(0, len(df_group), batch_size):
-                    batch_end = i+batch_size
-
-                    batch_df = df_group.iloc[i:batch_end,:]
-                    targets = self._get_targets_from_batch_df(
-                        batch_df,nAA=nAA,**kwargs
-                    )
-                    features = self._get_features_from_batch_df(
-                        batch_df,nAA=nAA,**kwargs
-                    )
-
-                    batch_cost.append(
-                        self._train_one_batch(targets, *features)
-                    )
-
-                if verbose_each_epoch:
-                    batch_tqdm.set_description(
-                        f'Epoch={epoch+1}, nAA={nAA}, batch={len(batch_cost)}, loss={batch_cost[-1]:.4f}'
-                    )
+            batch_cost = self._train_one_epoch(
+                precursor_df, epoch,
+                batch_size, verbose_each_epoch,
+                **kwargs
+            )
             lr_scheduler.step()
             if verbose: print(
                 f'[Training] Epoch={epoch+1}, lr={lr_scheduler.get_last_lr()[0]}, loss={np.mean(batch_cost)}'
             )
 
         torch.cuda.empty_cache()
-
 
     def train(self,
         precursor_df: pd.DataFrame,
@@ -296,49 +112,17 @@ class ModelImplBase(object):
         verbose_each_epoch=False,
         **kwargs
     ):
-        if 'nAA' not in precursor_df.columns:
-            precursor_df['nAA'] = precursor_df.sequence.str.len()
-        self._prepare_train_data_df(precursor_df, **kwargs)
-        self.model.train()
-
-        self.set_lr(lr)
+        self._pre_training(precursor_df, lr, **kwargs)
 
         for epoch in range(epoch):
-            batch_cost = []
-            _grouped = list(precursor_df.sample(frac=1).groupby('nAA'))
-            rnd_nAA = np.random.permutation(len(_grouped))
-            if verbose_each_epoch:
-                batch_tqdm = tqdm(rnd_nAA)
-            else:
-                batch_tqdm = rnd_nAA
-            for i_group in batch_tqdm:
-                nAA, df_group = _grouped[i_group]
-                # df_group = df_group.reset_index(drop=True)
-                for i in range(0, len(df_group), batch_size):
-                    batch_end = i+batch_size
-
-                    batch_df = df_group.iloc[i:batch_end,:]
-                    targets = self._get_targets_from_batch_df(batch_df,nAA=nAA,**kwargs)
-                    features = self._get_features_from_batch_df(batch_df,nAA=nAA,**kwargs)
-
-                    cost = self._train_one_batch(
-                        targets,
-                        *features,
-                    )
-                    batch_cost.append(cost)
-                if verbose_each_epoch:
-                    batch_tqdm.set_description(
-                        f'Epoch={epoch+1}, nAA={nAA}, Batch={len(batch_cost)}, Loss={cost:.4f}'
-                    )
+            batch_cost = self._train_one_epoch(
+                precursor_df, epoch,
+                batch_size, verbose_each_epoch,
+                **kwargs
+            )
             if verbose: print(f'[Training] Epoch={epoch+1}, Mean Loss={np.mean(batch_cost)}')
 
         torch.cuda.empty_cache()
-
-    def _check_predict_in_order(self, precursor_df:pd.DataFrame):
-        if is_precursor_sorted(precursor_df):
-            self._predict_in_order = True
-        else:
-            self._predict_in_order = False
 
     def predict(self,
         precursor_df:pd.DataFrame,
@@ -380,3 +164,206 @@ class ModelImplBase(object):
 
         torch.cuda.empty_cache()
         return self.predict_df
+
+    def save(self, save_as):
+        dir = os.path.dirname(save_as)
+        if not dir: dir = './'
+        if not os.path.exists(dir): os.makedirs(dir)
+        torch.save(self.model.state_dict(), save_as)
+        with open(save_as+'.txt','w') as f: f.write(str(self.model))
+        save_yaml(save_as+'.model_const.yaml', model_const)
+        self._save_codes(save_as+'.model.py')
+        save_yaml(save_as+'.param.yaml', self.model_params)
+
+    def load(
+        self,
+        model_file: Tuple[str, IO],
+        model_path_in_zip: str = None,
+        **kwargs
+    ):
+        if isinstance(model_file, str):
+            # We may release all models (msms, rt, ccs, ...) in a single zip file
+            if model_file.lower().endswith('.zip'):
+                with ZipFile(model_file) as model_zip:
+                    with model_zip.open(model_path_in_zip,'r') as pt_file:
+                        self._load_model_file(pt_file)
+            else:
+                with open(model_file,'rb') as pt_file:
+                    self._load_model_file(pt_file)
+        else:
+            self._load_model_file(model_file)
+
+    def get_parameter_num(self):
+        return np.sum([p.numel() for p in self.model.parameters()])
+
+    def build_from_py_codes(self,
+        model_code_file:str,
+        code_file_in_zip:str=None,
+        **kwargs
+    ):
+        if model_code_file.lower().endswith('.zip'):
+            with ZipFile(model_code_file, 'r') as model_zip:
+                with model_zip.open(code_file_in_zip) as f:
+                    codes = f.read()
+        else:
+            with open(model_code_file, 'r') as f:
+                codes = f.read()
+        codes = compile(
+            codes,
+            filename='model_file_py',
+            mode='exec'
+        )
+        exec(codes) #codes must contains torch model codes 'class Model(...'
+        self.model = Model(**kwargs)
+        self.model_params = kwargs
+        self.model.to(self.device)
+        self._init_for_train()
+
+    def _init_for_train(self):
+        self.loss_func = torch.nn.L1Loss()
+
+    def _load_model_file(self, stream):
+        (
+            missing_keys, unexpect_keys
+        ) = self.model.load_state_dict(torch.load(
+            stream, map_location=self.device),
+            strict=False
+        )
+
+    def _save_codes(self, save_as):
+        import inspect
+        code = '''import torch\nimport peptdeep.model.base as model_base\n'''
+        class_code = inspect.getsource(self.model.__class__)
+        code += 'class Model' + class_code[class_code.find('('):]
+        with open(save_as, 'w') as f:
+            f.write(code)
+
+    def _train_one_batch(
+        self,
+        targets:torch.Tensor,
+        *features,
+    ):
+        self.optimizer.zero_grad()
+        predicts = self.model(*[fea.to(self.device) for fea in features])
+        cost = self.loss_func(predicts, targets.to(self.device))
+        cost.backward()
+        torch.nn.utils.clip_grad_norm_(self.model.parameters(), 1.0)
+        self.optimizer.step()
+        return cost.item()
+
+    def _predict_one_batch(self,
+        *features
+    ):
+        return self.model(
+            *[fea.to(self.device) for fea in features]
+        ).cpu().detach().numpy()
+
+    def _get_targets_from_batch_df(self,
+        batch_df:pd.DataFrame,
+        nAA:int=None, **kwargs,
+    )->Union[torch.Tensor,List]:
+        raise NotImplementedError(
+            'Must implement _get_targets_from_batch_df() method'
+        )
+
+    def _get_features_from_batch_df(self,
+        batch_df:pd.DataFrame,
+        nAA:int, **kwargs,
+    )->Tuple[torch.Tensor]:
+        raise NotImplementedError(
+            'Must implement _get_features_from_batch_df() method'
+        )
+
+    def _prepare_predict_data_df(self,
+        precursor_df:pd.DataFrame,
+        **kwargs
+    ):
+        '''
+        This method must define `self._predict_column_in_df`
+        and create a `self.predict_df` dataframe.
+        '''
+        raise NotImplementedError(
+            'Must implement _prepare_predict_data_df() method'
+        )
+
+    def _prepare_train_data_df(self,
+        precursor_df:pd.DataFrame,
+        **kwargs
+    ):
+        pass
+
+    def _set_batch_predict_data(self,
+        batch_df:pd.DataFrame,
+        predicts:torch.Tensor,
+        **kwargs
+    ):
+        predicts[predicts<0] = 0.0
+        if self._predict_in_order:
+            self.predict_df.loc[:,self._predict_column_in_df].values[
+                batch_df.index.values[0]:batch_df.index.values[-1]+1
+            ] = predicts
+        else:
+            self.predict_df.loc[
+                batch_df.index,self._predict_column_in_df
+            ] = predicts
+
+    def _init_optimizer(self, lr):
+        self.optimizer = torch.optim.Adam(
+            self.model.parameters(), lr=lr
+        )
+
+    def set_lr(self, lr):
+        if self.optimizer is None:
+            self._init_optimizer(lr)
+        else:
+            for g in self.optimizer.param_groups:
+                g['lr'] = lr
+
+    def _pre_training(self, precursor_df, lr, **kwargs):
+        if 'nAA' not in precursor_df.columns:
+            precursor_df['nAA'] = precursor_df.sequence.str.len()
+        self._prepare_train_data_df(precursor_df, **kwargs)
+        self.model.train()
+
+        self.set_lr(lr)
+
+    def _train_one_epoch(self,
+        precursor_df, epoch, batch_size, verbose_each_epoch,
+        **kwargs
+    ):
+        batch_cost = []
+        _grouped = list(precursor_df.sample(frac=1).groupby('nAA'))
+        rnd_nAA = np.random.permutation(len(_grouped))
+        if verbose_each_epoch:
+            batch_tqdm = tqdm(rnd_nAA)
+        else:
+            batch_tqdm = rnd_nAA
+        for i_group in batch_tqdm:
+            nAA, df_group = _grouped[i_group]
+            # df_group = df_group.reset_index(drop=True)
+            for i in range(0, len(df_group), batch_size):
+                batch_end = i+batch_size
+
+                batch_df = df_group.iloc[i:batch_end,:]
+                targets = self._get_targets_from_batch_df(
+                    batch_df,nAA=nAA,**kwargs
+                )
+                features = self._get_features_from_batch_df(
+                    batch_df,nAA=nAA,**kwargs
+                )
+
+                batch_cost.append(
+                    self._train_one_batch(targets, *features)
+                )
+
+            if verbose_each_epoch:
+                batch_tqdm.set_description(
+                    f'Epoch={epoch+1}, nAA={nAA}, batch={len(batch_cost)}, loss={batch_cost[-1]:.4f}'
+                )
+        return batch_cost
+
+    def _check_predict_in_order(self, precursor_df:pd.DataFrame):
+        if is_precursor_sorted(precursor_df):
+            self._predict_in_order = True
+        else:
+            self._predict_in_order = False

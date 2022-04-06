@@ -182,7 +182,8 @@ class AlphaRTModel(model_base.ModelImplBase):
     def _prepare_predict_data_df(self,
         precursor_df:pd.DataFrame,
     ):
-        precursor_df['rt_pred'] = 0.
+        self._predict_column_in_df = 'rt_pred'
+        precursor_df[self._predict_column_in_df] = 0.
         self.predict_df = precursor_df
 
     def _get_features_from_batch_df(self,
@@ -205,20 +206,6 @@ class AlphaRTModel(model_base.ModelImplBase):
         **kwargs,
     ) -> torch.Tensor:
         return torch.Tensor(batch_df['rt_norm'].values)
-
-    def _set_batch_predict_data(self,
-        batch_df: pd.DataFrame,
-        predicts: np.array,
-    ):
-        predicts[predicts<0] = 0.0
-        if self._predict_in_order:
-            self.predict_df.loc[:,'rt_pred'].values[
-                batch_df.index.values[0]:batch_df.index.values[-1]+1
-            ] = predicts
-        else:
-            self.predict_df.loc[
-                batch_df.index,'rt_pred'
-            ] = predicts
 
     def rt_to_irt_pred(self,
         precursor_df: pd.DataFrame

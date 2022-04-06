@@ -11,17 +11,21 @@ from peptdeep.spec_lib.translate import (
     speclib_to_single_df, mod_to_unimod_dict
 )
 
+from peptdeep.pretrained_models import ModelManager
+
 import pandas as pd
 import numpy as np
 
 class PredictLibraryMakerBase(object):
     def __init__(self,
-        settings:dict = global_settings
+        settings:dict = global_settings,
+        model_manager:ModelManager = None,
     ):
         self._settings = settings
         lib_settings = settings['library']
         in_settings = lib_settings['input']
         self.spec_lib = PredictFastaSpecLib(
+            model_manager=model_manager,
             charged_frag_types = get_charged_frag_types(
                 in_settings['frag_types'],
                 in_settings['max_frag_charge'],
@@ -144,12 +148,13 @@ class LibraryMakerProvider:
         self.library_maker_dict = {}
     def register_maker(self, maker_name:str, maker_class):
         self.library_maker_dict[maker_name.lower()] = maker_class
-    def get_maker(self, maker_name:str,
-        settings:dict = global_settings
+    def get_maker(self, maker_name:str, *,
+        settings:dict = global_settings,
+        model_manager = None,
     )->PredictLibraryMakerBase:
         maker_name = maker_name.lower()
         if maker_name in self.library_maker_dict:
-            return self.library_maker_dict[maker_name](settings)
+            return self.library_maker_dict[maker_name](settings, model_manager)
         else:
             raise ValueError(f'library maker "{maker_name}" is not registered.')
 library_maker_provider = LibraryMakerProvider()

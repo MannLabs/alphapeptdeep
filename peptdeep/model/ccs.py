@@ -164,7 +164,8 @@ class AlphaCCSModel(model_base.ModelImplBase):
     def _prepare_predict_data_df(self,
         precursor_df:pd.DataFrame,
     ):
-        precursor_df['ccs_pred'] = 0.
+        self._predict_column_in_df = 'ccs_pred'
+        precursor_df[self._predict_column_in_df] = 0.
         self.predict_df = precursor_df
 
     def _get_features_from_batch_df(self,
@@ -191,20 +192,6 @@ class AlphaCCSModel(model_base.ModelImplBase):
         **kwargs,
     ) -> torch.Tensor:
         return torch.Tensor(batch_df['ccs'].values)
-
-    def _set_batch_predict_data(self,
-        batch_df: pd.DataFrame,
-        predicts,
-    ):
-        predicts[predicts<0] = 0.0
-        if self._predict_in_order:
-            self.predict_df.loc[:,'ccs_pred'].values[
-                batch_df.index.values[0]:batch_df.index.values[-1]+1
-            ] = predicts
-        else:
-            self.predict_df.loc[
-                batch_df.index,'ccs_pred'
-            ] = predicts
 
     def ccs_to_mobility_pred(self,
         precursor_df:pd.DataFrame
