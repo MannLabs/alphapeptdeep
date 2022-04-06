@@ -164,13 +164,14 @@ mod_to_other_mod_dict = {
     "Phospho@S": "Phospho (STY)",
     "Phospho@T": "Phospho (STY)",
     "Phospho@Y": "Phospho (STY)",
-    "GlyGly@K": "GlyGly (K)",
+    "GG@K": "GG (K)",
     "Acetyl@Protein N-term": "Acetyl (Protein N-term)",
 }
 
 from alphabase.constants.modification import MOD_DF
 mod_to_unimod_dict = {}
 for mod_name,unimod_id in MOD_DF[['name','unimod_id']].values:
+    if unimod_id==-1 or unimod_id=='-1': continue
     mod_to_unimod_dict[mod_name] = f"UniMod:{unimod_id}"
 
 def mask_fragment_intensity_by_mz_(
@@ -187,7 +188,7 @@ def speclib_to_single_df(
     speclib:SpecLibBase,
     *,
     translate_mod_dict:dict = None,
-    keep_k_highest_intensity:int=12,
+    keep_k_highest_fragments:int=12,
     min_frag_mz = 200,
     max_frag_mz = 2000,
     min_frag_intensity = 0.02,
@@ -205,9 +206,9 @@ def speclib_to_single_df(
     used by DiaNN, or spectronaut, or others
     Args:
         translate_mod_dict (dict): a dict map modifications from alphabase to other software. Default: build-in `alpha_to_other_mod_dict`
-        keep_k_highest_intensity (int): only keep highest fragment intensities for each precursor. Default: 12
+        keep_k_highest_peaks (int): only keep highest fragments for each precursor. Default: 12
     Returns:
-        pd.DataFrame: a single-file dataframe which contains precursors and fragments
+        pd.DataFrame: a single dataframe in the SWATH-like format
     '''
     df = pd.DataFrame()
     df['ModifiedPeptide'] = speclib._precursor_df[
@@ -271,7 +272,7 @@ def speclib_to_single_df(
         df,
         speclib._fragment_mz_df,
         speclib._fragment_intensity_df,
-        top_n_inten=keep_k_highest_intensity,
+        top_n_inten=keep_k_highest_fragments,
         frag_type_head=frag_type_head,
         frag_mass_head=frag_mass_head,
         frag_inten_head=frag_inten_head,
@@ -287,7 +288,7 @@ def speclib_to_single_df(
 def speclib_to_swath_df(
     speclib:SpecLibBase,
     *,
-    keep_k_highest_intensity:int=12,
+    keep_k_highest_fragments:int=12,
     min_frag_mz = 200,
     max_frag_mz = 2000,
     min_frag_intensity = 0.02,
@@ -295,7 +296,7 @@ def speclib_to_swath_df(
     speclib_to_single_df(
         speclib,
         translate_mod_dict=mod_to_other_mod_dict,
-        keep_k_highest_intensity=keep_k_highest_intensity,
+        keep_k_highest_fragments=keep_k_highest_fragments,
         min_frag_mz = min_frag_mz,
         max_frag_mz = max_frag_mz,
         min_frag_intensity = min_frag_intensity,

@@ -137,17 +137,22 @@ def cleave_sequence_with_cut_pos(
 
 class Digest(object):
     def __init__(self,
-        protease='trypsin',
+        protease:str='trypsin',
         max_missed_cleavages:int=2,
-        pep_length_min:int=6,
-        pep_length_max:int=45,
+        peptide_length_min:int=6,
+        peptide_length_max:int=45,
     ):
         self.n_miss_cleave = max_missed_cleavages
-        self.pep_length_min = pep_length_min
-        self.pep_length_max = pep_length_max
-        self.regex_pattern = re.compile(
-            protease_dict[protease]
-        )
+        self.peptide_length_min = peptide_length_min
+        self.peptide_length_max = peptide_length_max
+        if protease in protease_dict:
+            self.regex_pattern = re.compile(
+                protease_dict[protease]
+            )
+        else:
+            self.regex_pattern = re.compile(
+                protease
+            )
 
     def cleave_sequence(self,
         sequence:str,
@@ -173,8 +178,8 @@ class Digest(object):
         ) = cleave_sequence_with_cut_pos(
             sequence, cut_pos,
             self.n_miss_cleave,
-            self.pep_length_min,
-            self.pep_length_max,
+            self.peptide_length_min,
+            self.peptide_length_max,
         )
         # Consider M loss at protein N-term
         if sequence.startswith('M'):
@@ -183,7 +188,7 @@ class Digest(object):
             ):
                 if (
                     sequence.startswith(seq)
-                    and len(seq)>self.pep_length_min
+                    and len(seq)>self.peptide_length_min
                 ):
                     seq_list.append(seq[1:])
                     miss_list.append(miss)
@@ -325,15 +330,16 @@ def parse_term_mod(term_mod_name:str):
 
 class PredictFastaSpecLib(PredictSpecLib):
     def __init__(self,
-        model_manager:ModelManager,
+        model_manager:ModelManager = None,
         charged_frag_types:list = ['b_z1','b_z2','y_z1','y_z2'],
-        min_precursor_mz = 400, max_precursor_mz = 1800,
         protease:str = 'trypsin',
         max_missed_cleavages:int = 2,
-        pep_length_min:int = 7,
-        pep_length_max:int = 35,
-        min_charge:int = 2,
-        max_charge:int = 4,
+        peptide_length_min:int = 7,
+        peptide_length_max:int = 35,
+        precursor_charge_min:int = 2,
+        precursor_charge_max:int = 4,
+        precursor_mz_min:float = 200.0,
+        precursor_mz_max:float = 2000.0,
         var_mods:list = ['Acetyl@Protein N-term','Oxidation@M'],
         max_var_mod_num:int = 2,
         fix_mods:list = ['Carbamidomethyl@C'],
@@ -341,19 +347,21 @@ class PredictFastaSpecLib(PredictSpecLib):
         I_to_L=False,
     ):
         super().__init__(
-            model_manager, charged_frag_types,
-            min_precursor_mz, max_precursor_mz,
+            model_manager,
+            charged_frag_types=charged_frag_types,
+            precursor_mz_min=precursor_mz_min,
+            precursor_mz_max=precursor_mz_max,
             decoy=decoy
         )
         self.protein_df = pd.DataFrame()
         self.I_to_L = I_to_L
-        self.max_mod_combs = 100
+        self.max_mod_combinations = 100
         self._digest = Digest(
             protease, max_missed_cleavages,
-            pep_length_min, pep_length_max
+            peptide_length_min, peptide_length_max
         )
-        self.min_charge = min_charge
-        self.max_charge = max_charge
+        self.precursor_charge_min = precursor_charge_min
+        self.precursor_charge_max = precursor_charge_max
 
         self.var_mods = var_mods
         self.fix_mods = fix_mods
@@ -596,7 +604,7 @@ class PredictFastaSpecLib(PredictSpecLib):
 
         var_mods_list, var_mod_sites_list = get_var_mods(
             sequence, self.var_mod_aas, self.var_mod_dict,
-            self.max_var_mod_num, self.max_mod_combs-1, # 1 for unmodified
+            self.max_var_mod_num, self.max_mod_combinations-1, # 1 for unmodified
         )
         var_mods_list.append('')
         var_mod_sites_list.append('')
@@ -631,6 +639,11 @@ class PredictFastaSpecLib(PredictSpecLib):
         )
 
     def add_modifications(self):
+        if 'is_prot_nterm' not in self._precursor_df.columns:
+            self._precursor_df['is_prot_nterm'] = False
+        if 'is_prot_cterm' not in self._precursor_df.columns:
+            self._precursor_df['is_prot_cterm'] = False
+
         (
             self._precursor_df['mods'],
             self._precursor_df['mod_sites']
@@ -646,7 +659,10 @@ class PredictFastaSpecLib(PredictSpecLib):
 
     def add_charge(self):
         self._precursor_df['charge'] = [
-            np.arange(self.min_charge, self.max_charge+1)
+            np.arange(
+                self.precursor_charge_min,
+                self.precursor_charge_max+1
+            )
         ]*len(self._precursor_df)
         self._precursor_df = self._precursor_df.explode('charge')
         self._precursor_df['charge'] = self._precursor_df.charge.astype(np.int8)
@@ -663,13 +679,14 @@ class PredictFastaSpecLib(PredictSpecLib):
         _hdf.library.protein_df = self.protein_df
 
 # Cell
-def append_regular_modifications(df,
+def append_regular_modifications(df:pd.DataFrame,
     var_mods = ['Phospho@S','Phospho@T','Phospho@Y'],
     max_mod_num=1, max_combs=100,
     keep_unmodified=True,
 ):
     mod_dict = dict([(mod[-1],mod) for mod in var_mods])
     var_mod_aas = ''.join(mod_dict.keys())
+
     (
         df['mods_app'],
         df['mod_sites_app']
@@ -691,7 +708,6 @@ def append_regular_modifications(df,
     df['mod_sites'] = df[['mod_sites','mod_sites_app']].apply(
         lambda x: ';'.join(i for i in x if i), axis=1
     )
-    del df['mods_app']
-    del df['mod_sites_app']
+    df.drop(columns=['mods_app', 'mod_sites_app'], inplace=True)
     df.reset_index(drop=True, inplace=True)
     return df

@@ -520,8 +520,8 @@ class ScoreFeatureExtractor:
             )
 
         self.psm_df = pd.concat(
-            result_psm_list
-        ).reset_index(drop=True)
+            result_psm_list, ignore_index=True
+        )
         logging.info('Finish extracting features')
         return self.psm_df
 
@@ -778,7 +778,7 @@ class ScoreFeatureExtractorMP(ScoreFeatureExtractor):
                     result_psm_list.append(df)
 
         self.psm_df = pd.concat(
-            result_psm_list
-        ).reset_index(drop=True)
+            result_psm_list, ignore_index=True
+        )
         logging.info('Finished feature extraction with multiprocessing')
         return self.psm_df
