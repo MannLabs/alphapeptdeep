@@ -3,7 +3,8 @@
 __all__ = ['protease_dict', 'read_fasta_file', 'load_all_proteins', 'concat_proteins', 'cleave_sequence_with_cut_pos',
            'Digest', 'get_fix_mods', 'get_candidate_sites', 'get_var_mod_sites',
            'get_var_mods_per_sites_multi_mods_on_aa', 'get_var_mods_per_sites_single_mod_on_aa', 'get_var_mods',
-           'get_var_mods_per_sites', 'parse_term_mod', 'PredictFastaSpecLib', 'append_regular_modifications']
+           'get_var_mods_per_sites', 'parse_term_mod', 'protein_idxes_to_names', 'PredictFastaSpecLib',
+           'append_regular_modifications']
 
 # Cell
 import regex as re
@@ -327,6 +328,11 @@ def parse_term_mod(term_mod_name:str):
         return '', term
 
 # Cell
+def protein_idxes_to_names(protein_idxes:str, protein_ids:list):
+    if len(protein_idxes) == 0: return ''
+    return ';'.join(protein_ids[int(i)] for i in protein_idxes.split(';'))
+
+# Cell
 
 class PredictFastaSpecLib(PredictSpecLib):
     def __init__(self,
@@ -353,7 +359,7 @@ class PredictFastaSpecLib(PredictSpecLib):
             precursor_mz_max=precursor_mz_max,
             decoy=decoy
         )
-        self.protein_df = pd.DataFrame()
+        self.protein_df:pd.DataFrame() = pd.DataFrame()
         self.I_to_L = I_to_L
         self.max_mod_combinations = 100
         self._digest = Digest(
@@ -573,6 +579,19 @@ class PredictFastaSpecLib(PredictSpecLib):
         self._precursor_df['mods'] = ''
         self._precursor_df['mod_sites'] = ''
         self.refine_df()
+
+    def append_protein_name(self):
+        if (
+            'id' not in self.protein_df or
+            'protein_idxes' not in self._precursor_df
+        ):
+            return
+
+        self._precursor_df['proteins'] = self._precursor_df['protein_idxes'].apply(
+            protein_idxes_to_names,
+            protein_ids=self.protein_df['id'].values
+        )
+
 
     def from_peptide_sequence_list(self,
         pep_seq_list:list,
