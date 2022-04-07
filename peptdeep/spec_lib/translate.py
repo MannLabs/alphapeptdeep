@@ -32,12 +32,14 @@ def create_modified_sequence(
     cterm = '_'
     mod_seq = df_items[0]
     if df_items[1]:
-        mods = df_items[1].split(';')[::-1]
-        mod_sites = df_items[2].split(';')[::-1]
+        mods = df_items[1].split(';')
+        mod_sites = [int(i) for i in df_items[2].split(';')]
+        rev_order = np.argsort(mod_sites)[::-1]
+        mod_sites = [mod_sites[rev_order[i]] for i in range(len(mod_sites))]
+        mods = [mods[rev_order[i]] for i in range(len(mods))]
         if translate_mod_dict is not None:
             mods = [translate_mod_dict[mod] for mod in mods]
-        for site, mod in zip(mod_sites, mods):
-            _site = int(site)
+        for _site, mod in zip(mod_sites, mods):
             if _site > 0:
                 mod_seq = mod_seq[:_site] + mod_sep[0]+mod+mod_sep[1] + mod_seq[_site:]
             elif _site == -1:

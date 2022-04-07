@@ -146,7 +146,7 @@ def mobility_to_ccs_df_(
 
 # Cell
 
-class AlphaCCSModel(model_base.ModelImplBase):
+class AlphaCCSModel(model_base.PeptideModelInterfaceBase):
     def __init__(self,
         dropout=0.1, lr=0.001,
         model_class:torch.nn.Module=ModelCCS_LSTM,

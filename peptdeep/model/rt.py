@@ -165,7 +165,7 @@ class ModelRT_LSTM(torch.nn.Module):
         return self.rt_decoder(x).squeeze(1)
 
 # Cell
-class AlphaRTModel(model_base.ModelImplBase):
+class AlphaRTModel(model_base.PeptideModelInterfaceBase):
     def __init__(self,
         dropout=0.1, lr=0.001,
         model_class:torch.nn.Module=ModelRT_LSTM,

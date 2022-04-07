@@ -343,7 +343,7 @@ class PredictFastaSpecLib(PredictSpecLib):
         var_mods:list = ['Acetyl@Protein N-term','Oxidation@M'],
         max_var_mod_num:int = 2,
         fix_mods:list = ['Carbamidomethyl@C'],
-        decoy: str = 'pseudo_reverse', # or diann
+        decoy: str = None, # or pseudo_reverse or diann
         I_to_L=False,
     ):
         super().__init__(
