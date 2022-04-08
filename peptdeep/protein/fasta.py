@@ -328,9 +328,9 @@ def parse_term_mod(term_mod_name:str):
         return '', term
 
 # Cell
-def protein_idxes_to_names(protein_idxes:str, protein_ids:list):
+def protein_idxes_to_names(protein_idxes:str, protein_names:list):
     if len(protein_idxes) == 0: return ''
-    return ';'.join(protein_ids[int(i)] for i in protein_idxes.split(';'))
+    return ';'.join(protein_names[int(i)] for i in protein_idxes.split(';'))
 
 # Cell
 
@@ -474,8 +474,8 @@ class PredictFastaSpecLib(PredictSpecLib):
                 mod_set.add(mod[-1])
         return False
 
-    def import_fasta(self, fasta_files:list):
-        self.from_fasta_list(fasta_files)
+    def import_fasta(self, fasta_files:Union[str,list]):
+        self.from_fasta(fasta_files)
         self._predict_all_after_load_pep_seqs()
 
     def import_protein_dict(self, protein_dict:dict):
@@ -494,30 +494,11 @@ class PredictFastaSpecLib(PredictSpecLib):
         self.add_charge()
         self.predict_all()
 
-    def load_peptide_sequences(self,
-        *source,
-        source_type="fasta"
-    ):
-        """Wrapper for loading peptide sequences
-
-        Args:
-            source_type (str, optional): could be .
-             Defaults to "fasta".
-        """
-        if source_type == "fasta":
-            self.from_fasta(*source)
-        elif source_type == "protein_dict":
-            self.from_protein_dict(*source)
-        elif source_type == "peptide_list":
-            self.from_peptide_sequence_list(*source)
-        else:
-            self.from_fasta_list(*source)
-
     def from_fasta(self, fasta_file:Union[str,list]):
         """Load peptide sequence from fasta file.
 
         Args:
-            fasta_path (Union[str,list]): could be a fasta path
+            fasta_path (Union[str,list]): could be a fasta path or a list of fasta paths
               or a list of fasta paths
         """
         if isinstance(fasta_file, 'str'):
@@ -589,7 +570,7 @@ class PredictFastaSpecLib(PredictSpecLib):
 
         self._precursor_df['proteins'] = self._precursor_df['protein_idxes'].apply(
             protein_idxes_to_names,
-            protein_ids=self.protein_df['id'].values
+            protein_names=self.protein_df['id'].values
         )
 
 
