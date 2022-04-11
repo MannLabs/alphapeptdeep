@@ -2,14 +2,17 @@
 
 __all__ = ['mod_feature_size', 'max_instrument_num', 'frag_types', 'max_frag_charge', 'num_ion_types',
            'aa_embedding_size', 'aa_embedding', 'ascii_embedding', 'aa_one_hot', 'instrument_embedding', 'zero_param',
-           'xavier_param', 'init_state', 'Encoder_AA_MOD_LSTM_LSTM', 'Encoder_AA_MOD_CNN_LSTM',
+           'xavier_param', 'init_state', 'Input_AA_MOD_Embed', 'Input_META_Linear', 'Input_MOD_LinearFixFirstK',
+           'Input_MOD_Linear', 'Input_AA_Mod_Transformer', 'InputEmbedAAwithMod', 'InputMetaNet',
+           'InputModNetFixFirstK', 'InputModNet', 'AATransformerEncoding', 'Input_AA_MOD_LSTM',
+           'Input_AA_MOD_Meta_LSTM', 'Input_AA_MOD_CHARGE_LSTM', 'InputAALSTM', 'InputAALSTM_cat_Meta',
+           'InputAALSTM_cat_Charge', 'Output_META_LSTM', 'Output_META_Linear', 'OutputLSTM_cat_Meta',
+           'OutputLinear_cat_Meta', 'SeqCNN', 'SeqLSTM', 'SeqGRU', 'SeqTransformer', 'SeqAttentionSum',
+           'PositionalEncoding', 'PositionalEmbedding', 'Encoder_AA_MOD_LSTM_LSTM', 'Encoder_AA_MOD_CNN_LSTM',
            'Encoder_AA_MOD_CNN_LSTM_ATTSUM', 'Encoder_AA_MOD_CH_CNN_LSTM_ATTSUM', 'Input_AA_LSTM_Encoder',
            'Input_AA_CNN_Encoder', 'Input_AA_CNN_LSTM_Encoder', 'Input_AA_CNN_LSTM_cat_Charge_Encoder',
-           'Input_AA_MOD_LSTM', 'Input_AA_MOD_Meta_LSTM', 'Input_AA_MOD_CHARGE_LSTM', 'InputAALSTM',
-           'InputAALSTM_cat_Meta', 'InputAALSTM_cat_Charge', 'Decoder_AA_LSTM', 'Decoder_AA_GRU', 'SeqLSTMDecoder',
-           'SeqGRUDecoder', 'Decoder_AA_Linear', 'LinearDecoder', 'Output_META_LSTM', 'Output_META_Linear',
-           'OutputLSTM_cat_Meta', 'OutputLinear_cat_Meta', 'SeqCNN', 'SeqLSTM', 'SeqGRU', 'SeqTransformer',
-           'SeqAttentionSum', 'PositionalEncoding', 'PositionalEmbedding', 'HiddenTransformer', 'HiddenBert']
+           'Decoder_AA_LSTM', 'Decoder_AA_GRU', 'SeqLSTMDecoder', 'SeqGRUDecoder', 'Decoder_AA_Linear', 'LinearDecoder',
+           'HiddenTransformer', 'HiddenBert']
 
 # Cell
 import torch
@@ -53,115 +56,117 @@ def xavier_param(*shape):
 init_state = xavier_param
 
 # Cell
-
-class Encoder_AA_MOD_LSTM_LSTM(torch.nn.Module):
+class Input_AA_MOD_Embed(torch.nn.Module):
     """
-    two LSTM layers on AA and mod info
+    concatenates the AA embedding with the modifcation vector
     """
-    def __init__(self, out_features):
+    def __init__(self,
+        out_features,
+    ):
         super().__init__()
+        self.aa_embedding = aa_embedding(
+            out_features-mod_feature_size
+        )
+    def forward(self, aa_indices, mod_x):
+        aa_x = self.aa_embedding(aa_indices)
+        return torch.cat((aa_x, mod_x), 2)
+#legacy
+InputEmbedAAwithMod = Input_AA_MOD_Embed
 
-        self.input_nn = InputAALSTM(out_features)
-        self.nn = SeqLSTM(
-            out_features, out_features, rnn_layer=1
+
+class Input_META_Linear(torch.nn.Module):
+    # Meta = Charge, NCE and Instrument
+    """Encodes Charge state, Normalized Collision Energy (NCE) and Instrument for a given spectrum
+    into a 'meta' single layer network
+    """
+    def __init__(self,
+        out_features,
+    ):
+        super().__init__()
+        self.nn = torch.nn.Linear(
+            max_instrument_num+1, out_features-1
         )
 
-    def forward(self, aa_indices, mod_x):
-        x = self.input_nn(aa_indices, mod_x)
-        x = self.nn(x)
-        return x
-
-#legacy
-Input_AA_LSTM_Encoder = Encoder_AA_MOD_LSTM_LSTM
-
-
-class Encoder_AA_MOD_CNN_LSTM(torch.nn.Module):
-    """
-    linear NN for modification, CNN and LSTM layer
-    """
-    def __init__(self, out_features):
-        super().__init__()
-
-        mod_hidden = 8
-        self.mod_nn = InputModNetFixFirstK(mod_hidden)
-        input_dim = aa_embedding_size+mod_hidden
-        self.input_cnn = SeqCNN(input_dim)
-        self.hidden_nn = SeqLSTM(
-            input_dim*4, out_features, rnn_layer=1
-        ) #SeqCNN outputs 4*input_dim
-
-    def forward(self, aa_indices, mod_x):
-        mod_x = self.mod_nn(mod_x)
-        x = aa_one_hot(aa_indices, mod_x)
-        x = self.input_cnn(x)
-        x = self.hidden_nn(x)
-        return x
-
-#legacy
-Input_AA_CNN_Encoder = Encoder_AA_MOD_CNN_LSTM
-
-
-class Encoder_AA_MOD_CNN_LSTM_ATTSUM(torch.nn.Module):
-    """
-    linear NN for modification, CNN, LSTM, Attention sum (linear + softmax)
-    """
-    def __init__(self, out_features):
-        super().__init__()
-
-        mod_hidden = 8
-        self.mod_nn = InputModNetFixFirstK(mod_hidden)
-
-        input_dim = aa_embedding_size+mod_hidden
-        self.input_cnn = SeqCNN(input_dim)
-        self.hidden_nn = SeqLSTM(
-            input_dim*4, out_features, rnn_layer=2
-        ) #SeqCNN outputs 4*input_dim
-        self.attn_sum = SeqAttentionSum(out_features)
-
-    def forward(self, aa_indices, mod_x):
-        mod_x = self.mod_nn(mod_x)
-        x = aa_one_hot(aa_indices, mod_x)
-        x = self.input_cnn(x)
-        x = self.hidden_nn(x)
-        x = self.attn_sum(x)
-        return x
-#legacy
-Input_AA_CNN_LSTM_Encoder = Encoder_AA_MOD_CNN_LSTM_ATTSUM
-
-
-class Encoder_AA_MOD_CH_CNN_LSTM_ATTSUM(torch.nn.Module):
-    """
-    linear NN for modification, charge concatenated, CNN, LSTM, Attention sum (linear + softmax)
-    """
-    def __init__(self, out_features):
-        super().__init__()
-
-        mod_hidden = 8
-        self.mod_nn = InputModNetFixFirstK(mod_hidden)
-
-        input_dim = aa_embedding_size+mod_hidden+1
-        self.input_cnn = SeqCNN(input_dim)
-        self.hidden_nn = SeqLSTM(
-            input_dim*4, out_features, rnn_layer=2
-        ) #SeqCNN outputs 4*input_dim
-        self.attn_sum = SeqAttentionSum(out_features)
-
-    def forward(self, aa_indices, mod_x, charges):
-        mod_x = self.mod_nn(mod_x)
-        x = aa_one_hot(
-            aa_indices, mod_x,
-            charges.unsqueeze(1).repeat(1,mod_x.size(1),1)
+    def forward(self,
+        charges, NCEs, instrument_indices,
+    ):
+        inst_x = torch.nn.functional.one_hot(
+            instrument_indices, max_instrument_num
         )
-        x = self.input_cnn(x)
-        x = self.hidden_nn(x)
-        x = self.attn_sum(x)
-        return x
-
+        meta_x = self.nn(torch.cat((inst_x, NCEs), 1))
+        meta_x = torch.cat((meta_x, charges), 1)
+        return meta_x
 #legacy
-Input_AA_CNN_LSTM_cat_Charge_Encoder = Encoder_AA_MOD_CH_CNN_LSTM_ATTSUM
+InputMetaNet = Input_META_Linear
 
 
+class Input_MOD_LinearFixFirstK(torch.nn.Module):
+    """
+    Encodes the modification vector in a single layer feed forward network, but not transforming the first k features
+    """
+    def __init__(self,
+        out_features,
+    ):
+        super().__init__()
+        self.k = 6
+        self.nn = torch.nn.Linear(
+            mod_feature_size-self.k, out_features-self.k,
+            bias=False
+        )
 
+    def forward(self,
+        mod_x,
+    ):
+        return torch.cat((
+            mod_x[:,:,:self.k],
+            self.nn(mod_x[:,:,self.k:])
+        ), 2)
+#legacy
+InputModNetFixFirstK = Input_MOD_LinearFixFirstK
+
+class Input_MOD_Linear(torch.nn.Module):
+    """
+    Encodes the modification vector in a single layer feed forward network
+    """
+    def __init__(self,
+        out_features,
+    ):
+        super().__init__()
+        self.nn = torch.nn.Linear(
+            mod_feature_size, out_features,
+            bias=False
+        )
+
+    def forward(self,
+        mod_x,
+    ):
+        return self.nn(mod_x)
+#legacy
+InputModNet = Input_MOD_Linear
+
+class Input_AA_Mod_Transformer(torch.nn.Module):
+    """
+    Encodes AA and modification vector
+    """
+    def __init__(self, out_features, max_len=200):
+        super().__init__()
+        mod_hidden = 8
+        self.mod_nn = InputModNetFixFirstK(mod_hidden)
+        self.aa_emb = aa_embedding(
+            out_features-mod_hidden
+        )
+        self.pos_encoder = PositionalEncoding(
+            out_features, max_len
+        )
+
+    def forward(self,
+        aa_indices, mod_x
+    ):
+        mod_x = self.mod_nn(mod_x)
+        x = self.aa_emb(aa_indices)
+        return self.pos_encoder(torch.cat((x, mod_x), 2))
+#legacy
+AATransformerEncoding = Input_AA_Mod_Transformer
 
 # Cell
 
@@ -248,78 +253,6 @@ class Input_AA_MOD_CHARGE_LSTM(torch.nn.Module):
 #legacy
 InputAALSTM_cat_Charge = Input_AA_MOD_CHARGE_LSTM
 
-
-# Cell
-class Decoder_AA_LSTM(torch.nn.Module):
-    """
-    Decode with LSTM
-    """
-    def __init__(self, in_features, out_features):
-        super().__init__()
-
-        hidden = 128
-        self.rnn = SeqLSTM(
-            in_features, out_features,
-            rnn_layer=1, bidirectional=False,
-        )
-
-        self.output_nn = torch.nn.Linear(
-            hidden, out_features, bias=False
-        )
-
-    def forward(self, x:torch.tensor, output_len):
-        x = self.rnn(
-            x.unsqueeze(1).repeat(1,output_len,1)
-        )
-        x = self.output_nn(x)
-        return x
-#legacy
-SeqLSTMDecoder = Decoder_AA_LSTM
-
-class Decoder_AA_GRU(torch.nn.Module):
-    """
-    Decode with GRU
-    """
-    def __init__(self, in_features, out_features):
-        super().__init__()
-
-        hidden = 128
-        self.rnn = SeqGRU(
-            in_features, out_features,
-            rnn_layer=1, bidirectional=False,
-        )
-
-        self.output_nn = torch.nn.Linear(
-            hidden, out_features, bias=False
-        )
-
-    def forward(self, x:torch.tensor, output_len):
-        x = self.rnn(
-            x.unsqueeze(1).repeat(1,output_len,1)
-        )
-        x = self.output_nn(x)
-        return x
-#legacy
-SeqGRUDecoder = Decoder_AA_GRU
-
-# Cell
-class Decoder_AA_Linear(torch.nn.Module):
-    """
-    Decode w linear NN
-    """
-    def __init__(self, in_features, out_features):
-        super().__init__()
-
-        self.nn = torch.nn.Sequential(
-            torch.nn.Linear(in_features, 64),
-            torch.nn.PReLU(),
-            torch.nn.Linear(64, out_features),
-        )
-
-    def forward(self, x):
-        return self.nn(x)
-#legacy
-LinearDecoder = Decoder_AA_Linear
 
 # Cell
 class Output_META_LSTM(torch.nn.Module):
@@ -555,6 +488,189 @@ class PositionalEmbedding(torch.nn.Module):
         return x + self.pos_emb(torch.arange(
             x.size(1), dtype=torch.long, device=x.device
         ).unsqueeze(0))
+
+# Cell
+
+class Encoder_AA_MOD_LSTM_LSTM(torch.nn.Module):
+    """
+    two LSTM layers on AA and mod info
+    """
+    def __init__(self, out_features):
+        super().__init__()
+
+        self.input_nn = InputAALSTM(out_features)
+        self.nn = SeqLSTM(
+            out_features, out_features, rnn_layer=1
+        )
+
+    def forward(self, aa_indices, mod_x):
+        x = self.input_nn(aa_indices, mod_x)
+        x = self.nn(x)
+        return x
+
+#legacy
+Input_AA_LSTM_Encoder = Encoder_AA_MOD_LSTM_LSTM
+
+
+class Encoder_AA_MOD_CNN_LSTM(torch.nn.Module):
+    """
+    linear NN for modification, CNN and LSTM layer
+    """
+    def __init__(self, out_features):
+        super().__init__()
+
+        mod_hidden = 8
+        self.mod_nn = InputModNetFixFirstK(mod_hidden)
+        input_dim = aa_embedding_size+mod_hidden
+        self.input_cnn = SeqCNN(input_dim)
+        self.hidden_nn = SeqLSTM(
+            input_dim*4, out_features, rnn_layer=1
+        ) #SeqCNN outputs 4*input_dim
+
+    def forward(self, aa_indices, mod_x):
+        mod_x = self.mod_nn(mod_x)
+        x = aa_one_hot(aa_indices, mod_x)
+        x = self.input_cnn(x)
+        x = self.hidden_nn(x)
+        return x
+
+#legacy
+Input_AA_CNN_Encoder = Encoder_AA_MOD_CNN_LSTM
+
+
+class Encoder_AA_MOD_CNN_LSTM_ATTSUM(torch.nn.Module):
+    """
+    linear NN for modification, CNN, LSTM, Attention sum (linear + softmax)
+    """
+    def __init__(self, out_features):
+        super().__init__()
+
+        mod_hidden = 8
+        self.mod_nn = InputModNetFixFirstK(mod_hidden)
+
+        input_dim = aa_embedding_size+mod_hidden
+        self.input_cnn = SeqCNN(input_dim)
+        self.hidden_nn = SeqLSTM(
+            input_dim*4, out_features, rnn_layer=2
+        ) #SeqCNN outputs 4*input_dim
+        self.attn_sum = SeqAttentionSum(out_features)
+
+    def forward(self, aa_indices, mod_x):
+        mod_x = self.mod_nn(mod_x)
+        x = aa_one_hot(aa_indices, mod_x)
+        x = self.input_cnn(x)
+        x = self.hidden_nn(x)
+        x = self.attn_sum(x)
+        return x
+#legacy
+Input_AA_CNN_LSTM_Encoder = Encoder_AA_MOD_CNN_LSTM_ATTSUM
+
+
+class Encoder_AA_MOD_CH_CNN_LSTM_ATTSUM(torch.nn.Module):
+    """
+    linear NN for modification, charge concatenated, CNN, LSTM, Attention sum (linear + softmax)
+    """
+    def __init__(self, out_features):
+        super().__init__()
+
+        mod_hidden = 8
+        self.mod_nn = InputModNetFixFirstK(mod_hidden)
+
+        input_dim = aa_embedding_size+mod_hidden+1
+        self.input_cnn = SeqCNN(input_dim)
+        self.hidden_nn = SeqLSTM(
+            input_dim*4, out_features, rnn_layer=2
+        ) #SeqCNN outputs 4*input_dim
+        self.attn_sum = SeqAttentionSum(out_features)
+
+    def forward(self, aa_indices, mod_x, charges):
+        mod_x = self.mod_nn(mod_x)
+        x = aa_one_hot(
+            aa_indices, mod_x,
+            charges.unsqueeze(1).repeat(1,mod_x.size(1),1)
+        )
+        x = self.input_cnn(x)
+        x = self.hidden_nn(x)
+        x = self.attn_sum(x)
+        return x
+
+#legacy
+Input_AA_CNN_LSTM_cat_Charge_Encoder = Encoder_AA_MOD_CH_CNN_LSTM_ATTSUM
+
+
+
+
+# Cell
+class Decoder_AA_LSTM(torch.nn.Module):
+    """
+    Decode with LSTM
+    """
+    def __init__(self, in_features, out_features):
+        super().__init__()
+
+        hidden = 128
+        self.rnn = SeqLSTM(
+            in_features, out_features,
+            rnn_layer=1, bidirectional=False,
+        )
+
+        self.output_nn = torch.nn.Linear(
+            hidden, out_features, bias=False
+        )
+
+    def forward(self, x:torch.tensor, output_len):
+        x = self.rnn(
+            x.unsqueeze(1).repeat(1,output_len,1)
+        )
+        x = self.output_nn(x)
+        return x
+#legacy
+SeqLSTMDecoder = Decoder_AA_LSTM
+
+class Decoder_AA_GRU(torch.nn.Module):
+    """
+    Decode with GRU
+    """
+    def __init__(self, in_features, out_features):
+        super().__init__()
+
+        hidden = 128
+        self.rnn = SeqGRU(
+            in_features, out_features,
+            rnn_layer=1, bidirectional=False,
+        )
+
+        self.output_nn = torch.nn.Linear(
+            hidden, out_features, bias=False
+        )
+
+    def forward(self, x:torch.tensor, output_len):
+        x = self.rnn(
+            x.unsqueeze(1).repeat(1,output_len,1)
+        )
+        x = self.output_nn(x)
+        return x
+#legacy
+SeqGRUDecoder = Decoder_AA_GRU
+
+# Cell
+class Decoder_AA_Linear(torch.nn.Module):
+    """
+    Decode w linear NN
+    """
+    def __init__(self, in_features, out_features):
+        super().__init__()
+
+        self.nn = torch.nn.Sequential(
+            torch.nn.Linear(in_features, 64),
+            torch.nn.PReLU(),
+            torch.nn.Linear(64, out_features),
+        )
+
+    def forward(self, x):
+        return self.nn(x)
+#legacy
+LinearDecoder = Decoder_AA_Linear
 
 # Cell
 #BERT from huggingface
