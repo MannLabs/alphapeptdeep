@@ -2,13 +2,13 @@
 
 __all__ = ['mod_feature_size', 'max_instrument_num', 'frag_types', 'max_frag_charge', 'num_ion_types',
            'aa_embedding_size', 'aa_embedding', 'ascii_embedding', 'aa_one_hot', 'instrument_embedding', 'zero_param',
-           'xavier_param', 'init_state', 'Input_AA_MOD_Embed', 'Input_META_Linear', 'Input_MOD_LinearFixFirstK',
-           'Input_MOD_Linear', 'Input_AA_Mod_Transformer', 'InputEmbedAAwithMod', 'InputMetaNet',
-           'InputModNetFixFirstK', 'InputModNet', 'AATransformerEncoding', 'Input_AA_MOD_LSTM',
+           'xavier_param', 'init_state', 'SeqCNN', 'SeqLSTM', 'SeqGRU', 'SeqTransformer', 'SeqAttentionSum',
+           'PositionalEncoding', 'PositionalEmbedding', 'Input_AA_MOD_Embed', 'Input_META_Linear',
+           'Input_MOD_LinearFixFirstK', 'Input_MOD_Linear', 'Input_AA_Mod_Transformer', 'InputEmbedAAwithMod',
+           'InputMetaNet', 'InputModNetFixFirstK', 'InputModNet', 'AATransformerEncoding', 'Input_AA_MOD_LSTM',
            'Input_AA_MOD_Meta_LSTM', 'Input_AA_MOD_CHARGE_LSTM', 'InputAALSTM', 'InputAALSTM_cat_Meta',
            'InputAALSTM_cat_Charge', 'Output_META_LSTM', 'Output_META_Linear', 'OutputLSTM_cat_Meta',
-           'OutputLinear_cat_Meta', 'SeqCNN', 'SeqLSTM', 'SeqGRU', 'SeqTransformer', 'SeqAttentionSum',
-           'PositionalEncoding', 'PositionalEmbedding', 'Encoder_AA_MOD_LSTM_LSTM', 'Encoder_AA_MOD_CNN_LSTM',
+           'OutputLinear_cat_Meta', 'Encoder_AA_MOD_LSTM_LSTM', 'Encoder_AA_MOD_CNN_LSTM',
            'Encoder_AA_MOD_CNN_LSTM_ATTSUM', 'Encoder_AA_MOD_CH_CNN_LSTM_ATTSUM', 'Input_AA_LSTM_Encoder',
            'Input_AA_CNN_Encoder', 'Input_AA_CNN_LSTM_Encoder', 'Input_AA_CNN_LSTM_cat_Charge_Encoder',
            'Decoder_AA_LSTM', 'Decoder_AA_GRU', 'SeqLSTMDecoder', 'SeqGRUDecoder', 'Decoder_AA_Linear', 'LinearDecoder',
@@ -54,6 +54,190 @@ def xavier_param(*shape):
     return x
 
 init_state = xavier_param
+
+# Cell
+class SeqCNN(torch.nn.Module):
+    """
+    extracts sequence features using `torch.nn.Conv1D` with different kernel sizes (3,5,7), and then concatenates the outputs of these Conv1Ds
+    """
+    def __init__(self, embedding_hidden):
+        super().__init__()
+
+        self.cnn_short = torch.nn.Conv1d(
+            embedding_hidden, embedding_hidden,
+            kernel_size=3, padding=1
+        )
+        self.cnn_medium = torch.nn.Conv1d(
+            embedding_hidden, embedding_hidden,
+            kernel_size=5, padding=2
+        )
+        self.cnn_long = torch.nn.Conv1d(
+            embedding_hidden, embedding_hidden,
+            kernel_size=7, padding=3
+        )
+
+    def forward(self, x):
+        x = x.transpose(1, 2)
+        x1 = self.cnn_short(x)
+        x2 = self.cnn_medium(x)
+        x3 = self.cnn_long(x)
+        return torch.cat((x, x1, x2, x3), dim=1).transpose(1,2)
+
+
+# Cell
+
+class SeqLSTM(torch.nn.Module):
+    """
+
+    """
+    def __init__(self, in_features, out_features,
+                 rnn_layer=2, bidirectional=True
+        ):
+        """
+        returns LSTM applied on sequence input
+        """
+        super().__init__()
+
+        if bidirectional:
+            if out_features%2 != 0:
+                raise ValueError("'out_features' must be able to be divided by 2")
+            hidden = out_features//2
+        else:
+            hidden = out_features
+
+        self.rnn_h0 = init_state(
+            rnn_layer+rnn_layer*bidirectional,
+            1, hidden
+        )
+        self.rnn_c0 = init_state(
+            rnn_layer+rnn_layer*bidirectional,
+            1, hidden
+        )
+        self.rnn = torch.nn.LSTM(
+            input_size = in_features,
+            hidden_size = hidden,
+            num_layers = rnn_layer,
+            batch_first = True,
+            bidirectional = bidirectional,
+        )
+
+    def forward(self, x:torch.Tensor):
+        h0 = self.rnn_h0.repeat(1, x.size(0), 1)
+        c0 = self.rnn_c0.repeat(1, x.size(0), 1)
+        x, _ = self.rnn(x, (h0,c0))
+        return x
+
+# Cell
+class SeqGRU(torch.nn.Module):
+    def __init__(self, in_features, out_features,
+                 rnn_layer=2, bidirectional=True
+        ):
+        """
+        returns GRU applied on sequence input
+        """
+        super().__init__()
+
+        if bidirectional:
+            if out_features%2 != 0:
+                raise ValueError("'out_features' must be able to be divided by 2")
+            # to make sure that output dim is out_features
+            # as `bidirectional` will cat forward and reverse RNNs
+            hidden = out_features//2
+        else:
+            hidden = out_features
+
+        self.rnn_h0 = init_state(
+            rnn_layer+rnn_layer*bidirectional,
+            1, hidden
+        )
+        self.rnn = torch.nn.GRU(
+            input_size = in_features,
+            hidden_size = hidden,
+            num_layers = rnn_layer,
+            batch_first = True,
+            bidirectional = bidirectional,
+        )
+
+    def forward(self, x:torch.Tensor):
+        h0 = self.rnn_h0.repeat(1, x.size(0), 1)
+        x, _ = self.rnn(x, h0)
+        return x
+
+class SeqTransformer(torch.nn.Module):
+    """
+    return Transformer applied on sequence input
+    """
+    def __init__(self,
+        in_features,
+        hidden_features,
+        nhead=8,
+        nlayers=2,
+        dropout=0.1
+    ):
+        super().__init__()
+        encoder_layers = torch.nn.TransformerEncoderLayer(
+            in_features, nhead, hidden_features, dropout
+        )
+        self.transformer_encoder = torch.nn.TransformerEncoder(
+            encoder_layers, nlayers
+        )
+
+    def forward(self, x):
+        return self.transformer_encoder(x.permute(1,0,2)).permute(1,0,2)
+
+# Cell
+class SeqAttentionSum(torch.nn.Module):
+    """
+    apply linear transformation and tensor rescaling with softmax
+    """
+    def __init__(self, in_features):
+        super().__init__()
+        self.attn = torch.nn.Sequential(
+            torch.nn.Linear(in_features, 1, bias=False),
+            torch.nn.Softmax(dim=1),
+        )
+
+    def forward(self, x):
+        attn = self.attn(x)
+        return torch.sum(torch.mul(x, attn), dim=1)
+
+
+class PositionalEncoding(torch.nn.Module):
+    """
+    transform sequence input into a positional representation
+    """
+    def __init__(self, out_features=128, max_len = 200):
+        super().__init__()
+
+        position = torch.arange(max_len).unsqueeze(1)
+        div_term = torch.exp(
+            torch.arange(
+                0, out_features, 2
+            ) * (-np.log(max_len) / out_features)
+        )
+        pe = torch.zeros(1, max_len, out_features)
+        pe[0, :, 0::2] = torch.sin(position * div_term)
+        pe[0, :, 1::2] = torch.cos(position * div_term)
+        self.register_buffer('pe', pe)
+
+    def forward(self, x):
+        return x + self.pe[:,:x.size(1),:]
+
+class PositionalEmbedding(torch.nn.Module):
+    """
+    transform sequence with the standard embedding function
+    """
+    def __init__(self, out_features=128, max_len=200):
+        super().__init__()
+
+        self.pos_emb = torch.nn.Embedding(
+            max_len, out_features
+        )
+
+    def forward(self, x:torch.Tensor):
+        return x + self.pos_emb(torch.arange(
+            x.size(1), dtype=torch.long, device=x.device
+        ).unsqueeze(0))
 
 # Cell
 class Input_AA_MOD_Embed(torch.nn.Module):
@@ -304,190 +488,6 @@ class Output_META_Linear(torch.nn.Module):
         return self.nn(torch.cat((x, meta_x), 2))
 #legacy
 OutputLinear_cat_Meta = Output_META_Linear
-
-# Cell
-class SeqCNN(torch.nn.Module):
-    """
-    extracts sequence features using `torch.nn.Conv1D` with different kernel sizes (3,5,7), and then concatenates the outputs of these Conv1Ds
-    """
-    def __init__(self, embedding_hidden):
-        super().__init__()
-
-        self.cnn_short = torch.nn.Conv1d(
-            embedding_hidden, embedding_hidden,
-            kernel_size=3, padding=1
-        )
-        self.cnn_medium = torch.nn.Conv1d(
-            embedding_hidden, embedding_hidden,
-            kernel_size=5, padding=2
-        )
-        self.cnn_long = torch.nn.Conv1d(
-            embedding_hidden, embedding_hidden,
-            kernel_size=7, padding=3
-        )
-
-    def forward(self, x):
-        x = x.transpose(1, 2)
-        x1 = self.cnn_short(x)
-        x2 = self.cnn_medium(x)
-        x3 = self.cnn_long(x)
-        return torch.cat((x, x1, x2, x3), dim=1).transpose(1,2)
-
-
-# Cell
-
-class SeqLSTM(torch.nn.Module):
-    """
-
-    """
-    def __init__(self, in_features, out_features,
-                 rnn_layer=2, bidirectional=True
-        ):
-        """
-        returns LSTM applied on sequence input
-        """
-        super().__init__()
-
-        if bidirectional:
-            if out_features%2 != 0:
-                raise ValueError("'out_features' must be able to be divided by 2")
-            hidden = out_features//2
-        else:
-            hidden = out_features
-
-        self.rnn_h0 = init_state(
-            rnn_layer+rnn_layer*bidirectional,
-            1, hidden
-        )
-        self.rnn_c0 = init_state(
-            rnn_layer+rnn_layer*bidirectional,
-            1, hidden
-        )
-        self.rnn = torch.nn.LSTM(
-            input_size = in_features,
-            hidden_size = hidden,
-            num_layers = rnn_layer,
-            batch_first = True,
-            bidirectional = bidirectional,
-        )
-
-    def forward(self, x:torch.Tensor):
-        h0 = self.rnn_h0.repeat(1, x.size(0), 1)
-        c0 = self.rnn_c0.repeat(1, x.size(0), 1)
-        x, _ = self.rnn(x, (h0,c0))
-        return x
-
-# Cell
-class SeqGRU(torch.nn.Module):
-    def __init__(self, in_features, out_features,
-                 rnn_layer=2, bidirectional=True
-        ):
-        """
-        returns GRU applied on sequence input
-        """
-        super().__init__()
-
-        if bidirectional:
-            if out_features%2 != 0:
-                raise ValueError("'out_features' must be able to be divided by 2")
-            # to make sure that output dim is out_features
-            # as `bidirectional` will cat forward and reverse RNNs
-            hidden = out_features//2
-        else:
-            hidden = out_features
-
-        self.rnn_h0 = init_state(
-            rnn_layer+rnn_layer*bidirectional,
-            1, hidden
-        )
-        self.rnn = torch.nn.GRU(
-            input_size = in_features,
-            hidden_size = hidden,
-            num_layers = rnn_layer,
-            batch_first = True,
-            bidirectional = bidirectional,
-        )
-
-    def forward(self, x:torch.Tensor):
-        h0 = self.rnn_h0.repeat(1, x.size(0), 1)
-        x, _ = self.rnn(x, h0)
-        return x
-
-class SeqTransformer(torch.nn.Module):
-    """
-    return Transformer applied on sequence input
-    """
-    def __init__(self,
-        in_features,
-        hidden_features,
-        nhead=8,
-        nlayers=2,
-        dropout=0.1
-    ):
-        super().__init__()
-        encoder_layers = torch.nn.TransformerEncoderLayer(
-            in_features, nhead, hidden_features, dropout
-        )
-        self.transformer_encoder = torch.nn.TransformerEncoder(
-            encoder_layers, nlayers
-        )
-
-    def forward(self, x):
-        return self.transformer_encoder(x.permute(1,0,2)).permute(1,0,2)
-
-# Cell
-class SeqAttentionSum(torch.nn.Module):
-    """
-    apply linear transformation and tensor rescaling with softmax
-    """
-    def __init__(self, in_features):
-        super().__init__()
-        self.attn = torch.nn.Sequential(
-            torch.nn.Linear(in_features, 1, bias=False),
-            torch.nn.Softmax(dim=1),
-        )
-
-    def forward(self, x):
-        attn = self.attn(x)
-        return torch.sum(torch.mul(x, attn), dim=1)
-
-
-class PositionalEncoding(torch.nn.Module):
-    """
-    transform sequence input into a positional representation
-    """
-    def __init__(self, out_features=128, max_len = 200):
-        super().__init__()
-
-        position = torch.arange(max_len).unsqueeze(1)
-        div_term = torch.exp(
-            torch.arange(
-                0, out_features, 2
-            ) * (-np.log(max_len) / out_features)
-        )
-        pe = torch.zeros(1, max_len, out_features)
-        pe[0, :, 0::2] = torch.sin(position * div_term)
-        pe[0, :, 1::2] = torch.cos(position * div_term)
-        self.register_buffer('pe', pe)
-
-    def forward(self, x):
-        return x + self.pe[:,:x.size(1),:]
-
-class PositionalEmbedding(torch.nn.Module):
-    """
-    transform sequence with the standard embedding function
-    """
-    def __init__(self, out_features=128, max_len=200):
-        super().__init__()
-
-        self.pos_emb = torch.nn.Embedding(
-            max_len, out_features
-        )
-
-    def forward(self, x:torch.Tensor):
-        return x + self.pos_emb(torch.arange(
-            x.size(1), dtype=torch.long, device=x.device
-        ).unsqueeze(0))
 
 # Cell
 
