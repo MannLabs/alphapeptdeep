@@ -3,11 +3,11 @@
 __all__ = ['mod_feature_size', 'max_instrument_num', 'frag_types', 'max_frag_charge', 'num_ion_types',
            'aa_embedding_size', 'aa_embedding', 'ascii_embedding', 'aa_one_hot', 'instrument_embedding', 'zero_param',
            'xavier_param', 'init_state', 'SeqCNN', 'SeqLSTM', 'SeqGRU', 'SeqTransformer', 'SeqAttentionSum',
-           'PositionalEncoding', 'PositionalEmbedding', 'Input_AA_MOD_Embed', 'Input_META_Linear',
+           'PositionalEncoding', 'PositionalEmbedding', 'Input_AA_MOD_Embed', 'Input_Meta_Linear',
            'Input_MOD_LinearFixFirstK', 'Input_MOD_Linear', 'Input_AA_Mod_Transformer', 'InputEmbedAAwithMod',
            'InputMetaNet', 'InputModNetFixFirstK', 'InputModNet', 'AATransformerEncoding', 'Input_AA_MOD_LSTM',
            'Input_AA_MOD_Meta_LSTM', 'Input_AA_MOD_CHARGE_LSTM', 'InputAALSTM', 'InputAALSTM_cat_Meta',
-           'InputAALSTM_cat_Charge', 'Output_META_LSTM', 'Output_META_Linear', 'OutputLSTM_cat_Meta',
+           'InputAALSTM_cat_Charge', 'Output_Meta_LSTM', 'Output_Meta_Linear', 'OutputLSTM_cat_Meta',
            'OutputLinear_cat_Meta', 'Encoder_AA_MOD_LSTM_LSTM', 'Encoder_AA_MOD_CNN_LSTM',
            'Encoder_AA_MOD_CNN_LSTM_ATTSUM', 'Encoder_AA_MOD_CH_CNN_LSTM_ATTSUM', 'Input_AA_LSTM_Encoder',
            'Input_AA_CNN_Encoder', 'Input_AA_CNN_LSTM_Encoder', 'Input_AA_CNN_LSTM_cat_Charge_Encoder',
@@ -258,7 +258,7 @@ class Input_AA_MOD_Embed(torch.nn.Module):
 InputEmbedAAwithMod = Input_AA_MOD_Embed
 
 
-class Input_META_Linear(torch.nn.Module):
+class Input_Meta_Linear(torch.nn.Module):
     # Meta = Charge, NCE and Instrument
     """Encodes Charge state, Normalized Collision Energy (NCE) and Instrument for a given spectrum
     into a 'meta' single layer network
@@ -281,7 +281,7 @@ class Input_META_Linear(torch.nn.Module):
         meta_x = torch.cat((meta_x, charges), 1)
         return meta_x
 #legacy
-InputMetaNet = Input_META_Linear
+InputMetaNet = Input_Meta_Linear
 
 
 class Input_MOD_LinearFixFirstK(torch.nn.Module):
@@ -439,7 +439,7 @@ InputAALSTM_cat_Charge = Input_AA_MOD_CHARGE_LSTM
 
 
 # Cell
-class Output_META_LSTM(torch.nn.Module):
+class Output_Meta_LSTM(torch.nn.Module):
     """
     takes a hidden layer which processed the 'meta' information of NCE, Instrument, Charge
     """
@@ -462,9 +462,9 @@ class Output_META_LSTM(torch.nn.Module):
         ).unsqueeze(1).repeat(1, x.size(1), 1)
         return self.nn(torch.cat((x, meta_x), 2))
 #legacy
-OutputLSTM_cat_Meta = Output_META_LSTM
+OutputLSTM_cat_Meta = Output_Meta_LSTM
 
-class Output_META_Linear(torch.nn.Module):
+class Output_Meta_Linear(torch.nn.Module):
     """
     takes a hidden linear which processed the 'meta' information of NCE, Instrument, Charge
     """
@@ -487,7 +487,7 @@ class Output_META_Linear(torch.nn.Module):
         ).unsqueeze(1).repeat(1, x.size(1), 1)
         return self.nn(torch.cat((x, meta_x), 2))
 #legacy
-OutputLinear_cat_Meta = Output_META_Linear
+OutputLinear_cat_Meta = Output_Meta_Linear
 
 # Cell
 
