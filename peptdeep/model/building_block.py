@@ -5,10 +5,10 @@ __all__ = ['mod_feature_size', 'max_instrument_num', 'frag_types', 'max_frag_cha
            'xavier_param', 'init_state', 'SeqCNN', 'SeqLSTM', 'SeqGRU', 'SeqTransformer', 'SeqAttentionSum',
            'PositionalEncoding', 'PositionalEmbedding', 'Input_AA_MOD_Embed', 'Input_Meta_Linear',
            'Input_MOD_LinearFixFirstK', 'Input_MOD_Linear', 'Input_AA_Mod_Transformer', 'InputEmbedAAwithMod',
-           'InputMetaNet', 'InputModNetFixFirstK', 'InputModNet', 'AATransformerEncoding', 'Input_AA_MOD_LSTM',
-           'Input_AA_MOD_Meta_LSTM', 'Input_AA_MOD_CHARGE_LSTM', 'InputAALSTM', 'InputAALSTM_cat_Meta',
-           'InputAALSTM_cat_Charge', 'Output_Meta_LSTM', 'Output_Meta_Linear', 'OutputLSTM_cat_Meta',
-           'OutputLinear_cat_Meta', 'Encoder_AA_MOD_LSTM_LSTM', 'Encoder_AA_MOD_CNN_LSTM',
+           'InputAAEmbedding', 'InputMetaNet', 'InputModNetFixFirstK', 'InputModNet', 'AATransformerEncoding',
+           'Input_AA_MOD_LSTM', 'Input_AA_MOD_Meta_LSTM', 'Input_AA_MOD_CHARGE_LSTM', 'InputAALSTM',
+           'InputAALSTM_cat_Meta', 'InputAALSTM_cat_Charge', 'Output_Meta_LSTM', 'Output_Meta_Linear',
+           'OutputLSTM_cat_Meta', 'OutputLinear_cat_Meta', 'Encoder_AA_MOD_LSTM_LSTM', 'Encoder_AA_MOD_CNN_LSTM',
            'Encoder_AA_MOD_CNN_LSTM_ATTSUM', 'Encoder_AA_MOD_CH_CNN_LSTM_ATTSUM', 'Input_AA_LSTM_Encoder',
            'Input_AA_CNN_Encoder', 'Input_AA_CNN_LSTM_Encoder', 'Input_AA_CNN_LSTM_cat_Charge_Encoder',
            'Decoder_AA_LSTM', 'Decoder_AA_GRU', 'SeqLSTMDecoder', 'SeqGRUDecoder', 'Decoder_AA_Linear', 'LinearDecoder',
@@ -256,6 +256,7 @@ class Input_AA_MOD_Embed(torch.nn.Module):
         return torch.cat((aa_x, mod_x), 2)
 #legacy
 InputEmbedAAwithMod = Input_AA_MOD_Embed
+InputAAEmbedding = Input_AA_MOD_Embed
 
 
 class Input_Meta_Linear(torch.nn.Module):
