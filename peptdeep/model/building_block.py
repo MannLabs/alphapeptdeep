@@ -632,6 +632,7 @@ class HiddenBert(torch.nn.Module):
         )
         self.output_attentions = output_attentions
         self.bert = BertEncoder(self.config)
+
     def forward(self, x:torch.Tensor)->tuple:
         """
         Returns:

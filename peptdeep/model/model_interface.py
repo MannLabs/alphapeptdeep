@@ -15,6 +15,7 @@ from alphabase.yaml_utils import save_yaml
 from alphabase.peptide.precursor import is_precursor_sorted
 
 from peptdeep.settings import model_const
+from peptdeep.utils import logging
 
 from peptdeep.model.building_block import *
 
@@ -229,6 +230,10 @@ class PeptideModelInterfaceBase(object):
             stream, map_location=self.device),
             strict=False
         )
+        if len(missing_keys) > 0:
+            logging.warn(f"torch layers {missing_keys} are missing while loading models in {self.__class__}")
+        if len(unexpect_keys) > 0:
+            logging.warn(f"torch layers {unexpect_keys} are unexpected while loading models in {self.__class__}")
 
     def _save_codes(self, save_as):
         import inspect

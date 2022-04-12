@@ -195,9 +195,9 @@ class AlphaRTModel(model_base.PeptideModelInterfaceBase):
                 batch_df['sequence'].values.astype('U')
             )
         )
-
-        mod_x_batch = get_batch_mod_feature(batch_df, nAA)
-        mod_x = torch.Tensor(mod_x_batch)
+        mod_x = torch.Tensor(
+            get_batch_mod_feature(batch_df, nAA)
+        )
 
         return aa_indices, mod_x
 
