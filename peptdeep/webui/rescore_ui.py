@@ -5,6 +5,8 @@ import pandas as pd
 import os
 import time
 
+from peptdeep.settings import global_settings
+
 def files_in_folder_pandas(folder: str, file_type:str=None) -> pd.DataFrame:
     """Reads a folder and returns a pandas dataframe containing the files and additional information.
     Args:
@@ -33,11 +35,6 @@ def show():
     """Streamlit page that displays information on how to rescore."""
     st.write("# Rescore started")
     st.text("Welcome to rescore of AlphaPeptDeep.")
-
-    #markdown_link("google link", "https://www.google.com")
-    #fasta_files = files_in_folder_pandas("/Users/zhouxiexuan/workspace/alphadeep/alphadeep")
-    #st.table(fasta_files)
-
 
     raw_folder = st.text_input('Raw folder')
     #st.write('The current raw folder is', raw_folder)
@@ -78,10 +75,3 @@ def show():
         result_files = files_in_folder_pandas(result_folder,psm_type)
 
         st.table(result_files)
-
-
-
-
-#    agree = st.checkbox('I agree')
-#    if agree:
-#     st.write('Great!')

@@ -19,6 +19,10 @@ model_mgr:
     batch_size_rt_ccs: 1024
     default_nce: 30
     default_instrument: Lumos
+    instrument_choices:
+    - Lumos
+    - QE
+    - timsTOF
     verbose: True
     multiprocessing: True
   fine_tune:
@@ -106,7 +110,7 @@ percolator:
   output_dir: C:/datasets/percolaotr
 library:
   input:
-    type: peptide_table
+    type: fasta
     type_choices:
     - fasta
     - sequence_table
@@ -121,6 +125,7 @@ library:
     - Carbamidomethyl@C
     var_mods:
     - Oxidation@M
+    min_var_mod_num: 0
     max_var_mod_num: 2
     min_precursor_charge: 2
     max_precursor_charge: 4
