@@ -46,38 +46,39 @@ def choose_precursor_charge():
         'to',
         (options),index = 2
     )
-    global_settings['library']['output']['min_precursor_charge'] = from_charge
-    global_settings['library']['output']['max_precursor_charge'] = to_charge
+    global_settings['library']['input']['min_precursor_charge'] = from_charge
+    global_settings['library']['input']['max_precursor_charge'] = to_charge
 
 def choose_precursor_mz():
-    min_precursor_mz = st.text_input('min precursor mz', value = "400")
+    min_precursor_mz = st.number_input('min precursor mz', value = 400)
     global_settings['library']['input']['min_precursor_mz'] = min_precursor_mz
-    max_precursor_mz = st.text_input('max precursor mz', value = "2000")
+    max_precursor_mz = st.number_input('max precursor mz', value = 2000)
     global_settings['library']['input']['max_precursor_mz'] = max_precursor_mz
 
 def add_decoy():
     add_decoy = st.checkbox('Add decoy')
     if add_decoy == 1:
         decoy = st.selectbox('decoy',
-        global_settings['library']['input']['decoy_choices']
+        global_settings['library']['input']['decoy_choices'],
+        index = -1
         )
         global_settings['library']['input']['decoy'] = decoy
 
 def choose_protease():
     protease = st.text_input('protease', value = 'trypsin')
     global_settings['library']['input']['fasta']['protease'] = protease
-    max_miss_cleave = st.text_input('max_miss_cleave',value = '2')
+    max_miss_cleave = st.number_input('max_miss_cleave',value = 2)
     global_settings['library']['input']['fasta']['max_miss_cleave'] = max_miss_cleave
 
 def choose_peptide_len():
-    min_peptide_len = st.text_input('min peptide len:', value = 7)
-    max_peptide_len = st.text_input('max peptide len:', value = 35)
+    min_peptide_len = st.number_input('min peptide len:', value = 7)
+    max_peptide_len = st.number_input('max peptide len:', value = 35)
     global_settings['library']['input']['min_peptide_len'] = min_peptide_len
     global_settings['library']['input']['max_peptide_len'] = max_peptide_len
 
 def choose_frag_types():
     frag_types = st.multiselect(
-        'frag_types',('b','y','b_modloss','y_modloss'),
+        'frag_types',(global_settings['model']['frag_types']),
         default = ['b','y']
     )
     global_settings['library']['input']['frag_types'] = frag_types
@@ -85,14 +86,14 @@ def choose_frag_types():
     global_settings['library']['input']['max_frag_charge'] = max_frag_charge
 
 def output_tsv():
-    min_fragment_mz = st.text_input('min fragment mz:', value = "300")
-    global_settings['library']['output']['min_fragment_mz'] = min_fragment_mz
-    max_fragment_mz = st.text_input('max fragment mz:', value = "2000")
-    global_settings['library']['output']['max_fragment_mz'] = max_fragment_mz
-    min_relative_intensity = st.text_input('min relative intensity:', value = "0.02")
-    global_settings['library']['output']['min_relative_intensity'] = min_relative_intensity
-    keep_higest_k_peaks = st.text_input('top n peaks:', value = "12")
-    global_settings['library']['output']['keep_higest_k_peaks'] = keep_higest_k_peaks
+    min_fragment_mz = st.number_input('min fragment mz:', value = 300)
+    global_settings['library']['output_tsv']['min_fragment_mz'] = min_fragment_mz
+    max_fragment_mz = st.number_input('max fragment mz:', value = 2000)
+    global_settings['library']['output_tsv']['max_fragment_mz'] = max_fragment_mz
+    min_relative_intensity = st.number_input('min relative intensity:', value = 0.02)
+    global_settings['library']['output_tsv']['min_relative_intensity'] = min_relative_intensity
+    keep_higest_k_peaks = st.number_input('top n peaks:', value = 12)
+    global_settings['library']['output_tsv']['keep_higest_k_peaks'] = keep_higest_k_peaks
 
 def input_type():
     input_type = st.selectbox(
@@ -106,6 +107,7 @@ def show():
 
     st.write("# Library started")
     st.text("Welcome to library of AlphaPeptDeep.")
+
     st.write('### input')
 
     _input_type = input_type()

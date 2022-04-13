@@ -18,6 +18,10 @@ model_mgr:
     batch_size_ms2: 512
     batch_size_rt_ccs: 1024
     default_nce: 30
+    instrument_choices:
+    - Lumos
+    - QE
+    - timsTOF
     default_instrument: Lumos
     verbose: True
     multiprocessing: True
@@ -29,6 +33,7 @@ model_mgr:
     grid_nce_last: 45
     grid_nce_step: 3
     grid_instrument: ['Lumos']
+  model_type: regular
   model_choices:
   - regular
   - phos
@@ -41,7 +46,7 @@ percolator:
   psm_num_to_tune_rt_ccs: 5000
   mod_psm_num_to_tune_rt_ccs: 100
   top_n_mods_to_tune: 10
-  peptdeep_model_type: regular # or phos, or HLA
+
   mask_modloss: True
 
   require_raw_specific_tuning: True
@@ -122,6 +127,7 @@ library:
     - Carbamidomethyl@C
     var_mods:
     - Oxidation@M
+    min_var_mod_num: 0
     max_var_mod_num: 2
     min_precursor_charge: 2
     max_precursor_charge: 4

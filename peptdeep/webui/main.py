@@ -1,7 +1,7 @@
 # from alphapept.gui
 
 import streamlit as st
-from peptdeep.webui import startpage, rescore_ui, library_ui
+from peptdeep.webui import model_ui, startpage, rescore_ui, library_ui
 from PIL import Image
 import os
 import socket
@@ -35,8 +35,10 @@ st.sidebar.code(f"AlphaPeptDeep {peptdeep.__version__} \n{computer_name}")
 
 sidebar = {
     'Start': startpage.show,
+    'Model': model_ui.show,
     'Rescore': rescore_ui.show,
     'Library': library_ui.show,
+    
 }
 
 menu = st.sidebar.radio("", list(sidebar.keys()))
