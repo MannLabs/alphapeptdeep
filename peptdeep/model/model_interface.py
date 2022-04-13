@@ -231,9 +231,9 @@ class PeptideModelInterfaceBase(object):
             strict=False
         )
         if len(missing_keys) > 0:
-            logging.warn(f"torch layers {missing_keys} are missing while loading models in {self.__class__}")
+            logging.warn(f"nn parameters {missing_keys} are MISSING while loading models in {self.__class__}")
         if len(unexpect_keys) > 0:
-            logging.warn(f"torch layers {unexpect_keys} are unexpected while loading models in {self.__class__}")
+            logging.warn(f"nn parameters {unexpect_keys} are UNEXPECTED while loading models in {self.__class__}")
 
     def _save_codes(self, save_as):
         import inspect

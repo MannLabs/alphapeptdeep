@@ -178,11 +178,7 @@ class Percolator:
               Defaults to None.
         """
         if model_mgr is None:
-            self.model_mgr = ModelManager(
-                mask_modloss=perc_settings[
-                    'mask_modloss'
-                ]
-            )
+            self.model_mgr = ModelManager()
         else:
             self.model_mgr = model_mgr
         self.charged_frag_types = perc_settings['frag_types']

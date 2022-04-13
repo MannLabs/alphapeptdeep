@@ -54,15 +54,15 @@ class ModelMS2Transformer(torch.nn.Module):
             self._mask_modloss = True
 
         meta_dim = 8
-        self.input_nn = model_base.AATransformerEncoding(hidden-meta_dim)
+        self.input_nn = model_base.Input_AA_Mod_with_PositionalEncoding(hidden-meta_dim)
 
-        self.meta_nn = model_base.InputMetaNet(meta_dim)
+        self.meta_nn = model_base.Meta_Embedding(meta_dim)
 
-        self.hidden_nn = model_base.HiddenTransformer(
+        self.hidden_nn = model_base.Hidden_Transformer(
             hidden, nlayers=nlayers, dropout=dropout
         )
 
-        self.output_nn = model_base.LinearDecoder(
+        self.output_nn = model_base.Decoder_Linear(
             hidden,
             self._num_non_modloss,
         )
@@ -70,10 +70,10 @@ class ModelMS2Transformer(torch.nn.Module):
         if num_modloss_types > 0:
             # for transfer learning of modloss frags
             self.modloss_nn = torch.nn.ModuleList([
-                model_base.HiddenTransformer(
+                model_base.Hidden_Transformer(
                     hidden, nlayers=1, dropout=dropout
                 ),
-                model_base.LinearDecoder(
+                model_base.Decoder_Linear(
                     hidden, num_modloss_types,
                 ),
             ])
@@ -146,17 +146,17 @@ class ModelMS2Bert(torch.nn.Module):
             self._mask_modloss = True
 
         meta_dim = 8
-        self.input_nn = model_base.AATransformerEncoding(hidden-meta_dim)
+        self.input_nn = model_base.Input_AA_Mod_with_PositionalEncoding(hidden-meta_dim)
 
-        self.meta_nn = model_base.InputMetaNet(meta_dim)
+        self.meta_nn = model_base.Meta_Embedding(meta_dim)
 
         self._output_attentions = output_attentions
-        self.hidden_nn = model_base.HiddenBert(
+        self.hidden_nn = model_base.Hidden_HFace_Transformer(
             hidden, nlayers=nlayers, dropout=dropout,
             output_attentions=output_attentions
         )
 
-        self.output_nn = model_base.LinearDecoder(
+        self.output_nn = model_base.Decoder_Linear(
             hidden,
             self._num_non_modloss,
         )
@@ -164,11 +164,11 @@ class ModelMS2Bert(torch.nn.Module):
         if num_modloss_types > 0:
             # for transfer learning of modloss frags
             self.modloss_nn = torch.nn.ModuleList([
-                model_base.HiddenBert(
+                model_base.Hidden_HFace_Transformer(
                     hidden, nlayers=1, dropout=dropout,
                     output_attentions=output_attentions
                 ),
-                model_base.LinearDecoder(
+                model_base.Decoder_Linear(
                     hidden, num_modloss_types,
                 ),
             ])
