@@ -7,10 +7,11 @@ model:
   - y_modloss
   max_frag_charge: 2
 
+local_model_zip_name: "pretrained_models.zip"
+
 # overwritable config
 model_url: "https://datashare.biochem.mpg.de/s/ABnQuD2KkXfIGF3/download"
 model_url_zip_name: "released_models"
-local_model_file_name: "pretrained_models.zip"
 
 thread_num: 8
 model_mgr:
@@ -117,9 +118,9 @@ library:
     - peptide_table # sequence with mods and mod_sites
     - precursor_table # peptide with charge state
     paths: 
-    - xxx.tsv
+    - xxx.fasta
     fasta:
-      protease: "([KR])"
+      protease: '([KR])'
       max_miss_cleave: 2
     fix_mods: 
     - Carbamidomethyl@C
