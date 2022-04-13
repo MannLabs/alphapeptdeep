@@ -121,6 +121,16 @@ library:
     - xxx.fasta
     fasta:
       protease: '([KR])'
+      protease_choices:
+      - 'trypsin/P'
+      - '([KR])'
+      - 'trypsin'
+      - '([KR](?=[^P]))'
+      - 'lys-c'
+      - 'K'
+      - 'lys-n'
+      - '\w(?=K)'
+      - 'chymotrypsin'
       max_miss_cleave: 2
     fix_mods: 
     - Carbamidomethyl@C

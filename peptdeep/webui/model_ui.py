@@ -19,8 +19,8 @@ def show():
     model_url_zip_name = st.text_input('model url zip name:',value = 'released_models')
     global_settings['model_url_zip_name'] = model_url_zip_name
 
-    local_model_file_name = st.text_input('local model file name:',value = 'pretrained_models.zip')
-    global_settings['local_model_file_name'] = local_model_file_name
+    local_model_file_name = st.text_input('local model zip name:',value = 'pretrained_models.zip')
+    global_settings['local_model_zip_name'] = local_model_file_name
 
     thread_num = st.number_input('thread num:', value = 8)
     global_settings['thread_num'] = thread_num
@@ -60,5 +60,7 @@ def show():
     ),default =['Lumos']) 
     global_settings['model_mgr']['fine_tune']['grid_instrument'] = grid_instrument
 
+
+    global_settings['model_mgr']['mask_modloss'] = bool(st.checkbox('mask modloss'))
     model_type = st.selectbox('model choices',(global_settings['model_mgr']['model_choices']),index = 0)
     global_settings['model_mgr']['model_type'] = model_type

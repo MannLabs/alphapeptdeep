@@ -65,7 +65,10 @@ def add_decoy():
         global_settings['library']['input']['decoy'] = decoy
 
 def choose_protease():
-    protease = st.text_input('protease', value = 'trypsin')
+    protease = st.selectbox(
+        'protease', 
+        global_settings['library']['input']['fasta']['protease_choices'],
+    )
     global_settings['library']['input']['fasta']['protease'] = protease
     max_miss_cleave = st.number_input('max_miss_cleave',value = 2)
     global_settings['library']['input']['fasta']['max_miss_cleave'] = max_miss_cleave
