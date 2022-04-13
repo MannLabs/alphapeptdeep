@@ -167,7 +167,7 @@ class ModelRT_LSTM(torch.nn.Module):
 # Cell
 class AlphaRTModel(model_base.PeptideModelInterfaceBase):
     def __init__(self,
-        dropout=0.1, lr=0.001,
+        dropout=0.1,
         model_class:torch.nn.Module=ModelRT_LSTM,
         **kwargs,
     ):

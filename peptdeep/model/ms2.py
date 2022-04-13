@@ -351,7 +351,6 @@ class pDeepModel(model_base.PeptideModelInterfaceBase):
             frag_types, max_frag_charge
         ),
         dropout=0.1,
-        lr=0.001,
         mask_modloss=True,
         modloss_type='modloss',
         model_class:torch.nn.Module=ModelMS2Bert,
