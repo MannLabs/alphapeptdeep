@@ -29,6 +29,8 @@ model_mgr:
     grid_nce_last: 45
     grid_nce_step: 3
     grid_instrument: ['Lumos']
+  mask_modloss: True
+  model_type: regular
   model_choices:
   - regular
   - phos
@@ -41,8 +43,6 @@ percolator:
   psm_num_to_tune_rt_ccs: 5000
   mod_psm_num_to_tune_rt_ccs: 100
   top_n_mods_to_tune: 10
-  peptdeep_model_type: regular # or phos, or HLA
-  mask_modloss: True
 
   require_raw_specific_tuning: True
   raw_specific_ms2_tuning: False
@@ -105,7 +105,6 @@ percolator:
       maxquant: {}
   output_dir: C:/datasets/percolaotr
 library:
-  peptdeep_model_type: regular
   input:
     type: peptide_table
     type_choices:

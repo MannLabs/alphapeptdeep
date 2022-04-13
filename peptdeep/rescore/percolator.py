@@ -183,9 +183,6 @@ class Percolator:
                     'mask_modloss'
                 ]
             )
-            self.model_mgr.load_installed_models(
-                perc_settings['peptdeep_model_type'],
-            )
         else:
             self.model_mgr = model_mgr
         self.charged_frag_types = perc_settings['frag_types']
