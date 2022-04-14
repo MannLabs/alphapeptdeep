@@ -91,8 +91,7 @@ class Model_CCS_Bert(torch.nn.Module):
 # Cell
 class Model_CCS_LSTM(torch.nn.Module):
     def __init__(self,
-        dropout=0.1,
-        *kwargs,
+        dropout=0.1
     ):
         super().__init__()
 
@@ -170,7 +169,6 @@ class AlphaCCSModel(model_base.PeptideModelInterfaceBase):
 
     def _get_features_from_batch_df(self,
         batch_df: pd.DataFrame,
-        nAA, **kwargs,
     ):
         aa_indices = torch.LongTensor(
             parse_aa_indices(
@@ -178,8 +176,11 @@ class AlphaCCSModel(model_base.PeptideModelInterfaceBase):
             )
         )
 
-        mod_x_batch = get_batch_mod_feature(batch_df, nAA)
-        mod_x = torch.Tensor(mod_x_batch)
+        mod_x = torch.Tensor(
+            get_batch_mod_feature(
+                batch_df, batch_df.nAA.values[0]
+            )
+        )
 
         charges = torch.Tensor(
             batch_df['charge'].values
@@ -189,7 +190,6 @@ class AlphaCCSModel(model_base.PeptideModelInterfaceBase):
 
     def _get_targets_from_batch_df(self,
         batch_df: pd.DataFrame,
-        **kwargs,
     ) -> torch.Tensor:
         return torch.Tensor(batch_df['ccs'].values)
 

@@ -153,7 +153,7 @@ class PeptideModelInterfaceBase(object):
                     batch_df = df_group.iloc[i:batch_end,:]
 
                     features = self._get_features_from_batch_df(
-                        batch_df, nAA, **kwargs
+                        batch_df, **kwargs
                     )
 
                     predicts = self._predict_one_batch(*features)
@@ -263,10 +263,10 @@ class PeptideModelInterfaceBase(object):
 
                 batch_df = df_group.iloc[i:batch_end,:]
                 targets = self._get_targets_from_batch_df(
-                    batch_df,nAA=nAA,**kwargs
+                    batch_df, **kwargs
                 )
                 features = self._get_features_from_batch_df(
-                    batch_df,nAA=nAA,**kwargs
+                    batch_df, **kwargs
                 )
 
                 batch_cost.append(
@@ -302,8 +302,7 @@ class PeptideModelInterfaceBase(object):
         ).cpu().detach().numpy()
 
     def _get_targets_from_batch_df(self,
-        batch_df:pd.DataFrame,
-        nAA:int=None, **kwargs,
+        batch_df:pd.DataFrame, **kwargs,
     )->torch.Tensor:
         """Tell the `train()` method how to get target values from the `batch_df`.
            All sub-classes must re-implement this method.
@@ -323,8 +322,7 @@ class PeptideModelInterfaceBase(object):
         )
 
     def _get_features_from_batch_df(self,
-        batch_df:pd.DataFrame,
-        nAA:int, **kwargs,
+        batch_df:pd.DataFrame, **kwargs,
     )->Tuple[torch.Tensor]:
         """Tell `train()` and `predict()` methods how to get feature tensors from the `batch_df`.
            All sub-classes must re-implement this method.
