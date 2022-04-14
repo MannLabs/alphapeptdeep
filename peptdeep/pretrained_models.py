@@ -30,7 +30,7 @@ sandbox_dir = os.path.join(
 if not os.path.exists(sandbox_dir):
     os.makedirs(sandbox_dir)
 
-model_name = global_settings['local_model_file_name']
+model_name = global_settings['local_model_zip_name']
 model_url = global_settings['model_url']
 url_zip_name = global_settings['model_url_zip_name']
 
@@ -276,13 +276,16 @@ def clear_error_modloss_intensities(
             ] = 0
 
 class ModelManager(object):
-    def __init__(self, mask_modloss=True):
+    def __init__(self,
+        mask_modloss:bool=mgr_settings['mask_modloss']
+    ):
         """ The manager class to access MS2/RT/CCS models.
 
         Args:
             mask_modloss (bool, optional): If modloss ions are masked to zeros
                 in the ms2 model. `modloss` ions are mostly useful for phospho
-                MS2 prediciton model. Defaults to True.
+                MS2 prediciton model.
+                Defaults to :py:data:`global_settings`['model_mgr']['mask_modloss'].
 
         Attributes:
             ms2_model (:py:class:`peptdeep.model.ms2.pDeepModel`): The MS2 (pDeep)
@@ -354,13 +357,15 @@ class ModelManager(object):
     def set_default_nce(self, df):
         self.set_default_nce_instrument(df)
 
-    def load_installed_models(self, model_type='regular'):
+    def load_installed_models(self,
+        model_type:str=mgr_settings['model_type']
+    ):
         """ Load built-in MS2/CCS/RT models.
         Args:
             model_type (str, optional): To load the installed MS2/RT/CCS models
                 or phos MS2/RT/CCS models. It could be 'phospho', 'HLA', or 'regular'.
                 Currently, HLA and regular share the same models.
-                Defaults to 'regular'.
+                Defaults to `global_settings['model_mgr']['model_type']` ('regular').
         """
         if model_type.lower() in ['phospho','phos']:
             self.ms2_model.load(

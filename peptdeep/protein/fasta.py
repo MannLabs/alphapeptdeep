@@ -3,7 +3,8 @@
 __all__ = ['protease_dict', 'read_fasta_file', 'load_all_proteins', 'concat_proteins', 'cleave_sequence_with_cut_pos',
            'Digest', 'get_fix_mods', 'get_candidate_sites', 'get_var_mod_sites',
            'get_var_mods_per_sites_multi_mods_on_aa', 'get_var_mods_per_sites_single_mod_on_aa', 'get_var_mods',
-           'get_var_mods_per_sites', 'parse_term_mod', 'PredictFastaSpecLib', 'append_regular_modifications']
+           'get_var_mods_per_sites', 'parse_term_mod', 'protein_idxes_to_names', 'PredictFastaSpecLib',
+           'append_regular_modifications']
 
 # Cell
 import regex as re
@@ -327,6 +328,11 @@ def parse_term_mod(term_mod_name:str):
         return '', term
 
 # Cell
+def protein_idxes_to_names(protein_idxes:str, protein_names:list):
+    if len(protein_idxes) == 0: return ''
+    return ';'.join(protein_names[int(i)] for i in protein_idxes.split(';'))
+
+# Cell
 
 class PredictFastaSpecLib(PredictSpecLib):
     def __init__(self,
@@ -343,7 +349,7 @@ class PredictFastaSpecLib(PredictSpecLib):
         var_mods:list = ['Acetyl@Protein N-term','Oxidation@M'],
         max_var_mod_num:int = 2,
         fix_mods:list = ['Carbamidomethyl@C'],
-        decoy: str = 'pseudo_reverse', # or diann
+        decoy: str = None, # or pseudo_reverse or diann
         I_to_L=False,
     ):
         super().__init__(
@@ -353,7 +359,7 @@ class PredictFastaSpecLib(PredictSpecLib):
             precursor_mz_max=precursor_mz_max,
             decoy=decoy
         )
-        self.protein_df = pd.DataFrame()
+        self.protein_df:pd.DataFrame() = pd.DataFrame()
         self.I_to_L = I_to_L
         self.max_mod_combinations = 100
         self._digest = Digest(
@@ -468,8 +474,8 @@ class PredictFastaSpecLib(PredictSpecLib):
                 mod_set.add(mod[-1])
         return False
 
-    def import_fasta(self, fasta_files:list):
-        self.from_fasta_list(fasta_files)
+    def import_fasta(self, fasta_files:Union[str,list]):
+        self.from_fasta(fasta_files)
         self._predict_all_after_load_pep_seqs()
 
     def import_protein_dict(self, protein_dict:dict):
@@ -488,30 +494,11 @@ class PredictFastaSpecLib(PredictSpecLib):
         self.add_charge()
         self.predict_all()
 
-    def load_peptide_sequences(self,
-        *source,
-        source_type="fasta"
-    ):
-        """Wrapper for loading peptide sequences
-
-        Args:
-            source_type (str, optional): could be .
-             Defaults to "fasta".
-        """
-        if source_type == "fasta":
-            self.from_fasta(*source)
-        elif source_type == "protein_dict":
-            self.from_protein_dict(*source)
-        elif source_type == "peptide_list":
-            self.from_peptide_sequence_list(*source)
-        else:
-            self.from_fasta_list(*source)
-
     def from_fasta(self, fasta_file:Union[str,list]):
         """Load peptide sequence from fasta file.
 
         Args:
-            fasta_path (Union[str,list]): could be a fasta path
+            fasta_path (Union[str,list]): could be a fasta path or a list of fasta paths
               or a list of fasta paths
         """
         if isinstance(fasta_file, 'str'):
@@ -573,6 +560,19 @@ class PredictFastaSpecLib(PredictSpecLib):
         self._precursor_df['mods'] = ''
         self._precursor_df['mod_sites'] = ''
         self.refine_df()
+
+    def append_protein_name(self):
+        if (
+            'id' not in self.protein_df or
+            'protein_idxes' not in self._precursor_df
+        ):
+            return
+
+        self._precursor_df['proteins'] = self._precursor_df['protein_idxes'].apply(
+            protein_idxes_to_names,
+            protein_names=self.protein_df['id'].values
+        )
+
 
     def from_peptide_sequence_list(self,
         pep_seq_list:list,

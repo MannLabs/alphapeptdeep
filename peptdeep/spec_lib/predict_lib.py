@@ -32,9 +32,6 @@ class PredictSpecLib(SpecLibBase):
             self.model_manager = ModelManager(
                 mask_modloss=False
             )
-            self.model_manager.load_installed_models(
-                lib_settings['peptdeep_model_type'],
-            )
         else:
             self.model_manager = model_manager
 

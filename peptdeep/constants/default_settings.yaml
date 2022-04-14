@@ -7,10 +7,11 @@ model:
   - y_modloss
   max_frag_charge: 2
 
+local_model_zip_name: "pretrained_models.zip"
+
 # overwritable config
 model_url: "https://datashare.biochem.mpg.de/s/ABnQuD2KkXfIGF3/download"
 model_url_zip_name: "released_models"
-local_model_file_name: "pretrained_models.zip"
 
 thread_num: 8
 model_mgr:
@@ -19,6 +20,10 @@ model_mgr:
     batch_size_rt_ccs: 1024
     default_nce: 30
     default_instrument: Lumos
+    instrument_choices:
+    - Lumos
+    - QE
+    - timsTOF
     verbose: True
     multiprocessing: True
   fine_tune:
@@ -29,6 +34,8 @@ model_mgr:
     grid_nce_last: 45
     grid_nce_step: 3
     grid_instrument: ['Lumos']
+  mask_modloss: True
+  model_type: regular
   model_choices:
   - regular
   - phos
@@ -41,8 +48,6 @@ percolator:
   psm_num_to_tune_rt_ccs: 5000
   mod_psm_num_to_tune_rt_ccs: 100
   top_n_mods_to_tune: 10
-  peptdeep_model_type: regular # or phos, or HLA
-  mask_modloss: True
 
   require_raw_specific_tuning: True
   raw_specific_ms2_tuning: False
@@ -105,23 +110,33 @@ percolator:
       maxquant: {}
   output_dir: C:/datasets/percolaotr
 library:
-  peptdeep_model_type: regular
   input:
-    type: peptide_table
+    type: fasta
     type_choices:
     - fasta
     - sequence_table
     - peptide_table # sequence with mods and mod_sites
     - precursor_table # peptide with charge state
     paths: 
-    - xxx.tsv
+    - xxx.fasta
     fasta:
-      protease: "([KR])"
+      protease: '([KR])'
+      protease_choices:
+      - 'trypsin/P'
+      - '([KR])'
+      - 'trypsin'
+      - '([KR](?=[^P]))'
+      - 'lys-c'
+      - 'K'
+      - 'lys-n'
+      - '\w(?=K)'
+      - 'chymotrypsin'
       max_miss_cleave: 2
     fix_mods: 
     - Carbamidomethyl@C
     var_mods:
     - Oxidation@M
+    min_var_mod_num: 0
     max_var_mod_num: 2
     min_precursor_charge: 2
     max_precursor_charge: 4
