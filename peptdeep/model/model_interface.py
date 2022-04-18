@@ -167,6 +167,7 @@ class PeptideModelInterfaceBase(object):
         return self.predict_df
 
     def save(self, save_as):
+        # TODO save tf.keras.Model
         dir = os.path.dirname(save_as)
         if not dir: dir = './'
         if not os.path.exists(dir): os.makedirs(dir)
@@ -182,6 +183,7 @@ class PeptideModelInterfaceBase(object):
         model_path_in_zip: str = None,
         **kwargs
     ):
+        # TODO load tf.keras.Model
         if isinstance(model_file, str):
             # We may release all models (msms, rt, ccs, ...) in a single zip file
             if model_file.lower().endswith('.zip'):
