@@ -10,12 +10,12 @@ from peptdeep.settings import global_settings
 
 def mod_options():
     fixmod = st.multiselect(
-            'Please select fix_mod',
+            'Please select fixed modifications',
             ['Carbamidomethyl@C', 'B', 'C', 'D'],
             default = ['Carbamidomethyl@C']
         ), 
     varmod = st.multiselect(
-            'Please select var_mod',
+            'Please select variable modifications',
             ['Oxidation@M', 'B', 'C', 'D'],
             default = ['Oxidation@M']
         ), 
@@ -24,83 +24,70 @@ def mod_options():
 
 
 def varmod_range():
-    min_varmod = st.selectbox(
-            'min_var_mod_num',
-            ('0','1'),
-            index = 0
-        ),
-    max_varmod = st.selectbox(
-            'max_var_mod_num',
-            ('1','2'),
-            index = 1
-        ),
+    min_varmod = st.number_input('Min number of var mods',min_value = 0, max_value = 1, value = 0, step = 1)
+    max_varmod = st.number_input('Max number of var mods',min_value = 1, max_value = 2, value = 2, step = 1)
     global_settings['library']['input']['min_var_mod_num'] = min_varmod
     global_settings['library']['input']['max_var_mod_num'] = max_varmod
 
 
 def choose_precursor_charge():
-    from_charge = st.selectbox('precursor charge from',
-    ('1','2','3','4'),index = 1)
-    options = range(int(from_charge),int(7))
-    to_charge = st.selectbox(
+    from_charge = st.number_input('Precursor charge from',min_value = 1, max_value = 4, value = 2, step = 1)
+    to_charge = st.number_input(
         'to',
-        (options),index = 2
+        min_value = from_charge, max_value = 6, value = from_charge, step = 1 
     )
     global_settings['library']['input']['min_precursor_charge'] = from_charge
     global_settings['library']['input']['max_precursor_charge'] = to_charge
 
 def choose_precursor_mz():
-    min_precursor_mz = st.number_input('min precursor mz', value = 400)
+    min_precursor_mz = st.number_input('Min precursor mz', value = 400)
     global_settings['library']['input']['min_precursor_mz'] = min_precursor_mz
-    max_precursor_mz = st.number_input('max precursor mz', value = 2000)
+    max_precursor_mz = st.number_input('Max precursor mz', min_value = min_precursor_mz, value = 2000)
     global_settings['library']['input']['max_precursor_mz'] = max_precursor_mz
 
 def add_decoy():
     add_decoy = st.checkbox('Add decoy')
     if add_decoy == 1:
-        decoy = st.selectbox('decoy',
-        global_settings['library']['input']['decoy_choices'],
-        index = -1
-        )
+        decoy = st.selectbox('decoy methods',global_settings['library']['input']['decoy_choices'],index = 2)
         global_settings['library']['input']['decoy'] = decoy
 
 def choose_protease():
     protease = st.selectbox(
-        'protease', 
+        'Protease', 
         global_settings['library']['input']['fasta']['protease_choices'],
     )
     global_settings['library']['input']['fasta']['protease'] = protease
-    max_miss_cleave = st.number_input('max_miss_cleave',value = 2)
+    max_miss_cleave = st.number_input('Max number of miss cleavages',value = 2)
     global_settings['library']['input']['fasta']['max_miss_cleave'] = max_miss_cleave
 
 def choose_peptide_len():
-    min_peptide_len = st.number_input('min peptide len:', value = 7)
-    max_peptide_len = st.number_input('max peptide len:', value = 35)
+    min_peptide_len = st.number_input('Min peptide len:', value = 7)
+    max_peptide_len = st.number_input('Max peptide len:', min_value = min_peptide_len, value = 35)
     global_settings['library']['input']['min_peptide_len'] = min_peptide_len
     global_settings['library']['input']['max_peptide_len'] = max_peptide_len
 
 def choose_frag_types():
     frag_types = st.multiselect(
-        'frag_types',(global_settings['model']['frag_types']),
+        'fragment types',(global_settings['model']['frag_types']),
         default = ['b','y']
     )
     global_settings['library']['input']['frag_types'] = frag_types
-    max_frag_charge = st.selectbox('max fragment charge:',['1','2'], index = 1)
+    max_frag_charge = st.number_input('Max fragment charge:',min_value = 1, max_value = 2, value = 2, step = 1)
     global_settings['library']['input']['max_frag_charge'] = max_frag_charge
 
 def output_tsv():
-    min_fragment_mz = st.number_input('min fragment mz:', value = 300)
+    min_fragment_mz = st.number_input('Min fragment mz:', value = 300)
     global_settings['library']['output_tsv']['min_fragment_mz'] = min_fragment_mz
-    max_fragment_mz = st.number_input('max fragment mz:', value = 2000)
+    max_fragment_mz = st.number_input('Max fragment mz:', min_value = min_fragment_mz, value = 2000)
     global_settings['library']['output_tsv']['max_fragment_mz'] = max_fragment_mz
-    min_relative_intensity = st.number_input('min relative intensity:', value = 0.02)
+    min_relative_intensity = st.number_input('Min relative intensity:', value = 0.02)
     global_settings['library']['output_tsv']['min_relative_intensity'] = min_relative_intensity
-    keep_higest_k_peaks = st.number_input('top n peaks:', value = 12)
+    keep_higest_k_peaks = st.number_input('Number of highest peaks to keep:', value = 12)
     global_settings['library']['output_tsv']['keep_higest_k_peaks'] = keep_higest_k_peaks
 
 def input_type():
     input_type = st.selectbox(
-        'input types',
+        'Input file type',
         global_settings['library']['input']['type_choices'],
     )
     global_settings['library']['input']['type'] = input_type
@@ -108,14 +95,13 @@ def input_type():
 
 def show():
 
-    st.write("# Library started")
-    st.text("Welcome to library of AlphaPeptDeep.")
+    st.write("# Library Prediction")
 
     st.write('### input')
 
     _input_type = input_type()
 
-    path = st.text_input('paths')
+    path = st.text_input('File paths')
 
     add_decoy()
 
@@ -140,8 +126,11 @@ def show():
     choose_frag_types()
 
 
-    st.write("### output")
+    st.write("### Output")
 
-    if st.checkbox('Output TSV') == 1:
+    output_dir = st.text_input("Output folder", value="C:/")
+    global_settings['library']['output_dir'] = output_dir
+
+    if st.checkbox('Output TSV (in output folder)') == 1:
         output_tsv()
     
