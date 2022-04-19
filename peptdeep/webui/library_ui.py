@@ -24,27 +24,17 @@ def mod_options():
 
 
 def varmod_range():
-    min_varmod = st.selectbox(
-            'min_var_mod_num',
-            ('0','1'),
-            index = 0
-        ),
-    max_varmod = st.selectbox(
-            'max_var_mod_num',
-            ('1','2'),
-            index = 1
-        ),
+    min_varmod = st.number_input('min_var_mod_num',min_value = 0, max_value = 1, value = 0, step = 1)
+    max_varmod = st.number_input('max_var_mod_num',min_value = 1, max_value = 2, value = 2, step = 1)
     global_settings['library']['input']['min_var_mod_num'] = min_varmod
     global_settings['library']['input']['max_var_mod_num'] = max_varmod
 
 
 def choose_precursor_charge():
-    from_charge = st.selectbox('precursor charge from',
-    ('1','2','3','4'),index = 1)
-    options = range(int(from_charge),int(7))
-    to_charge = st.selectbox(
+    from_charge = st.number_input('precursor charge from',min_value = 1, max_value = 4, value = 2, step = 1)
+    to_charge = st.number_input(
         'to',
-        (options),index = 2
+        min_value = from_charge, max_value = 6, value = from_charge, step = 1 
     )
     global_settings['library']['input']['min_precursor_charge'] = from_charge
     global_settings['library']['input']['max_precursor_charge'] = to_charge
@@ -52,16 +42,13 @@ def choose_precursor_charge():
 def choose_precursor_mz():
     min_precursor_mz = st.number_input('min precursor mz', value = 400)
     global_settings['library']['input']['min_precursor_mz'] = min_precursor_mz
-    max_precursor_mz = st.number_input('max precursor mz', value = 2000)
+    max_precursor_mz = st.number_input('max precursor mz', min_value = min_precursor_mz, value = 2000)
     global_settings['library']['input']['max_precursor_mz'] = max_precursor_mz
 
 def add_decoy():
     add_decoy = st.checkbox('Add decoy')
     if add_decoy == 1:
-        decoy = st.selectbox('decoy',
-        global_settings['library']['input']['decoy_choices'],
-        index = -1
-        )
+        decoy = st.selectbox('decoy',global_settings['library']['input']['decoy_choices'],index = 2)
         global_settings['library']['input']['decoy'] = decoy
 
 def choose_protease():
@@ -75,7 +62,7 @@ def choose_protease():
 
 def choose_peptide_len():
     min_peptide_len = st.number_input('min peptide len:', value = 7)
-    max_peptide_len = st.number_input('max peptide len:', value = 35)
+    max_peptide_len = st.number_input('max peptide len:', min_value = min_peptide_len, value = 35)
     global_settings['library']['input']['min_peptide_len'] = min_peptide_len
     global_settings['library']['input']['max_peptide_len'] = max_peptide_len
 
@@ -85,13 +72,13 @@ def choose_frag_types():
         default = ['b','y']
     )
     global_settings['library']['input']['frag_types'] = frag_types
-    max_frag_charge = st.selectbox('max fragment charge:',['1','2'], index = 1)
+    max_frag_charge = st.number_input('max fragment charge:',min_value = 1, max_value = 2, value = 2, step = 1)
     global_settings['library']['input']['max_frag_charge'] = max_frag_charge
 
 def output_tsv():
     min_fragment_mz = st.number_input('min fragment mz:', value = 300)
     global_settings['library']['output_tsv']['min_fragment_mz'] = min_fragment_mz
-    max_fragment_mz = st.number_input('max fragment mz:', value = 2000)
+    max_fragment_mz = st.number_input('max fragment mz:', min_value = min_fragment_mz, value = 2000)
     global_settings['library']['output_tsv']['max_fragment_mz'] = max_fragment_mz
     min_relative_intensity = st.number_input('min relative intensity:', value = 0.02)
     global_settings['library']['output_tsv']['min_relative_intensity'] = min_relative_intensity

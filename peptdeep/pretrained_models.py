@@ -30,7 +30,7 @@ sandbox_dir = os.path.join(
 if not os.path.exists(sandbox_dir):
     os.makedirs(sandbox_dir)
 
-model_name = global_settings['local_model_file_name']
+model_name = global_settings['local_model_zip_name']
 model_url = global_settings['model_url']
 url_zip_name = global_settings['model_url_zip_name']
 
