@@ -7,7 +7,7 @@ def run(port=8077):
     _this_file = __file__
     _this_directory = os.path.dirname(_this_file)
 
-    file_path = os.path.join(_this_directory, 'webui', 'main.py')
+    file_path = os.path.join(_this_directory, 'webui', 'main_ui.py')
 
     HOME = os.path.expanduser("~")
 

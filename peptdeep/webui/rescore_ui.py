@@ -34,7 +34,7 @@ def files_in_folder_pandas(folder: str, file_type:str=None) -> pd.DataFrame:
 
 def show():
     """Streamlit page that displays information on how to rescore."""
-    st.write("# Rescoring module of AlphaPeptDeep")
+    st.write("# DDA Rescoring")
 
     raw_folder = st.text_input('Raw folder')
     #st.write('The current raw folder is', raw_folder)
@@ -44,7 +44,7 @@ def show():
     #st.write('You selected:', MS_type)
     if raw_folder:
         st.text(
-            f"AlphaPeptDeep looks for MS files in {raw_folder}.\nThese can be selected in the new experiment tab.\nYou can add own files to this folder."
+            f"PeptDeep looks for MS files in {raw_folder}.\nThese can be selected in the new experiment tab.\nYou can add own files to this folder."
             )
 
         st.write("### Existing files")

@@ -46,10 +46,10 @@ def predict():
     global_settings['model_mgr']['predict']['multiprocessing'] = multiprocessing
 
 def model():
-    model_url = st.text_input('Built-in URL to download the models:',value = 'https://datashare.biochem.mpg.de/s/ABnQuD2KkXfIGF3/download')
+    model_url = st.text_input('URL to download the pre-trained models:',value = 'https://datashare.biochem.mpg.de/s/ABnQuD2KkXfIGF3/download')
     global_settings['model_url'] = model_url
 
-    model_url_zip_name = st.text_input('The zip file name after download from the URL:',value = 'released_models')
+    model_url_zip_name = st.text_input('The downloaded zip file name from the URL:',value = 'released_models')
     global_settings['model_url_zip_name'] = model_url_zip_name
 
     thread_num = st.number_input('thread number:', value = 8)
@@ -58,17 +58,17 @@ def model():
 
 def show():
 
-    st.write("# Model Configuration of AlphaPeptDeep")
-    st.write('### model parameters')
+    st.write("# Model Configuration")
+    st.write('### Model parameters')
     model()
 
     model_type = st.selectbox('Model type',(global_settings['model_mgr']['model_choices']),index = 0)
     global_settings['model_mgr']['model_type'] = model_type
 
-    st.write('### prediction parameters')
+    st.write('### Prediction parameters')
     predict()
 
-    st.write('### fine-tuning parameters')
+    st.write('### Fine-tuning parameters')
     fine_tune()
 
     grid_nce_search = st.checkbox('grid NCE search')

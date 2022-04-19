@@ -16,7 +16,7 @@ icon = Image.open(ICON_PATH)
 computer_name = socket.gethostname()
 
 st.set_page_config(
-    page_title=f"AlphaPeptDeep {peptdeep.__version__}",
+    page_title=f"PeptDeep {peptdeep.__version__}",
     page_icon=icon,
     layout="wide",
 )
@@ -31,13 +31,13 @@ footer {visibility: hidden;}
 st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 
 st.sidebar.image(image, width = 300)
-st.sidebar.code(f"AlphaPeptDeep {peptdeep.__version__} \n{computer_name}")
+st.sidebar.code(f"AlphaPeptDeep (PeptDeep) {peptdeep.__version__} \n{computer_name}")
 
 sidebar = {
     'Start': startpage.show,
     'Model': model_ui.show,
-    'Rescore': rescore_ui.show,
     'Library': library_ui.show,
+    'Rescore': rescore_ui.show,
     
 }
 
@@ -46,5 +46,5 @@ menu = st.sidebar.radio("", list(sidebar.keys()))
 if menu:
     sidebar[menu]()
 
-link = f'[AlphaPeptDeep on GitHub]({peptdeep.__github__})'
+link = f'[PeptDeep on GitHub]({peptdeep.__github__})'
 st.sidebar.markdown(link, unsafe_allow_html=True)

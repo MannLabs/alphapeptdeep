@@ -97,7 +97,7 @@ def show():
 
     st.write("# Library Prediction")
 
-    st.write('### input')
+    st.write('### Input')
 
     _input_type = input_type()
 
