@@ -21,7 +21,7 @@ from alphabase.peptide.fragment import (
 )
 
 from peptdeep.model.featurize import (
-    parse_aa_indices, parse_instrument_indices,
+    get_batch_aa_indices, parse_instrument_indices,
     get_batch_mod_feature
 )
 
@@ -420,14 +420,14 @@ class pDeepModel(model_base.PeptideModelInterfaceBase):
         **kwargs,
     ) -> Tuple[torch.Tensor]:
         aa_indices = torch.LongTensor(
-            parse_aa_indices(
+            get_batch_aa_indices(
                 batch_df['sequence'].values.astype('U')
             )
         )
 
         mod_x = torch.Tensor(
             get_batch_mod_feature(
-                batch_df, batch_df.nAA.values[0]
+                batch_df
             )
         )
 
