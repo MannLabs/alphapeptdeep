@@ -117,7 +117,6 @@ class AlphaRTModel(model_base.PeptideModelInterfaceBase):
             dropout=dropout,
             **kwargs
         )
-        self.loss_func = torch.nn.L1Loss()
 
     def _prepare_predict_data_df(self,
         precursor_df:pd.DataFrame,

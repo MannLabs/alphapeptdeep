@@ -501,7 +501,7 @@ class PredictFastaSpecLib(PredictSpecLib):
             fasta_path (Union[str,list]): could be a fasta path or a list of fasta paths
               or a list of fasta paths
         """
-        if isinstance(fasta_file, 'str'):
+        if isinstance(fasta_file, str):
             self.from_fasta_list([fasta_file])
         else:
             self.from_fasta_list(fasta_file)
