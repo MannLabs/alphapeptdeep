@@ -214,7 +214,7 @@ class ModelInterface(object):
         if isinstance(model_file, str):
             # We may release all models (msms, rt, ccs, ...) in a single zip file
             if model_file.lower().endswith('.zip'):
-                self._load_model_from_zipfile(model_file)
+                self._load_model_from_zipfile(model_file, model_path_in_zip)
             else:
                 self._load_model_from_textfile(model_file)
         else:
@@ -259,7 +259,7 @@ class ModelInterface(object):
         self.loss_func = torch.nn.L1Loss()
 
 
-    def _load_model_from_zipfile(self, model_file):
+    def _load_model_from_zipfile(self, model_file, model_path_in_zip):
         with ZipFile(model_file) as model_zip:
             with model_zip.open(model_path_in_zip,'r') as pt_file:
                 self._load_model_from_filestream(pt_file)
@@ -493,5 +493,5 @@ class ModelInterface(object):
 
 #legacy
 PeptideModelInterfaceBase = ModelInterface
-ModelInterface.use_GPU = ModelInterface.set_GPU_state
+ModelInterface.use_GPU = ModelInterface.set_device
 ModelInterface._init_for_train = ModelInterface._set_loss_function
