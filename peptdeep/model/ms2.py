@@ -345,7 +345,7 @@ frag_types = settings['model']['frag_types']
 max_frag_charge = settings['model']['max_frag_charge']
 num_ion_types = len(frag_types)*max_frag_charge
 
-class pDeepModel(model_base.PeptideModelInterfaceBase):
+class pDeepModel(model_base.ModelInterface):
     def __init__(self,
         charged_frag_types = get_charged_frag_types(
             frag_types, max_frag_charge
@@ -517,6 +517,7 @@ class pDeepModel(model_base.PeptideModelInterfaceBase):
         *,
         batch_size=1024,
         epoch=20,
+        warmup_epoch=0,
         verbose=False,
         verbose_each_epoch=False,
         **kwargs
@@ -526,6 +527,7 @@ class pDeepModel(model_base.PeptideModelInterfaceBase):
             fragment_intensity_df=fragment_intensity_df,
             batch_size=batch_size,
             epoch=epoch,
+            warmup_epoch=warmup_epoch,
             verbose=verbose,
             verbose_each_epoch=verbose_each_epoch,
             **kwargs
