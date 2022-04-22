@@ -145,7 +145,7 @@ def mobility_to_ccs_df_(
 
 # Cell
 
-class AlphaCCSModel(model_base.PeptideModelInterfaceBase):
+class AlphaCCSModel(model_base.ModelInterface):
     def __init__(self,
         dropout=0.1,
         model_class:torch.nn.Module=Model_CCS_LSTM,
@@ -157,7 +157,6 @@ class AlphaCCSModel(model_base.PeptideModelInterfaceBase):
             dropout=dropout,
             **kwargs
         )
-        self.loss_func = torch.nn.L1Loss()
         self.charge_factor = 0.1
 
     def _prepare_predict_data_df(self,

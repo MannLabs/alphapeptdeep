@@ -136,7 +136,8 @@ def read_until(file, until):
     lines = []
     while True:
         line = file.readline().strip()
-        if line.startswith(until):
+        if line == "": break
+        elif line.startswith(until):
             break
         else:
             lines.append(line)

@@ -105,7 +105,7 @@ class Model_RT_LSTM(torch.nn.Module):
         return self.rt_decoder(x).squeeze(1)
 
 # Cell
-class AlphaRTModel(model_base.PeptideModelInterfaceBase):
+class AlphaRTModel(model_base.ModelInterface):
     def __init__(self,
         dropout=0.1,
         model_class:torch.nn.Module=Model_RT_LSTM,
@@ -117,7 +117,6 @@ class AlphaRTModel(model_base.PeptideModelInterfaceBase):
             dropout=dropout,
             **kwargs
         )
-        self.loss_func = torch.nn.L1Loss()
 
     def _prepare_predict_data_df(self,
         precursor_df:pd.DataFrame,
