@@ -20,6 +20,7 @@ from alphabase.yaml_utils import load_yaml
 from alphabase.io.hdf import HDF_File
 from peptdeep.spec_lib.predict_lib import PredictSpecLib
 from peptdeep.pretrained_models import ModelManager
+from peptdeep.utils import explode_multiple_columns
 
 protease_dict = load_yaml(
     os.path.join(
@@ -652,7 +653,8 @@ class PredictFastaSpecLib(PredictSpecLib):
         ].apply(lambda x:
             self.add_mods_for_one_seq(*x), axis=1
         ))
-        self._precursor_df = self._precursor_df.explode(
+        self._precursor_df = explode_multiple_columns(
+            self._precursor_df,
             ['mods','mod_sites']
         )
         self._precursor_df.reset_index(drop=True, inplace=True)

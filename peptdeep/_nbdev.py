@@ -202,7 +202,8 @@ index = {"match_centroid_mz": "match.ipynb",
          "show_platform_info": "utils.ipynb",
          "show_python_info": "utils.ipynb",
          "BASE_PATH": "utils.ipynb",
-         "LOG_PATH": "utils.ipynb"}
+         "LOG_PATH": "utils.ipynb",
+         "explode_multiple_columns": "utils.ipynb"}
 
 modules = ["mass_spec/match.py",
            "mass_spec/ms_reader.py",

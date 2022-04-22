@@ -9,7 +9,8 @@ import pandas as pd
 import numpy as np
 import tqdm
 import typing
-import itertools
+
+from peptdeep.utils import explode_multiple_columns
 
 from alphabase.spectrum_library.library_base import SpecLibBase
 
@@ -77,14 +78,6 @@ def _get_frag_num(columns, rows, frag_len):
             frag_nums.append(r+1)
     return frag_nums
 
-def _flatten(list_of_lists):
-    '''
-    Flatten a list of lists
-    '''
-    return list(
-        itertools.chain.from_iterable(list_of_lists)
-    )
-
 def merge_precursor_fragment_df(
     precursor_df:pd.DataFrame,
     fragment_mz_df:pd.DataFrame,
@@ -138,32 +131,43 @@ def merge_precursor_fragment_df(
         frag_inten_list.append(intens[idx_in_df])
         frag_num_list.append(frag_nums)
 
-    try:
-        df[frag_type_head] = frag_type_list
-        df[frag_mass_head] = frag_mass_list
-        df[frag_inten_head] = frag_inten_list
-        df[frag_charge_head] = frag_charge_list
-        df[frag_loss_head] = frag_loss_list
-        df[frag_num_head] = frag_num_list
-        return df.explode([
+    df[frag_type_head] = frag_type_list
+    df[frag_mass_head] = frag_mass_list
+    df[frag_inten_head] = frag_inten_list
+    df[frag_charge_head] = frag_charge_list
+    df[frag_loss_head] = frag_loss_list
+    df[frag_num_head] = frag_num_list
+
+    return explode_multiple_columns(df,
+        [
             frag_type_head,
             frag_mass_head,
             frag_inten_head,
             frag_charge_head,
             frag_loss_head,
             frag_num_head
-        ])
-    except ValueError:
-        # df.explode does not allow mulitple columns before pandas version 1.x.x.
-        df[frag_type_head] = frag_type_list
-        df = df.explode(frag_type_head)
+        ]
+    )
 
-        df[frag_mass_head] = _flatten(frag_mass_list)
-        df[frag_inten_head] = _flatten(frag_inten_list)
-        df[frag_charge_head] = _flatten(frag_charge_list)
-        df[frag_loss_head] = _flatten(frag_loss_list)
-        df[frag_num_head] = _flatten(frag_num_list)
-        return df
+    # try:
+    #     return df.explode([
+    #         frag_type_head,
+    #         frag_mass_head,
+    #         frag_inten_head,
+    #         frag_charge_head,
+    #         frag_loss_head,
+    #         frag_num_head
+    #     ])
+    # except ValueError:
+    #     # df.explode does not allow mulitple columns before pandas version 1.x.x.
+    #     df = df.explode(frag_type_head)
+
+    #     df[frag_mass_head] = _flatten(frag_mass_list)
+    #     df[frag_inten_head] = _flatten(frag_inten_list)
+    #     df[frag_charge_head] = _flatten(frag_charge_list)
+    #     df[frag_loss_head] = _flatten(frag_loss_list)
+    #     df[frag_num_head] = _flatten(frag_num_list)
+    #     return df
 
 mod_to_other_mod_dict = {
     "Carbamidomethyl@C": "Carbamidomethyl (C)",
