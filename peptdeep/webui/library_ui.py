@@ -7,18 +7,20 @@ import pandas as pd
 import os
 import time
 from peptdeep.settings import global_settings
+from peptdeep.cli import generate_library
+from alphabase.yaml_utils import save_yaml
 
 def mod_options():
-    fixmod = st.multiselect(
+    fixmod, = st.multiselect(
             'Please select fixed modifications',
-            ['Carbamidomethyl@C', 'B', 'C', 'D'],
+            ['Carbamidomethyl@C'],
             default = ['Carbamidomethyl@C']
-        ), 
-    varmod = st.multiselect(
+        ),
+    varmod, = st.multiselect(
             'Please select variable modifications',
-            ['Oxidation@M', 'B', 'C', 'D'],
+            ['Oxidation@M'],
             default = ['Oxidation@M']
-        ), 
+        ),
     global_settings['library']['input']['fix_mods'] = fixmod
     global_settings['library']['input']['var_mods'] = varmod
 
@@ -34,7 +36,7 @@ def choose_precursor_charge():
     from_charge = st.number_input('Precursor charge from',min_value = 1, max_value = 4, value = 2, step = 1)
     to_charge = st.number_input(
         'to',
-        min_value = from_charge, max_value = 6, value = from_charge, step = 1 
+        min_value = from_charge, max_value = 6, value = from_charge, step = 1
     )
     global_settings['library']['input']['min_precursor_charge'] = from_charge
     global_settings['library']['input']['max_precursor_charge'] = to_charge
@@ -53,7 +55,7 @@ def add_decoy():
 
 def choose_protease():
     protease = st.selectbox(
-        'Protease', 
+        'Protease',
         global_settings['library']['input']['fasta']['protease_choices'],
     )
     global_settings['library']['input']['fasta']['protease'] = protease
@@ -102,6 +104,7 @@ def show():
     _input_type = input_type()
 
     path = st.text_input('File paths')
+    global_settings['library']['input']['paths'] = [path]
 
     add_decoy()
 
@@ -114,23 +117,33 @@ def show():
         choose_precursor_charge()
         choose_peptide_len()
 
-
-    if _input_type == 'sequence_table':
+    elif _input_type == 'sequence_table':
         mod_options()
         varmod_range()
         choose_precursor_charge()
 
-    if _input_type == 'peptide_table':
+    elif _input_type == 'peptide_table':
         choose_precursor_charge()
-    
+
     choose_frag_types()
 
 
     st.write("### Output")
 
-    output_dir = st.text_input("Output folder", value="C:/")
+    output_dir = st.text_input("Output folder", value="/Users/zhouxiexuan/workspace/alphadeep_test")
     global_settings['library']['output_dir'] = output_dir
 
-    if st.checkbox('Output TSV (in output folder)') == 1:
+    tsv_enabled = bool(st.checkbox('Output TSV (for DiaNN/Spectronaut)'))
+    global_settings['library']['output_tsv']['enabled'] = tsv_enabled
+    if tsv_enabled:
         output_tsv()
-    
+
+    if st.button('Generate library'):
+        if not os.path.exists(output_dir):
+            os.makedirs(output_dir)
+        save_yaml(
+            os.path.join(output_dir, 'peptdeep_settings.yaml'),
+            global_settings
+        )
+        generate_library()
+        st.write('finished')
