@@ -15,12 +15,12 @@ def mod_options():
             'Please select fixed modifications',
             ['Carbamidomethyl@C'],
             default = ['Carbamidomethyl@C']
-        ), 
+        ),
     varmod, = st.multiselect(
             'Please select variable modifications',
             ['Oxidation@M'],
             default = ['Oxidation@M']
-        ), 
+        ),
     global_settings['library']['input']['fix_mods'] = fixmod
     global_settings['library']['input']['var_mods'] = varmod
 
@@ -36,7 +36,7 @@ def choose_precursor_charge():
     from_charge = st.number_input('Precursor charge from',min_value = 1, max_value = 4, value = 2, step = 1)
     to_charge = st.number_input(
         'to',
-        min_value = from_charge, max_value = 6, value = from_charge, step = 1 
+        min_value = from_charge, max_value = 6, value = from_charge, step = 1
     )
     global_settings['library']['input']['min_precursor_charge'] = from_charge
     global_settings['library']['input']['max_precursor_charge'] = to_charge
@@ -55,7 +55,7 @@ def add_decoy():
 
 def choose_protease():
     protease = st.selectbox(
-        'Protease', 
+        'Protease',
         global_settings['library']['input']['fasta']['protease_choices'],
     )
     global_settings['library']['input']['fasta']['protease'] = protease
@@ -124,7 +124,7 @@ def show():
 
     elif _input_type == 'peptide_table':
         choose_precursor_charge()
-    
+
     choose_frag_types()
 
 
@@ -139,10 +139,11 @@ def show():
         output_tsv()
 
     if st.button('Generate library'):
+        if not os.path.exists(output_dir):
+            os.makedirs(output_dir)
         save_yaml(
             os.path.join(output_dir, 'peptdeep_settings.yaml'),
             global_settings
         )
         generate_library()
         st.write('finished')
-    
