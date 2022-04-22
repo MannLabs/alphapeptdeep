@@ -9,6 +9,7 @@ import pandas as pd
 # local
 import peptdeep
 from peptdeep import settings
+from peptdeep.utils import logging
 from peptdeep.rescore.percolator import Percolator
 from peptdeep.spec_lib.library_factory import (
     library_maker_provider
@@ -131,18 +132,24 @@ def generate_library():
             df_list.append(pd.read_csv(file_path, sep=sep))
         df = pd.concat(df_list, ignore_index=True)
         lib_maker.make_library(df)
-    lib_maker.spec_lib.save_hdf(
-        os.path.join(lib_settings['output_dir'], 'predict_library.hdf')
+    hdf_path = os.path.join(
+        lib_settings['output_dir'], 
+        'predict_library.hdf'
     )
+    logging.info(f"Save library to {hdf_path}")
+    lib_maker.spec_lib.save_hdf(hdf_path)
     if lib_settings['output_tsv']['enabled']:
         lib_df = lib_maker.translate_library()
+        tsv_path = os.path.join(
+            lib_settings['output_dir'], 
+            'predict_library.tsv'
+        )
+        logging.info(f"Save library to {tsv_path}")
         lib_df.to_csv(
-            os.path.join(
-                lib_settings['output_dir'], 
-                'predict_library.tsv'
-            ),
+            tsv_path,
             sep='\t', index=False
         )
+    logging.info("Finished library generation!!")
 
 @run.command("library", help="Predict library for DIA search.")
 @click.argument("settings_yaml", type=str)
