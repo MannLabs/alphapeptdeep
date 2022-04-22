@@ -155,7 +155,7 @@ library:
     - y
   output_dir: C:/xxx/xxx
   output_tsv:
-    enable: False
+    enabled: False
     min_fragment_mz: 300
     max_fragment_mz: 2000
     min_relative_intensity: 0.02

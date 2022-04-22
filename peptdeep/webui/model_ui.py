@@ -35,10 +35,13 @@ def predict():
     global_settings['model_mgr']['predict']['batch_size_ms2'] = batch_size_ms2
     batch_size_rt_ccs = st.number_input('Batch size to tune RT and CCS model', value = 1024)
     global_settings['model_mgr']['predict']['batch_size_rt_ccs'] = batch_size_rt_ccs
-    default_nce = st.number_input('NCE', value = 30)
-    global_settings['model_mgr']['predict']['default_nce'] = default_nce
+
     default_instrument = st.selectbox('Instrument',(global_settings['model_mgr']['predict']['instrument_choices']),index = 0)
     global_settings['model_mgr']['predict']['default_instrument'] = default_instrument
+    default_nce = st.number_input('NCE', value = 30,disabled=(default_instrument=='timsTOF'))
+    
+    global_settings['model_mgr']['predict']['default_nce'] = default_nce
+
 
     verbose = st.checkbox('Verbose')
     global_settings['model_mgr']['predict']['verbose'] = verbose

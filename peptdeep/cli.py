@@ -116,16 +116,12 @@ def _get_delimiter(csv_file, bytes=4096):
     with open(csv_file, "r") as f:
         return csv.Sniffer().sniff(f.read(bytes)).delimiter
 
-@run.command("library", help="Predict library for DIA search.")
-@click.argument("settings_yaml", type=str)
-def library(settings_yaml:str):
-    update_settings(settings_yaml)
-
+def generate_library():
     lib_settings = settings.global_settings['library']
 
     lib_maker = library_maker_provider.get_maker(
-        lib_settings['input']['type'],
-    )
+        lib_settings['input']['type']
+        )
     if lib_settings['input']['type'] == 'fasta':
         lib_maker.make_library(lib_settings['input']['paths'])
     else:
@@ -138,7 +134,7 @@ def library(settings_yaml:str):
     lib_maker.spec_lib.save_hdf(
         os.path.join(lib_settings['output_dir'], 'predict_library.hdf')
     )
-    if lib_settings['output_tsv']['enable']:
+    if lib_settings['output_tsv']['enabled']:
         lib_df = lib_maker.translate_library()
         lib_df.to_csv(
             os.path.join(
@@ -147,3 +143,10 @@ def library(settings_yaml:str):
             ),
             sep='\t', index=False
         )
+
+@run.command("library", help="Predict library for DIA search.")
+@click.argument("settings_yaml", type=str)
+def library(settings_yaml:str):
+    update_settings(settings_yaml)
+    generate_library()
+    
