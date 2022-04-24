@@ -5,14 +5,16 @@ __all__ = ['mod_feature_size', 'max_instrument_num', 'frag_types', 'max_frag_cha
            'xavier_param', 'init_state', 'SeqCNN', 'Seq_Transformer', 'Hidden_Transformer', 'Hidden_HFace_Transformer',
            'HiddenBert', 'SeqLSTM', 'SeqGRU', 'SeqAttentionSum', 'PositionalEncoding', 'PositionalEmbedding',
            'AA_Mod_Embedding', 'Meta_Embedding', 'Mod_Embedding_FixFirstK', 'Mod_Embedding',
-           'Input_AA_Mod_with_PositionalEncoding', 'InputAAEmbedding', 'InputMetaNet', 'InputModNetFixFirstK',
-           'InputModNet', 'AATransformerEncoding', 'Input_AA_Mod_LSTM', 'Input_AA_Mod_Meta_LSTM',
-           'Input_AA_Mod_Charge_LSTM', 'InputAALSTM', 'InputAALSTM_cat_Meta', 'InputAALSTM_cat_Charge', 'Seq_Meta_LSTM',
-           'Seq_Meta_Linear', 'OutputLSTM_cat_Meta', 'OutputLinear_cat_Meta', 'Encoder_AA_Mod_LSTM',
-           'Encoder_AA_Mod_CNN_LSTM', 'Encoder_AA_Mod_CNN_LSTM_AttnSum', 'Encoder_AA_Mod_Transformer',
-           'Encoder_AA_Mod_Charge_CNN_LSTM_AttnSum', 'Input_AA_LSTM_Encoder', 'Input_AA_CNN_Encoder',
-           'Input_AA_CNN_LSTM_Encoder', 'Input_AA_CNN_LSTM_cat_Charge_Encoder', 'Decoder_LSTM', 'Decoder_GRU',
-           'SeqLSTMDecoder', 'SeqGRUDecoder', 'Decoder_Linear', 'LinearDecoder']
+           'Input_AA_Mod_PositionalEncoding', 'Input_AA_Mod_Charge_PositionalEncoding', 'InputAAEmbedding',
+           'InputMetaNet', 'InputModNetFixFirstK', 'InputModNet', 'AATransformerEncoding', 'Input_AA_Mod_LSTM',
+           'Input_AA_Mod_Meta_LSTM', 'Input_AA_Mod_Charge_LSTM', 'InputAALSTM', 'InputAALSTM_cat_Meta',
+           'InputAALSTM_cat_Charge', 'Seq_Meta_LSTM', 'Seq_Meta_Linear', 'OutputLSTM_cat_Meta', 'OutputLinear_cat_Meta',
+           'Encoder_AA_Mod_LSTM', 'Encoder_AA_Mod_CNN_LSTM', 'Encoder_AA_Mod_CNN_LSTM_AttnSum',
+           'Encoder_AA_Mod_Transformer', 'Encoder_AA_Mod_Transformer_AttnSum', 'Encoder_AA_Mod_Charge_Transformer',
+           'Encoder_AA_Mod_Charge_Transformer_AttnSum', 'Encoder_AA_Mod_Charge_CNN_LSTM_AttnSum',
+           'Input_AA_LSTM_Encoder', 'Input_AA_CNN_Encoder', 'Input_AA_CNN_LSTM_Encoder',
+           'Input_AA_CNN_LSTM_cat_Charge_Encoder', 'Decoder_LSTM', 'Decoder_GRU', 'SeqLSTMDecoder', 'SeqGRUDecoder',
+           'Decoder_Linear', 'LinearDecoder']
 
 # Cell
 import torch
@@ -408,7 +410,7 @@ class Mod_Embedding(torch.nn.Module):
 #legacy
 InputModNet = Mod_Embedding
 
-class Input_AA_Mod_with_PositionalEncoding(torch.nn.Module):
+class Input_AA_Mod_PositionalEncoding(torch.nn.Module):
     """
     Encodes AA and modification vector
     """
@@ -430,7 +432,33 @@ class Input_AA_Mod_with_PositionalEncoding(torch.nn.Module):
         x = self.aa_emb(aa_indices)
         return self.pos_encoder(torch.cat((x, mod_x), 2))
 #legacy
-AATransformerEncoding = Input_AA_Mod_with_PositionalEncoding
+AATransformerEncoding = Input_AA_Mod_PositionalEncoding
+
+class Input_AA_Mod_Charge_PositionalEncoding(torch.nn.Module):
+    """
+    Encodes AA and modification vector
+    """
+    def __init__(self, out_features, max_len=200):
+        super().__init__()
+        mod_hidden = 8
+        self.charge_dim = 2
+        self.mod_nn = Mod_Embedding_FixFirstK(mod_hidden)
+        self.aa_emb = aa_embedding(
+            out_features-mod_hidden-self.charge_dim
+        )
+        self.pos_encoder = PositionalEncoding(
+            out_features, max_len
+        )
+
+    def forward(self,
+        aa_indices, mod_x, charges
+    ):
+        mod_x = self.mod_nn(mod_x)
+        x = self.aa_emb(aa_indices)
+        charge_x = charges.unsqueeze(1).repeat(
+            1, mod_x.size(1), self.charge_dim
+        )
+        return self.pos_encoder(torch.cat((x, mod_x,charge_x), 2))
 
 # Cell
 
@@ -654,14 +682,16 @@ class Encoder_AA_Mod_Transformer(torch.nn.Module):
     ):
         super().__init__()
 
-        self.input_nn = Input_AA_Mod_with_PositionalEncoding(out_features)
+        self.dropout = torch.nn.Dropout(dropout)
 
-        self._output_attentions = output_attentions
+        self.input_nn = Input_AA_Mod_PositionalEncoding(out_features)
+
+        self.output_attentions = output_attentions
         self.encoder = Hidden_HFace_Transformer(
             out_features, nlayers=nlayers, dropout=dropout,
             output_attentions=output_attentions
         )
-    def forward(self,aa_indices,mod_x):
+    def forward(self, aa_indices, mod_x):
         in_x = self.dropout(self.input_nn(
             aa_indices, mod_x
         ))
@@ -672,6 +702,72 @@ class Encoder_AA_Mod_Transformer(torch.nn.Module):
         else:
             self.attentions = None
         return x[0]
+
+class Encoder_AA_Mod_Transformer_AttnSum(torch.nn.Module):
+    def __init__(self,out_features,
+        dropout=0.1,
+        nlayers=4,
+        output_attentions=False
+    ):
+        super().__init__()
+
+        self.dropout = torch.nn.Dropout(dropout)
+
+        self.encoder_nn = Encoder_AA_Mod_Transformer(
+            out_features, dropout=dropout, nlayers=nlayers,
+            output_attentions=output_attentions
+        )
+        self.attn_sum = SeqAttentionSum(out_features)
+
+    def forward(self, aa_indices, mod_x):
+        x = self.encoder_nn(aa_indices, mod_x)
+        return self.dropout(self.attn_sum(x))
+
+class Encoder_AA_Mod_Charge_Transformer(torch.nn.Module):
+    def __init__(self,out_features,
+        dropout=0.1,
+        nlayers=4,
+        output_attentions=False
+    ):
+        super().__init__()
+
+        self.input_nn = Input_AA_Mod_Charge_PositionalEncoding(out_features)
+
+        self.output_attentions = output_attentions
+        self.encoder = Hidden_HFace_Transformer(
+            out_features, nlayers=nlayers, dropout=dropout,
+            output_attentions=output_attentions
+        )
+    def forward(self, aa_indices, mod_x, charges):
+        in_x = self.dropout(self.input_nn(
+            aa_indices, mod_x, charges
+        ))
+
+        x = self.encoder(in_x)
+        if self.output_attentions:
+            self.attentions = x[1]
+        else:
+            self.attentions = None
+        return x[0]
+
+class Encoder_AA_Mod_Charge_Transformer_AttnSum(torch.nn.Module):
+    def __init__(self,out_features,
+        dropout=0.1,
+        nlayers=4,
+        output_attentions=False
+    ):
+        super().__init__()
+
+        self.dropout = torch.nn.Dropout(dropout)
+
+        self.encoder_nn = Encoder_AA_Mod_Charge_Transformer(
+            out_features, dropout=dropout, nlayers=nlayers,
+            output_attentions=output_attentions
+        )
+        self.attn_sum = SeqAttentionSum(out_features)
+    def forward(self, aa_indices, mod_x, charges):
+        x = self.encoder_nn(aa_indices, mod_x, charges)
+        return self.dropout(self.attn_sum(x))
 
 class Encoder_AA_Mod_Charge_CNN_LSTM_AttnSum(torch.nn.Module):
     """

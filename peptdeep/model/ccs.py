@@ -17,7 +17,7 @@ from alphabase.peptide.mobility import (
 )
 
 from peptdeep.model.featurize import (
-    parse_aa_indices,
+    get_batch_aa_indices,
     get_batch_mod_feature
 )
 
@@ -91,8 +91,7 @@ class Model_CCS_Bert(torch.nn.Module):
 # Cell
 class Model_CCS_LSTM(torch.nn.Module):
     def __init__(self,
-        dropout=0.1,
-        *kwargs,
+        dropout=0.1
     ):
         super().__init__()
 
@@ -146,7 +145,7 @@ def mobility_to_ccs_df_(
 
 # Cell
 
-class AlphaCCSModel(model_base.PeptideModelInterfaceBase):
+class AlphaCCSModel(model_base.ModelInterface):
     def __init__(self,
         dropout=0.1,
         model_class:torch.nn.Module=Model_CCS_LSTM,
@@ -158,7 +157,6 @@ class AlphaCCSModel(model_base.PeptideModelInterfaceBase):
             dropout=dropout,
             **kwargs
         )
-        self.loss_func = torch.nn.L1Loss()
         self.charge_factor = 0.1
 
     def _prepare_predict_data_df(self,
@@ -170,16 +168,18 @@ class AlphaCCSModel(model_base.PeptideModelInterfaceBase):
 
     def _get_features_from_batch_df(self,
         batch_df: pd.DataFrame,
-        nAA, **kwargs,
     ):
         aa_indices = torch.LongTensor(
-            parse_aa_indices(
+            get_batch_aa_indices(
                 batch_df['sequence'].values.astype('U')
             )
         )
 
-        mod_x_batch = get_batch_mod_feature(batch_df, nAA)
-        mod_x = torch.Tensor(mod_x_batch)
+        mod_x = torch.Tensor(
+            get_batch_mod_feature(
+                batch_df
+            )
+        )
 
         charges = torch.Tensor(
             batch_df['charge'].values
@@ -189,7 +189,6 @@ class AlphaCCSModel(model_base.PeptideModelInterfaceBase):
 
     def _get_targets_from_batch_df(self,
         batch_df: pd.DataFrame,
-        **kwargs,
     ) -> torch.Tensor:
         return torch.Tensor(batch_df['ccs'].values)
 

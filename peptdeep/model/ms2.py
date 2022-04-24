@@ -21,7 +21,7 @@ from alphabase.peptide.fragment import (
 )
 
 from peptdeep.model.featurize import (
-    parse_aa_indices, parse_instrument_indices,
+    get_batch_aa_indices, parse_instrument_indices,
     get_batch_mod_feature
 )
 
@@ -54,7 +54,7 @@ class ModelMS2Transformer(torch.nn.Module):
             self._mask_modloss = True
 
         meta_dim = 8
-        self.input_nn = model_base.Input_AA_Mod_with_PositionalEncoding(hidden-meta_dim)
+        self.input_nn = model_base.Input_AA_Mod_PositionalEncoding(hidden-meta_dim)
 
         self.meta_nn = model_base.Meta_Embedding(meta_dim)
 
@@ -146,7 +146,7 @@ class ModelMS2Bert(torch.nn.Module):
             self._mask_modloss = True
 
         meta_dim = 8
-        self.input_nn = model_base.Input_AA_Mod_with_PositionalEncoding(hidden-meta_dim)
+        self.input_nn = model_base.Input_AA_Mod_PositionalEncoding(hidden-meta_dim)
 
         self.meta_nn = model_base.Meta_Embedding(meta_dim)
 
@@ -345,7 +345,7 @@ frag_types = settings['model']['frag_types']
 max_frag_charge = settings['model']['max_frag_charge']
 num_ion_types = len(frag_types)*max_frag_charge
 
-class pDeepModel(model_base.PeptideModelInterfaceBase):
+class pDeepModel(model_base.ModelInterface):
     def __init__(self,
         charged_frag_types = get_charged_frag_types(
             frag_types, max_frag_charge
@@ -417,16 +417,19 @@ class pDeepModel(model_base.PeptideModelInterfaceBase):
 
     def _get_features_from_batch_df(self,
         batch_df: pd.DataFrame,
-        nAA, **kwargs,
+        **kwargs,
     ) -> Tuple[torch.Tensor]:
         aa_indices = torch.LongTensor(
-            parse_aa_indices(
+            get_batch_aa_indices(
                 batch_df['sequence'].values.astype('U')
             )
         )
 
-        mod_x_batch = get_batch_mod_feature(batch_df, nAA)
-        mod_x = torch.Tensor(mod_x_batch)
+        mod_x = torch.Tensor(
+            get_batch_mod_feature(
+                batch_df
+            )
+        )
 
         charges = torch.Tensor(
             batch_df['charge'].values
@@ -442,7 +445,7 @@ class pDeepModel(model_base.PeptideModelInterfaceBase):
         return aa_indices, mod_x, charges, nces, instrument_indices
 
     def _get_targets_from_batch_df(self,
-        batch_df: pd.DataFrame, nAA,
+        batch_df: pd.DataFrame,
         fragment_intensity_df:pd.DataFrame=None
     ) -> torch.Tensor:
         return torch.Tensor(
@@ -452,7 +455,10 @@ class pDeepModel(model_base.PeptideModelInterfaceBase):
                     ['frag_start_idx','frag_end_idx']
                 ].values
             ).values
-        ).view(-1, nAA-1, len(self.charged_frag_types))
+        ).view(-1,
+            batch_df.nAA.values[0]-1,
+            len(self.charged_frag_types)
+        )
 
     def _set_batch_predict_data(self,
         batch_df: pd.DataFrame,
@@ -511,6 +517,7 @@ class pDeepModel(model_base.PeptideModelInterfaceBase):
         *,
         batch_size=1024,
         epoch=20,
+        warmup_epoch=0,
         verbose=False,
         verbose_each_epoch=False,
         **kwargs
@@ -520,6 +527,7 @@ class pDeepModel(model_base.PeptideModelInterfaceBase):
             fragment_intensity_df=fragment_intensity_df,
             batch_size=batch_size,
             epoch=epoch,
+            warmup_epoch=warmup_epoch,
             verbose=verbose,
             verbose_each_epoch=verbose_each_epoch,
             **kwargs

@@ -12,6 +12,7 @@ from peptdeep.spec_lib.translate import (
 )
 
 from peptdeep.pretrained_models import ModelManager
+from peptdeep.utils import logging
 
 import pandas as pd
 import numpy as np
@@ -60,6 +61,7 @@ class PredictLibraryMakerBase(object):
         self.fragment_intensity_df = self.spec_lib.fragment_intensity_df
 
     def make_library(self, _input):
+        logging.info("Generating the library...")
         try:
             self._input(_input)
             self._check_df()
@@ -69,7 +71,12 @@ class PredictLibraryMakerBase(object):
             raise e
 
     def translate_library(self)->pd.DataFrame:
+        logging.info("Translating to tsv library for DiaNN/Spectronaut...")
         lib_settings = self._settings['library']
+
+        if 'proteins' not in self.spec_lib._precursor_df.columns:
+            self.spec_lib.append_protein_name()
+
         return speclib_to_single_df(
             self.spec_lib,
             translate_mod_dict=mod_to_unimod_dict,

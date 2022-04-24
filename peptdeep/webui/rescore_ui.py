@@ -1,3 +1,4 @@
+from argparse import FileType
 import streamlit as st
 from peptdeep.webui.ui_utils import markdown_link
 import peptdeep
@@ -21,7 +22,7 @@ def files_in_folder_pandas(folder: str, file_type:str=None) -> pd.DataFrame:
         file_type = file_type.lower()
         files = [
             file for file in os.listdir(folder) 
-            if file.lower().endswith(f".{file_type}")
+            if file.lower().endswith(f".{file_type}") or file.lower() == file_type
         ]
     created = [time.ctime(os.path.getctime(os.path.join(folder, _))) for _ in files]
     sizes = [os.path.getsize(os.path.join(folder, _)) / 1024 ** 2 for _ in files]
@@ -33,14 +34,13 @@ def files_in_folder_pandas(folder: str, file_type:str=None) -> pd.DataFrame:
 
 def show():
     """Streamlit page that displays information on how to rescore."""
-    st.write("# Rescore started")
-    st.text("Welcome to rescore of AlphaPeptDeep.")
+    st.write("# DDA Rescoring")
 
     raw_folder = st.text_input('Raw folder')
     #st.write('The current raw folder is', raw_folder)
     MS_type = st.selectbox(
-     'MS types',
-     ('Raw', 'MGF', 'hdf','py'))
+     'MS file type',
+     ('Raw', 'MGF', 'hdf'))
     #st.write('You selected:', MS_type)
     if raw_folder:
         st.text(
@@ -56,13 +56,13 @@ def show():
     result_folder = st.text_input('Result folder')
     #st.write('The current result folder is', result_folder)
     PSM_type = st.selectbox(
-     'PSM types',
+     'PSM file type',
      ('AlphaPept', 'pFind', 'MaxQuant'))
     if PSM_type == 'AlphaPept':
         psm_type = 'hdf'
-    if PSM_type == 'pFind':
+    elif PSM_type == 'pFind':
         psm_type = 'spectra'
-    if PSM_type == 'MaxQuant':
+    elif PSM_type == 'MaxQuant':
         psm_type = 'txt'
     #st.write('You selected:', PSM_type)
     if result_folder:
