@@ -354,9 +354,10 @@ class pDeepModel(model_base.ModelInterface):
         mask_modloss=True,
         modloss_type='modloss',
         model_class:torch.nn.Module=ModelMS2Bert,
+        device:str='gpu',
         **kwargs, #model params
     ):
-        super().__init__()
+        super().__init__(device=device)
         self.charged_frag_types = charged_frag_types
         self._get_modloss_frags(modloss_type)
 

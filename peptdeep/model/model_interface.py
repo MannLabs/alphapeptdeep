@@ -63,12 +63,13 @@ class ModelInterface(object):
     the abstract (i.e. not implemented) methods.
     """
     def __init__(self,
+        device:str='gpu',
         **kwargs
     ):
         self.model:torch.nn.Module = None
         self.optimizer = None
         self.model_params:dict = {}
-        self.set_device(kwargs.get('device','gpu'))
+        self.set_device(device)
 
     def set_device(self, device_type = 'gpu'):
         """

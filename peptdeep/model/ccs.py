@@ -149,9 +149,10 @@ class AlphaCCSModel(model_base.ModelInterface):
     def __init__(self,
         dropout=0.1,
         model_class:torch.nn.Module=Model_CCS_LSTM,
+        device:str='gpu',
         **kwargs,
     ):
-        super().__init__()
+        super().__init__(device=device)
         self.build(
             model_class,
             dropout=dropout,
