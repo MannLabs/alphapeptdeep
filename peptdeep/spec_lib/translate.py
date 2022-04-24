@@ -72,10 +72,10 @@ def _get_frag_info_from_column_name(column:str):
 def _get_frag_num(columns, rows, frag_len):
     frag_nums = []
     for r,c in zip(rows, columns):
-        if c[0] in 'xyz':
-            frag_nums.append(frag_len-r)
-        else:
+        if is_nterm_frag(c):
             frag_nums.append(r+1)
+        else:
+            frag_nums.append(frag_len-r)
     return frag_nums
 
 def merge_precursor_fragment_df(
