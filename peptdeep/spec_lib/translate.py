@@ -369,14 +369,12 @@ def translate_to_tsv(
     translate_mod_dict:dict = mod_to_unimod_dict,
 ):
     if isinstance(tsv_or_buf, str):
-        f = open(tsv_or_buf, "w")
-    else:
-        f = tsv_or_buf
+        with open(tsv_or_buf, "w"): pass
     _speclib = SpecLibBase()
     _speclib._fragment_intensity_df = speclib._fragment_intensity_df
     _speclib._fragment_mz_df = speclib._fragment_mz_df
     precursor_df = speclib._precursor_df
-    for i in tqdm.tqdm(range(0, len(speclib._precursor_df), batch_size)):
+    for i in tqdm.tqdm(range(0, len(precursor_df), batch_size)):
         _speclib._precursor_df = precursor_df.iloc[i:i+batch_size]
         df = speclib_to_single_df(
             _speclib, translate_mod_dict=translate_mod_dict,
@@ -387,6 +385,4 @@ def translate_to_tsv(
             min_frag_nAA=min_frag_nAA,
             verbose=False
         )
-        df.to_csv(f, header=(i==0), sep="\t", index=False)
-    if isinstance(tsv_or_buf, str):
-        f.close()
+        df.to_csv(tsv_or_buf, header=(i==0), sep="\t", mode='a', index=False)
