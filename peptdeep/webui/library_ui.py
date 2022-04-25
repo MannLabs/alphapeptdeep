@@ -9,16 +9,17 @@ import time
 from peptdeep.settings import global_settings
 from peptdeep.cli import generate_library
 from alphabase.yaml_utils import save_yaml
+from alphabase.constants.modification import MOD_DF
 
 def mod_options():
     fixmod, = st.multiselect(
             'Please select fixed modifications',
-            ['Carbamidomethyl@C'],
+            MOD_DF.index.values,
             default = ['Carbamidomethyl@C']
         ),
     varmod, = st.multiselect(
             'Please select variable modifications',
-            ['Oxidation@M'],
+            MOD_DF.index.values,
             default = ['Oxidation@M']
         ),
     global_settings['library']['input']['fix_mods'] = fixmod
@@ -48,10 +49,8 @@ def choose_precursor_mz():
     global_settings['library']['input']['max_precursor_mz'] = max_precursor_mz
 
 def add_decoy():
-    add_decoy = st.checkbox('Add decoy')
-    if add_decoy == 1:
-        decoy = st.selectbox('decoy methods',global_settings['library']['input']['decoy_choices'],index = 2)
-        global_settings['library']['input']['decoy'] = decoy
+    decoy = st.selectbox('decoy methods',global_settings['library']['input']['decoy_choices'],index = 0)
+    global_settings['library']['input']['decoy'] = decoy
 
 def choose_protease():
     protease = st.selectbox(
