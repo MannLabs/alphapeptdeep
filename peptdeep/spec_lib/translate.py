@@ -27,7 +27,7 @@ def create_modified_sequence(
     Args:
         df_items (List): must be `(sequence, mods, mod_sites)`
         translate_mod_dict (dict): A dict to map alpha modification names to other software
-        mod_seq (str): '[]' or '()', default '[]'
+        mod_sep (str): '[]' or '()', default '[]'
     '''
     nterm = '_'
     cterm = '_'
@@ -84,11 +84,11 @@ def merge_precursor_fragment_df(
     fragment_inten_df:pd.DataFrame,
     top_n_inten:int,
     frag_type_head:str='FragmentType',
-    frag_mass_head:str='FragmengMz',
-    frag_inten_head:str='RelativeIntensity',
+    frag_mass_head:str='FragmentMz',
+    frag_inten_head:str='LibraryIntensity',
     frag_charge_head:str='FragmentCharge',
     frag_loss_head:str='FragmentLossType',
-    frag_num_head:str='FragmentNumber',
+    frag_num_head:str='FragmentSeriesNumber',
     verbose=True,
 ):
     '''
@@ -241,10 +241,10 @@ def speclib_to_single_df(
     modloss='H3PO4',
     frag_type_head:str='FragmentType',
     frag_mass_head:str='FragmentMz',
-    frag_inten_head:str='RelativeIntensity',
+    frag_inten_head:str='LibraryIntensity',
     frag_charge_head:str='FragmentCharge',
     frag_loss_head:str='FragmentLossType',
-    frag_num_head:str='FragmentNumber',
+    frag_num_head:str='FragmentSeriesNumber',
     verbose = True,
 )->pd.DataFrame:
     '''
@@ -272,11 +272,11 @@ def speclib_to_single_df(
 
     df['PrecursorCharge'] = speclib._precursor_df['charge']
     if 'irt_pred' in speclib._precursor_df.columns:
-        df['iRT'] = speclib._precursor_df['irt_pred']
+        df['Tr_recalibrated'] = speclib._precursor_df['irt_pred']
     elif 'rt_pred' in speclib._precursor_df.columns:
-        df['iRT'] = speclib._precursor_df['rt_pred']
+        df['Tr_recalibrated'] = speclib._precursor_df['rt_pred']
     elif 'rt_norm' in speclib._precursor_df.columns:
-        df['iRT'] = speclib._precursor_df['rt_norm']
+        df['Tr_recalibrated'] = speclib._precursor_df['rt_norm']
     else:
         raise ValueError('precursor_df must contain the "rt_pred" or "rt_norm" column')
 
@@ -334,7 +334,7 @@ def speclib_to_single_df(
         frag_num_head=frag_num_head,
         verbose=verbose
     )
-    df = df[df['RelativeIntensity']>min_frag_intensity]
+    df = df[df['LibraryIntensity']>min_frag_intensity]
     df.loc[df[frag_loss_head]=='modloss',frag_loss_head] = modloss
 
     return df.drop(['frag_start_idx','frag_end_idx'], axis=1)
