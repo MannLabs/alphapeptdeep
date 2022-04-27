@@ -277,7 +277,8 @@ def clear_error_modloss_intensities(
 
 class ModelManager(object):
     def __init__(self,
-        mask_modloss:bool=mgr_settings['mask_modloss']
+        mask_modloss:bool=mgr_settings['mask_modloss'],
+        device:str='gpu',
     ):
         """ The manager class to access MS2/RT/CCS models.
 
@@ -286,6 +287,9 @@ class ModelManager(object):
                 in the ms2 model. `modloss` ions are mostly useful for phospho
                 MS2 prediciton model.
                 Defaults to :py:data:`global_settings`['model_mgr']['mask_modloss'].
+            device (str, optional): Device for DL models, could be 'gpu' ('cuda') or 'cpu'.
+                if device=='gpu' but no GPUs are detected, it will automatically switch to 'cpu'.
+                Defaults to 'gpu'.
 
         Attributes:
             ms2_model (:py:class:`peptdeep.model.ms2.pDeepModel`): The MS2 (pDeep)
@@ -309,9 +313,9 @@ class ModelManager(object):
                 NCE and instrument type. This will change `self.nce` and `self.instrument` values.
                 Defaults to global_settings['model_mgr']['fine_tune']['grid_nce_search'].
         """
-        self.ms2_model:pDeepModel = pDeepModel(mask_modloss=mask_modloss)
-        self.rt_model:AlphaRTModel = AlphaRTModel()
-        self.ccs_model:AlphaCCSModel = AlphaCCSModel()
+        self.ms2_model:pDeepModel = pDeepModel(mask_modloss=mask_modloss, device=device)
+        self.rt_model:AlphaRTModel = AlphaRTModel(device=device)
+        self.ccs_model:AlphaCCSModel = AlphaCCSModel(device=device)
 
         self.load_installed_models()
 

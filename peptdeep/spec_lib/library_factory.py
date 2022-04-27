@@ -8,7 +8,8 @@ from alphabase.peptide.fragment import get_charged_frag_types
 from peptdeep.settings import global_settings
 from peptdeep.protein.fasta import PredictFastaSpecLib
 from peptdeep.spec_lib.translate import (
-    speclib_to_single_df, mod_to_unimod_dict
+    speclib_to_single_df, mod_to_unimod_dict,
+    translate_to_tsv
 )
 
 from peptdeep.pretrained_models import ModelManager
@@ -70,8 +71,36 @@ class PredictLibraryMakerBase(object):
         except ValueError as e:
             raise e
 
+    def translate_to_tsv(self, tsv_path:str)->pd.DataFrame:
+        logging.info(f"Translating to {tsv_path} for DiaNN/Spectronaut...")
+        lib_settings = self._settings['library']
+
+        if 'proteins' not in self.spec_lib._precursor_df.columns:
+            self.spec_lib.append_protein_name()
+
+        translate_to_tsv(
+            self.spec_lib,
+            tsv_path,
+            keep_k_highest_fragments=lib_settings['output_tsv'][
+                'keep_higest_k_peaks'
+            ],
+            min_frag_intensity=lib_settings['output_tsv'][
+                'min_relative_intensity'
+            ],
+            min_frag_mz=lib_settings['output_tsv'][
+                'min_fragment_mz'
+            ],
+            max_frag_mz=lib_settings['output_tsv'][
+                'max_fragment_mz'
+            ],
+            batch_size=lib_settings['output_tsv'][
+                'translate_batch_size'
+            ],
+            translate_mod_dict=mod_to_unimod_dict,
+        )
+
     def translate_library(self)->pd.DataFrame:
-        logging.info("Translating to tsv library for DiaNN/Spectronaut...")
+        logging.info("Translating library for DiaNN/Spectronaut...")
         lib_settings = self._settings['library']
 
         if 'proteins' not in self.spec_lib._precursor_df.columns:

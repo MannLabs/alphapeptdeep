@@ -14,7 +14,7 @@ def show():
         st.write(
             "- Model: Set the parameters of peptdeep models."
             " \n- Library: Predict spectral libraries."
-            " \n- Rescore: Rescore DDA search results."
+            " \n- Rescore: Rescore DDA search results (the GUI is not finished yet)."
         )
 
     with st.expander("Resources"):
@@ -45,4 +45,4 @@ def show():
         )
 
     with st.expander("Sample Run"):
-        st.write("TBD")
+        st.write("To Be Finished")

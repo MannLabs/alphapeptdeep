@@ -67,7 +67,7 @@ class PredictSpecLib(SpecLibBase):
 
     def predict_all(self):
         """ Add 'rt_pred' into columns """
-        logging.info('predicting RT/IM/MS2 ...')
+        logging.info('Predicting RT/IM/MS2 ...')
         res = self.model_manager.predict_all(
             self._precursor_df,
             predict_items=['rt','mobility','ms2'],
