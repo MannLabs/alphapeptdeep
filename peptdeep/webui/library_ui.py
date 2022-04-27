@@ -6,8 +6,10 @@ import peptdeep
 import pandas as pd
 import os
 import time
+from datetime import datetime
 from peptdeep.settings import global_settings
 from peptdeep.cli import generate_library
+from peptdeep.utils import set_logger, logging, show_platform_info, show_python_info
 from alphabase.yaml_utils import save_yaml
 from alphabase.constants.modification import MOD_DF
 
@@ -18,41 +20,41 @@ def mod_options():
     fixmod, = st.multiselect(
             'Please select fixed modifications',
             MOD_DF.index.values,
-            default = ['Carbamidomethyl@C']
+            default = global_settings['library']['input']['fix_mods']
         ),
     varmod, = st.multiselect(
             'Please select variable modifications',
             MOD_DF.index.values,
-            default = ['Oxidation@M']
+            default = global_settings['library']['input']['var_mods']
         ),
     global_settings['library']['input']['fix_mods'] = fixmod
     global_settings['library']['input']['var_mods'] = varmod
 
 
 def varmod_range():
-    min_varmod = st.number_input('Min number of var mods',min_value = 0, max_value = 1, value = 0, step = 1)
-    max_varmod = st.number_input('Max number of var mods',min_value = 1, max_value = 2, value = 2, step = 1)
+    min_varmod = st.number_input('Min number of variable modifications',min_value = 0, max_value = 1, value = global_settings['library']['input']['min_var_mod_num'], step = 1)
+    max_varmod = st.number_input('Max number of variable modifications',min_value = 1, max_value = 2, value = global_settings['library']['input']['max_var_mod_num'], step = 1)
     global_settings['library']['input']['min_var_mod_num'] = min_varmod
     global_settings['library']['input']['max_var_mod_num'] = max_varmod
 
 
 def choose_precursor_charge():
-    from_charge = st.number_input('Precursor charge from',min_value = 1, max_value = 4, value = 2, step = 1)
+    from_charge = st.number_input('Min precursor charge', min_value = 1, max_value = 4, value = global_settings['library']['input']['min_precursor_charge'], step = 1)
     to_charge = st.number_input(
-        'to',
-        min_value = from_charge, max_value = 6, value = from_charge, step = 1
+        'Max precursor charge',
+        min_value = from_charge, max_value = 7, value = global_settings['library']['input']['max_precursor_charge'], step = 1
     )
     global_settings['library']['input']['min_precursor_charge'] = from_charge
     global_settings['library']['input']['max_precursor_charge'] = to_charge
 
 def choose_precursor_mz():
-    min_precursor_mz = st.number_input('Min precursor mz', value = 400)
+    min_precursor_mz = st.number_input('Min precursor mz', value = global_settings['library']['input']['min_precursor_mz'])
     global_settings['library']['input']['min_precursor_mz'] = min_precursor_mz
-    max_precursor_mz = st.number_input('Max precursor mz', min_value = min_precursor_mz, value = 2000)
+    max_precursor_mz = st.number_input('Max precursor mz', min_value = min_precursor_mz, value = global_settings['library']['input']['max_precursor_mz'])
     global_settings['library']['input']['max_precursor_mz'] = max_precursor_mz
 
 def add_decoy():
-    decoy = st.selectbox('decoy methods',global_settings['library']['input']['decoy_choices'],index = 0)
+    decoy = st.selectbox('Decoy method',global_settings['library']['input']['decoy_choices'],index = 0)
     global_settings['library']['input']['decoy'] = decoy
 
 def choose_protease():
@@ -61,43 +63,33 @@ def choose_protease():
         global_settings['library']['input']['fasta']['protease_choices'],
     )
     global_settings['library']['input']['fasta']['protease'] = protease
-    max_miss_cleave = st.number_input('Max number of miss cleavages',value = 2)
+    max_miss_cleave = st.number_input('Max number of miss cleavages',value = global_settings['library']['input']['fasta']['max_miss_cleave'])
     global_settings['library']['input']['fasta']['max_miss_cleave'] = max_miss_cleave
 
 def choose_peptide_len():
-    min_peptide_len = st.number_input('Min peptide len:', value = 7)
-    max_peptide_len = st.number_input('Max peptide len:', min_value = min_peptide_len, value = 35)
+    min_peptide_len = st.number_input('Min peptide length:', value = global_settings['library']['input']['min_peptide_len'])
+    max_peptide_len = st.number_input('Max peptide length:', min_value = min_peptide_len, value = global_settings['library']['input']['max_peptide_len'])
     global_settings['library']['input']['min_peptide_len'] = min_peptide_len
     global_settings['library']['input']['max_peptide_len'] = max_peptide_len
 
 def choose_frag_types():
     frag_types = st.multiselect(
         'fragment types',(global_settings['model']['frag_types']),
-        default = ['b','y']
+        default = global_settings['library']['input']['frag_types']
     )
     global_settings['library']['input']['frag_types'] = frag_types
-    max_frag_charge = st.number_input('Max fragment charge:',min_value = 1, max_value = 2, value = 2, step = 1)
+    max_frag_charge = st.number_input('Max fragment charge:',min_value = 1, max_value = 2, value = global_settings['library']['input']['max_frag_charge'], step = 1)
     global_settings['library']['input']['max_frag_charge'] = max_frag_charge
 
 def output_tsv():
-    min_fragment_mz = st.number_input('Min fragment mz:', value = 300)
+    min_fragment_mz = st.number_input('Min fragment mz:', value = global_settings['library']['output_tsv']['min_fragment_mz'])
     global_settings['library']['output_tsv']['min_fragment_mz'] = min_fragment_mz
-    max_fragment_mz = st.number_input('Max fragment mz:', min_value = min_fragment_mz, value = 2000)
+    max_fragment_mz = st.number_input('Max fragment mz:', min_value = min_fragment_mz, value = global_settings['library']['output_tsv']['max_fragment_mz'])
     global_settings['library']['output_tsv']['max_fragment_mz'] = max_fragment_mz
-    min_relative_intensity = st.number_input('Min relative intensity:', value = 0.02)
+    min_relative_intensity = st.number_input('Min relative intensity:', value = global_settings['library']['output_tsv']['min_relative_intensity'])
     global_settings['library']['output_tsv']['min_relative_intensity'] = min_relative_intensity
-    keep_higest_k_peaks = st.number_input('Number of highest peaks to keep:', value = 12)
+    keep_higest_k_peaks = st.number_input('Number of highest peaks to keep:', value = global_settings['library']['output_tsv']['keep_higest_k_peaks'])
     global_settings['library']['output_tsv']['keep_higest_k_peaks'] = keep_higest_k_peaks
-
-def input_type():
-    input_type = st.selectbox(
-        'Input file type',
-        global_settings['library']['input']['type_choices'],
-        key='file_type',
-        disabled=(len(global_settings['library']['input']['paths'])>0)
-    )
-    global_settings['library']['input']['type'] = input_type
-    return input_type
 
 def files_in_pandas(files:list) -> pd.DataFrame:
     """Reads a folder and returns a pandas dataframe containing the files and additional information.
@@ -107,16 +99,17 @@ def files_in_pandas(files:list) -> pd.DataFrame:
     Returns:
         pd.DataFrame: PandasDataFrame.
     """
-    created = [time.ctime(os.path.getctime(_)) for _ in files]
+    ctimes = [os.path.getctime(_) for _ in files]
+    created = [datetime.fromtimestamp(_).strftime("%Y-%m-%d %H:%M:%S") for _ in ctimes]
     sizes = [os.path.getsize(_) / 1024 ** 2 for _ in files]
-    df = pd.DataFrame(files, columns=["File"])
-    df["Created"] = created
-    df["Filesize (Mb)"] = sizes
+    df = pd.DataFrame(files, columns=["File Path"])
+    df["Created Time"] = created
+    df["File Size (Mb)"] = sizes
 
     return df
 
 def select_files(_input_type):
-    path = st.text_input(f'File paths ({_input_type} files)')
+    path = st.text_input(f"File paths ({_input_type if _input_type=='fasta' else 'tsv/csv/txt'} files)")
     col1, col2, col3 = st.columns([0.5,0.5,2])
     with col1:
         add = st.button('Add')
@@ -132,20 +125,39 @@ def select_files(_input_type):
             global_settings['library']['input']['paths'].remove(path)
     if clear is True:
         global_settings['library']['input']['paths'] = []
+    update_input_paths()
+    st.table(files_in_pandas(global_settings['library']['input']['paths']))
+
+def input_files():
+    def on_input_change():
+        if len(global_settings['library']['input']['paths'])>0:
+            st.warning("Please clear all input files before changing the input file type")
+            st.session_state.input_type = global_settings['library']['input']['type']
+            
+    update_input_paths()
+    input_type = st.selectbox(
+        'Input file type',
+        global_settings['library']['input']['type_choices'],
+        key='input_type',
+        on_change=on_input_change
+    )
+    global_settings['library']['input']['type'] = input_type
+
+    select_files(input_type)
+    return input_type
+
+def update_input_paths():
     global_settings['library']['input']['paths'] = [
         _ for _ in global_settings['library']['input']['paths']
         if os.path.isfile(_)
     ]
-    st.table(files_in_pandas(global_settings['library']['input']['paths']))
 
 def show():
     st.write("# Library Prediction")
 
     st.write('### Input')
 
-    _input_type = input_type()
-
-    select_files(_input_type)
+    _input_type = input_files()
 
     add_decoy()
 
@@ -171,7 +183,8 @@ def show():
 
     st.write("### Output")
 
-    output_dir = st.text_input("Output folder", value="/Users/zhouxiexuan/workspace/alphadeep_test")
+    output_dir = st.text_input("Output folder", value=global_settings['library']['output_dir'])
+    output_dir = os.path.abspath(os.path.expanduser(os.path.expandvars(output_dir)))
     global_settings['library']['output_dir'] = output_dir
 
     tsv_enabled = bool(st.checkbox('Output TSV (for DiaNN/Spectronaut)'))
@@ -180,11 +193,20 @@ def show():
         output_tsv()
 
     if st.button('Generate library'):
-        if not os.path.exists(output_dir):
-            os.makedirs(output_dir)
-        save_yaml(
-            os.path.join(output_dir, 'peptdeep_settings.yaml'),
-            global_settings
-        )
-        generate_library()
-        st.write('finished')
+        if len(global_settings['library']['input']['paths']) > 0:
+            if not os.path.exists(output_dir):
+                os.makedirs(output_dir)
+            set_logger(
+                log_file_name=os.path.join(output_dir, 'peptdeep.log'),
+                overwrite=True, stream=True
+            )
+            show_platform_info()
+            show_python_info()
+            save_yaml(
+                os.path.join(output_dir, 'peptdeep_settings.yaml'),
+                global_settings
+            )
+            generate_library()
+            st.write('Library generation done!')
+        else:
+            st.warning(f'Please select the input {_input_type} files')

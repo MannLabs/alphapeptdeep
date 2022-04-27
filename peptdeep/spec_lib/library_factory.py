@@ -100,7 +100,7 @@ class PredictLibraryMakerBase(object):
         )
 
     def translate_library(self)->pd.DataFrame:
-        logging.info("Translating to tsv library for DiaNN/Spectronaut...")
+        logging.info("Translating library for DiaNN/Spectronaut...")
         lib_settings = self._settings['library']
 
         if 'proteins' not in self.spec_lib._precursor_df.columns:

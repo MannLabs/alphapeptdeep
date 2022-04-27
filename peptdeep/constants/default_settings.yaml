@@ -140,11 +140,11 @@ library:
     max_var_mod_num: 2
     min_precursor_charge: 2
     max_precursor_charge: 4
-    min_peptide_len: 6
+    min_peptide_len: 7
     max_peptide_len: 35
     min_precursor_mz: 200.0
     max_precursor_mz: 2000.0
-    decoy: None
+    decoy: pseudo_reverse
     decoy_choices:
     - pseudo_reverse
     - diann
@@ -153,7 +153,7 @@ library:
     frag_types:
     - b
     - y
-  output_dir: C:/xxx/xxx
+  output_dir: ~/peptdeep_library
   output_tsv:
     enabled: False
     min_fragment_mz: 200

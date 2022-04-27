@@ -136,15 +136,15 @@ def generate_library():
         lib_settings['output_dir'], 
         'predict_library.hdf'
     )
-    logging.info(f"Save library to {hdf_path}")
+    logging.info(f"Saving HDF library to {hdf_path} ...")
     lib_maker.spec_lib.save_hdf(hdf_path)
     if lib_settings['output_tsv']['enabled']:
         tsv_path = os.path.join(
             lib_settings['output_dir'], 
             'predict_library.tsv'
         )
-        lib_df = lib_maker.translate_to_tsv(tsv_path)
-    logging.info("Finished library generation!!")
+        lib_maker.translate_to_tsv(tsv_path)
+    logging.info("Library generation done!!")
 
 @run.command("library", help="Predict library for DIA search.")
 @click.argument("settings_yaml", type=str)
