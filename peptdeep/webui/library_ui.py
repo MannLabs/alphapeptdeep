@@ -9,16 +9,20 @@ import time
 from peptdeep.settings import global_settings
 from peptdeep.cli import generate_library
 from alphabase.yaml_utils import save_yaml
+from alphabase.constants.modification import MOD_DF
+
+from pathlib import Path
+import tempfile
 
 def mod_options():
     fixmod, = st.multiselect(
             'Please select fixed modifications',
-            ['Carbamidomethyl@C'],
+            MOD_DF.index.values,
             default = ['Carbamidomethyl@C']
         ),
     varmod, = st.multiselect(
             'Please select variable modifications',
-            ['Oxidation@M'],
+            MOD_DF.index.values,
             default = ['Oxidation@M']
         ),
     global_settings['library']['input']['fix_mods'] = fixmod
@@ -48,10 +52,8 @@ def choose_precursor_mz():
     global_settings['library']['input']['max_precursor_mz'] = max_precursor_mz
 
 def add_decoy():
-    add_decoy = st.checkbox('Add decoy')
-    if add_decoy == 1:
-        decoy = st.selectbox('decoy methods',global_settings['library']['input']['decoy_choices'],index = 2)
-        global_settings['library']['input']['decoy'] = decoy
+    decoy = st.selectbox('decoy methods',global_settings['library']['input']['decoy_choices'],index = 0)
+    global_settings['library']['input']['decoy'] = decoy
 
 def choose_protease():
     protease = st.selectbox(
@@ -91,20 +93,59 @@ def input_type():
     input_type = st.selectbox(
         'Input file type',
         global_settings['library']['input']['type_choices'],
+        key='file_type',
+        disabled=(len(global_settings['library']['input']['paths'])>0)
     )
     global_settings['library']['input']['type'] = input_type
     return input_type
 
-def show():
+def files_in_pandas(files:list) -> pd.DataFrame:
+    """Reads a folder and returns a pandas dataframe containing the files and additional information.
+    Args:
+        folder (str): Path to folder.
 
+    Returns:
+        pd.DataFrame: PandasDataFrame.
+    """
+    created = [time.ctime(os.path.getctime(_)) for _ in files]
+    sizes = [os.path.getsize(_) / 1024 ** 2 for _ in files]
+    df = pd.DataFrame(files, columns=["File"])
+    df["Created"] = created
+    df["Filesize (Mb)"] = sizes
+
+    return df
+
+def select_files(_input_type):
+    path = st.text_input(f'File paths ({_input_type} files)')
+    col1, col2, col3 = st.columns([0.5,0.5,2])
+    with col1:
+        add = st.button('Add')
+    with col2:
+        remove = st.button('Remove')
+    with col3:
+        clear = st.button('Clear all files')
+    if add is True:
+        if path not in global_settings['library']['input']['paths']:
+            global_settings['library']['input']['paths'].append(path)
+    if remove is True:
+        if path in global_settings['library']['input']['paths']:
+            global_settings['library']['input']['paths'].remove(path)
+    if clear is True:
+        global_settings['library']['input']['paths'] = []
+    global_settings['library']['input']['paths'] = [
+        _ for _ in global_settings['library']['input']['paths']
+        if os.path.isfile(_)
+    ]
+    st.table(files_in_pandas(global_settings['library']['input']['paths']))
+
+def show():
     st.write("# Library Prediction")
 
     st.write('### Input')
 
     _input_type = input_type()
 
-    path = st.text_input('File paths')
-    global_settings['library']['input']['paths'] = [path]
+    select_files(_input_type)
 
     add_decoy()
 
