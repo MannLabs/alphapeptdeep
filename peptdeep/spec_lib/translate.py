@@ -110,6 +110,8 @@ def merge_precursor_fragment_df(
         iters = df[['frag_start_idx','frag_end_idx']].values
     for start, end in iters:
         intens = fragment_inten_df.iloc[start:end,:].values # is loc[start:end-1,:] faster?
+        max_inten = np.amax(intens)
+        intens /= max_inten
         masses = fragment_mz_df.iloc[start:end,:].values
         sorted_idx = np.argsort(intens.reshape(-1))[-top_n_inten:][::-1]
         idx_in_df = np.unravel_index(sorted_idx, masses.shape)
