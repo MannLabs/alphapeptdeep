@@ -19,7 +19,7 @@ from alphabase.spectrum_library.library_base import SpecLibBase
 def create_modified_sequence(
     df_items:typing.Tuple, # must be ('sequence','mods','mod_sites')
     translate_mod_dict:dict=None,
-    mod_sep='[]'
+    mod_sep='()'
 ):
     '''
     Translate `(sequence, mods, mod_sites)` into a modified sequence. Used by `df.apply()`.
@@ -27,7 +27,7 @@ def create_modified_sequence(
     Args:
         df_items (List): must be `(sequence, mods, mod_sites)`
         translate_mod_dict (dict): A dict to map alpha modification names to other software
-        mod_sep (str): '[]' or '()', default '[]'
+        mod_sep (str): '[]' or '()', default '()'
     '''
     nterm = '_'
     cterm = '_'
@@ -264,7 +264,7 @@ def speclib_to_single_df(
         create_modified_sequence,
         axis=1,
         translate_mod_dict=translate_mod_dict,
-        mod_sep='[]'
+        mod_sep='()'
     )
 
     df['frag_start_idx'] = speclib._precursor_df['frag_start_idx']

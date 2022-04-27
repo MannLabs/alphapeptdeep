@@ -270,7 +270,16 @@ class PepSpecMatch(object):
         ms2_file_type:str = 'alphapept', # or 'mgf', or 'thermo'
         ppm=True, tol=20.0,
     ):
+        """Matching PSM dataframe against the ms2 files in ms2_file_dict
 
+        Args:
+            psm_df (pd.DataFrame): PSM dataframe
+            ms2_file_dict (dict): {raw_name: ms2 path}
+            ms2_file_type (str, optional): Could be 'alphapept', 'mgf' or 'thermo'.
+                Defaults to 'alphapept'.
+            ppm (bool, optional): Defaults to True.
+            tol (float, optional): PPM units, defaults to 20.0.
+        """
         self.psm_df = psm_df
 
         if 'frag_start_idx' in self.psm_df.columns:

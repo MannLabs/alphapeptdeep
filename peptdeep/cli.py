@@ -139,16 +139,11 @@ def generate_library():
     logging.info(f"Save library to {hdf_path}")
     lib_maker.spec_lib.save_hdf(hdf_path)
     if lib_settings['output_tsv']['enabled']:
-        lib_df = lib_maker.translate_library()
         tsv_path = os.path.join(
             lib_settings['output_dir'], 
             'predict_library.tsv'
         )
-        logging.info(f"Save library to {tsv_path}")
-        lib_df.to_csv(
-            tsv_path,
-            sep='\t', index=False
-        )
+        lib_df = lib_maker.translate_to_tsv(tsv_path)
     logging.info("Finished library generation!!")
 
 @run.command("library", help="Predict library for DIA search.")
