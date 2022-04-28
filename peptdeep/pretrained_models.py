@@ -139,8 +139,9 @@ if not os.path.exists(model_zip):
 from peptdeep.model.ms2 import (
     pDeepModel, normalize_training_intensities
 )
-from peptdeep.model.rt import AlphaRTModel, uniform_sampling
+from peptdeep.model.rt import AlphaRTModel
 from peptdeep.model.ccs import AlphaCCSModel
+from peptdeep.model.model_interface import uniform_sampling
 
 from peptdeep.settings import global_settings
 mgr_settings = global_settings['model_mgr']
