@@ -141,7 +141,7 @@ from peptdeep.model.ms2 import (
 )
 from peptdeep.model.rt import AlphaRTModel
 from peptdeep.model.ccs import AlphaCCSModel
-from peptdeep.model.model_interface import uniform_sampling
+from peptdeep.utils import uniform_sampling
 
 from peptdeep.settings import global_settings
 mgr_settings = global_settings['model_mgr']
