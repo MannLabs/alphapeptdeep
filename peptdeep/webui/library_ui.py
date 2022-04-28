@@ -90,6 +90,7 @@ def output_tsv():
     global_settings['library']['output_tsv']['min_relative_intensity'] = min_relative_intensity
     keep_higest_k_peaks = st.number_input('Number of highest peaks to keep:', value = global_settings['library']['output_tsv']['keep_higest_k_peaks'])
     global_settings['library']['output_tsv']['keep_higest_k_peaks'] = keep_higest_k_peaks
+    global_settings['library']['output_tsv']['translate_mod_to_unimod_id']=bool(st.checkbox('Translate modifications to Unimod ids'))
 
 def files_in_pandas(files:list) -> pd.DataFrame:
     """Reads a folder and returns a pandas dataframe containing the files and additional information.
@@ -207,6 +208,6 @@ def show():
                 global_settings
             )
             generate_library()
-            st.write('Library generation done!')
+            st.write('Library generated!')
         else:
             st.warning(f'Please select the input {_input_type} files')

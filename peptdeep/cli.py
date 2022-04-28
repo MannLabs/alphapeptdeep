@@ -143,8 +143,14 @@ def generate_library():
             lib_settings['output_dir'], 
             'predict_library.tsv'
         )
-        lib_maker.translate_to_tsv(tsv_path)
-    logging.info("Library generation done!!")
+        from peptdeep.spec_lib.translate import mod_to_unimod_dict
+        lib_maker.translate_to_tsv(
+            tsv_path, 
+            translate_mod_dict=mod_to_unimod_dict 
+            if lib_settings['output_tsv']['translate_mod_to_unimod_id'] 
+            else None
+        )
+    logging.info("Library generated!!")
 
 @run.command("library", help="Predict library for DIA search.")
 @click.argument("settings_yaml", type=str)
