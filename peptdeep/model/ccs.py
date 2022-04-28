@@ -25,10 +25,6 @@ from peptdeep.settings import model_const
 
 import peptdeep.model.base as model_base
 
-from peptdeep.model.rt import (
-    evaluate_linear_regression,
-    evaluate_linear_regression_plot
-)
 
 # Cell
 class Model_CCS_Bert(torch.nn.Module):
