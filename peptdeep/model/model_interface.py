@@ -17,7 +17,6 @@ from alphabase.peptide.precursor import is_precursor_sorted
 from peptdeep.settings import model_const
 from peptdeep.utils import logging
 
-from peptdeep.model.building_block import *
 
 # Cell
 from torch.optim.lr_scheduler import LambdaLR

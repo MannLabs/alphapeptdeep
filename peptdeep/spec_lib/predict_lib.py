@@ -10,7 +10,6 @@ from peptdeep.utils import logging
 
 from alphabase.spectrum_library.library_base import SpecLibBase
 from peptdeep.pretrained_models import ModelManager
-from peptdeep.model.rt import convert_predicted_rt_to_irt
 from peptdeep.settings import global_settings
 
 lib_settings = global_settings['library']
@@ -61,9 +60,7 @@ class PredictSpecLib(SpecLibBase):
 
     def rt_to_irt_pred(self):
         """ Add 'irt_pred' into columns based on 'rt_pred' """
-        return convert_predicted_rt_to_irt(
-            self._precursor_df, self.model_manager.rt_model
-        )
+        return self.model_manager.rt_model.add_irt_column_to_precursor_df(self._precursor_df)
 
     def predict_all(self):
         """ Add 'rt_pred' into columns """
