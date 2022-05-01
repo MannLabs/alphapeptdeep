@@ -198,7 +198,10 @@ class ModelInterface(object):
                         batch_df, **kwargs
                     )
 
-                    predicts = self._predict_one_batch(*features)
+                    if isinstance(features, tuple):
+                        predicts = self._predict_one_batch(*features)
+                    else:
+                        predicts = self._predict_one_batch(features)
 
                     self._set_batch_predict_data(
                         batch_df, predicts,
@@ -335,10 +338,14 @@ class ModelInterface(object):
                 features = self._get_features_from_batch_df(
                     batch_df, **kwargs
                 )
-
-                batch_cost.append(
-                    self._train_one_batch(targets, *features)
-                )
+                if isinstance(features, tuple):
+                    batch_cost.append(
+                        self._train_one_batch(targets, *features)
+                    )
+                else:
+                    batch_cost.append(
+                        self._train_one_batch(targets, features)
+                    )
 
             if verbose_each_epoch:
                 batch_tqdm.set_description(
