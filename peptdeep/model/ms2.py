@@ -420,28 +420,33 @@ class pDeepModel(model_base.ModelInterface):
         batch_df: pd.DataFrame,
         **kwargs,
     ) -> Tuple[torch.Tensor]:
-        aa_indices = torch.LongTensor(
+        aa_indices = torch.tensor(
             get_batch_aa_indices(
                 batch_df['sequence'].values.astype('U')
-            )
+            ),
+            dtype=torch.long, device=self.device
         )
 
-        mod_x = torch.Tensor(
+        mod_x = torch.tensor(
             get_batch_mod_feature(
                 batch_df
-            )
+            ),
+            dtype=torch.float32, device=self.device
         )
 
-        charges = torch.Tensor(
-            batch_df['charge'].values
+        charges = torch.tensor(
+            batch_df['charge'].values,
+            dtype=torch.float32, device=self.device
         ).unsqueeze(1)*self.charge_factor
 
-        nces = torch.Tensor(
-            batch_df['nce'].values
+        nces = torch.tensor(
+            batch_df['nce'].values,
+            dtype=torch.float32, device=self.device
         ).unsqueeze(1)*self.NCE_factor
 
-        instrument_indices = torch.LongTensor(
-            parse_instrument_indices(batch_df['instrument'])
+        instrument_indices = torch.tensor(
+            parse_instrument_indices(batch_df['instrument']),
+            dtype=torch.long, device=self.device
         )
         return aa_indices, mod_x, charges, nces, instrument_indices
 
@@ -449,13 +454,14 @@ class pDeepModel(model_base.ModelInterface):
         batch_df: pd.DataFrame,
         fragment_intensity_df:pd.DataFrame=None
     ) -> torch.Tensor:
-        return torch.Tensor(
+        return torch.tensor(
             get_sliced_fragment_dataframe(
                 fragment_intensity_df,
                 batch_df[
                     ['frag_start_idx','frag_end_idx']
                 ].values
-            ).values
+            ).values,
+            dtype=torch.float32, device=self.device
         ).view(-1,
             batch_df.nAA.values[0]-1,
             len(self.charged_frag_types)
@@ -741,26 +747,28 @@ def calc_ms2_similarity(
             batch_end = i+batch_size
             batch_df = df_group.iloc[i:batch_end,:]
 
-            pred_intens = torch.Tensor(
+            pred_intens = torch.tensor(
                 get_sliced_fragment_dataframe(
                     predict_intensity_df,
                     batch_df[
                         ['frag_start_idx','frag_end_idx']
                     ].values,
                     charged_frag_types
-                ).values
+                ).values,
+                dtype=torch.float32, device=device
             ).reshape(
                 -1, (nAA-1)*len(charged_frag_types)
             ).to(device)
 
-            frag_intens = torch.Tensor(
+            frag_intens = torch.tensor(
                 get_sliced_fragment_dataframe(
                     fragment_intensity_df,
                     batch_df[
                         ['frag_start_idx','frag_end_idx']
                     ].values,
                     charged_frag_types
-                ).values
+                ).values,
+                dtype=torch.float32, device=device
             ).reshape(
                 -1, (nAA-1)*len(charged_frag_types)
             ).to(device)

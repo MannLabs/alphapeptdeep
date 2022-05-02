@@ -92,7 +92,7 @@ class ModelInterface(object):
         self.model = model_class(**kwargs)
         self.model_params = kwargs
         self.model.to(self.device)
-        self._init_for_train()
+        self._init_for_training()
 
     def train_with_warmup(self,
         precursor_df: pd.DataFrame,
@@ -275,14 +275,14 @@ class ModelInterface(object):
         self.model = Model(**kwargs)
         self.model_params = kwargs
         self.model.to(self.device)
-        self._init_for_train()
+        self._init_for_training()
 
-    def _init_for_train(self):
+    def _init_for_training(self):
         """
-        Set the loss function, and more attributes for different tasks
+        Set the loss function, and more attributes for different tasks.
+        The default loss function is nn.L1Loss.
         """
         self.loss_func = torch.nn.L1Loss()
-
 
     def _load_model_from_zipfile(self, model_file, model_path_in_zip):
         with ZipFile(model_file) as model_zip:
@@ -360,8 +360,8 @@ class ModelInterface(object):
     ):
         """Training for a mini batch"""
         self.optimizer.zero_grad()
-        predicts = self.model(*[fea.to(self.device) for fea in features])
-        cost = self.loss_func(predicts, targets.to(self.device))
+        predicts = self.model(*features)
+        cost = self.loss_func(predicts, targets)
         cost.backward()
         torch.nn.utils.clip_grad_norm_(self.model.parameters(), 1.0)
         self.optimizer.step()
@@ -372,7 +372,7 @@ class ModelInterface(object):
     ):
         """Predicting for a mini batch"""
         return self.model(
-            *[fea.to(self.device) for fea in features]
+            *features
         ).cpu().detach().numpy()
 
     def _get_targets_from_batch_df(self,
@@ -380,6 +380,7 @@ class ModelInterface(object):
     )->torch.Tensor:
         """Tell the `train()` method how to get target values from the `batch_df`.
            All sub-classes must re-implement this method.
+           Use torch.tensor(np.array, dtype=..., device=self.device) to convert tensor.
 
         Args:
             batch_df (pd.DataFrame): Dataframe of each mini batch.
@@ -400,6 +401,7 @@ class ModelInterface(object):
     )->Tuple[torch.Tensor]:
         """Tell `train()` and `predict()` methods how to get feature tensors from the `batch_df`.
            All sub-classes must re-implement this method.
+           Use torch.tensor(np.array, dtype=..., device=self.device) to convert tensor.
 
         Args:
             batch_df (pd.DataFrame): Dataframe of each mini batch.

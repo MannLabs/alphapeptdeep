@@ -167,16 +167,18 @@ class AlphaRTModel(model_interface.ModelInterface):
     def _get_features_from_batch_df(self,
         batch_df: pd.DataFrame,
     ):
-        aa_indices = torch.LongTensor(
+        aa_indices = torch.tensor(
             get_batch_aa_indices(
                 batch_df['sequence'].values.astype('U')
-            )
+            ),
+            dtype=torch.long, device=self.device
         )
 
-        mod_x = torch.Tensor(
+        mod_x = torch.tensor(
             get_batch_mod_feature(
                 batch_df
-            )
+            ),
+            dtype=torch.float32, device=self.device
         )
 
         return aa_indices, mod_x
@@ -184,7 +186,10 @@ class AlphaRTModel(model_interface.ModelInterface):
     def _get_targets_from_batch_df(self,
         batch_df: pd.DataFrame,
     ) -> torch.Tensor:
-        return torch.Tensor(batch_df['rt_norm'].values)
+        return torch.tensor(
+            batch_df['rt_norm'].values,
+            dtype=torch.float32, device=self.device
+        )
 
     def add_irt_column_to_precursor_df(self,
         precursor_df: pd.DataFrame

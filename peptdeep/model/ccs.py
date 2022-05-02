@@ -166,20 +166,23 @@ class AlphaCCSModel(model_base.ModelInterface):
     def _get_features_from_batch_df(self,
         batch_df: pd.DataFrame,
     ):
-        aa_indices = torch.LongTensor(
+        aa_indices = torch.tensor(
             get_batch_aa_indices(
                 batch_df['sequence'].values.astype('U')
-            )
+            ),
+            dtype=torch.long, device=self.device
         )
 
-        mod_x = torch.Tensor(
+        mod_x = torch.tensor(
             get_batch_mod_feature(
                 batch_df
-            )
+            ),
+            dtype=torch.float32, device=self.device
         )
 
-        charges = torch.Tensor(
-            batch_df['charge'].values
+        charges = torch.tensor(
+            batch_df['charge'].values,
+            dtype=torch.float32, device=self.device
         ).unsqueeze(1)*self.charge_factor
 
         return aa_indices, mod_x, charges
@@ -187,7 +190,10 @@ class AlphaCCSModel(model_base.ModelInterface):
     def _get_targets_from_batch_df(self,
         batch_df: pd.DataFrame,
     ) -> torch.Tensor:
-        return torch.Tensor(batch_df['ccs'].values)
+        return torch.tensor(
+            batch_df['ccs'].values,
+            dtype=torch.float32, device=self.device
+        )
 
     def ccs_to_mobility_pred(self,
         precursor_df:pd.DataFrame
