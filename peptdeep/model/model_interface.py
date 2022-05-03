@@ -284,6 +284,23 @@ class ModelInterface(object):
         """
         self.loss_func = torch.nn.L1Loss()
 
+    def _as_tensor(self,
+        data:np.array,
+        dtype:torch.dtype=torch.float32
+    )->torch.Tensor:
+        """Convert numerical np.array to pytorch tensor.
+        The tensor will be stored in self.device
+
+        Args:
+            data (np.array): numerical np.array
+            dtype (torch.dtype, optional): dtype. The dtype of the indices
+                used for embedding should be `torch.long`.
+                Defaults to `torch.float32`.
+        Returns:
+            torch.Tensor: the tensor stored in self.device
+        """
+        return torch.tensor(data, dtype=dtype, device=self.device)
+
     def _load_model_from_zipfile(self, model_file, model_path_in_zip):
         with ZipFile(model_file) as model_zip:
             with model_zip.open(model_path_in_zip,'r') as pt_file:
