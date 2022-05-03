@@ -2,9 +2,9 @@
 
 __all__ = ['mod_feature_size', 'max_instrument_num', 'frag_types', 'max_frag_charge', 'num_ion_types',
            'aa_embedding_size', 'aa_embedding', 'ascii_embedding', 'aa_one_hot', 'instrument_embedding', 'zero_param',
-           'xavier_param', 'init_state', 'SeqCNN', 'Seq_Transformer', 'Hidden_Transformer', 'Hidden_HFace_Transformer',
-           'HiddenBert', 'SeqLSTM', 'SeqGRU', 'SeqAttentionSum', 'PositionalEncoding', 'PositionalEmbedding',
-           'AA_Mod_Embedding', 'Meta_Embedding', 'Mod_Embedding_FixFirstK', 'Mod_Embedding',
+           'xavier_param', 'init_state', 'SeqCNN_Multi_Kernel', 'SeqCNN', 'Seq_Transformer', 'Hidden_Transformer',
+           'Hidden_HFace_Transformer', 'HiddenBert', 'SeqLSTM', 'SeqGRU', 'SeqAttentionSum', 'PositionalEncoding',
+           'PositionalEmbedding', 'AA_Mod_Embedding', 'Meta_Embedding', 'Mod_Embedding_FixFirstK', 'Mod_Embedding',
            'Input_AA_Mod_PositionalEncoding', 'Input_AA_Mod_Charge_PositionalEncoding', 'InputAAEmbedding',
            'InputMetaNet', 'InputModNetFixFirstK', 'InputModNet', 'AATransformerEncoding', 'Input_AA_Mod_LSTM',
            'Input_AA_Mod_Meta_LSTM', 'Input_AA_Mod_Charge_LSTM', 'InputAALSTM', 'InputAALSTM_cat_Meta',
@@ -58,9 +58,43 @@ def xavier_param(*shape):
 init_state = xavier_param
 
 # Cell
-class SeqCNN(torch.nn.Module):
+class SeqCNN_Multi_Kernel(torch.nn.Module):
     """
     extracts sequence features using `torch.nn.Conv1D` with different kernel sizes (3,5,7), and then concatenates the outputs of these Conv1Ds
+    """
+    def __init__(self, out_features:int):
+        super().__init__()
+
+        hidden = out_features//4
+        if hidden*4 != out_features:
+            raise ValueError('embedding_hidden must be divided by 4')
+
+        self.cnn_short = torch.nn.Conv1d(
+            hidden, hidden,
+            kernel_size=3, padding=1
+        )
+        self.cnn_medium = torch.nn.Conv1d(
+            hidden, hidden,
+            kernel_size=5, padding=2
+        )
+        self.cnn_long = torch.nn.Conv1d(
+            hidden, hidden,
+            kernel_size=7, padding=3
+        )
+
+    def forward(self, x):
+        x = x.transpose(1, 2)
+        x1 = self.cnn_short(x)
+        x2 = self.cnn_medium(x)
+        x3 = self.cnn_long(x)
+        return torch.cat((x, x1, x2, x3), dim=1).transpose(1,2)
+
+#legacy
+class SeqCNN(torch.nn.Module):
+    """
+    extracts sequence features using `torch.nn.Conv1D` with
+    different kernel sizes (1(residue connection),3,5,7), and then concatenates
+    the outputs of these Conv1Ds. The Output dim is 4*embedding_hidden.
     """
     def __init__(self, embedding_hidden):
         super().__init__()
