@@ -9,11 +9,16 @@ import pandas as pd
 # local
 import peptdeep
 from peptdeep import settings
-from peptdeep.utils import logging
+from peptdeep.utils import (
+    logging, set_logger, 
+    show_platform_info, show_python_info
+)
+from alphabase.yaml_utils import save_yaml
 from peptdeep.rescore.percolator import Percolator
 from peptdeep.spec_lib.library_factory import (
     library_maker_provider
 )
+from peptdeep.webui.library_ui import output_tsv
 
 @click.group(
     context_settings=dict(
@@ -72,7 +77,7 @@ def install_model(model_file, overwrite):
     else:
         download_models(model_file, overwrite=overwrite)
 
-def update_settings(settings_yaml):
+def load_settings(settings_yaml):
     settings_dict = settings.load_yaml(settings_yaml)
     settings.global_settings = settings.update_settings(
         settings.global_settings, settings_dict
@@ -81,7 +86,7 @@ def update_settings(settings_yaml):
 @run.command("rescore", help="Rescore DDA results.")
 @click.argument("settings_yaml", type=str)
 def rescore(settings_yaml):
-    update_settings(settings_yaml)
+    load_settings(settings_yaml)
     perc_settings = settings.global_settings['percolator']
     percolator = Percolator()
     psm_df = percolator.load_psms(
@@ -122,7 +127,7 @@ def generate_library():
 
     lib_maker = library_maker_provider.get_maker(
         lib_settings['input']['type']
-        )
+    )
     if lib_settings['input']['type'] == 'fasta':
         lib_maker.make_library(lib_settings['input']['paths'])
     else:
@@ -132,15 +137,29 @@ def generate_library():
             df_list.append(pd.read_csv(file_path, sep=sep))
         df = pd.concat(df_list, ignore_index=True)
         lib_maker.make_library(df)
+
+    output_dir = lib_settings['output_dir']
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+    set_logger(
+        log_file_name=os.path.join(output_dir, 'peptdeep.log'),
+        overwrite=True, stream=True
+    )
+    show_platform_info()
+    show_python_info()
+    save_yaml(
+        os.path.join(output_dir, 'peptdeep_settings.yaml'),
+        settings.global_settings
+    )
     hdf_path = os.path.join(
-        lib_settings['output_dir'], 
+        output_dir, 
         'predict_library.hdf'
     )
     logging.info(f"Saving HDF library to {hdf_path} ...")
     lib_maker.spec_lib.save_hdf(hdf_path)
     if lib_settings['output_tsv']['enabled']:
         tsv_path = os.path.join(
-            lib_settings['output_dir'], 
+            output_dir, 
             'predict_library.tsv'
         )
         from peptdeep.spec_lib.translate import mod_to_unimod_dict
@@ -155,6 +174,6 @@ def generate_library():
 @run.command("library", help="Predict library for DIA search.")
 @click.argument("settings_yaml", type=str)
 def library(settings_yaml:str):
-    update_settings(settings_yaml)
+    load_settings(settings_yaml)
     generate_library()
     

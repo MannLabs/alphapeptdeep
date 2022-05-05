@@ -2,7 +2,7 @@
 
 __all__ = ['mod_feature_size', 'max_instrument_num', 'frag_types', 'max_frag_charge', 'num_ion_types',
            'aa_embedding_size', 'aa_embedding', 'ascii_embedding', 'aa_one_hot', 'instrument_embedding', 'zero_param',
-           'xavier_param', 'init_state', 'SeqCNN_Multi_Kernel', 'SeqCNN', 'Seq_Transformer', 'Hidden_Transformer',
+           'xavier_param', 'init_state', 'SeqCNN_MultiKernel', 'SeqCNN', 'Seq_Transformer', 'Hidden_Transformer',
            'Hidden_HFace_Transformer', 'HiddenBert', 'SeqLSTM', 'SeqGRU', 'SeqAttentionSum', 'PositionalEncoding',
            'PositionalEmbedding', 'AA_Mod_Embedding', 'Meta_Embedding', 'Mod_Embedding_FixFirstK', 'Mod_Embedding',
            'Input_AA_Mod_PositionalEncoding', 'Input_AA_Mod_Charge_PositionalEncoding', 'InputAAEmbedding',
@@ -58,16 +58,25 @@ def xavier_param(*shape):
 init_state = xavier_param
 
 # Cell
-class SeqCNN_Multi_Kernel(torch.nn.Module):
+class SeqCNN_MultiKernel(torch.nn.Module):
     """
-    extracts sequence features using `torch.nn.Conv1D` with different kernel sizes (3,5,7), and then concatenates the outputs of these Conv1Ds
+    Extract sequence features using `torch.nn.Conv1D` with
+    different kernel sizes (1(residue connection),3,5,7),
+    and then concatenate the outputs of these Conv1Ds.
     """
     def __init__(self, out_features:int):
+        """
+        Args:
+            out_features (int): Must be divided by 4.
+
+        Raises:
+            ValueError: "out_features must be divided by 4"
+        """
         super().__init__()
 
         hidden = out_features//4
         if hidden*4 != out_features:
-            raise ValueError('embedding_hidden must be divided by 4')
+            raise ValueError('out_features must be divided by 4')
 
         self.cnn_short = torch.nn.Conv1d(
             hidden, hidden,
@@ -92,8 +101,8 @@ class SeqCNN_Multi_Kernel(torch.nn.Module):
 #legacy
 class SeqCNN(torch.nn.Module):
     """
-    extracts sequence features using `torch.nn.Conv1D` with
-    different kernel sizes (1(residue connection),3,5,7), and then concatenates
+    Extract sequence features using `torch.nn.Conv1D` with
+    different kernel sizes (1(residue connection),3,5,7), and then concatenate
     the outputs of these Conv1Ds. The Output dim is 4*embedding_hidden.
     """
     def __init__(self, embedding_hidden):

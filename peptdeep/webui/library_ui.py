@@ -9,8 +9,6 @@ import time
 from datetime import datetime
 from peptdeep.settings import global_settings
 from peptdeep.cli import generate_library
-from peptdeep.utils import set_logger, logging, show_platform_info, show_python_info
-from alphabase.yaml_utils import save_yaml
 from alphabase.constants.modification import MOD_DF
 
 from pathlib import Path
@@ -195,18 +193,6 @@ def show():
 
     if st.button('Generate library'):
         if len(global_settings['library']['input']['paths']) > 0:
-            if not os.path.exists(output_dir):
-                os.makedirs(output_dir)
-            set_logger(
-                log_file_name=os.path.join(output_dir, 'peptdeep.log'),
-                overwrite=True, stream=True
-            )
-            show_platform_info()
-            show_python_info()
-            save_yaml(
-                os.path.join(output_dir, 'peptdeep_settings.yaml'),
-                global_settings
-            )
             generate_library()
             st.write('Library generated!')
         else:
