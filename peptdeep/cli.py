@@ -18,7 +18,6 @@ from peptdeep.rescore.percolator import Percolator
 from peptdeep.spec_lib.library_factory import (
     library_maker_provider
 )
-from peptdeep.webui.library_ui import output_tsv
 
 @click.group(
     context_settings=dict(
