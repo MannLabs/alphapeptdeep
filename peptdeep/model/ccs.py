@@ -25,10 +25,6 @@ from peptdeep.settings import model_const
 
 import peptdeep.model.base as model_base
 
-from peptdeep.model.rt import (
-    evaluate_linear_regression,
-    evaluate_linear_regression_plot
-)
 
 # Cell
 class Model_CCS_Bert(torch.nn.Module):
@@ -170,19 +166,20 @@ class AlphaCCSModel(model_base.ModelInterface):
     def _get_features_from_batch_df(self,
         batch_df: pd.DataFrame,
     ):
-        aa_indices = torch.LongTensor(
+        aa_indices = self._as_tensor(
             get_batch_aa_indices(
                 batch_df['sequence'].values.astype('U')
-            )
+            ),
+            dtype=torch.long
         )
 
-        mod_x = torch.Tensor(
+        mod_x = self._as_tensor(
             get_batch_mod_feature(
                 batch_df
             )
         )
 
-        charges = torch.Tensor(
+        charges = self._as_tensor(
             batch_df['charge'].values
         ).unsqueeze(1)*self.charge_factor
 
@@ -191,7 +188,9 @@ class AlphaCCSModel(model_base.ModelInterface):
     def _get_targets_from_batch_df(self,
         batch_df: pd.DataFrame,
     ) -> torch.Tensor:
-        return torch.Tensor(batch_df['ccs'].values)
+        return self._as_tensor(
+            batch_df['ccs'].values
+        )
 
     def ccs_to_mobility_pred(self,
         precursor_df:pd.DataFrame

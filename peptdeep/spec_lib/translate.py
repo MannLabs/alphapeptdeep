@@ -110,6 +110,9 @@ def merge_precursor_fragment_df(
         iters = df[['frag_start_idx','frag_end_idx']].values
     for start, end in iters:
         intens = fragment_inten_df.iloc[start:end,:].values # is loc[start:end-1,:] faster?
+        max_inten = np.amax(intens)
+        if max_inten > 0:
+            intens /= max_inten
         masses = fragment_mz_df.iloc[start:end,:].values
         sorted_idx = np.argsort(intens.reshape(-1))[-top_n_inten:][::-1]
         idx_in_df = np.unravel_index(sorted_idx, masses.shape)
@@ -234,9 +237,9 @@ def speclib_to_single_df(
     *,
     translate_mod_dict:dict = None,
     keep_k_highest_fragments:int=12,
-    min_frag_mz = 300,
+    min_frag_mz = 200,
     max_frag_mz = 2000,
-    min_frag_intensity = 0.02,
+    min_frag_intensity = 0.01,
     min_frag_nAA = 0,
     modloss='H3PO4',
     frag_type_head:str='FragmentType',
@@ -343,9 +346,9 @@ def speclib_to_swath_df(
     speclib:SpecLibBase,
     *,
     keep_k_highest_fragments:int=12,
-    min_frag_mz = 300,
+    min_frag_mz = 200,
     max_frag_mz = 2000,
-    min_frag_intensity = 0.02,
+    min_frag_intensity = 0.01,
 )->pd.DataFrame:
     speclib_to_single_df(
         speclib,
@@ -361,9 +364,9 @@ def translate_to_tsv(
     tsv_or_buf:str,
     *,
     keep_k_highest_fragments:int=12,
-    min_frag_mz:float = 300,
+    min_frag_mz:float = 200,
     max_frag_mz:float = 2000,
-    min_frag_intensity:float = 0.02,
+    min_frag_intensity:float = 0.01,
     min_frag_nAA:int = 0,
     batch_size:int = 1000000,
     translate_mod_dict:dict = mod_to_unimod_dict,

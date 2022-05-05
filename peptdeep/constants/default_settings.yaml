@@ -161,3 +161,4 @@ library:
     min_relative_intensity: 0.01
     keep_higest_k_peaks: 12
     translate_batch_size: 1000000
+    translate_mod_to_unimod_id: False

@@ -420,28 +420,30 @@ class pDeepModel(model_base.ModelInterface):
         batch_df: pd.DataFrame,
         **kwargs,
     ) -> Tuple[torch.Tensor]:
-        aa_indices = torch.LongTensor(
+        aa_indices = self._as_tensor(
             get_batch_aa_indices(
                 batch_df['sequence'].values.astype('U')
-            )
+            ),
+            dtype=torch.long
         )
 
-        mod_x = torch.Tensor(
+        mod_x = self._as_tensor(
             get_batch_mod_feature(
                 batch_df
             )
         )
 
-        charges = torch.Tensor(
+        charges = self._as_tensor(
             batch_df['charge'].values
         ).unsqueeze(1)*self.charge_factor
 
-        nces = torch.Tensor(
+        nces = self._as_tensor(
             batch_df['nce'].values
         ).unsqueeze(1)*self.NCE_factor
 
-        instrument_indices = torch.LongTensor(
-            parse_instrument_indices(batch_df['instrument'])
+        instrument_indices = self._as_tensor(
+            parse_instrument_indices(batch_df['instrument']),
+            dtype=torch.long
         )
         return aa_indices, mod_x, charges, nces, instrument_indices
 
@@ -449,7 +451,7 @@ class pDeepModel(model_base.ModelInterface):
         batch_df: pd.DataFrame,
         fragment_intensity_df:pd.DataFrame=None
     ) -> torch.Tensor:
-        return torch.Tensor(
+        return self._as_tensor(
             get_sliced_fragment_dataframe(
                 fragment_intensity_df,
                 batch_df[
@@ -741,29 +743,31 @@ def calc_ms2_similarity(
             batch_end = i+batch_size
             batch_df = df_group.iloc[i:batch_end,:]
 
-            pred_intens = torch.Tensor(
+            pred_intens = torch.tensor(
                 get_sliced_fragment_dataframe(
                     predict_intensity_df,
                     batch_df[
                         ['frag_start_idx','frag_end_idx']
                     ].values,
                     charged_frag_types
-                ).values
+                ).values,
+                dtype=torch.float32, device=device
             ).reshape(
                 -1, (nAA-1)*len(charged_frag_types)
-            ).to(device)
+            )
 
-            frag_intens = torch.Tensor(
+            frag_intens = torch.tensor(
                 get_sliced_fragment_dataframe(
                     fragment_intensity_df,
                     batch_df[
                         ['frag_start_idx','frag_end_idx']
                     ].values,
                     charged_frag_types
-                ).values
+                ).values,
+                dtype=torch.float32, device=device
             ).reshape(
                 -1, (nAA-1)*len(charged_frag_types)
-            ).to(device)
+            )
 
             if 'PCC' in metrics:
                 psm_df.loc[batch_df.index,'PCC'] = pearson(

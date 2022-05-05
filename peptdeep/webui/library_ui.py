@@ -1,20 +1,10 @@
-from email.policy import default
-from multiprocessing.sharedctypes import Value
 import streamlit as st
-from peptdeep.webui.ui_utils import markdown_link
-import peptdeep
 import pandas as pd
 import os
-import time
 from datetime import datetime
 from peptdeep.settings import global_settings
 from peptdeep.cli import generate_library
-from peptdeep.utils import set_logger, logging, show_platform_info, show_python_info
-from alphabase.yaml_utils import save_yaml
 from alphabase.constants.modification import MOD_DF
-
-from pathlib import Path
-import tempfile
 
 def mod_options():
     fixmod, = st.multiselect(
@@ -90,6 +80,7 @@ def output_tsv():
     global_settings['library']['output_tsv']['min_relative_intensity'] = min_relative_intensity
     keep_higest_k_peaks = st.number_input('Number of highest peaks to keep:', value = global_settings['library']['output_tsv']['keep_higest_k_peaks'])
     global_settings['library']['output_tsv']['keep_higest_k_peaks'] = keep_higest_k_peaks
+    global_settings['library']['output_tsv']['translate_mod_to_unimod_id']=bool(st.checkbox('Translate modifications to Unimod ids'))
 
 def files_in_pandas(files:list) -> pd.DataFrame:
     """Reads a folder and returns a pandas dataframe containing the files and additional information.
@@ -194,19 +185,7 @@ def show():
 
     if st.button('Generate library'):
         if len(global_settings['library']['input']['paths']) > 0:
-            if not os.path.exists(output_dir):
-                os.makedirs(output_dir)
-            set_logger(
-                log_file_name=os.path.join(output_dir, 'peptdeep.log'),
-                overwrite=True, stream=True
-            )
-            show_platform_info()
-            show_python_info()
-            save_yaml(
-                os.path.join(output_dir, 'peptdeep_settings.yaml'),
-                global_settings
-            )
             generate_library()
-            st.write('Library generation done!')
+            st.write('Library generated!')
         else:
             st.warning(f'Please select the input {_input_type} files')

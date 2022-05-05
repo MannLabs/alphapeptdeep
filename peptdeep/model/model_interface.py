@@ -17,7 +17,6 @@ from alphabase.peptide.precursor import is_precursor_sorted
 from peptdeep.settings import model_const
 from peptdeep.utils import logging
 
-from peptdeep.model.building_block import *
 
 # Cell
 from torch.optim.lr_scheduler import LambdaLR
@@ -93,7 +92,7 @@ class ModelInterface(object):
         self.model = model_class(**kwargs)
         self.model_params = kwargs
         self.model.to(self.device)
-        self._init_for_train()
+        self._init_for_training()
 
     def train_with_warmup(self,
         precursor_df: pd.DataFrame,
@@ -199,7 +198,10 @@ class ModelInterface(object):
                         batch_df, **kwargs
                     )
 
-                    predicts = self._predict_one_batch(*features)
+                    if isinstance(features, tuple):
+                        predicts = self._predict_one_batch(*features)
+                    else:
+                        predicts = self._predict_one_batch(features)
 
                     self._set_batch_predict_data(
                         batch_df, predicts,
@@ -273,14 +275,31 @@ class ModelInterface(object):
         self.model = Model(**kwargs)
         self.model_params = kwargs
         self.model.to(self.device)
-        self._init_for_train()
+        self._init_for_training()
 
-    def _init_for_train(self):
+    def _init_for_training(self):
         """
-        Set the loss function, and more attributes for different tasks
+        Set the loss function, and more attributes for different tasks.
+        The default loss function is nn.L1Loss.
         """
         self.loss_func = torch.nn.L1Loss()
 
+    def _as_tensor(self,
+        data:np.array,
+        dtype:torch.dtype=torch.float32
+    )->torch.Tensor:
+        """Convert numerical np.array to pytorch tensor.
+        The tensor will be stored in self.device
+
+        Args:
+            data (np.array): numerical np.array
+            dtype (torch.dtype, optional): dtype. The dtype of the indices
+                used for embedding should be `torch.long`.
+                Defaults to `torch.float32`.
+        Returns:
+            torch.Tensor: the tensor stored in self.device
+        """
+        return torch.tensor(data, dtype=dtype, device=self.device)
 
     def _load_model_from_zipfile(self, model_file, model_path_in_zip):
         with ZipFile(model_file) as model_zip:
@@ -336,10 +355,14 @@ class ModelInterface(object):
                 features = self._get_features_from_batch_df(
                     batch_df, **kwargs
                 )
-
-                batch_cost.append(
-                    self._train_one_batch(targets, *features)
-                )
+                if isinstance(features, tuple):
+                    batch_cost.append(
+                        self._train_one_batch(targets, *features)
+                    )
+                else:
+                    batch_cost.append(
+                        self._train_one_batch(targets, features)
+                    )
 
             if verbose_each_epoch:
                 batch_tqdm.set_description(
@@ -354,8 +377,8 @@ class ModelInterface(object):
     ):
         """Training for a mini batch"""
         self.optimizer.zero_grad()
-        predicts = self.model(*[fea.to(self.device) for fea in features])
-        cost = self.loss_func(predicts, targets.to(self.device))
+        predicts = self.model(*features)
+        cost = self.loss_func(predicts, targets)
         cost.backward()
         torch.nn.utils.clip_grad_norm_(self.model.parameters(), 1.0)
         self.optimizer.step()
@@ -366,7 +389,7 @@ class ModelInterface(object):
     ):
         """Predicting for a mini batch"""
         return self.model(
-            *[fea.to(self.device) for fea in features]
+            *features
         ).cpu().detach().numpy()
 
     def _get_targets_from_batch_df(self,
@@ -374,6 +397,7 @@ class ModelInterface(object):
     )->torch.Tensor:
         """Tell the `train()` method how to get target values from the `batch_df`.
            All sub-classes must re-implement this method.
+           Use torch.tensor(np.array, dtype=..., device=self.device) to convert tensor.
 
         Args:
             batch_df (pd.DataFrame): Dataframe of each mini batch.
@@ -394,6 +418,7 @@ class ModelInterface(object):
     )->Tuple[torch.Tensor]:
         """Tell `train()` and `predict()` methods how to get feature tensors from the `batch_df`.
            All sub-classes must re-implement this method.
+           Use torch.tensor(np.array, dtype=..., device=self.device) to convert tensor.
 
         Args:
             batch_df (pd.DataFrame): Dataframe of each mini batch.

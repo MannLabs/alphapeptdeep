@@ -71,7 +71,10 @@ class PredictLibraryMakerBase(object):
         except ValueError as e:
             raise e
 
-    def translate_to_tsv(self, tsv_path:str)->pd.DataFrame:
+    def translate_to_tsv(self,
+        tsv_path:str,
+        translate_mod_dict=mod_to_unimod_dict
+    )->pd.DataFrame:
         logging.info(f"Translating to {tsv_path} for DiaNN/Spectronaut...")
         lib_settings = self._settings['library']
 
@@ -96,10 +99,12 @@ class PredictLibraryMakerBase(object):
             batch_size=lib_settings['output_tsv'][
                 'translate_batch_size'
             ],
-            translate_mod_dict=mod_to_unimod_dict,
+            translate_mod_dict=translate_mod_dict,
         )
 
-    def translate_library(self)->pd.DataFrame:
+    def translate_library(self,
+        translate_mod_dict=mod_to_unimod_dict
+    )->pd.DataFrame:
         logging.info("Translating library for DiaNN/Spectronaut...")
         lib_settings = self._settings['library']
 
@@ -108,7 +113,7 @@ class PredictLibraryMakerBase(object):
 
         return speclib_to_single_df(
             self.spec_lib,
-            translate_mod_dict=mod_to_unimod_dict,
+            translate_mod_dict=translate_mod_dict,
             keep_k_highest_fragments=lib_settings['output_tsv'][
                 'keep_higest_k_peaks'
             ],
