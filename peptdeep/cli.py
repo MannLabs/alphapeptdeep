@@ -121,8 +121,8 @@ def _get_delimiter(csv_file, bytes=4096):
     with open(csv_file, "r") as f:
         return csv.Sniffer().sniff(f.read(bytes)).delimiter
 
-def generate_library():
-    lib_settings = settings.global_settings['library']
+def generate_library(settings_dict:dict=settings.global_settings):
+    lib_settings = settings_dict['library']
 
     lib_maker = library_maker_provider.get_maker(
         lib_settings['input']['type']
@@ -148,7 +148,7 @@ def generate_library():
     show_python_info()
     save_yaml(
         os.path.join(output_dir, 'peptdeep_settings.yaml'),
-        settings.global_settings
+        settings_dict
     )
     hdf_path = os.path.join(
         output_dir, 

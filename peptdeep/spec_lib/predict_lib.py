@@ -8,6 +8,8 @@ import numpy as np
 import torch
 from peptdeep.utils import logging
 
+from alphabase.peptide.precursor import calc_precursor_isotope_mp
+from peptdeep.utils import process_bar
 from alphabase.spectrum_library.library_base import SpecLibBase
 from peptdeep.pretrained_models import ModelManager
 from peptdeep.settings import global_settings
@@ -64,6 +66,11 @@ class PredictSpecLib(SpecLibBase):
 
     def predict_all(self):
         """ Add 'rt_pred' into columns """
+        logging.info('Calculating precursor isotope distributions ...')
+        self.calc_precursor_mz()
+        self._precursor_df = calc_precursor_isotope_mp(
+            self._precursor_df, process_bar=process_bar
+        )
         logging.info('Predicting RT/IM/MS2 ...')
         res = self.model_manager.predict_all(
             self._precursor_df,
