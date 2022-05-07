@@ -152,14 +152,14 @@ def generate_library(settings_dict:dict=settings.global_settings):
     )
     hdf_path = os.path.join(
         output_dir, 
-        'predict_library.hdf'
+        'predict.speclib.hdf'
     )
     logging.info(f"Saving HDF library to {hdf_path} ...")
     lib_maker.spec_lib.save_hdf(hdf_path)
     if lib_settings['output_tsv']['enabled']:
         tsv_path = os.path.join(
             output_dir, 
-            'predict_library.tsv'
+            'predict.speclib.tsv'
         )
         from peptdeep.spec_lib.translate import mod_to_unimod_dict
         lib_maker.translate_to_tsv(
