@@ -32,7 +32,7 @@ def get_all_substring_indices_from_lcp(cat_prot, lcp_array, min_len, max_len, st
     for i in range(len(cat_prot)):
         if cat_prot[i] == stop_char: continue
         for seq_len in range(
-            lcp_array[i]+max(min_len,1),
+            max(lcp_array[i]+1,min_len),
             min(len(cat_prot)-i,max_len+1)
         ):
             end_pos = i+seq_len
