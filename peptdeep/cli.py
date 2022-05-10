@@ -122,6 +122,9 @@ def _get_delimiter(csv_file, bytes=4096):
         return csv.Sniffer().sniff(f.read(bytes)).delimiter
 
 def generate_library(settings_dict:dict=settings.global_settings):
+    settings.update_modifications(
+        settings_dict['common']['keep_only_important_modloss']
+    )
     lib_settings = settings_dict['library']
 
     lib_maker = library_maker_provider.get_maker(

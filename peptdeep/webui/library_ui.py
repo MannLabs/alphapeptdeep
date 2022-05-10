@@ -6,6 +6,11 @@ from peptdeep.settings import global_settings
 from peptdeep.cli import generate_library
 from alphabase.constants.modification import MOD_DF
 
+
+@st.cache
+def modloss_df():
+    return MOD_DF.loc[MOD_DF.modloss_importance>0,['name','classification','composition','mass','modloss_composition','modloss','modloss_importance']]
+
 def mod_options():
     fixmod, = st.multiselect(
             'Please select fixed modifications',
@@ -20,6 +25,11 @@ def mod_options():
     global_settings['library']['input']['fix_mods'] = fixmod
     global_settings['library']['input']['var_mods'] = varmod
 
+    global_settings['common']['keep_only_important_modloss'] = st.checkbox(
+        'Keep only important modification loss (fragment modloss mz=0 if modloss_importance=0)', 
+        value=global_settings['common']['keep_only_important_modloss']
+    )
+    st.dataframe(modloss_df())
 
 def varmod_range():
     min_varmod = st.number_input('Min number of variable modifications',min_value = 0, max_value = 1, value = global_settings['library']['input']['min_var_mod_num'], step = 1)
@@ -82,6 +92,7 @@ def output_tsv():
     global_settings['library']['output_tsv']['keep_higest_k_peaks'] = keep_higest_k_peaks
     global_settings['library']['output_tsv']['translate_mod_to_unimod_id']=bool(st.checkbox('Translate modifications to Unimod ids'))
 
+@st.cache
 def files_in_pandas(files:list) -> pd.DataFrame:
     """Reads a folder and returns a pandas dataframe containing the files and additional information.
     Args:

@@ -48,6 +48,10 @@ def model():
     thread_num = st.number_input('thread number:', value = global_settings['thread_num'])
     global_settings['thread_num'] = thread_num
 
+    global_settings['model_mgr']['external_ms2_model'] = st.text_input('External MS2 model')
+    global_settings['model_mgr']['external_rt_model'] = st.text_input('External RT model')
+    global_settings['model_mgr']['external_ccs_model'] = st.text_input('External CCS model')
+
 
 def show():
 

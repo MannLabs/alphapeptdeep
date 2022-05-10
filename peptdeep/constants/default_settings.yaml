@@ -14,6 +14,10 @@ model_url: "https://datashare.biochem.mpg.de/s/ABnQuD2KkXfIGF3/download"
 model_url_zip_name: "released_models"
 
 thread_num: 8
+
+common:
+  keep_only_important_modloss: True
+
 model_mgr:
   predict:
     batch_size_ms2: 512
@@ -40,6 +44,9 @@ model_mgr:
   - regular
   - phos
   - hla # same as regular
+  external_ms2_model: ''
+  external_rt_model: ''
+  external_ccs_model: ''
 percolator:
   require_model_tuning: True
   raw_num_to_tune: 8
