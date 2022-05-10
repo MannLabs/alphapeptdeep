@@ -465,7 +465,7 @@ class pDeepModel(model_base.ModelInterface):
 
     def _set_batch_predict_data(self,
         batch_df: pd.DataFrame,
-        predicts:np.array,
+        predicts:np.ndarray,
         **kwargs,
     ):
         apex_intens = predicts.reshape((len(batch_df), -1)).max(axis=1)

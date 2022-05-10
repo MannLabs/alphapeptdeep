@@ -92,11 +92,11 @@ def concat_proteins(protein_dict:dict)->str:
 @numba.njit
 def cleave_sequence_with_cut_pos(
     sequence:str,
-    cut_pos:np.array,
+    cut_pos:np.ndarray,
     n_missed_cleavages:int=2,
     pep_length_min:int=6,
     pep_length_max:int=45,
-)->np.array:
+)->np.ndarray:
     """
     Cleave a sequence with cut postions (cut_pos).
     Filters to have a minimum and maximum length.

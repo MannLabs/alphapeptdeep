@@ -12,15 +12,15 @@ import pandas as pd
 class MSReaderBase:
     def __init__(self):
         self.spectrum_df:pd.DataFrame = pd.DataFrame()
-        self.mzs: np.array = np.array([])
-        self.intensities: np.array = np.array([])
+        self.mzs: np.ndarray = np.array([])
+        self.intensities: np.ndarray = np.array([])
 
     def load(self, file_path):
         raise NotImplementedError('load()')
 
     def build_spectrum_df(self,
         scan_list:list,
-        scan_indices:np.array,
+        scan_indices:np.ndarray,
         rt_list:list,
         mobility_list:list = None,
         scan_starts_from_one:bool = True,

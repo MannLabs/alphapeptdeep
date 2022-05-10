@@ -9,20 +9,20 @@ import numba
 
 @numba.njit
 def match_centroid_mz(
-    spec_mzs:np.array,
-    query_mzs:np.array,
-    spec_mz_tols:np.array
-)->np.array:
+    spec_mzs:np.ndarray,
+    query_mzs:np.ndarray,
+    spec_mz_tols:np.ndarray
+)->np.ndarray:
     """
     Matched query masses against sorted MS2/spec centroid masses.
 
     Args:
-        spec_mzs (np.array): MS2 or spec mz values, 1-D float array
-        query_mzs (np.array): query mz values, n-D float array
-        spec_mz_tols (np.array): Da tolerance array, same shape as spec_mzs
+        spec_mzs (np.ndarray): MS2 or spec mz values, 1-D float array
+        query_mzs (np.ndarray): query mz values, n-D float array
+        spec_mz_tols (np.ndarray): Da tolerance array, same shape as spec_mzs
 
     Returns:
-        np.array: np.array of int32, the shape is the same as query_mzs.
+        np.ndarray: np.ndarray of int32, the shape is the same as query_mzs.
           -1 means no peaks are matched for the query mz
     """
     idxes = np.searchsorted(spec_mzs, query_mzs)
