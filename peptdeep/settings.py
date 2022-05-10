@@ -28,7 +28,7 @@ def update_settings(dict_, new_dict):
     return dict_
 
 def update_modifications(tsv:str="",
-    keep_only_important_modloss=global_settings['common']['keep_only_important_modloss']
+    keep_only_important_modloss:bool=global_settings['common']['keep_only_important_modloss']
 ):
     if os.path.isfile(tsv):
         load_mod_df(tsv, keep_only_important_modloss=keep_only_important_modloss)

@@ -122,10 +122,19 @@ def _get_delimiter(csv_file, bytes=4096):
         return csv.Sniffer().sniff(f.read(bytes)).delimiter
 
 def generate_library(settings_dict:dict=settings.global_settings):
-    settings.update_modifications(
-        settings_dict['common']['keep_only_important_modloss']
-    )
     lib_settings = settings_dict['library']
+    output_dir = lib_settings['output_dir']
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+    set_logger(
+        log_file_name=os.path.join(output_dir, 'peptdeep.log'),
+        overwrite=True, stream=True
+    )
+    show_platform_info()
+    show_python_info()
+    settings.update_modifications(
+        keep_only_important_modloss=settings_dict['common']['keep_only_important_modloss']
+    )
 
     lib_maker = library_maker_provider.get_maker(
         lib_settings['input']['type']
@@ -139,16 +148,6 @@ def generate_library(settings_dict:dict=settings.global_settings):
             df_list.append(pd.read_csv(file_path, sep=sep))
         df = pd.concat(df_list, ignore_index=True)
         lib_maker.make_library(df)
-
-    output_dir = lib_settings['output_dir']
-    if not os.path.exists(output_dir):
-        os.makedirs(output_dir)
-    set_logger(
-        log_file_name=os.path.join(output_dir, 'peptdeep.log'),
-        overwrite=True, stream=True
-    )
-    show_platform_info()
-    show_python_info()
     save_yaml(
         os.path.join(output_dir, 'peptdeep_settings.yaml'),
         settings_dict

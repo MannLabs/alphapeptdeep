@@ -8,7 +8,9 @@ import numpy as np
 import torch
 from peptdeep.utils import logging
 
-from alphabase.peptide.precursor import calc_precursor_isotope_mp
+from alphabase.peptide.precursor import (
+    calc_precursor_isotope_mp, calc_precursor_isotope
+)
 from peptdeep.utils import process_bar
 from alphabase.spectrum_library.library_base import SpecLibBase
 from peptdeep.pretrained_models import ModelManager
@@ -64,13 +66,23 @@ class PredictSpecLib(SpecLibBase):
         """ Add 'irt_pred' into columns based on 'rt_pred' """
         return self.model_manager.rt_model.add_irt_column_to_precursor_df(self._precursor_df)
 
-    def predict_all(self):
-        """ Add 'rt_pred' into columns """
+    def predict_all(self,
+        min_required_precursor_num_for_mp:int=2000
+    ):
+        """
+        1. Predict RT/IM/MS2 for self._precursor_df
+        2. Calculate isotope information in self._precursor_df
+        """
         logging.info('Calculating precursor isotope distributions ...')
         self.calc_precursor_mz()
-        self._precursor_df = calc_precursor_isotope_mp(
-            self._precursor_df, process_bar=process_bar
-        )
+        if len(self.precursor_df) < min_required_precursor_num_for_mp:
+            self._precursor_df = calc_precursor_isotope(
+                self._precursor_df
+            )
+        else:
+            self._precursor_df = calc_precursor_isotope_mp(
+                self._precursor_df, process_bar=process_bar
+            )
         logging.info('Predicting RT/IM/MS2 ...')
         res = self.model_manager.predict_all(
             self._precursor_df,
