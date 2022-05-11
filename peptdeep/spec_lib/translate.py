@@ -312,17 +312,19 @@ def speclib_to_single_df(
     if 'protein_group' in speclib._precursor_df.columns:
         df['ProteinGroups'] = speclib._precursor_df['protein_group']
 
-    mask_fragment_intensity_by_mz_(
-        speclib._fragment_mz_df,
-        speclib._fragment_intensity_df,
-        min_frag_mz, max_frag_mz
-    )
+    if min_frag_mz > 0 or max_frag_mz > 0:
+        mask_fragment_intensity_by_mz_(
+            speclib._fragment_mz_df,
+            speclib._fragment_intensity_df,
+            min_frag_mz, max_frag_mz
+        )
 
-    mask_fragment_intensity_by_frag_nAA(
-        speclib._fragment_intensity_df,
-        speclib._precursor_df,
-        max_mask_frag_nAA=min_frag_nAA-1
-    )
+    if min_frag_nAA > 0:
+        mask_fragment_intensity_by_frag_nAA(
+            speclib._fragment_intensity_df,
+            speclib._precursor_df,
+            max_mask_frag_nAA=min_frag_nAA-1
+        )
 
     df = merge_precursor_fragment_df(
         df,
@@ -371,6 +373,17 @@ def translate_to_tsv(
     batch_size:int = 1000000,
     translate_mod_dict:dict = mod_to_unimod_dict,
 ):
+    mask_fragment_intensity_by_mz_(
+        speclib._fragment_mz_df,
+        speclib._fragment_intensity_df,
+        min_frag_mz, max_frag_mz
+    )
+    if min_frag_nAA > 0:
+        mask_fragment_intensity_by_frag_nAA(
+            speclib._fragment_intensity_df,
+            speclib._precursor_df,
+            max_mask_frag_nAA=min_frag_nAA-1
+        )
     if isinstance(tsv_or_buf, str):
         with open(tsv_or_buf, "w"): pass
     _speclib = SpecLibBase()
@@ -382,10 +395,10 @@ def translate_to_tsv(
         df = speclib_to_single_df(
             _speclib, translate_mod_dict=translate_mod_dict,
             keep_k_highest_fragments=keep_k_highest_fragments,
-            min_frag_mz=min_frag_mz,
-            max_frag_mz=max_frag_mz,
+            min_frag_mz=0,
+            max_frag_mz=0,
             min_frag_intensity=min_frag_intensity,
-            min_frag_nAA=min_frag_nAA,
+            min_frag_nAA=0,
             verbose=False
         )
         df.to_csv(tsv_or_buf, header=(i==0), sep="\t", mode='a', index=False)
