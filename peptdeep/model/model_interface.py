@@ -323,12 +323,15 @@ class ModelInterface(object):
             logging.warn(f"nn parameters {unexpect_keys} are UNEXPECTED while loading models in {self.__class__}")
 
     def _save_codes(self, save_as):
-        import inspect
-        code = '''import torch\nimport peptdeep.model.base as model_base\n'''
-        class_code = inspect.getsource(self.model.__class__)
-        code += 'class Model' + class_code[class_code.find('('):]
-        with open(save_as, 'w') as f:
-            f.write(code)
+        try:
+            import inspect
+            code = '''import torch\nimport peptdeep.model.base as model_base\n'''
+            class_code = inspect.getsource(self.model.__class__)
+            code += 'class Model' + class_code[class_code.find('('):]
+            with open(save_as, 'w') as f:
+                f.write(code)
+        except (TypeError, ValueError, KeyError) as e:
+            logging.info(f'Cannot save model source codes: {str(e)}')
 
     def _train_one_epoch(self,
         precursor_df, epoch, batch_size, verbose_each_epoch,
