@@ -17,10 +17,10 @@ python setup.py sdist bdist_wheel
 # Setting up the local package
 cd release/one_click_windows_gui
 # Make sure you include the required extra packages and always use the stable or very-stable options!
-pip install "../../dist/peptdeep-0.0.1-py3-none-any.whl[stable]"
+pip install "../../dist/peptdeep-0.0.8-py3-none-any.whl[stable]"
 
 # Creating the stand-alone pyinstaller folder
-pip install pyinstaller==4.2
+pip install pyinstaller
 pyinstaller ../pyinstaller/peptdeep.spec -y
 conda deactivate
 

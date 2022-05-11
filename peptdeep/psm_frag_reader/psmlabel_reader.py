@@ -60,7 +60,7 @@ class PSMLabelReader(pFindReader,PSMReader_w_FragBase):
             'rt': 'RT',
             'raw_name': 'raw_name',
             'query_id': 'spec',
-            'spec_idx': 'spec_idx',
+            'scan_num': 'scan_num',
         }
 
     def _load_file(self, filename):
@@ -68,14 +68,14 @@ class PSMLabelReader(pFindReader,PSMReader_w_FragBase):
         psmlabel_df.fillna('', inplace=True)
 
         if psmlabel_df['spec'].values[0].count('.')>=4: #pfind
-            psmlabel_df['raw_name'], psmlabel_df['spec_idx'], psmlabel_df['charge'] = zip(
+            psmlabel_df['raw_name'], psmlabel_df['scan_num'], psmlabel_df['charge'] = zip(
                 *psmlabel_df['spec'].str.split('.').apply(lambda x: (x[0], x[-4], x[-3]))
             )
         else:
-            psmlabel_df['raw_name'], psmlabel_df['spec_idx'] = zip(
+            psmlabel_df['raw_name'], psmlabel_df['scan_num'] = zip(
                 *psmlabel_df['spec'].str.split('.').apply(lambda x: (x[0], x[1]))
             )
-        psmlabel_df['spec_idx'] = psmlabel_df['spec_idx'].astype(int)
+        psmlabel_df['scan_num'] = psmlabel_df['scan_num'].astype(int)
         psmlabel_df['charge'] = psmlabel_df['charge'].astype(int)
         return psmlabel_df
 

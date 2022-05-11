@@ -10,12 +10,14 @@ import numpy as np
 import pandas as pd
 from tqdm import tqdm
 import torch
+import os
 
 import multiprocessing as mp
 
 from peptdeep.utils import logging
 
 from alphabase.peptide.fragment import get_charged_frag_types
+from alphabase.io.psm_reader import psm_reader_provider
 
 from peptdeep.rescore.feature_extractor import (
     ScoreFeatureExtractor,
@@ -133,7 +135,7 @@ class Percolator:
         percolator_model:str=perc_settings['percolator_model'],
         percolator_backend:str=perc_settings['percolator_backend'],
         cv_fold:int = perc_settings['cv_fold'],
-        iter_num:int = perc_settings['ml_iter_num'],
+        iter_num:int = perc_settings['percolator_iter_num'],
         ms2_ppm:bool = perc_settings['ms2_ppm'],
         ms2_tol:float = perc_settings['ms2_tol'],
         model_mgr:ModelManager = None
@@ -155,7 +157,7 @@ class Percolator:
             cv_fold (int, optional): cross-validation fold.
               Defaults to perc_settings['cv_fold'].
             iter_num (int, optional): percolator iteration number.
-              Defaults to perc_settings['ml_iter_num'].
+              Defaults to perc_settings['percolator_iter_num'].
             ms2_ppm (bool, optional): is ms2 tolerance the ppm.
               Defaults to perc_settings['ms2_ppm'].
             ms2_tol (float, optional): ms2 tolerance.
@@ -164,24 +166,19 @@ class Percolator:
               peptdeep.pretrained_model.ModelManager.
               If None, self.model_mgr will be init by:
               ```
-              self.model_mgr = ModelManager()
+              self.model_mgr = ModelManager(
+                  mask_modloss=perc_settings[
+                      'mask_modloss'
+                  ]
+              )
               self.model_mgr.load_installed_models(
-                perc_settings['peptdeep_model_type'],
-                mask_modloss=perc_settings[
-                    'mask_modloss'
-                ]
+                  perc_settings['peptdeep_model_type'],
               )
               ```
               Defaults to None.
         """
         if model_mgr is None:
             self.model_mgr = ModelManager()
-            self.model_mgr.load_installed_models(
-                perc_settings['peptdeep_model_type'],
-                mask_modloss=perc_settings[
-                    'mask_modloss'
-                ]
-            )
         else:
             self.model_mgr = model_mgr
         self.charged_frag_types = perc_settings['frag_types']
@@ -212,7 +209,7 @@ class Percolator:
 
         self.max_train_sample = perc_settings['max_perc_train_sample']
         self.min_train_sample = perc_settings['min_perc_train_sample']
-        self.per_raw_fdr = perc_settings['per_raw_fdr']
+        self.per_raw_fdr = perc_settings['use_fdr_for_each_raw']
 
         self.init_percolator_model(percolator_model, percolator_backend)
 
@@ -397,6 +394,48 @@ class Percolator:
 
             return self._predict(test_df)
 
+    def load_psms(self,
+        psm_file_list:list, psm_type:str
+    )->pd.DataFrame:
+        """Load PSM dataframe from file path list.
+
+        Args:
+            psm_file_list (list): PSM file path list
+            psm_type (str): PSM type, could be alphapept, pfind, ...
+
+        Returns:
+            pd.DataFrame: PSM dataframe with 100% FDR including decoys.
+        """
+        reader = psm_reader_provider.get_reader(
+            psm_type, fdr=1, keep_decoy=True
+        )
+        psm_df_list = []
+        for psm_file in psm_file_list:
+            _df = reader.import_file(psm_file)
+            if len(_df) > 0:
+                psm_df_list.append(_df)
+        return pd.concat(psm_df_list)
+
+    def parse_ms_files_to_dict(self,
+        ms_file_list:list
+    )->dict:
+        """Load spectrum file paths into a dict:
+          "/Users/xxx/name.raw" -> {"name":"/Users/xxx/name.raw"}
+
+        Args:
+            spectrum_file_list (list): File path list
+
+        Returns:
+            dict: {"name":"/Users/xxx/name.raw", ...}
+        """
+        spec_dict = {}
+        for ms_file in ms_file_list:
+            basename = os.path.splitext(
+                os.path.basename(ms_file)
+            )[0]
+            spec_dict[basename] = ms_file
+        return spec_dict
+
     def extract_features(self,
         psm_df:pd.DataFrame, ms2_file_dict:dict, ms2_file_type:str
     )->pd.DataFrame:
@@ -441,3 +480,5 @@ class Percolator:
             psm_df, ms2_file_dict, ms2_file_type
         )
         return self.re_score(df)
+
+# Cell

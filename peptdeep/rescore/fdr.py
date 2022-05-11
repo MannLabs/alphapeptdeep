@@ -10,16 +10,16 @@ import pandas as pd
 
 @numba.njit
 def fdr_to_q_values(
-    fdr_values:np.array
-)->np.array:
+    fdr_values:np.ndarray
+)->np.ndarray:
     """convert FDR values to q_values.
 
     Args:
-        fdr_values (np.array): FDR values, they should be
+        fdr_values (np.ndarray): FDR values, they should be
         sorted according to the descending order of the `score`
 
     Returns:
-        np.array: q_values
+        np.ndarray: q_values
     """
     q_values = np.zeros_like(fdr_values)
     min_q_value = np.max(fdr_values)
@@ -61,10 +61,10 @@ calc_fdr_for_df = calc_fdr
 
 @numba.njit
 def fdr_from_ref(
-    sorted_scores:np.array,
-    ref_scores:np.array,
-    ref_fdr_values:np.array
-)->np.array:
+    sorted_scores:np.ndarray,
+    ref_scores:np.ndarray,
+    ref_fdr_values:np.ndarray
+)->np.ndarray:
     """ Calculate FDR values from the given reference scores and fdr_values.
     It is used to extend peptide-level or sequence-level FDR (reference)
     to each PSM, as PSMs are more useful for quantification.
@@ -94,8 +94,8 @@ def fdr_from_ref(
 
 def calc_fdr_from_ref(
     df: pd.DataFrame,
-    ref_scores:np.array,
-    ref_fdr_values:np.array,
+    ref_scores:np.ndarray,
+    ref_fdr_values:np.ndarray,
     score_column:str,
     decoy_column:str='decoy'
 )->pd.DataFrame:

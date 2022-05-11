@@ -9,19 +9,20 @@ import numba
 
 @numba.njit
 def match_centroid_mz(
-    spec_mzs:np.array,
-    query_mzs:np.array,
-    spec_mz_tols:np.array
-)->np.array:
+    spec_mzs:np.ndarray,
+    query_mzs:np.ndarray,
+    spec_mz_tols:np.ndarray
+)->np.ndarray:
     """
     Matched query masses against sorted MS2/spec centroid masses.
+
     Args:
-        spec_mzs (np.array): MS2 or spec mz values, 1-D float array
-        query_mzs (np.array): query mz values, n-D float array
-        spec_mz_tols (np.array): Da tolerance array, same shape as spec_mzs
+        spec_mzs (np.ndarray): MS2 or spec mz values, 1-D float array
+        query_mzs (np.ndarray): query mz values, n-D float array
+        spec_mz_tols (np.ndarray): Da tolerance array, same shape as spec_mzs
 
     Returns:
-        np.array: np.array of int32, the shape is the same as query_mzs.
+        np.ndarray: np.ndarray of int32, the shape is the same as query_mzs.
           -1 means no peaks are matched for the query mz
     """
     idxes = np.searchsorted(spec_mzs, query_mzs)
@@ -121,9 +122,12 @@ class PepSpecMatch(object):
         """Matching psm_df_one_raw against ms2_file
 
         Args:
-            psm_df_one_raw (pd.DataFrame): psm dataframe contains only one raw file
+            psm_df_one_raw (pd.DataFrame): psm dataframe
+                that contains only one raw file
             ms2_file (str): ms2 file path
-            ms2_file_type (str, optional): ms2 file type. Default to 'alphapept'
+            ms2_file_type (str, optional): ms2 file type,
+                could be ["thermo","alphapept","mgf"].
+                Default to 'alphapept'
             ppm (bool, optional): ppm tolerance. Defaults to True.
             tol (int, optional): tolerance. Defaults to 20.
 
@@ -266,7 +270,16 @@ class PepSpecMatch(object):
         ms2_file_type:str = 'alphapept', # or 'mgf', or 'thermo'
         ppm=True, tol=20.0,
     ):
+        """Matching PSM dataframe against the ms2 files in ms2_file_dict
 
+        Args:
+            psm_df (pd.DataFrame): PSM dataframe
+            ms2_file_dict (dict): {raw_name: ms2 path}
+            ms2_file_type (str, optional): Could be 'alphapept', 'mgf' or 'thermo'.
+                Defaults to 'alphapept'.
+            ppm (bool, optional): Defaults to True.
+            tol (float, optional): PPM units, defaults to 20.0.
+        """
         self.psm_df = psm_df
 
         if 'frag_start_idx' in self.psm_df.columns:

@@ -7,27 +7,46 @@ model:
   - y_modloss
   max_frag_charge: 2
 
+local_model_zip_name: "pretrained_models.zip"
+
 # overwritable config
 model_url: "https://datashare.biochem.mpg.de/s/ABnQuD2KkXfIGF3/download"
 model_url_zip_name: "released_models"
-local_model_file_name: "pretrained_models.zip"
 
 thread_num: 8
+
+common:
+  keep_only_important_modloss: True
+
 model_mgr:
   predict:
     batch_size_ms2: 512
     batch_size_rt_ccs: 1024
-    default_nce: 0.3
+    default_nce: 30
     default_instrument: Lumos
+    instrument_choices:
+    - Lumos
+    - QE
+    - timsTOF
     verbose: True
+    multiprocessing: True
   fine_tune:
     epoch_ms2: 10
     epoch_rt_ccs: 20
     grid_nce_search: True
-    grid_nce_first: 0.15
-    grid_nce_last: 0.45
-    grid_nce_step: 0.03
+    grid_nce_first: 15
+    grid_nce_last: 45
+    grid_nce_step: 3
     grid_instrument: ['Lumos']
+  mask_modloss: True
+  model_type: regular
+  model_choices:
+  - regular
+  - phos
+  - hla # same as regular
+  external_ms2_model: ''
+  external_rt_model: ''
+  external_ccs_model: ''
 percolator:
   require_model_tuning: True
   raw_num_to_tune: 8
@@ -36,8 +55,6 @@ percolator:
   psm_num_to_tune_rt_ccs: 5000
   mod_psm_num_to_tune_rt_ccs: 100
   top_n_mods_to_tune: 10
-  peptdeep_model_type: regular # or phos, or HLA
-  mask_modloss: True
 
   require_raw_specific_tuning: True
   raw_specific_ms2_tuning: False
@@ -65,7 +82,7 @@ percolator:
       - linear # logistic regression
       - random_forest
   lr_percolator_torch_model: 0.1 # learning rate, only used when percolator_backend==pytorch 
-  ml_iter_num: 5 # percolator iteration number
+  percolator_iter_num: 5 # percolator iteration number
   cv_fold: 1
   fdr: 0.01
   fdr_level: psm
@@ -74,7 +91,7 @@ percolator:
     - precursor
     - peptide
     - sequence
-  per_raw_fdr: False
+  use_fdr_for_each_raw: False
   frag_types: ['b_z1','b_z2','y_z1','y_z2']
   input_files:
     psm_type: alphapept
@@ -82,15 +99,14 @@ percolator:
       - alphapept
       - pfind
       - maxquant
-      - msfragger_pepxml
     psm_files: []
-    raw_type: alphapept_hdf
-    raw_type_choices:
+    ms_file_type: alphapept_hdf
+    ms_file_type_choices:
       - hdf
       - thermo_raw # if alphapept is installed
       - mgf
       - mzml
-    raw_files: []
+    ms_files: []
     other_score_column_mapping:
       alphapept: {}
       pfind: 
@@ -99,49 +115,57 @@ percolator:
         hyperscore: hyperscore
         nextscore: nextscore
       maxquant: {}
-spec_lib:
+  output_dir: C:/datasets/percolaotr
+library:
   input:
     type: fasta
     type_choices:
     - fasta
-    - sequence_list
-    - peptide_list # sequence with mods and mod_sites
-    - precursor_list # peptide with charge state
-    files: 
+    - sequence_table
+    - peptide_table # sequence with mods and mod_sites
+    - precursor_table # peptide with charge state
+    paths: 
     - xxx.fasta
     fasta:
-      max_miss_cleave: 3
-      fixmod: 
-      - Carbamidomethyl@C
-      varmod:
-      - Oxidation@M
-      min_varmod: 0
-      max_varmod: 1
-      target_mod: []
-      min_target_mod: 0
-      max_target_mod: 2
-  output:
-    type: hdf
-    type_choices:
-    - hdf
-    - diann # and can also be used by spectronaut
-    - msp
-    library: xxx.speclib.hdf
-    min_fragment_mz: 300
-    max_fragment_mz: 2000
-    min_relative_intensity: 0.1
-    least_n_peaks: 6
-    max_frag_charge: 2
-    frag_types:
-    - b
-    - y
+      protease: '([KR])'
+      protease_choices:
+      - 'trypsin/P'
+      - '([KR])'
+      - 'trypsin'
+      - '([KR](?=[^P]))'
+      - 'lys-c'
+      - 'K'
+      - 'lys-n'
+      - '\w(?=K)'
+      - 'chymotrypsin'
+      max_miss_cleave: 2
+    fix_mods: 
+    - Carbamidomethyl@C
+    var_mods:
+    - Oxidation@M
+    min_var_mod_num: 0
+    max_var_mod_num: 2
     min_precursor_charge: 2
     max_precursor_charge: 4
-    min_precursor_mz: 400
-    max_precursor_mz: 2000
-    min_peptide_len: 6
+    min_peptide_len: 7
     max_peptide_len: 35
+    min_precursor_mz: 200.0
+    max_precursor_mz: 2000.0
     decoy: pseudo_reverse
     decoy_choices:
     - pseudo_reverse
     - diann
+    - None
+    max_frag_charge: 2
+    frag_types:
+    - b
+    - y
+  output_dir: ~/peptdeep_library
+  output_tsv:
+    enabled: False
+    min_fragment_mz: 200
+    max_fragment_mz: 2000
+    min_relative_intensity: 0.01
+    keep_higest_k_peaks: 12
+    translate_batch_size: 1000000
+    translate_mod_to_unimod_id: False

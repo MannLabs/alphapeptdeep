@@ -3,7 +3,8 @@
 __all__ = ['protease_dict', 'read_fasta_file', 'load_all_proteins', 'concat_proteins', 'cleave_sequence_with_cut_pos',
            'Digest', 'get_fix_mods', 'get_candidate_sites', 'get_var_mod_sites',
            'get_var_mods_per_sites_multi_mods_on_aa', 'get_var_mods_per_sites_single_mod_on_aa', 'get_var_mods',
-           'get_var_mods_per_sites', 'parse_term_mod', 'PredictFastaSpecLib', 'append_regular_modifications']
+           'get_var_mods_per_sites', 'parse_term_mod', 'protein_idxes_to_names', 'PredictFastaSpecLib',
+           'append_regular_modifications']
 
 # Cell
 import regex as re
@@ -19,6 +20,7 @@ from alphabase.yaml_utils import load_yaml
 from alphabase.io.hdf import HDF_File
 from peptdeep.spec_lib.predict_lib import PredictSpecLib
 from peptdeep.pretrained_models import ModelManager
+from peptdeep.utils import explode_multiple_columns
 
 protease_dict = load_yaml(
     os.path.join(
@@ -90,11 +92,11 @@ def concat_proteins(protein_dict:dict)->str:
 @numba.njit
 def cleave_sequence_with_cut_pos(
     sequence:str,
-    cut_pos:np.array,
+    cut_pos:np.ndarray,
     n_missed_cleavages:int=2,
     pep_length_min:int=6,
     pep_length_max:int=45,
-)->np.array:
+)->np.ndarray:
     """
     Cleave a sequence with cut postions (cut_pos).
     Filters to have a minimum and maximum length.
@@ -137,17 +139,22 @@ def cleave_sequence_with_cut_pos(
 
 class Digest(object):
     def __init__(self,
-        protease='trypsin',
+        protease:str='trypsin',
         max_missed_cleavages:int=2,
-        pep_length_min:int=6,
-        pep_length_max:int=45,
+        peptide_length_min:int=6,
+        peptide_length_max:int=45,
     ):
         self.n_miss_cleave = max_missed_cleavages
-        self.pep_length_min = pep_length_min
-        self.pep_length_max = pep_length_max
-        self.regex_pattern = re.compile(
-            protease_dict[protease]
-        )
+        self.peptide_length_min = peptide_length_min
+        self.peptide_length_max = peptide_length_max
+        if protease in protease_dict:
+            self.regex_pattern = re.compile(
+                protease_dict[protease]
+            )
+        else:
+            self.regex_pattern = re.compile(
+                protease
+            )
 
     def cleave_sequence(self,
         sequence:str,
@@ -173,8 +180,8 @@ class Digest(object):
         ) = cleave_sequence_with_cut_pos(
             sequence, cut_pos,
             self.n_miss_cleave,
-            self.pep_length_min,
-            self.pep_length_max,
+            self.peptide_length_min,
+            self.peptide_length_max,
         )
         # Consider M loss at protein N-term
         if sequence.startswith('M'):
@@ -183,7 +190,7 @@ class Digest(object):
             ):
                 if (
                     sequence.startswith(seq)
-                    and len(seq)>self.pep_length_min
+                    and len(seq)>self.peptide_length_min
                 ):
                     seq_list.append(seq[1:])
                     miss_list.append(miss)
@@ -228,7 +235,7 @@ def get_var_mod_sites(
     sequence:str,
     target_mod_aas:str,
     max_var_mod: int,
-    max_combs: int
+    max_combs: int,
 )->list:
     """get all combinations of variable modification sites
 
@@ -297,6 +304,7 @@ def get_var_mods(
     mod_dict:dict,
     max_var_mod:int,
     max_combs:int,
+    keep_unmodified:bool=False,
 )->tuple:
     mod_sites_list = get_var_mod_sites(
         sequence, var_mod_aas,
@@ -311,6 +319,9 @@ def get_var_mods(
         mod_sites_str = ';'.join([str(i) for i in mod_sites])
         ret_mods.extend(_mods)
         ret_sites_list.extend([mod_sites_str]*len(_mods))
+    if keep_unmodified:
+        ret_mods.append('')
+        ret_sites_list.append('')
     return ret_mods, ret_sites_list
 
 # Cell
@@ -322,38 +333,46 @@ def parse_term_mod(term_mod_name:str):
         return '', term
 
 # Cell
+def protein_idxes_to_names(protein_idxes:str, protein_names:list):
+    if len(protein_idxes) == 0: return ''
+    return ';'.join(protein_names[int(i)] for i in protein_idxes.split(';'))
+
+# Cell
 
 class PredictFastaSpecLib(PredictSpecLib):
     def __init__(self,
-        model_manager:ModelManager,
+        model_manager:ModelManager = None,
         charged_frag_types:list = ['b_z1','b_z2','y_z1','y_z2'],
-        min_precursor_mz = 400, max_precursor_mz = 1800,
         protease:str = 'trypsin',
         max_missed_cleavages:int = 2,
-        pep_length_min:int = 7,
-        pep_length_max:int = 35,
-        min_charge:int = 2,
-        max_charge:int = 4,
+        peptide_length_min:int = 7,
+        peptide_length_max:int = 35,
+        precursor_charge_min:int = 2,
+        precursor_charge_max:int = 4,
+        precursor_mz_min:float = 200.0,
+        precursor_mz_max:float = 2000.0,
         var_mods:list = ['Acetyl@Protein N-term','Oxidation@M'],
         max_var_mod_num:int = 2,
         fix_mods:list = ['Carbamidomethyl@C'],
-        decoy: str = 'pseudo_reverse', # or diann
+        decoy: str = None, # or pseudo_reverse or diann
         I_to_L=False,
     ):
         super().__init__(
-            model_manager, charged_frag_types,
-            min_precursor_mz, max_precursor_mz,
+            model_manager,
+            charged_frag_types=charged_frag_types,
+            precursor_mz_min=precursor_mz_min,
+            precursor_mz_max=precursor_mz_max,
             decoy=decoy
         )
-        self.protein_df = pd.DataFrame()
+        self.protein_df:pd.DataFrame() = pd.DataFrame()
         self.I_to_L = I_to_L
-        self.max_mod_combs = 100
+        self.max_mod_combinations = 100
         self._digest = Digest(
             protease, max_missed_cleavages,
-            pep_length_min, pep_length_max
+            peptide_length_min, peptide_length_max
         )
-        self.min_charge = min_charge
-        self.max_charge = max_charge
+        self.precursor_charge_min = precursor_charge_min
+        self.precursor_charge_max = precursor_charge_max
 
         self.var_mods = var_mods
         self.fix_mods = fix_mods
@@ -421,6 +440,7 @@ class PredictFastaSpecLib(PredictSpecLib):
         self.var_mod_pep_cterm_dict = {}
         self.var_mod_dict = {}
 
+        global get_var_mods_per_sites
         if self._check_if_multi_mods_on_aa(var_mods):
             for mod in var_mods:
                 if mod.find('@')+2 == len(mod):
@@ -430,16 +450,14 @@ class PredictFastaSpecLib(PredictSpecLib):
                         self.var_mod_dict[mod[-1]].append(mod)
                     else:
                         self.var_mod_dict[mod[-1]] = [mod]
-            global get_var_mods_per_sites
-            get_var_mod_sites = get_var_mods_per_sites_multi_mods_on_aa
+            get_var_mods_per_sites = get_var_mods_per_sites_multi_mods_on_aa
         else:
             for mod in var_mods:
                 if mod.find('@')+2 == len(mod):
                     if mod[-1] in self.fix_mod_dict: continue
                     self.var_mod_aas += mod[-1]
                     self.var_mod_dict[mod[-1]] = mod
-            global get_var_mods_per_sites
-            get_var_mod_sites = get_var_mods_per_sites_single_mod_on_aa
+            get_var_mods_per_sites = get_var_mods_per_sites_single_mod_on_aa
 
         for mod in var_mods:
             if mod.find('@')+2 < len(mod):
@@ -460,8 +478,8 @@ class PredictFastaSpecLib(PredictSpecLib):
                 mod_set.add(mod[-1])
         return False
 
-    def import_fasta(self, fasta_files:list):
-        self.from_fasta_list(fasta_files)
+    def import_fasta(self, fasta_files:Union[str,list]):
+        self.from_fasta(fasta_files)
         self._predict_all_after_load_pep_seqs()
 
     def import_protein_dict(self, protein_dict:dict):
@@ -480,33 +498,14 @@ class PredictFastaSpecLib(PredictSpecLib):
         self.add_charge()
         self.predict_all()
 
-    def load_peptide_sequences(self,
-        *source,
-        source_type="fasta"
-    ):
-        """Wrapper for loading peptide sequences
-
-        Args:
-            source_type (str, optional): could be .
-             Defaults to "fasta".
-        """
-        if source_type == "fasta":
-            self.from_fasta(*source)
-        elif source_type == "protein_dict":
-            self.from_protein_dict(*source)
-        elif source_type == "peptide_list":
-            self.from_peptide_sequence_list(*source)
-        else:
-            self.from_fasta_list(*source)
-
     def from_fasta(self, fasta_file:Union[str,list]):
         """Load peptide sequence from fasta file.
 
         Args:
-            fasta_path (Union[str,list]): could be a fasta path
+            fasta_path (Union[str,list]): could be a fasta path or a list of fasta paths
               or a list of fasta paths
         """
-        if isinstance(fasta_file, 'str'):
+        if isinstance(fasta_file, str):
             self.from_fasta_list([fasta_file])
         else:
             self.from_fasta_list(fasta_file)
@@ -566,6 +565,19 @@ class PredictFastaSpecLib(PredictSpecLib):
         self._precursor_df['mod_sites'] = ''
         self.refine_df()
 
+    def append_protein_name(self):
+        if (
+            'id' not in self.protein_df or
+            'protein_idxes' not in self._precursor_df
+        ):
+            return
+
+        self._precursor_df['proteins'] = self._precursor_df['protein_idxes'].apply(
+            protein_idxes_to_names,
+            protein_names=self.protein_df['id'].values
+        )
+
+
     def from_peptide_sequence_list(self,
         pep_seq_list:list,
         protein_list:list = None
@@ -596,10 +608,9 @@ class PredictFastaSpecLib(PredictSpecLib):
 
         var_mods_list, var_mod_sites_list = get_var_mods(
             sequence, self.var_mod_aas, self.var_mod_dict,
-            self.max_var_mod_num, self.max_mod_combs-1, # 1 for unmodified
+            self.max_var_mod_num, self.max_mod_combinations-1, # 1 for unmodified
+            keep_unmodified=True
         )
-        var_mods_list.append('')
-        var_mod_sites_list.append('')
 
         nterm_var_mods = ['']
         nterm_var_mod_sites = ['']
@@ -631,6 +642,11 @@ class PredictFastaSpecLib(PredictSpecLib):
         )
 
     def add_modifications(self):
+        if 'is_prot_nterm' not in self._precursor_df.columns:
+            self._precursor_df['is_prot_nterm'] = False
+        if 'is_prot_cterm' not in self._precursor_df.columns:
+            self._precursor_df['is_prot_cterm'] = False
+
         (
             self._precursor_df['mods'],
             self._precursor_df['mod_sites']
@@ -639,14 +655,18 @@ class PredictFastaSpecLib(PredictSpecLib):
         ].apply(lambda x:
             self.add_mods_for_one_seq(*x), axis=1
         ))
-        self._precursor_df = self._precursor_df.explode(
+        self._precursor_df = explode_multiple_columns(
+            self._precursor_df,
             ['mods','mod_sites']
         )
         self._precursor_df.reset_index(drop=True, inplace=True)
 
     def add_charge(self):
         self._precursor_df['charge'] = [
-            np.arange(self.min_charge, self.max_charge+1)
+            np.arange(
+                self.precursor_charge_min,
+                self.precursor_charge_max+1
+            )
         ]*len(self._precursor_df)
         self._precursor_df = self._precursor_df.explode('charge')
         self._precursor_df['charge'] = self._precursor_df.charge.astype(np.int8)
@@ -663,19 +683,21 @@ class PredictFastaSpecLib(PredictSpecLib):
         _hdf.library.protein_df = self.protein_df
 
 # Cell
-def append_regular_modifications(df,
+def append_regular_modifications(df:pd.DataFrame,
     var_mods = ['Phospho@S','Phospho@T','Phospho@Y'],
     max_mod_num=1, max_combs=100,
     keep_unmodified=True,
 ):
     mod_dict = dict([(mod[-1],mod) for mod in var_mods])
     var_mod_aas = ''.join(mod_dict.keys())
+
     (
         df['mods_app'],
         df['mod_sites_app']
     ) = zip(*df.sequence.apply(get_var_mods,
             var_mod_aas=var_mod_aas, mod_dict=mod_dict,
-            max_var_mod=max_mod_num, max_combs=max_combs
+            max_var_mod=max_mod_num, max_combs=max_combs,
+            keep_unmodified=keep_unmodified
         )
     )
 
@@ -691,7 +713,6 @@ def append_regular_modifications(df,
     df['mod_sites'] = df[['mod_sites','mod_sites_app']].apply(
         lambda x: ';'.join(i for i in x if i), axis=1
     )
-    del df['mods_app']
-    del df['mod_sites_app']
+    df.drop(columns=['mods_app', 'mod_sites_app'], inplace=True)
     df.reset_index(drop=True, inplace=True)
     return df

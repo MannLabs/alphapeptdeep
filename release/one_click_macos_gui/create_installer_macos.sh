@@ -20,10 +20,10 @@ python setup.py sdist bdist_wheel
 
 # Setting up the local package
 cd release/one_click_macos_gui
-pip install "../../dist/peptdeep-0.0.1-py3-none-any.whl[stable]"
+pip install "../../dist/peptdeep-0.0.8-py3-none-any.whl[stable]"
 
 # Creating the stand-alone pyinstaller folder
-pip install pyinstaller==4.2
+pip install pyinstaller
 pyinstaller ../pyinstaller/peptdeep.spec -y
 conda deactivate
 
@@ -40,5 +40,5 @@ cp ../../LICENSE.txt Resources/LICENSE.txt
 cp ../logos/alpha_logo.png Resources/alpha_logo.png
 chmod 777 scripts/*
 
-pkgbuild --root dist/peptdeep --identifier de.mpg.biochem.peptdeep.app --version 0.0.1 --install-location /Applications/peptdeep.app --scripts scripts peptdeep.pkg
+pkgbuild --root dist/peptdeep --identifier de.mpg.biochem.peptdeep.app --version 0.0.8 --install-location /Applications/peptdeep.app --scripts scripts peptdeep.pkg
 productbuild --distribution distribution.xml --resources Resources --package-path peptdeep.pkg dist/peptdeep_gui_installer_macos.pkg

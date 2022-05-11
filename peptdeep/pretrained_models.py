@@ -2,7 +2,8 @@
 
 __all__ = ['is_model_zip', 'download_models', 'install_models', 'sandbox_dir', 'model_name', 'model_url',
            'url_zip_name', 'model_zip', 'count_mods', 'psm_sampling_with_important_mods', 'load_phos_models',
-           'load_HLA_models', 'load_models', 'load_models_by_model_type_in_zip', 'mgr_settings', 'ModelManager']
+           'load_models', 'load_models_by_model_type_in_zip', 'mgr_settings', 'clear_error_modloss_intensities',
+           'ModelManager']
 
 # Cell
 import os
@@ -16,6 +17,7 @@ import urllib
 import socket
 import logging
 import shutil
+from pickle import UnpicklingError
 
 from peptdeep.settings import global_settings
 
@@ -29,7 +31,7 @@ sandbox_dir = os.path.join(
 if not os.path.exists(sandbox_dir):
     os.makedirs(sandbox_dir)
 
-model_name = global_settings['local_model_file_name']
+model_name = global_settings['local_model_zip_name']
 model_url = global_settings['model_url']
 url_zip_name = global_settings['model_url_zip_name']
 
@@ -67,7 +69,9 @@ def download_models(
 
         logging.info(f'Downloading {model_name} ...')
         try:
-            requests = urllib.request.urlopen(url, timeout=10)
+            import ssl
+            context = ssl._create_unverified_context()
+            requests = urllib.request.urlopen(url, context=context, timeout=10)
             with open(downloaded_zip, 'wb') as f:
                 f.write(requests.read())
         except (
@@ -136,8 +140,9 @@ if not os.path.exists(model_zip):
 from peptdeep.model.ms2 import (
     pDeepModel, normalize_training_intensities
 )
-from peptdeep.model.rt import AlphaRTModel, uniform_sampling
+from peptdeep.model.rt import AlphaRTModel
 from peptdeep.model.ccs import AlphaCCSModel
+from peptdeep.utils import uniform_sampling
 
 from peptdeep.settings import global_settings
 mgr_settings = global_settings['model_mgr']
@@ -210,30 +215,21 @@ def psm_sampling_with_important_mods(
                 )
             )
     if len(psm_df_list) > 0:
-        return pd.concat(psm_df_list).reset_index(drop=True)
+        return pd.concat(psm_df_list, ignore_index=True)
     else:
         return pd.DataFrame()
 
-def load_phos_models(mask_phos_modloss=False):
-    ms2_model = pDeepModel(mask_modloss=mask_phos_modloss)
-    ms2_model.load(model_zip, model_path_in_zip='phospho/ms2.pth')
+def load_phos_models(mask_modloss=True):
+    ms2_model = pDeepModel(mask_modloss=mask_modloss)
+    ms2_model.load(model_zip, model_path_in_zip='phospho/ms2_phos.pth')
     rt_model = AlphaRTModel()
-    rt_model.load(model_zip, model_path_in_zip='phospho/rt.pth')
+    rt_model.load(model_zip, model_path_in_zip='phospho/rt_phos.pth')
     ccs_model = AlphaCCSModel()
     ccs_model.load(model_zip, model_path_in_zip='regular/ccs.pth')
     return ms2_model, rt_model, ccs_model
 
-def load_HLA_models():
-    ms2_model = pDeepModel(mask_modloss=True)
-    ms2_model.load(model_zip, model_path_in_zip='HLA/ms2.pth')
-    rt_model = AlphaRTModel()
-    rt_model.load(model_zip, model_path_in_zip='HLA/rt.pth')
-    ccs_model = AlphaCCSModel()
-    ccs_model.load(model_zip, model_path_in_zip='regular/ccs.pth')
-    return ms2_model, rt_model, ccs_model
-
-def load_models():
-    ms2_model = pDeepModel()
+def load_models(mask_modloss=True):
+    ms2_model = pDeepModel(mask_modloss=mask_modloss)
     ms2_model.load(model_zip, model_path_in_zip='regular/ms2.pth')
     rt_model = AlphaRTModel()
     rt_model.load(model_zip, model_path_in_zip='regular/rt.pth')
@@ -241,8 +237,8 @@ def load_models():
     ccs_model.load(model_zip, model_path_in_zip='regular/ccs.pth')
     return ms2_model, rt_model, ccs_model
 
-def load_models_by_model_type_in_zip(model_type_in_zip:str):
-    ms2_model = pDeepModel()
+def load_models_by_model_type_in_zip(model_type_in_zip:str, mask_modloss=True):
+    ms2_model = pDeepModel(mask_modloss=mask_modloss)
     ms2_model.load(model_zip, model_path_in_zip=f'{model_type_in_zip}/ms2.pth')
     rt_model = AlphaRTModel()
     rt_model.load(model_zip, model_path_in_zip=f'{model_type_in_zip}/rt.pth')
@@ -271,26 +267,78 @@ import torch.multiprocessing as mp
 from typing import Dict
 from peptdeep.utils import logging, process_bar
 
-class ModelManager(object):
-    def __init__(self):
-        self.ms2_model:pDeepModel = None
-        self.rt_model:AlphaRTModel = None
-        self.ccs_model:AlphaCCSModel = None
+def clear_error_modloss_intensities(
+    fragment_mz_df, fragment_intensity_df
+):
+    # clear error modloss intensities
+    for col in fragment_mz_df.columns.values:
+        if 'modloss' in col:
+            fragment_intensity_df.loc[
+                fragment_mz_df[col]==0,col
+            ] = 0
 
-        self.grid_nce_search = mgr_settings[
+class ModelManager(object):
+    def __init__(self,
+        mask_modloss:bool=mgr_settings['mask_modloss'],
+        device:str='gpu',
+    ):
+        """ The manager class to access MS2/RT/CCS models.
+
+        Args:
+            mask_modloss (bool, optional): If modloss ions are masked to zeros
+                in the ms2 model. `modloss` ions are mostly useful for phospho
+                MS2 prediciton model.
+                Defaults to :py:data:`global_settings`['model_mgr']['mask_modloss'].
+            device (str, optional): Device for DL models, could be 'gpu' ('cuda') or 'cpu'.
+                if device=='gpu' but no GPUs are detected, it will automatically switch to 'cpu'.
+                Defaults to 'gpu'.
+
+        Attributes:
+            ms2_model (:py:class:`peptdeep.model.ms2.pDeepModel`): The MS2 (pDeep)
+                prediction.
+            rt_model (:py:class:`peptdeep.model.rt.AlphaRTModel`): The RT prediction model.
+            ccs_model (:py:class:`peptdeep.model.ccs.AlphaCCSModel`): The CCS prediciton model.
+            psm_num_to_tune_ms2 (int): Number of PSMs to fine-tune the MS2 model.
+                Defaults to 5000.
+            epoch_to_tune_ms2 (int): Number of epoches to fine-tune the MS2 model.
+                Defaults to global_settings['model_mgr']['fine_tune']['epoch_ms2'].
+            psm_num_to_tune_rt_ccs (int): Number of PSMs to fine-tune RT/CCS model.
+                Defaults to 3000.
+            epoch_to_tune_rt_ccs (int): Number of epoches to fine-tune RT/CCS model.
+                Defaults to global_settings['model_mgr']['fine_tune']['epoch_rt_ccs'].
+            nce (float): Default NCE value for a precursor_df without the 'nce' column.
+                Defaults to global_settings['model_mgr']['predict']['default_nce'].
+            instrument (str): Default instrument type for a precursor_df without the 'instrument' column.
+                Defaults to global_settings['model_mgr']['predict']['default_instrument'].
+            use_grid_nce_search (bool): If self.ms2_model uses
+                :py:meth:`peptdeep.model.ms2.pDeepModel.grid_nce_search` to determine optimal
+                NCE and instrument type. This will change `self.nce` and `self.instrument` values.
+                Defaults to global_settings['model_mgr']['fine_tune']['grid_nce_search'].
+        """
+        self.ms2_model:pDeepModel = pDeepModel(mask_modloss=mask_modloss, device=device)
+        self.rt_model:AlphaRTModel = AlphaRTModel(device=device)
+        self.ccs_model:AlphaCCSModel = AlphaCCSModel(device=device)
+
+        self.load_installed_models()
+        self.load_external_models()
+
+        self.use_grid_nce_search = mgr_settings[
             'fine_tune'
         ]['grid_nce_search']
 
         self.psm_num_to_tune_ms2 = 5000
-        self.psm_num_per_mod_to_tune_ms2 = 100
+        self.psm_num_per_mod_to_tune_ms2 = 0
         self.epoch_to_tune_ms2 = mgr_settings[
             'fine_tune'
         ]['epoch_ms2']
+        self.batch_size_to_tune_ms2 = 512
+
         self.psm_num_to_tune_rt_ccs = 3000
-        self.psm_num_per_mod_to_tune_rt_ccs = 100
+        self.psm_num_per_mod_to_tune_rt_ccs = 0
         self.epoch_to_tune_rt_ccs = mgr_settings[
             'fine_tune'
         ]['epoch_rt_ccs']
+        self.batch_size_to_tune_rt_ccs = 1024
 
         self.top_n_mods_to_tune = 10
 
@@ -304,81 +352,96 @@ class ModelManager(object):
             'predict'
         ]['verbose']
 
-    def set_default_nce(self, df):
-        df['nce'] = self.nce
-        df['instrument'] = self.instrument
+    def set_default_nce_instrument(self, df):
+        if 'nce' not in df.columns and 'instrument' not in df.columns:
+            df['nce'] = self.nce
+            df['instrument'] = self.instrument
+        elif 'nce' not in df.columns:
+            df['nce'] = self.nce
+        elif 'instrument' not in df.columns:
+            df['instrument'] = self.instrument
 
-    def load_installed_models(self, model_type='regular', mask_modloss=True):
+    def set_default_nce(self, df):
+        self.set_default_nce_instrument(df)
+
+    def load_installed_models(self,
+        model_type:str=mgr_settings['model_type']
+    ):
         """ Load built-in MS2/CCS/RT models.
         Args:
             model_type (str, optional): To load the installed MS2/RT/CCS models
-                or phos MS2/RT/CCS models. It could be 'phospho', 'HLA', 'regular', or
-                model_type (model sub-folder) in peptdeep_models.zip.
-                Defaults to 'regular'.
-            mask_modloss (bool, optional): If modloss ions are masked to zeros
-                in the ms2 model. `modloss` ions are mostly useful for phospho
-                MS2 prediciton model. Defaults to True.
+                or phos MS2/RT/CCS models. It could be 'phospho', 'HLA', or 'regular'.
+                Currently, HLA and regular share the same models.
+                Defaults to `global_settings['model_mgr']['model_type']` ('regular').
         """
         if model_type.lower() in ['phospho','phos']:
-            (
-                self.ms2_model, self.rt_model, self.ccs_model
-            ) = load_phos_models(mask_modloss)
+            self.ms2_model.load(
+                model_zip,
+                model_path_in_zip='phospho/ms2_phos.pth'
+            )
+            self.rt_model.load(
+                model_zip,
+                model_path_in_zip='phospho/rt_phos.pth'
+            )
+            self.ccs_model.load(
+                model_zip,
+                model_path_in_zip='regular/ccs.pth'
+            )
         elif model_type.lower() in ['regular','common']:
-            (
-                self.ms2_model, self.rt_model, self.ccs_model
-            ) = load_models()
+            self.ms2_model.load(
+                model_zip, model_path_in_zip='regular/ms2.pth'
+            )
+            self.rt_model.load(
+                model_zip, model_path_in_zip='regular/rt.pth'
+            )
+            self.ccs_model.load(
+                model_zip, model_path_in_zip='regular/ccs.pth'
+            )
         elif model_type.lower() in [
             'hla','unspecific','non-specific', 'nonspecific'
         ]:
-            (
-                self.ms2_model, self.rt_model, self.ccs_model
-            ) = load_HLA_models()
+            self.load_installed_models(model_type="regular")
         else:
-            (
-                self.ms2_model, self.rt_model, self.ccs_model
-            ) = load_models_by_model_type_in_zip(model_type)
+            logging.warn(f"model_type='{model_type}' is not supported, use 'regular'")
+            self.load_installed_models(model_type="regular")
 
     def load_external_models(self,
         *,
-        ms2_model_file: Tuple[str, io.BytesIO]=None,
-        rt_model_file: Tuple[str, io.BytesIO]=None,
-        ccs_model_file: Tuple[str, io.BytesIO]=None,
-        mask_modloss=True
+        ms2_model_file: Tuple[str, io.BytesIO]=mgr_settings['external_ms2_model'],
+        rt_model_file: Tuple[str, io.BytesIO]=mgr_settings['external_rt_model'],
+        ccs_model_file: Tuple[str, io.BytesIO]=mgr_settings['external_ccs_model'],
     ):
-        """Load external MS2/RT/CCS models
+        """Load external MS2/RT/CCS models.
 
         Args:
             ms2_model_file (Tuple[str, io.BytesIO], optional): ms2 model file or stream.
-                It will load the installed model if the value is None. Defaults to None.
+                Do nothing if the value is ''. Defaults to global_settings['model_mgr']['external_ms2_model'].
             rt_model_file (Tuple[str, io.BytesIO], optional): rt model file or stream.
-                It will load the installed model if the value is None. Defaults to None.
+                Do nothing if the value is ''. Defaults to global_settings['model_mgr']['external_rt_model'].
             ccs_model_file (Tuple[str, io.BytesIO], optional): ccs model or stream.
-                It will load the installed model if the value is None. Defaults to None.
-            mask_modloss (bool, optional): If modloss ions are masked to zeros
-                in the ms2 model. Defaults to True.
+                Do nothing if the value is ''. Defaults to global_settings['model_mgr']['external_ccs_model'].
         """
-        self.ms2_model = pDeepModel(mask_modloss=mask_modloss)
-        self.rt_model = AlphaRTModel()
-        self.ccs_model = AlphaCCSModel()
 
-        if ms2_model_file is not None:
-            self.ms2_model.load(ms2_model_file)
-        else:
-            self.ms2_model.load(model_zip, model_path_in_zip='regular/ms2.pth')
-        if rt_model_file is not None:
-            self.rt_model.load(rt_model_file)
-        else:
-            self.rt_model.load(model_zip, model_path_in_zip='regular/rt.pth')
-        if ccs_model_file is not None:
-            self.ccs_model.load(ccs_model_file)
-        else:
-            self.ccs_model.load(model_zip, model_path_in_zip='regular/ccs.pth')
+        def _load_file(model, model_file):
+            try:
+                if isinstance(model_file, str):
+                    if os.path.isfile(model_file):
+                        model.load(model_file)
+                    else:
+                        return
+                model.load(model_file)
+            except UnpicklingError as e:
+                logging.info(f"Cannot load {model_file} as {model.__class__} model, peptdeep will use the pretrained model instead.")
+
+        _load_file(self.ms2_model, ms2_model_file)
+        _load_file(self.rt_model, rt_model_file)
+        _load_file(self.ccs_model, ccs_model_file)
 
     def fine_tune_rt_model(self,
         psm_df:pd.DataFrame,
     ):
         """ Fine-tune the RT model. The fine-tuning will be skipped
-            if `n_rt_ccs_tune` is zero.
+            if `self.psm_num_to_tune_rt_ccs` is zero.
 
         Args:
             psm_df (pd.DataFrame): training psm_df which contains 'rt_norm' column.
@@ -391,15 +454,17 @@ class ModelManager(object):
                 uniform_sampling_column='rt_norm'
             )
             if len(tr_df) > 0:
-                self.rt_model.train(tr_df,
-                    epoch=self.epoch_to_tune_rt_ccs
+                self.rt_model.train_with_warmup(tr_df,
+                    batch_size=self.batch_size_to_tune_rt_ccs,
+                    epoch=self.epoch_to_tune_rt_ccs,
+                    warmup_epoch=self.epoch_to_tune_rt_ccs//2,
                 )
 
     def fine_tune_ccs_model(self,
         psm_df:pd.DataFrame,
     ):
         """ Fine-tune the CCS model. The fine-tuning will be skipped
-            if `n_rt_ccs_tune` is zero.
+            if `self.psm_num_to_tune_rt_ccs` is zero.
 
         Args:
             psm_df (pd.DataFrame): training psm_df which contains 'ccs' column.
@@ -420,14 +485,25 @@ class ModelManager(object):
                 uniform_sampling_column='ccs'
             )
             if len(tr_df) > 0:
-                self.ccs_model.train(tr_df,
-                    epoch=self.epoch_to_tune_rt_ccs
+                self.ccs_model.train_with_warmup(tr_df,
+                    batch_size=self.batch_size_to_tune_rt_ccs,
+                    epoch=self.epoch_to_tune_rt_ccs,
+                    warmup_epoch=self.epoch_to_tune_rt_ccs//2,
                 )
 
     def fine_tune_ms2_model(self,
         psm_df: pd.DataFrame,
         matched_intensity_df: pd.DataFrame,
     ):
+        """Using matched_intensity_df to fine-tune the ms2 model.
+        1. It will sample `n=self.psm_num_to_tune_ms2` PSMs into training dataframe (`tr_df`) to for fine-tuning.
+        2. This method will also consider some important PTMs (`n=self.top_n_mods_to_tune`) into `tr_df` for fine-tuning.
+        3. If `self.use_grid_nce_search==True`, this method will call `self.ms2_model.grid_nce_search` to find the best NCE and instrument.
+
+        Args:
+            psm_df (pd.DataFrame): PSM dataframe for fine-tuning.
+            matched_intensity_df (pd.DataFrame): The matched fragment intensities for `psm_df`.
+        """
         if self.psm_num_to_tune_ms2 > 0:
             tr_df = psm_sampling_with_important_mods(
                 psm_df, self.psm_num_to_tune_ms2,
@@ -445,7 +521,7 @@ class ModelManager(object):
                     else:
                         tr_inten_df[frag_type] = 0
 
-                if self.grid_nce_search:
+                if self.use_grid_nce_search:
                     self.nce, self.instrument = self.ms2_model.grid_nce_search(
                         tr_df, tr_inten_df,
                         nce_first=mgr_settings['fine_tune'][
@@ -463,23 +539,40 @@ class ModelManager(object):
                     )
                     tr_df['nce'] = self.nce
                     tr_df['instrument'] = self.instrument
-                elif 'nce' not in tr_df.columns:
-                    self.set_default_nce(tr_df)
+                else:
+                    self.set_default_nce_instrument(tr_df)
 
-                self.ms2_model.train(tr_df,
+                self.ms2_model.train_with_warmup(tr_df,
                     fragment_intensity_df=tr_inten_df,
-                    epoch=self.epoch_to_tune_ms2
+                    batch_size=self.batch_size_to_tune_ms2,
+                    epoch=self.epoch_to_tune_ms2,
+                    warmup_epoch=self.epoch_to_tune_ms2//2,
                 )
 
     def predict_ms2(self, precursor_df:pd.DataFrame,
         *,
-        batch_size=mgr_settings[
+        batch_size:int=mgr_settings[
             'predict'
         ]['batch_size_ms2'],
-        reference_frag_df = None,
-    ):
-        if 'nce' not in precursor_df.columns:
-            self.set_default_nce(precursor_df)
+        reference_frag_df:pd.DataFrame = None,
+    )->pd.DataFrame:
+        """Predict MS2 for the given precursor_df
+
+        Args:
+            precursor_df (pd.DataFrame): precursor dataframe for MS2 prediction.
+            batch_size (int, optional): Batch size for prediction.
+              Defaults to mgr_settings[ 'predict' ]['batch_size_ms2'].
+            reference_frag_df (pd.DataFrame, optional):
+              If precursor_df has 'frag_start_idx' pointing to reference_frag_df.
+              Defaults to None.
+
+        Returns:
+            pd.DataFrame: predicted fragment intensity dataframe.
+              If there are no such two columns in precursor_df,
+              it will insert 'frag_start_idx' and `frag_end_idx` in
+              precursor_df pointing to this predicted fragment dataframe.
+        """
+        self.set_default_nce_instrument(precursor_df)
         if self.verbose:
             logging.info('Predicting MS2 ...')
         return self.ms2_model.predict(precursor_df,
@@ -489,10 +582,22 @@ class ModelManager(object):
         )
 
     def predict_rt(self, precursor_df:pd.DataFrame,
-        *, batch_size=mgr_settings[
-             'predict'
-           ]['batch_size_rt_ccs']
-    ):
+        *,
+        batch_size:int=mgr_settings[
+            'predict'
+        ]['batch_size_rt_ccs']
+    )->pd.DataFrame:
+        """ Predict RT ('rt_pred') inplace into `precursor_df`.
+
+        Args:
+            precursor_df (pd.DataFrame): precursor_df for RT prediction
+            batch_size (int, optional): Batch size for prediction.
+              Defaults to mgr_settings[ 'predict' ]['batch_size_rt_ccs'].
+              mgr_settings=peptdeep.settings.global_settings['model_mgr'].
+
+        Returns:
+            pd.DataFrame: df with 'rt_pred' and 'rt_norm_pred' columns.
+        """
         if self.verbose:
             logging.info("Predicting RT ...")
         df = self.rt_model.predict(precursor_df,
@@ -502,10 +607,22 @@ class ModelManager(object):
         return df
 
     def predict_mobility(self, precursor_df:pd.DataFrame,
-        *, batch_size=mgr_settings[
-             'predict'
-           ]['batch_size_rt_ccs']
-    ):
+        *,
+        batch_size:int=mgr_settings[
+            'predict'
+        ]['batch_size_rt_ccs']
+    )->pd.DataFrame:
+        """ Predict mobility ('ccs_pred' and `mobility_pred`) inplace into `precursor_df`.
+
+        Args:
+            precursor_df (pd.DataFrame): precursor_df for CCS/mobility prediction
+            batch_size (int, optional): Batch size for prediction.
+              Defaults to mgr_settings[ 'predict' ]['batch_size_rt_ccs'].
+              mgr_settings=peptdeep.settings.global_settings['model_mgr'].
+
+        Returns:
+            pd.DataFrame: df with 'ccs_pred' and 'mobility_pred' columns.
+        """
         if self.verbose:
             logging.info("Predicting mobility ...")
         precursor_df = self.ccs_model.predict(precursor_df,
@@ -516,6 +633,7 @@ class ModelManager(object):
         )
 
     def _predict_all_for_mp(self, arg_dict):
+        """Internal function, for multiprocessing"""
         return self.predict_all(
             multiprocessing=False, **arg_dict
         )
@@ -523,13 +641,12 @@ class ModelManager(object):
     def predict_all(self, precursor_df:pd.DataFrame,
         *,
         predict_items:list = [
-            'rt' #,'mobility' ,'ms2'
+            'rt' ,'mobility' ,'ms2'
         ],
-        frag_types:list = get_charged_frag_types(
-            ['b','y'],2
-        ),
-        multiprocessing:bool = True,
-        thread_num:int = global_settings['thread_num']
+        frag_types:list =  None,
+        multiprocessing:bool = mgr_settings['predict']['multiprocessing'],
+        thread_num:int = global_settings['thread_num'],
+        min_required_precursor_num_for_mp:int = 3000,
     )->Dict[str, pd.DataFrame]:
         """ predict all items defined by `predict_items`,
         which may include rt, mobility, fragment_mz
@@ -541,11 +658,17 @@ class ModelManager(object):
             predict_items (list, optional): items ('rt', 'mobility',
               'ms2') to predict.
               Defaults to [ 'rt' ].
-            frag_types (list, optional): fragment types to predict.
-              Defaults to ['b_z1','b_z2','y_z1','y_z2'].
+            frag_types (list, optional): fragment types to predict. If it is None,
+            it then depends on `self.ms2_model.charged_frag_types` and
+            `self.ms2_model.model._mask_modloss`.
+              Defaults to None.
             multiprocessing (bool, optional): if use multiprocessing.
               Defaults to True.
             thread_num (int, optional): Defaults to global_settings['thread_num']
+            min_required_precursor_num_for_mp (int, optional): It will not use
+              multiprocessing when the number of precursors in precursor_df
+              is lower than this value. Defaults to 5000.
+
         Returns:
             Dict[str, pd.DataFrame]: {'precursor_df': precursor_df}
               if 'ms2' in predict_items, it also contains:
@@ -553,7 +676,6 @@ class ModelManager(object):
                   'fragment_mz_df': fragment_mz_df,
                   'fragment_intensity_df': fragment_intensity_df
               }
-
         """
         def refine_df(df):
             if 'ms2' in predict_items:
@@ -561,16 +683,36 @@ class ModelManager(object):
             else:
                 refine_precursor_df(df, drop_frag_idx=False)
 
+        if frag_types is None:
+            if self.ms2_model.model._mask_modloss:
+                frag_types = [
+                    frag for frag in self.ms2_model.charged_frag_types
+                    if 'modloss' not in frag
+                ]
+            else:
+                frag_types = self.ms2_model.charged_frag_types
+
         if 'precursor_mz' not in precursor_df.columns:
             update_precursor_mz(precursor_df)
 
-        if torch.cuda.is_available() or not multiprocessing:
+        if (
+            torch.cuda.is_available() or not multiprocessing
+            or len(precursor_df) < min_required_precursor_num_for_mp
+        ):
             refine_df(precursor_df)
             if 'rt' in predict_items:
                 self.predict_rt(precursor_df)
             if 'mobility' in predict_items:
                 self.predict_mobility(precursor_df)
             if 'ms2' in predict_items:
+                fragment_mz_df = create_fragment_mz_dataframe(
+                    precursor_df, frag_types
+                )
+
+                precursor_df.drop(
+                    columns=['frag_start_idx'], inplace=True
+                )
+
                 fragment_intensity_df = self.predict_ms2(
                     precursor_df
                 )
@@ -582,25 +724,9 @@ class ModelManager(object):
                     ], inplace=True
                 )
 
-                precursor_df.drop(
-                    columns=['frag_start_idx'], inplace=True
+                clear_error_modloss_intensities(
+                    fragment_mz_df, fragment_intensity_df
                 )
-                fragment_mz_df = create_fragment_mz_dataframe(
-                    precursor_df, frag_types
-                )
-                fragment_mz_df.drop(
-                    columns=[
-                        col for col in fragment_mz_df.columns
-                        if col not in frag_types
-                    ], inplace=True
-                )
-
-                # clear error modloss intensities
-                for col in fragment_mz_df.columns.values:
-                    if 'modloss' in col:
-                        fragment_intensity_df.loc[
-                            fragment_mz_df[col]==0,col
-                        ] = 0
 
                 return {
                     'precursor_df': precursor_df,

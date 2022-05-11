@@ -54,12 +54,15 @@ def get_ms2_features(
     matched_mass_err_df,
 )->pd.DataFrame:
     """ Extract ms2 features from the given
-    predict_intensity_df and matched_intensity_df. It will add columns:
+    predict_intensity_df and matched_intensity_df. It will add columns into psm_df:
       cos: cosine similarity between predicted and matched fragments
+      pcc: pearson correlation between predicted and matched fragments
       sa: spectral angle between predicted and matched fragments
       spc: Spearman's rank correlation between predicted and matched fragments.
       cos_bion: ...
       cos_yion: ...
+      pcc_bion: ...
+      pcc_yion: ...
       sa_bion: ...
       sa_yion: ...
       spc_bion: ...
@@ -77,12 +80,12 @@ def get_ms2_features(
         psm_df, predict_intensity_df,
         matched_intensity_df,
         charged_frag_types=used_frag_types,
-        metrics=['COS','SA','SPC'],
+        metrics=['COS','SA','SPC','PCC'],
         spc_top_k=perc_settings['top_k_frags_to_calc_spc']
     )
     psm_df.rename(
         columns={
-            'COS':'cos','SA':'sa','SPC':'spc'
+            'COS':'cos','SA':'sa','SPC':'spc','PCC':'pcc',
         },
         inplace=True
     )
@@ -113,11 +116,12 @@ def get_ms2_features(
             psm_df, predict_intensity_df,
             matched_intensity_df,
             charged_frag_types=b_frag_types,
-            metrics=['COS','SA','SPC'],
+            metrics=['COS','SA','SPC','PCC'],
         )
         psm_df.rename(
             columns={
-                'COS':'cos_bion','SA':'sa_bion','SPC':'spc_bion'
+                'COS':'cos_bion','SA':'sa_bion','SPC':'spc_bion',
+                'PCC':'pcc_bion'
             },
             inplace=True
         )
@@ -134,7 +138,7 @@ def get_ms2_features(
             )
         psm_df['frag_ratio_bion'] = frag_ratio_ion
     else:
-        psm_df[['cos_bion','sa_bion','spc_bion']] = 0
+        psm_df[['cos_bion','sa_bion','spc_bion','pcc_bion']] = 0
         psm_df[['frag_ratio_bion']] = 0
 
     if len(y_frag_types) > 0:
@@ -146,7 +150,8 @@ def get_ms2_features(
         )
         psm_df.rename(
             columns={
-                'COS':'cos_yion','SA':'sa_yion','SPC':'spc_yion'
+                'COS':'cos_yion','SA':'sa_yion','SPC':'spc_yion',
+                'PCC':'pcc_yion',
             },
             inplace=True
         )
@@ -162,7 +167,7 @@ def get_ms2_features(
             )
         psm_df['frag_ratio_yion'] = frag_ratio_ion
     else:
-        psm_df[['cos_yion','sa_yion','spc_yion']] = 0
+        psm_df[['cos_yion','sa_yion','spc_yion','pcc_yion']] = 0
         psm_df[['frag_ratio_yion']] = 0
 
     return psm_df
@@ -224,9 +229,9 @@ class ScoreFeatureExtractor:
         ]
 
         self.score_feature_list = [
-            'cos','sa','spc',
-            'cos_bion','sa_bion','spc_bion',
-            'cos_yion','sa_yion','spc_yion',
+            'sa','spc','pcc',
+            'sa_bion','spc_bion','pcc_bion',
+            'sa_yion','spc_yion','pcc_yion',
             'frag_ratio','frag_ratio_bion',
             'frag_ratio_yion','rt_delta_abs',
             'mobility_delta_abs',
@@ -515,8 +520,8 @@ class ScoreFeatureExtractor:
             )
 
         self.psm_df = pd.concat(
-            result_psm_list
-        ).reset_index(drop=True)
+            result_psm_list, ignore_index=True
+        )
         logging.info('Finish extracting features')
         return self.psm_df
 
@@ -719,12 +724,12 @@ class ScoreFeatureExtractorMP(ScoreFeatureExtractor):
                                 psm_num_to_tune_ms2,
                                 psm_num_per_mod_to_tune_ms2,
                                 epoch_to_tune_ms2,
-                                grid_nce_search
+                                use_grid_nce_search
                             ) = (
                                 self.model_mgr.psm_num_to_tune_ms2,
                                 self.model_mgr.psm_num_per_mod_to_tune_ms2,
                                 self.model_mgr.epoch_to_tune_ms2,
-                                self.model_mgr.grid_nce_search
+                                self.model_mgr.use_grid_nce_search
                             )
 
                             (
@@ -735,7 +740,7 @@ class ScoreFeatureExtractorMP(ScoreFeatureExtractor):
 
                             self.model_mgr.epoch_to_tune_ms2 = 3
 
-                            self.model_mgr.grid_nce_search = False
+                            self.model_mgr.use_grid_nce_search = False
 
                             if 'nce' not in df.columns:
                                 self.model_mgr.set_default_nce(df)
@@ -749,12 +754,12 @@ class ScoreFeatureExtractorMP(ScoreFeatureExtractor):
                                 self.model_mgr.psm_num_to_tune_ms2,
                                 self.model_mgr.psm_num_per_mod_to_tune_ms2,
                                 self.model_mgr.epoch_to_tune_ms2,
-                                self.model_mgr.grid_nce_search
+                                self.model_mgr.use_grid_nce_search
                             ) = (
                                 psm_num_to_tune_ms2,
                                 psm_num_per_mod_to_tune_ms2,
                                 epoch_to_tune_ms2,
-                                grid_nce_search
+                                use_grid_nce_search
                             )
 
                         predict_inten_df = self.model_mgr.predict_ms2(df)
@@ -773,7 +778,7 @@ class ScoreFeatureExtractorMP(ScoreFeatureExtractor):
                     result_psm_list.append(df)
 
         self.psm_df = pd.concat(
-            result_psm_list
-        ).reset_index(drop=True)
+            result_psm_list, ignore_index=True
+        )
         logging.info('Finished feature extraction with multiprocessing')
         return self.psm_df
