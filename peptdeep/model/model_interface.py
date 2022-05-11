@@ -285,7 +285,7 @@ class ModelInterface(object):
         self.loss_func = torch.nn.L1Loss()
 
     def _as_tensor(self,
-        data:np.array,
+        data:np.ndarray,
         dtype:torch.dtype=torch.float32
     )->torch.Tensor:
         """Convert numerical np.array to pytorch tensor.
@@ -465,7 +465,7 @@ class ModelInterface(object):
 
     def _set_batch_predict_data(self,
         batch_df:pd.DataFrame,
-        predict_values:np.array,
+        predict_values:np.ndarray,
         **kwargs
     ):
         """Set predicted values into `self.predict_df`.

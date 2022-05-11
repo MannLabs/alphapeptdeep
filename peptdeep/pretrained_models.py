@@ -17,6 +17,7 @@ import urllib
 import socket
 import logging
 import shutil
+from pickle import UnpicklingError
 
 from peptdeep.settings import global_settings
 
@@ -319,6 +320,7 @@ class ModelManager(object):
         self.ccs_model:AlphaCCSModel = AlphaCCSModel(device=device)
 
         self.load_installed_models()
+        self.load_external_models()
 
         self.use_grid_nce_search = mgr_settings[
             'fine_tune'
@@ -405,34 +407,35 @@ class ModelManager(object):
 
     def load_external_models(self,
         *,
-        ms2_model_file: Tuple[str, io.BytesIO]=None,
-        rt_model_file: Tuple[str, io.BytesIO]=None,
-        ccs_model_file: Tuple[str, io.BytesIO]=None,
+        ms2_model_file: Tuple[str, io.BytesIO]=mgr_settings['external_ms2_model'],
+        rt_model_file: Tuple[str, io.BytesIO]=mgr_settings['external_rt_model'],
+        ccs_model_file: Tuple[str, io.BytesIO]=mgr_settings['external_ccs_model'],
     ):
-        """Load external MS2/RT/CCS models
+        """Load external MS2/RT/CCS models.
 
         Args:
             ms2_model_file (Tuple[str, io.BytesIO], optional): ms2 model file or stream.
-                It will load the installed model if the value is None. Defaults to None.
+                Do nothing if the value is ''. Defaults to global_settings['model_mgr']['external_ms2_model'].
             rt_model_file (Tuple[str, io.BytesIO], optional): rt model file or stream.
-                It will load the installed model if the value is None. Defaults to None.
+                Do nothing if the value is ''. Defaults to global_settings['model_mgr']['external_rt_model'].
             ccs_model_file (Tuple[str, io.BytesIO], optional): ccs model or stream.
-                It will load the installed model if the value is None. Defaults to None.
-            mask_modloss (bool, optional): If modloss ions are masked to zeros
-                in the ms2 model. Defaults to True.
+                Do nothing if the value is ''. Defaults to global_settings['model_mgr']['external_ccs_model'].
         """
-        if ms2_model_file is not None:
-            self.ms2_model.load(ms2_model_file)
-        else:
-            self.ms2_model.load(model_zip, model_path_in_zip='regular/ms2.pth')
-        if rt_model_file is not None:
-            self.rt_model.load(rt_model_file)
-        else:
-            self.rt_model.load(model_zip, model_path_in_zip='regular/rt.pth')
-        if ccs_model_file is not None:
-            self.ccs_model.load(ccs_model_file)
-        else:
-            self.ccs_model.load(model_zip, model_path_in_zip='regular/ccs.pth')
+
+        def _load_file(model, model_file):
+            try:
+                if isinstance(model_file, str):
+                    if os.path.isfile(model_file):
+                        model.load(model_file)
+                    else:
+                        return
+                model.load(model_file)
+            except UnpicklingError as e:
+                logging.info(f"Cannot load {model_file} as {model.__class__} model, peptdeep will use the pretrained model instead.")
+
+        _load_file(self.ms2_model, ms2_model_file)
+        _load_file(self.rt_model, rt_model_file)
+        _load_file(self.ccs_model, ccs_model_file)
 
     def fine_tune_rt_model(self,
         psm_df:pd.DataFrame,

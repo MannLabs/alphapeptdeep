@@ -92,11 +92,11 @@ def concat_proteins(protein_dict:dict)->str:
 @numba.njit
 def cleave_sequence_with_cut_pos(
     sequence:str,
-    cut_pos:np.array,
+    cut_pos:np.ndarray,
     n_missed_cleavages:int=2,
     pep_length_min:int=6,
     pep_length_max:int=45,
-)->np.array:
+)->np.ndarray:
     """
     Cleave a sequence with cut postions (cut_pos).
     Filters to have a minimum and maximum length.
@@ -235,7 +235,7 @@ def get_var_mod_sites(
     sequence:str,
     target_mod_aas:str,
     max_var_mod: int,
-    max_combs: int
+    max_combs: int,
 )->list:
     """get all combinations of variable modification sites
 
@@ -304,6 +304,7 @@ def get_var_mods(
     mod_dict:dict,
     max_var_mod:int,
     max_combs:int,
+    keep_unmodified:bool=False,
 )->tuple:
     mod_sites_list = get_var_mod_sites(
         sequence, var_mod_aas,
@@ -318,6 +319,9 @@ def get_var_mods(
         mod_sites_str = ';'.join([str(i) for i in mod_sites])
         ret_mods.extend(_mods)
         ret_sites_list.extend([mod_sites_str]*len(_mods))
+    if keep_unmodified:
+        ret_mods.append('')
+        ret_sites_list.append('')
     return ret_mods, ret_sites_list
 
 # Cell
@@ -436,6 +440,7 @@ class PredictFastaSpecLib(PredictSpecLib):
         self.var_mod_pep_cterm_dict = {}
         self.var_mod_dict = {}
 
+        global get_var_mods_per_sites
         if self._check_if_multi_mods_on_aa(var_mods):
             for mod in var_mods:
                 if mod.find('@')+2 == len(mod):
@@ -445,16 +450,14 @@ class PredictFastaSpecLib(PredictSpecLib):
                         self.var_mod_dict[mod[-1]].append(mod)
                     else:
                         self.var_mod_dict[mod[-1]] = [mod]
-            global get_var_mods_per_sites
-            get_var_mod_sites = get_var_mods_per_sites_multi_mods_on_aa
+            get_var_mods_per_sites = get_var_mods_per_sites_multi_mods_on_aa
         else:
             for mod in var_mods:
                 if mod.find('@')+2 == len(mod):
                     if mod[-1] in self.fix_mod_dict: continue
                     self.var_mod_aas += mod[-1]
                     self.var_mod_dict[mod[-1]] = mod
-            global get_var_mods_per_sites
-            get_var_mod_sites = get_var_mods_per_sites_single_mod_on_aa
+            get_var_mods_per_sites = get_var_mods_per_sites_single_mod_on_aa
 
         for mod in var_mods:
             if mod.find('@')+2 < len(mod):
@@ -606,9 +609,8 @@ class PredictFastaSpecLib(PredictSpecLib):
         var_mods_list, var_mod_sites_list = get_var_mods(
             sequence, self.var_mod_aas, self.var_mod_dict,
             self.max_var_mod_num, self.max_mod_combinations-1, # 1 for unmodified
+            keep_unmodified=True
         )
-        var_mods_list.append('')
-        var_mod_sites_list.append('')
 
         nterm_var_mods = ['']
         nterm_var_mod_sites = ['']
@@ -694,7 +696,8 @@ def append_regular_modifications(df:pd.DataFrame,
         df['mod_sites_app']
     ) = zip(*df.sequence.apply(get_var_mods,
             var_mod_aas=var_mod_aas, mod_dict=mod_dict,
-            max_var_mod=max_mod_num, max_combs=max_combs
+            max_var_mod=max_mod_num, max_combs=max_combs,
+            keep_unmodified=keep_unmodified
         )
     )
 

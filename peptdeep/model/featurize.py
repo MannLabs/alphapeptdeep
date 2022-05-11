@@ -46,7 +46,7 @@ def parse_mod_feature(
     nAA:int,
     mod_names:List[str],
     mod_sites:List[int]
-)->np.array:
+)->np.ndarray:
     '''
     Get modification feature of a given peptide (len=nAA).
     Note that `site=0` is for peptide N-term modification,
@@ -68,7 +68,7 @@ def parse_mod_feature(
 # Cell
 def get_batch_mod_feature(
     batch_df: pd.DataFrame
-)->np.array:
+)->np.ndarray:
     '''
     Args:
         batch_df (pd.DataFrame): dataframe with 'sequence', 'mods', 'mod_sites' and 'nAA' columns.
@@ -98,8 +98,8 @@ def get_batch_mod_feature(
 
 # Cell
 def get_batch_aa_indices(
-    seq_array: Union[List, np.array]
-)->np.array:
+    seq_array: Union[List, np.ndarray]
+)->np.ndarray:
     '''
     Convert peptide sequences into AA ID array. ID=0 is reserved for masking,
     so ID of 'A' is 1, ID of 'B' is 2, ..., ID of 'Z' is 26 (maximum).
@@ -107,7 +107,7 @@ def get_batch_aa_indices(
     this conversion.
 
     Args:
-        seq_array (Union[List,np.array]):
+        seq_array (Union[List,np.ndarray]):
             list or 1-D array of sequences with the same length
     Returns:
         np.array: 2-D `np.int32` array with the shape
@@ -121,14 +121,14 @@ def get_batch_aa_indices(
     return np.pad(x, [(0,0)]*(len(x.shape)-1)+[(1,1)])
 
 def get_ascii_indices(
-    seq_array: Union[List, np.array]
-)->np.array:
+    seq_array: Union[List, np.ndarray]
+)->np.ndarray:
     '''
     Convert peptide sequences into ASCII code array.
     The values are from 0 to 127.
 
     Args:
-        seq_array (Union[List,np.array]):
+        seq_array (Union[List,np.ndarray]):
             list or 1-D array of sequences.
     Returns:
         np.array: 2-D `np.int32` array with the shape

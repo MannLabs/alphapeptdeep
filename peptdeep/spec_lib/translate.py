@@ -52,15 +52,16 @@ def create_modified_sequence(
     return nterm + mod_seq + cterm
 
 # Cell
+import numba
 
+@numba.njit
 def _get_frag_info_from_column_name(column:str):
     '''
-    Only used when convert alphabase libraries into other libraries
+    Only used when converting alphabase libraries into other libraries
     '''
     idx = column.rfind('_')
     frag_type = column[:idx]
-    ch_str = column[idx+2:]
-    charge = int(ch_str)
+    charge = column[idx+2:]
     if len(frag_type)==1:
         loss_type = 'noloss'
     else:
@@ -104,11 +105,10 @@ def merge_precursor_fragment_df(
     frag_mass_list = []
     frag_inten_list = []
     frag_num_list = []
+    iters =  enumerate(df[['frag_start_idx','frag_end_idx']].values)
     if verbose:
-        iters = tqdm.tqdm(df[['frag_start_idx','frag_end_idx']].values)
-    else:
-        iters = df[['frag_start_idx','frag_end_idx']].values
-    for start, end in iters:
+        iters = tqdm.tqdm(iters)
+    for i,(start, end) in iters:
         intens = fragment_inten_df.iloc[start:end,:].values # is loc[start:end-1,:] faster?
         max_inten = np.amax(intens)
         if max_inten > 0:
