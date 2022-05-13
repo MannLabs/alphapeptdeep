@@ -3,8 +3,8 @@
 __all__ = ['protease_dict', 'read_fasta_file', 'load_all_proteins', 'concat_proteins', 'cleave_sequence_with_cut_pos',
            'Digest', 'get_fix_mods', 'get_candidate_sites', 'get_var_mod_sites',
            'get_var_mods_per_sites_multi_mods_on_aa', 'get_var_mods_per_sites_single_mod_on_aa', 'get_var_mods',
-           'get_var_mods_per_sites', 'parse_term_mod', 'add_single_peptide_labelling', 'parse_labels',
-           'create_labelling_peptide_df', 'protein_idxes_to_names', 'PredictFastaSpecLib',
+           'get_var_mods_per_sites', 'parse_term_mod', 'add_single_peptide_labeling', 'parse_labels',
+           'create_labeling_peptide_df', 'protein_idxes_to_names', 'PredictFastaSpecLib',
            'append_regular_modifications']
 
 # Cell
@@ -334,7 +334,7 @@ def parse_term_mod(term_mod_name:str):
         return '', term
 
 # Cell
-def add_single_peptide_labelling(
+def add_single_peptide_labeling(
     seq:str,
     mods:str,
     mod_sites:str,
@@ -382,7 +382,7 @@ def parse_labels(labels:list):
             cterm_label_mod = label
     return label_aas, label_mod_dict, nterm_label_mod, cterm_label_mod
 
-def create_labelling_peptide_df(peptide_df:pd.DataFrame, labels:list):
+def create_labeling_peptide_df(peptide_df:pd.DataFrame, labels:list):
     df = peptide_df.copy()
     (
         label_aas, label_mod_dict,
@@ -395,7 +395,7 @@ def create_labelling_peptide_df(peptide_df:pd.DataFrame, labels:list):
     ) = zip(*df[
         ['sequence','mods','mod_sites']
     ].apply(lambda x:
-        add_single_peptide_labelling(
+        add_single_peptide_labeling(
             *x, label_aas, label_mod_dict,
             nterm_label_mod, cterm_label_mod
         ), axis=1,
@@ -731,12 +731,12 @@ class PredictFastaSpecLib(PredictSpecLib):
         )
         self._precursor_df.reset_index(drop=True, inplace=True)
 
-    def add_peptide_labelling(self, labelling_channel_dict:dict):
+    def add_peptide_labeling(self, labeling_channel_dict:dict):
         """
-        Add labelling onto peptides inplace of self._precursor_df
+        Add labeling onto peptides inplace of self._precursor_df
 
         Args:
-            labelling_channel_dict (dict of list): for example:
+            labeling_channel_dict (dict of list): for example:
               {
                   'reference': [], # not labelled for reference
                   'light': ['Dimethyl@Any N-term','Dimethyl@K'],
@@ -747,8 +747,8 @@ class PredictFastaSpecLib(PredictSpecLib):
 
         """
         df_list = []
-        for channel, labels in labelling_channel_dict.items():
-            df = create_labelling_peptide_df(self._precursor_df, labels)
+        for channel, labels in labeling_channel_dict.items():
+            df = create_labeling_peptide_df(self._precursor_df, labels)
             df['label_channel'] = channel
             df_list.append(df)
         self._precursor_df = pd.concat(df_list)
