@@ -12,7 +12,7 @@ __all__ = ['mod_feature_size', 'max_instrument_num', 'frag_types', 'max_frag_cha
            'Encoder_AA_Mod_LSTM', 'Encoder_AA_Mod_CNN_LSTM', 'Encoder_AA_Mod_CNN_LSTM_AttnSum',
            'Encoder_AA_Mod_Transformer', 'Encoder_AA_Mod_Transformer_AttnSum', 'Encoder_AA_Mod_Charge_Transformer',
            'Encoder_AA_Mod_Charge_Transformer_AttnSum', 'Encoder_AA_Mod_Charge_CNN_LSTM_AttnSum',
-           'Input_AA_LSTM_Encoder', 'Input_AA_CNN_Encoder', 'Input_AA_CNN_LSTM_Encoder',
+           'Encoder_HFace_Transformer', 'Input_AA_LSTM_Encoder', 'Input_AA_CNN_Encoder', 'Input_AA_CNN_LSTM_Encoder',
            'Input_AA_CNN_LSTM_cat_Charge_Encoder', 'Decoder_LSTM', 'Decoder_GRU', 'SeqLSTMDecoder', 'SeqGRUDecoder',
            'Decoder_Linear', 'LinearDecoder']
 
@@ -207,7 +207,7 @@ class Hidden_HFace_Transformer(torch.nn.Module):
     def __init__(self,
         hidden, hidden_expand=4,
         nhead=8, nlayers=4, dropout=0.1,
-        output_attentions=False
+        output_attentions=False,
     ):
         super().__init__()
         self.config = _Pseudo_Bert_Config(
@@ -842,6 +842,45 @@ class Encoder_AA_Mod_Charge_CNN_LSTM_AttnSum(torch.nn.Module):
 
 #legacy
 Input_AA_CNN_LSTM_cat_Charge_Encoder = Encoder_AA_Mod_Charge_CNN_LSTM_AttnSum
+
+class Encoder_HFace_Transformer(torch.nn.Module):
+    def __init__(self,
+        hidden:int, hidden_expand=4,
+        nhead=8, nlayers=4, dropout=0.1,
+        output_attentions=False,
+        max_len=200,
+    ):
+        """
+        HuggingFace transformer with a positional encoder in front.
+
+        Args:
+            hidden (int): Input and output feature dimension.
+            hidden_expand (int, optional): FFN hidden size = hidden*hidden_expand. Defaults to 4.
+            nhead (int, optional): Multi-head attention number. Defaults to 8.
+            nlayers (int, optional): Number of transformer layers. Defaults to 4.
+            dropout (float, optional): Dropout rate. Defaults to 0.1.
+            output_attentions (bool, optional): If output attention values. Defaults to False.
+            max_len (int, optional): Max input sequence length. Defaults to 200.
+        """
+        super().__init__()
+        self.pos_encoder = PositionalEncoding(hidden, max_len=max_len)
+        self.bert = Hidden_HFace_Transformer(
+            hidden=hidden, hidden_expand=hidden_expand,
+            nhead=nhead, nlayers=nlayers, dropout=dropout,
+            output_attentions=output_attentions
+        )
+    def forward(self, x:torch.Tensor)->tuple:
+        """
+
+        Args:
+            x (torch.Tensor): Input tensor
+
+        Returns:
+            Tensor: Output tensor.
+            [Tensor]: Attention tensor, returned only if output_attentions is True.
+        """
+        x = self.pos_encoder(x)
+        return self.bert(x)
 
 
 # Cell

@@ -3,7 +3,8 @@
 __all__ = ['protease_dict', 'read_fasta_file', 'load_all_proteins', 'concat_proteins', 'cleave_sequence_with_cut_pos',
            'Digest', 'get_fix_mods', 'get_candidate_sites', 'get_var_mod_sites',
            'get_var_mods_per_sites_multi_mods_on_aa', 'get_var_mods_per_sites_single_mod_on_aa', 'get_var_mods',
-           'get_var_mods_per_sites', 'parse_term_mod', 'protein_idxes_to_names', 'PredictFastaSpecLib',
+           'get_var_mods_per_sites', 'parse_term_mod', 'add_single_peptide_labelling', 'parse_labels',
+           'create_labelling_peptide_df', 'protein_idxes_to_names', 'PredictFastaSpecLib',
            'append_regular_modifications']
 
 # Cell
@@ -333,6 +334,76 @@ def parse_term_mod(term_mod_name:str):
         return '', term
 
 # Cell
+def add_single_peptide_labelling(
+    seq:str,
+    mods:str,
+    mod_sites:str,
+    label_aas:str,
+    label_mod_dict:dict,
+    nterm_label_mod:str,
+    cterm_label_mod:str
+):
+    add_nterm_label = True if nterm_label_mod else False
+    add_cterm_label = True if cterm_label_mod else False
+    if mod_sites:
+        _sites = mod_sites.split(';')
+        if '0' in _sites: add_nterm_label = False
+        if '-1' in _sites: add_cterm_label = False
+        mod_list = [mods]
+        mod_site_list = [mod_sites]
+    else:
+        mod_list = []
+        mod_site_list = []
+    if add_nterm_label:
+        mod_list.append(nterm_label_mod)
+        mod_site_list.append('0')
+    if add_cterm_label:
+        mod_list.append(cterm_label_mod)
+        mod_site_list.append('-1')
+    aa_labels, aa_label_sites = get_fix_mods(seq, label_aas, label_mod_dict)
+    if aa_labels:
+        mod_list.append(aa_labels)
+        mod_site_list.append(aa_label_sites)
+    return ';'.join(mod_list), ';'.join(mod_site_list)
+
+def parse_labels(labels:list):
+    label_aas = ''
+    label_mod_dict = {}
+    nterm_label_mod = ''
+    cterm_label_mod = ''
+    for label in labels:
+        _, aa = label.split('@')
+        if len(aa) == 1:
+            label_aas += aa
+            label_mod_dict[aa] = label
+        elif aa == 'Any N-term':
+            nterm_label_mod = label
+        elif aa == 'Any C-term':
+            cterm_label_mod = label
+    return label_aas, label_mod_dict, nterm_label_mod, cterm_label_mod
+
+def create_labelling_peptide_df(peptide_df:pd.DataFrame, labels:list):
+    df = peptide_df.copy()
+    (
+        label_aas, label_mod_dict,
+        nterm_label_mod, cterm_label_mod
+    ) = parse_labels(labels)
+
+    (
+        df['mods'],
+        df['mod_sites']
+    ) = zip(*df[
+        ['sequence','mods','mod_sites']
+    ].apply(lambda x:
+        add_single_peptide_labelling(
+            *x, label_aas, label_mod_dict,
+            nterm_label_mod, cterm_label_mod
+        ), axis=1,
+    ))
+
+    return df
+
+# Cell
 def protein_idxes_to_names(protein_idxes:str, protein_names:list):
     if len(protein_idxes) == 0: return ''
     return ';'.join(protein_names[int(i)] for i in protein_idxes.split(';'))
@@ -480,23 +551,22 @@ class PredictFastaSpecLib(PredictSpecLib):
 
     def import_fasta(self, fasta_files:Union[str,list]):
         self.from_fasta(fasta_files)
-        self._predict_all_after_load_pep_seqs()
+        self._preprocessing_after_load_pep_seqs()
 
     def import_protein_dict(self, protein_dict:dict):
         self.from_protein_dict(protein_dict)
-        self._predict_all_after_load_pep_seqs()
+        self._preprocessing_after_load_pep_seqs()
 
     def import_peptide_sequences(self,
         pep_seq_list:list, protein_list
     ):
         self.from_peptide_sequence_list(pep_seq_list, protein_list)
-        self._predict_all_after_load_pep_seqs()
+        self._preprocessing_after_load_pep_seqs()
 
-    def _predict_all_after_load_pep_seqs(self):
+    def _preprocessing_after_load_pep_seqs(self):
         self.append_decoy_sequence()
         self.add_modifications()
         self.add_charge()
-        self.predict_all()
 
     def from_fasta(self, fasta_file:Union[str,list]):
         """Load peptide sequence from fasta file.
@@ -659,6 +729,29 @@ class PredictFastaSpecLib(PredictSpecLib):
             self._precursor_df,
             ['mods','mod_sites']
         )
+        self._precursor_df.reset_index(drop=True, inplace=True)
+
+    def add_peptide_labelling(self, labelling_channel_dict:dict):
+        """
+        Add labelling onto peptides inplace of self._precursor_df
+
+        Args:
+            labelling_channel_dict (dict of list): for example:
+              {
+                  'reference': [], # not labelled for reference
+                  'light': ['Dimethyl@Any N-term','Dimethyl@K'],
+                  'median': ['Dimethyl:2H(4)@Any N-term','Dimethyl:2H(4)@K'],
+                  'heavy': ['Dimethyl:2H(6)13C(2)@Any N-term','Dimethyl:2H(6)13C(2)@K'],
+              }.
+              The key name could be arbitrary distinguished strings, and value must be a list of string.
+
+        """
+        df_list = []
+        for channel, labels in labelling_channel_dict.items():
+            df = create_labelling_peptide_df(self._precursor_df, labels)
+            df['label_channel'] = channel
+            df_list.append(df)
+        self._precursor_df = pd.concat(df_list)
         self._precursor_df.reset_index(drop=True, inplace=True)
 
     def add_charge(self):
