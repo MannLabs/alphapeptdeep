@@ -206,6 +206,7 @@ def explode_multiple_columns(df:pd.DataFrame, columns:list):
 
 # Cell
 import pandas as pd
+import numpy as np
 
 def regional_sampling(psm_df:pd.DataFrame,
     target:str='rt_norm', n_train:int=1000,
