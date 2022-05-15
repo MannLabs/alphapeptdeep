@@ -647,6 +647,7 @@ class ModelManager(object):
         multiprocessing:bool = mgr_settings['predict']['multiprocessing'],
         thread_num:int = global_settings['thread_num'],
         min_required_precursor_num_for_mp:int = 3000,
+        mp_batch_size:int = 500000,
     )->Dict[str, pd.DataFrame]:
         """ predict all items defined by `predict_items`,
         which may include rt, mobility, fragment_mz
@@ -742,13 +743,21 @@ class ModelManager(object):
 
             df_groupby = precursor_df.groupby('nAA')
 
-            def param_generator(df_groupby):
+            def get_batch_num_mp(df_groupby):
+                batch_num = 0
+                for group_len in df_groupby.size().values:
+                    for i in range(0, group_len, mp_batch_size):
+                        batch_num += 1
+                return batch_num
+
+            def mp_param_generator(df_groupby):
                 for nAA, df in df_groupby:
-                    yield {
-                        'precursor_df': df,
-                        'predict_items': predict_items,
-                        'frag_types': frag_types,
-                    }
+                    for i in range(0, len(df), mp_batch_size):
+                        yield {
+                            'precursor_df': df.iloc[i:i+mp_batch_size,:],
+                            'predict_items': predict_items,
+                            'frag_types': frag_types,
+                        }
 
             precursor_df_list = []
             if 'ms2' in predict_items:
@@ -768,8 +777,9 @@ class ModelManager(object):
                 for ret_dict in process_bar(
                     p.imap_unordered(
                         self._predict_all_for_mp,
-                        param_generator(df_groupby)
-                    ), df_groupby.ngroups
+                        mp_param_generator(df_groupby)
+                    ),
+                    get_batch_num_mp(df_groupby)
                 ):
                     precursor_df_list.append(ret_dict['precursor_df'])
                     if fragment_mz_df_list is not None:

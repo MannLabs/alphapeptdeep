@@ -2,7 +2,8 @@
 
 __all__ = ['ModelMS2Transformer', 'ModelMS2Bert', 'ModelMS2pDeep', 'IntenAwareLoss', 'pDeepModel', 'mod_feature_size',
            'max_instrument_num', 'frag_types', 'max_frag_charge', 'num_ion_types', 'normalize_training_intensities',
-           'pearson', 'spectral_angle', 'spearman', 'add_cutoff_metric', 'calc_ms2_similarity']
+           'pearson_correlation', 'spectral_angle', 'spearman_correlation', 'add_cutoff_metric', 'calc_ms2_similarity',
+           'pearson', 'spearman']
 
 # Cell
 import torch
@@ -30,7 +31,8 @@ from peptdeep.settings import (
     model_const
 )
 
-import peptdeep.model.base as model_base
+import peptdeep.model.model_interface as model_interface
+import peptdeep.model.building_block as building_block
 
 # Cell
 class ModelMS2Transformer(torch.nn.Module):
@@ -54,15 +56,15 @@ class ModelMS2Transformer(torch.nn.Module):
             self._mask_modloss = True
 
         meta_dim = 8
-        self.input_nn = model_base.Input_AA_Mod_PositionalEncoding(hidden-meta_dim)
+        self.input_nn = building_block.Input_AA_Mod_PositionalEncoding(hidden-meta_dim)
 
-        self.meta_nn = model_base.Meta_Embedding(meta_dim)
+        self.meta_nn = building_block.Meta_Embedding(meta_dim)
 
-        self.hidden_nn = model_base.Hidden_Transformer(
+        self.hidden_nn = building_block.Hidden_Transformer(
             hidden, nlayers=nlayers, dropout=dropout
         )
 
-        self.output_nn = model_base.Decoder_Linear(
+        self.output_nn = building_block.Decoder_Linear(
             hidden,
             self._num_non_modloss,
         )
@@ -70,10 +72,10 @@ class ModelMS2Transformer(torch.nn.Module):
         if num_modloss_types > 0:
             # for transfer learning of modloss frags
             self.modloss_nn = torch.nn.ModuleList([
-                model_base.Hidden_Transformer(
+                building_block.Hidden_Transformer(
                     hidden, nlayers=1, dropout=dropout
                 ),
-                model_base.Decoder_Linear(
+                building_block.Decoder_Linear(
                     hidden, num_modloss_types,
                 ),
             ])
@@ -146,17 +148,17 @@ class ModelMS2Bert(torch.nn.Module):
             self._mask_modloss = True
 
         meta_dim = 8
-        self.input_nn = model_base.Input_AA_Mod_PositionalEncoding(hidden-meta_dim)
+        self.input_nn = building_block.Input_AA_Mod_PositionalEncoding(hidden-meta_dim)
 
-        self.meta_nn = model_base.Meta_Embedding(meta_dim)
+        self.meta_nn = building_block.Meta_Embedding(meta_dim)
 
         self._output_attentions = output_attentions
-        self.hidden_nn = model_base.Hidden_HFace_Transformer(
+        self.hidden_nn = building_block.Hidden_HFace_Transformer(
             hidden, nlayers=nlayers, dropout=dropout,
             output_attentions=output_attentions
         )
 
-        self.output_nn = model_base.Decoder_Linear(
+        self.output_nn = building_block.Decoder_Linear(
             hidden,
             self._num_non_modloss,
         )
@@ -164,11 +166,11 @@ class ModelMS2Bert(torch.nn.Module):
         if num_modloss_types > 0:
             # for transfer learning of modloss frags
             self.modloss_nn = torch.nn.ModuleList([
-                model_base.Hidden_HFace_Transformer(
+                building_block.Hidden_HFace_Transformer(
                     hidden, nlayers=1, dropout=dropout,
                     output_attentions=output_attentions
                 ),
-                model_base.Decoder_Linear(
+                building_block.Decoder_Linear(
                     hidden, num_modloss_types,
                 ),
             ])
@@ -258,14 +260,14 @@ class ModelMS2pDeep(torch.nn.Module):
         hidden=512
         hidden_rnn_layer=2
 
-        self.input_nn = model_base.InputAALSTM_cat_Meta(hidden)
+        self.input_nn = building_block.InputAALSTM_cat_Meta(hidden)
 
-        self.hidden_nn = model_base.SeqLSTM(
+        self.hidden_nn = building_block.SeqLSTM(
             hidden, hidden, rnn_layer=hidden_rnn_layer,
             bidirectional=BiRNN
         )
 
-        self.output_nn = model_base.OutputLSTM_cat_Meta(
+        self.output_nn = building_block.OutputLSTM_cat_Meta(
             hidden,
             self._num_non_modloss,
         )
@@ -273,11 +275,11 @@ class ModelMS2pDeep(torch.nn.Module):
         if num_modloss_types:
             # for transfer learning of modloss frags
             self.modloss_nn = torch.nn.ModuleList([
-                model_base.SeqLSTM(
+                building_block.SeqLSTM(
                     hidden, hidden,
                     rnn_layer=1, bidirectional=BiRNN
                 ),
-                model_base.SeqLSTM(
+                building_block.SeqLSTM(
                     hidden, num_modloss_types,
                     rnn_layer=1, bidirectional=False
                 ),
@@ -345,7 +347,7 @@ frag_types = settings['model']['frag_types']
 max_frag_charge = settings['model']['max_frag_charge']
 num_ion_types = len(frag_types)*max_frag_charge
 
-class pDeepModel(model_base.ModelInterface):
+class pDeepModel(model_interface.ModelInterface):
     def __init__(self,
         charged_frag_types = get_charged_frag_types(
             frag_types, max_frag_charge
@@ -659,12 +661,20 @@ def normalize_training_intensities(
 
 # Cell
 
-def pearson(x, y):
+def pearson_correlation(x, y):
+    """Compute pearson correlation between 2 batches of 1-D tensors
+    Args:
+        x: Shape (Batch, n)
+        y: Shape (Batch, n)
+    """
     return torch.cosine_similarity(
         x-x.mean(dim=1, keepdim=True),
         y-y.mean(dim=1, keepdim=True),
         dim = 1
     )
+
+#legacy
+pearson=pearson_correlation
 
 def spectral_angle(cos):
     cos[cos>1] = 1
@@ -685,8 +695,8 @@ def _get_ranks(x: torch.Tensor, device) -> torch.Tensor:
     ranks[x==0] = 0
     return ranks
 
-def spearman(x: torch.Tensor, y: torch.Tensor, device):
-    """Compute correlation between 2 batches of 1-D tensors
+def spearman_correlation(x: torch.Tensor, y: torch.Tensor, device):
+    """Compute spearman correlation between 2 batches of 1-D tensors
     Args:
         x: Shape (Batch, n)
         y: Shape (Batch, n)
@@ -698,6 +708,9 @@ def spearman(x: torch.Tensor, y: torch.Tensor, device):
     upper = 6 * torch.sum((x_rank - y_rank).pow(2), dim=1)
     down = n * (n ** 2 - 1.0)
     return 1.0 - (upper / down)
+
+#legacy
+spearman = spearman_correlation
 
 def add_cutoff_metric(
     metrics_describ, metrics_df, thres=0.9
@@ -770,7 +783,7 @@ def calc_ms2_similarity(
             )
 
             if 'PCC' in metrics:
-                psm_df.loc[batch_df.index,'PCC'] = pearson(
+                psm_df.loc[batch_df.index,'PCC'] = pearson_correlation(
                     pred_intens, frag_intens
                 ).cpu().detach().numpy()
 
@@ -804,7 +817,7 @@ def calc_ms2_similarity(
                     frag_intens = frag_intens.flatten()[flat_idx].reshape(
                         sorted_idx.size(0),-1
                     )
-                psm_df.loc[batch_df.index,'SPC'] = spearman(
+                psm_df.loc[batch_df.index,'SPC'] = spearman_correlation(
                     pred_intens, frag_intens, device
                 ).cpu().detach().numpy()
 
