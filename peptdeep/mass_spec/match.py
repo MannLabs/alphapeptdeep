@@ -43,6 +43,7 @@ def match_centroid_mz(
 
 
 @numba.njit
+
 def match_profile_mz(
     spec_mzs:np.ndarray,
     query_mzs:np.ndarray,
@@ -69,13 +70,13 @@ def match_profile_mz(
         highest = 0
         highest_idx = -1
         for _idx in range(idx, -1, -1):
-            if query_mzs[i]<spec_mzs[_idx]-spec_mz_tols[_idx]:
+            if abs(spec_mzs[_idx]-query_mzs[i])>spec_mz_tols[_idx]:
                 break
             if highest < spec_intens[_idx]:
                 highest = spec_intens[_idx]
                 highest_idx = _idx
         for _idx in range(idx+1, len(spec_mzs)):
-            if query_mzs[i]>spec_mzs[_idx]+spec_mz_tols[_idx]:
+            if abs(spec_mzs[_idx]-query_mzs[i])>spec_mz_tols[_idx]:
                 break
             if highest < spec_intens[_idx]:
                 highest = spec_intens[_idx]
