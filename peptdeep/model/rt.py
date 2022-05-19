@@ -195,9 +195,9 @@ class AlphaRTModel(model_interface.ModelInterface):
         self.predict(precursor_df)
         # simple linear regression
         rt_pred_mean = precursor_df.rt_pred.mean()
-        irt_mean = precursor_df.irt.mean()
+        irt_mean = IRT_PEPTIDE_DF.irt.mean()
         x = precursor_df.rt_pred.values - rt_pred_mean
-        y = precursor_df.irt.values - irt_mean
+        y = IRT_PEPTIDE_DF.irt.values - irt_mean
         slope = np.sum(x*y)/np.sum(x*x)
         intercept = irt_mean - slope*rt_pred_mean
         # end linear regression

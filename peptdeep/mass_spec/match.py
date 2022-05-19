@@ -14,7 +14,7 @@ def match_centroid_mz(
     spec_mz_tols:np.ndarray,
 )->np.ndarray:
     """
-    Matched query masses against sorted MS2/spec centroid masses,
+    Matching query masses against sorted MS2/spec centroid masses,
     only closest (minimal mass error) peaks are matched.
 
     Args:
@@ -51,7 +51,7 @@ def match_profile_mz(
     spec_intens:np.ndarray,
 )->np.ndarray:
     """
-    Matched query masses against sorted MS2/spec profile masses,
+    Matching query masses against sorted MS2/spec profile masses,
     only highest peaks are matched.
 
     Args:
