@@ -385,8 +385,8 @@ class WritingThread(threading.Thread):
         while True:
             if self.stopped(): break
             if self.task_queue.empty(): continue
-            df, header = self.task_queue.get()
-            df.to_csv(self.tsv, header=header, sep="\t", mode="a", index=False)
+            df, batch = self.task_queue.get()
+            df.to_csv(self.tsv, header=(batch==0), sep="\t", mode="a", index=False)
             self.task_queue.task_done()
 
 def translate_to_tsv(
@@ -400,7 +400,7 @@ def translate_to_tsv(
     min_frag_nAA:int = 0,
     batch_size:int = 1000000,
     translate_mod_dict:dict = mod_to_unimod_dict,
-    multi_threading=True
+    multi_threading:bool=False
 ):
     if multi_threading:
         df_head_queue = queue.Queue()
@@ -435,7 +435,7 @@ def translate_to_tsv(
             verbose=False
         )
         if multi_threading:
-            df_head_queue.put_nowait((df, i==0))
+            df_head_queue.put_nowait((df, i))
         else:
             df.to_csv(tsv_or_buf, header=(i==0), sep="\t", mode='a', index=False)
     if multi_threading:
