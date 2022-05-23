@@ -67,14 +67,100 @@ def get_ms2_features(
       sa_yion: ...
       spc_bion: ...
       spc_yion: ...
-      frag_ratio: # matched fragments / # total b&y fragments
-      frag_ratio_bion: # matched b fragments / # total b fragments
-      frag_ratio_yion: # matched y fragments / # total y fragments
+      matched_frag_ratio: # matched fragments / # total b&y fragments
+      matched_bion_ratio: # matched b fragments / # total b fragments
+      matched_yion_ratio: # matched y fragments / # total y fragments
+      and more ...
     """
     used_frag_types = frag_types
     predict_intensity_df = predict_intensity_df[
         used_frag_types
     ]
+
+    def _get_frag_features(
+        frag_start, frag_end,
+        matched_inten_values, predicted_inten_values,
+        has_matched_intens, has_predicted_intens,
+        has_both_matched_predicted,
+    ):
+        matched_frag_num = has_matched_intens[
+            frag_start:frag_end
+        ].sum(dtype=np.float32)
+
+        pred_frag_num = has_predicted_intens[
+            frag_start:frag_end
+        ].sum(dtype=np.float32)
+
+        matched_frag_ratio = matched_frag_num / (
+            matched_inten_values.shape[1]*(frag_end-frag_start)
+        )
+
+        both_matched_pred_frag_num = has_both_matched_predicted[
+            frag_start:frag_end
+        ].sum(dtype=np.float32)
+
+        matched_not_pred_frag_num = (
+            has_matched_intens[frag_start:frag_end]&
+            ~has_both_matched_predicted[frag_start:frag_end]
+        ).sum(dtype=np.float32)
+
+        pred_not_matched_frag_num = (
+            has_predicted_intens[frag_start:frag_end]&
+            ~has_both_matched_predicted[frag_start:frag_end]
+        ).sum(dtype=np.float32)
+
+        if matched_frag_num > 0:
+            both_matched_pred_frag_to_matched = (
+                both_matched_pred_frag_num / matched_frag_num
+            )
+            matched_not_pred_frag_ratio = (
+                matched_not_pred_frag_num / matched_frag_num
+            )
+        else:
+            both_matched_pred_frag_to_matched = 0
+            matched_not_pred_frag_ratio = 0
+
+        if pred_frag_num > 0:
+            both_matched_pred_frag_to_pred = (
+                both_matched_pred_frag_num / pred_frag_num
+            )
+            pred_not_matched_frag_ratio = (
+                pred_not_matched_frag_num / pred_frag_num
+            )
+        else:
+            both_matched_pred_frag_to_pred = 0
+            pred_not_matched_frag_ratio = 0
+
+        matched_frag_rel_to_pred = np.ma.array(
+            matched_inten_values[frag_start:frag_end],
+            mask=~has_predicted_intens[frag_start:frag_end]
+        ).sum()
+        if matched_frag_rel_to_pred > 0:
+            matched_frag_rel_to_pred /= matched_inten_values[
+                frag_start:frag_end
+            ].sum()
+
+        pred_frag_rel_to_matched = np.ma.array(
+            predicted_inten_values[frag_start:frag_end],
+            mask=~has_matched_intens[frag_start:frag_end]
+        ).sum()
+        if pred_frag_rel_to_matched > 0:
+            pred_frag_rel_to_matched /= predicted_inten_values[
+                frag_start:frag_end
+            ].sum()
+
+        return (
+            matched_frag_num, matched_frag_ratio,
+            both_matched_pred_frag_num,
+            both_matched_pred_frag_to_matched,
+            both_matched_pred_frag_to_pred,
+            matched_not_pred_frag_num,
+            matched_not_pred_frag_ratio,
+            pred_not_matched_frag_num,
+            pred_not_matched_frag_ratio,
+            matched_frag_rel_to_pred,
+            pred_frag_rel_to_matched,
+        )
 
     psm_df, ms2_metrics_df = calc_ms2_similarity(
         psm_df, predict_intensity_df,
@@ -90,27 +176,39 @@ def get_ms2_features(
         inplace=True
     )
 
+    has_matched_intens=matched_intensity_df[
+        used_frag_types
+    ].values.any(axis=1)
+    has_predicted_intens=predict_intensity_df[
+        used_frag_types
+    ].values.any(axis=1)
+    has_both_matched_predicted = has_matched_intens&has_predicted_intens
+
+    (
+        psm_df['matched_frag_num'],
+        psm_df['matched_frag_ratio'],
+        psm_df['both_matched_pred_frag_num'],
+        psm_df['both_matched_pred_frag_to_matched'],
+        psm_df['both_matched_pred_frag_to_pred'],
+        psm_df['matched_not_pred_frag_num'],
+        psm_df['matched_not_pred_frag_ratio'],
+        psm_df['pred_not_matched_frag_num'],
+        psm_df['pred_not_matched_frag_ratio'],
+        psm_df['matched_frag_rel_to_pred'],
+        psm_df['pred_frag_rel_to_matched']
+    ) = zip(*psm_df[['frag_start_idx','frag_end_idx']].apply(
+        _get_frag_features, axis=1,
+        matched_inten_values=matched_intensity_df[used_frag_types].values,
+        predicted_inten_values=predict_intensity_df[used_frag_types].values,
+        has_matched_intens=has_matched_intens,
+        has_predicted_intens=has_predicted_intens,
+        has_both_matched_predicted=has_both_matched_predicted,
+    ))
+
     b_frag_types = [
         _t for _t in used_frag_types
         if _t.startswith('b')
     ]
-    y_frag_types = [
-        _t for _t in used_frag_types
-        if _t.startswith('y')
-    ]
-
-    frag_position_hits = matched_intensity_df[
-        used_frag_types
-    ].values.any(axis=1)
-    frag_ratio_ion = []
-    for start_idx, end_idx in psm_df[
-        ['frag_start_idx','frag_end_idx']
-    ].values:
-        frag_ratio_ion.append(
-            np.mean(frag_position_hits[start_idx:end_idx])
-        )
-    psm_df['frag_ratio'] = frag_ratio_ion
-
     if len(b_frag_types) > 0:
         psm_df, ms2_metrics_df = calc_ms2_similarity(
             psm_df, predict_intensity_df,
@@ -125,22 +223,53 @@ def get_ms2_features(
             },
             inplace=True
         )
-        frag_position_hits = matched_intensity_df[
+
+        has_matched_intens=matched_intensity_df[
             b_frag_types
         ].values.any(axis=1)
+        has_predicted_intens=predict_intensity_df[
+            b_frag_types
+        ].values.any(axis=1)
+        has_both_matched_predicted = has_matched_intens&has_predicted_intens
 
-        frag_ratio_ion = []
-        for start_idx, end_idx in psm_df[
-            ['frag_start_idx','frag_end_idx']
-        ].values:
-            frag_ratio_ion.append(
-                np.mean(frag_position_hits[start_idx:end_idx])
-            )
-        psm_df['frag_ratio_bion'] = frag_ratio_ion
+        (
+            psm_df['matched_bion_num'],
+            psm_df['matched_bion_ratio'],
+            psm_df['both_matched_pred_bion_num'],
+            psm_df['both_matched_pred_bion_to_matched'],
+            psm_df['both_matched_pred_bion_to_pred'],
+            psm_df['matched_not_pred_bion_num'],
+            psm_df['matched_not_pred_bion_ratio'],
+            psm_df['pred_not_matched_bion_num'],
+            psm_df['pred_not_matched_bion_ratio'],
+            psm_df['matched_bion_rel_to_pred'],
+            psm_df['pred_bion_rel_to_matched']
+        ) = zip(*psm_df[['frag_start_idx','frag_end_idx']].apply(
+            _get_frag_features, axis=1,
+            matched_inten_values=matched_intensity_df[b_frag_types].values,
+            predicted_inten_values=predict_intensity_df[b_frag_types].values,
+            has_matched_intens=has_matched_intens,
+            has_predicted_intens=has_predicted_intens,
+            has_both_matched_predicted=has_both_matched_predicted,
+        ))
     else:
-        psm_df[['cos_bion','sa_bion','spc_bion','pcc_bion']] = 0
-        psm_df[['frag_ratio_bion']] = 0
+        psm_df[[
+            'matched_bion_num', 'matched_bion_ratio',
+            'both_matched_pred_bion_num',
+            'both_matched_pred_bion_to_matched',
+            'both_matched_pred_bion_to_pred',
+            'matched_not_pred_bion_num',
+            'matched_not_pred_bion_ratio',
+            'pred_not_matched_bion_num',
+            'pred_not_matched_bion_ratio',
+            'matched_bion_rel_to_pred',
+            'pred_bion_rel_to_matched'
+        ]] = 0
 
+    y_frag_types = [
+        _t for _t in used_frag_types
+        if _t.startswith('y')
+    ]
     if len(y_frag_types) > 0:
         psm_df, ms2_metrics_df = calc_ms2_similarity(
             psm_df, predict_intensity_df,
@@ -155,20 +284,70 @@ def get_ms2_features(
             },
             inplace=True
         )
-        frag_position_hits = matched_intensity_df[
+
+        has_matched_intens=matched_intensity_df[
             y_frag_types
         ].values.any(axis=1)
-        frag_ratio_ion = []
-        for start_idx, end_idx in psm_df[
-            ['frag_start_idx','frag_end_idx']
-        ].values:
-            frag_ratio_ion.append(
-                np.mean(frag_position_hits[start_idx:end_idx])
-            )
-        psm_df['frag_ratio_yion'] = frag_ratio_ion
+        has_predicted_intens=predict_intensity_df[
+            y_frag_types
+        ].values.any(axis=1)
+        has_both_matched_predicted = has_matched_intens&has_predicted_intens
+
+        (
+            psm_df['matched_yion_num'],
+            psm_df['matched_yion_ratio'],
+            psm_df['both_matched_pred_yion_num'],
+            psm_df['both_matched_pred_yion_to_matched'],
+            psm_df['both_matched_pred_yion_to_pred'],
+            psm_df['matched_not_pred_yion_num'],
+            psm_df['matched_not_pred_yion_ratio'],
+            psm_df['pred_not_matched_yion_num'],
+            psm_df['pred_not_matched_yion_ratio'],
+            psm_df['matched_yion_rel_to_pred'],
+            psm_df['pred_yion_rel_to_matched']
+        ) = zip(*psm_df[['frag_start_idx','frag_end_idx']].apply(
+            _get_frag_features, axis=1,
+            matched_inten_values=matched_intensity_df[y_frag_types].values,
+            predicted_inten_values=predict_intensity_df[y_frag_types].values,
+            has_matched_intens=has_matched_intens,
+            has_predicted_intens=has_predicted_intens,
+            has_both_matched_predicted=has_both_matched_predicted,
+        ))
     else:
-        psm_df[['cos_yion','sa_yion','spc_yion','pcc_yion']] = 0
-        psm_df[['frag_ratio_yion']] = 0
+        psm_df[[
+            'matched_yion_num', 'matched_yion_ratio',
+            'both_matched_pred_yion_num',
+            'both_matched_pred_yion_to_matched',
+            'both_matched_pred_yion_to_pred',
+            'matched_not_pred_yion_num',
+            'matched_not_pred_yion_ratio',
+            'pred_not_matched_yion_num',
+            'pred_not_matched_yion_ratio',
+            'matched_yion_rel_to_pred',
+            'pred_yion_rel_to_matched'
+        ]] = 0
+
+    def _charge_one_hot(ch):
+        x = [0]*7
+        x[ch-1] = 1
+        return tuple(x)
+
+    (
+        psm_df['pep_z1'],psm_df['pep_z2'],
+        psm_df['pep_z3'],psm_df['pep_z4'],
+        psm_df['pep_z5'],psm_df['pep_z6'],
+        psm_df['pep_z_gt_6']
+    ) = zip(*psm_df.charge.astype(np.int8).apply(_charge_one_hot))
+
+    def _mod_count(mods):
+        if not mods: return 0
+        mod_count = 0
+        for mod in mods.split(';'):
+            if mod != 'Carbamidomethyl@C':
+                mod_count += 1
+        return mod_count
+
+    psm_df['mod_num'] = psm_df.mods.apply(_mod_count)
 
     return psm_df
 
@@ -232,9 +411,40 @@ class ScoreFeatureExtractor:
             'sa','spc','pcc',
             'sa_bion','spc_bion','pcc_bion',
             'sa_yion','spc_yion','pcc_yion',
-            'frag_ratio','frag_ratio_bion',
-            'frag_ratio_yion','rt_delta_abs',
-            'mobility_delta_abs',
+            'rt_delta_abs', 'mobility_delta_abs',
+            'matched_frag_num', 'matched_frag_ratio',
+            'both_matched_pred_frag_num',
+            'both_matched_pred_frag_to_matched',
+            'both_matched_pred_frag_to_pred',
+            'matched_not_pred_frag_num',
+            'matched_not_pred_frag_ratio',
+            'pred_not_matched_frag_num',
+            'pred_not_matched_frag_ratio',
+            'matched_frag_rel_to_pred',
+            'pred_frag_rel_to_matched',
+            'matched_bion_num', 'matched_bion_ratio',
+            'both_matched_pred_bion_num',
+            'both_matched_pred_bion_to_matched',
+            'both_matched_pred_bion_to_pred',
+            'matched_not_pred_bion_num',
+            'matched_not_pred_bion_ratio',
+            'pred_not_matched_bion_num',
+            'pred_not_matched_bion_ratio',
+            'matched_bion_rel_to_pred',
+            'pred_bion_rel_to_matched',
+            'matched_yion_num', 'matched_yion_ratio',
+            'both_matched_pred_yion_num',
+            'both_matched_pred_yion_to_matched',
+            'both_matched_pred_yion_to_pred',
+            'matched_not_pred_yion_num',
+            'matched_not_pred_yion_ratio',
+            'pred_not_matched_yion_num',
+            'pred_not_matched_yion_ratio',
+            'matched_yion_rel_to_pred',
+            'pred_yion_rel_to_matched',
+            'pep_z1','pep_z2','pep_z3','pep_z4',
+            'pep_z5','pep_z6','pep_z_gt_6',
+            'mod_num',
         ]
 
     def _select_raw_to_tune(self,

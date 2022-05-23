@@ -175,7 +175,7 @@ def merge_precursor_fragment_df(
 from alphabase.constants.modification import MOD_DF
 mod_to_unimod_dict = {}
 mod_to_modname_dict = {}
-for mod_name,unimod_id in MOD_DF[['name','unimod_id']].values:
+for mod_name,unimod_id in MOD_DF[['mod_name','unimod_id']].values:
     if unimod_id==-1 or unimod_id=='-1': continue
     mod_to_unimod_dict[mod_name] = f"UniMod:{unimod_id}"
     mod_to_modname_dict[mod_name] = mod_name[:mod_name.find('@')]
@@ -382,11 +382,11 @@ def translate_to_tsv(
     multi_processing:bool=True
 ):
     if multi_processing:
-        queue_size = 1000000//batch_size*2
-        if queue_size == 0:
+        queue_size = 1000000//batch_size
+        if queue_size < 2:
             queue_size = 2
-        elif queue_size > 2000:
-            queue_size = 2000
+        elif queue_size > 10:
+            queue_size = 10
         df_head_queue = mp.Queue(maxsize=queue_size)
         writing_process = WritingProcess(df_head_queue, tsv)
         writing_process.start()
