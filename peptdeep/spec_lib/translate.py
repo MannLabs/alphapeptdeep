@@ -2,7 +2,7 @@
 
 __all__ = ['create_modified_sequence', 'merge_precursor_fragment_df', 'is_nterm_frag', 'mask_fragment_intensity_by_mz_',
            'mask_fragment_intensity_by_frag_nAA', 'speclib_to_single_df', 'speclib_to_swath_df', 'WritingProcess',
-           'translate_to_tsv', 'mod_to_other_mod_dict', 'mod_to_unimod_dict', 'mod_to_modname_dict']
+           'translate_to_tsv', 'mod_to_unimod_dict', 'mod_to_modname_dict']
 
 # Cell
 import pandas as pd
@@ -172,24 +172,12 @@ def merge_precursor_fragment_df(
     #     df[frag_num_head] = _flatten(frag_num_list)
     #     return df
 
-mod_to_other_mod_dict = {
-    "Carbamidomethyl@C": "Carbamidomethyl (C)",
-    "Oxidation@M": "Oxidation (M)",
-    "Phospho@S": "Phospho (STY)",
-    "Phospho@T": "Phospho (STY)",
-    "Phospho@Y": "Phospho (STY)",
-    "GG@K": "GG (K)",
-    "Acetyl@Protein N-term": "Acetyl (Protein N-term)",
-}
-
 from alphabase.constants.modification import MOD_DF
 mod_to_unimod_dict = {}
+mod_to_modname_dict = {}
 for mod_name,unimod_id in MOD_DF[['name','unimod_id']].values:
     if unimod_id==-1 or unimod_id=='-1': continue
     mod_to_unimod_dict[mod_name] = f"UniMod:{unimod_id}"
-
-mod_to_modname_dict = {}
-for mod_name in MOD_DF['name'].values:
     mod_to_modname_dict[mod_name] = mod_name[:mod_name.find('@')]
 
 def is_nterm_frag(frag_type:str):
@@ -358,7 +346,7 @@ def speclib_to_swath_df(
 )->pd.DataFrame:
     speclib_to_single_df(
         speclib,
-        translate_mod_dict=mod_to_other_mod_dict,
+        translate_mod_dict=mod_to_modname_dict,
         keep_k_highest_fragments=keep_k_highest_fragments,
         min_frag_mz = min_frag_mz,
         max_frag_mz = max_frag_mz,
@@ -382,20 +370,25 @@ class WritingProcess(mp.Process):
 
 def translate_to_tsv(
     speclib:SpecLibBase,
-    tsv_or_buf:str,
+    tsv:str,
     *,
     keep_k_highest_fragments:int=12,
     min_frag_mz:float = 200,
     max_frag_mz:float = 2000,
     min_frag_intensity:float = 0.01,
     min_frag_nAA:int = 0,
-    batch_size:int = 1000000,
-    translate_mod_dict:dict = mod_to_unimod_dict,
+    batch_size:int = 100000,
+    translate_mod_dict:dict = mod_to_modname_dict,
     multi_processing:bool=True
 ):
     if multi_processing:
-        df_head_queue = mp.Queue()
-        writing_process = WritingProcess(df_head_queue, tsv_or_buf)
+        queue_size = 1000000//batch_size*2
+        if queue_size == 0:
+            queue_size = 2
+        elif queue_size > 2000:
+            queue_size = 2000
+        df_head_queue = mp.Queue(maxsize=queue_size)
+        writing_process = WritingProcess(df_head_queue, tsv)
         writing_process.start()
     mask_fragment_intensity_by_mz_(
         speclib._fragment_mz_df,
@@ -408,8 +401,8 @@ def translate_to_tsv(
             speclib._precursor_df,
             max_mask_frag_nAA=min_frag_nAA-1
         )
-    if isinstance(tsv_or_buf, str):
-        with open(tsv_or_buf, "w"): pass
+    if isinstance(tsv, str):
+        with open(tsv, "w"): pass
     _speclib = SpecLibBase()
     _speclib._fragment_intensity_df = speclib._fragment_intensity_df
     _speclib._fragment_mz_df = speclib._fragment_mz_df
@@ -426,9 +419,9 @@ def translate_to_tsv(
             verbose=False
         )
         if multi_processing:
-            df_head_queue.put_nowait((df, i))
+            df_head_queue.put((df, i))
         else:
-            df.to_csv(tsv_or_buf, header=(i==0), sep="\t", mode='a', index=False)
+            df.to_csv(tsv, header=(i==0), sep="\t", mode='a', index=False)
     if multi_processing:
-        df_head_queue.put_nowait((None, None))
+        df_head_queue.put((None, None))
         writing_process.join()
