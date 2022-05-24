@@ -106,7 +106,10 @@ def match_one_raw_with_numba(
     matched_intensities, matched_mz_errs,
     ppm, tol,
 ):
-    """ Internel function to match fragment mz values to spectrum mz values """
+    """
+    Internel function to match fragment mz values to spectrum mz values.
+    Matched_mz_errs[i] = np.inf if no peaks are matched.
+    """
     for spec_idx, frag_start, frag_end in zip(
         spec_idxes, frag_start_idxes, frag_end_idxes
     ):
