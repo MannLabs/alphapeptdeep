@@ -410,7 +410,10 @@ def get_ms2_features(
 
     def _charge_one_hot(ch):
         x = [0]*7
-        x[ch-1] = 1
+        if ch>6:
+            x[-1] = 1
+        else:
+            x[ch-1] = 1
         return tuple(x)
 
     (
