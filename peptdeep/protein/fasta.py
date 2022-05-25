@@ -59,7 +59,7 @@ def read_fasta_file(fasta_filename:str=""):
                     id = record.name
                 sequence = str(record.seq)
                 entry = {
-                    "id": id,
+                    "protein_id": id,
                     "full_name": record.name,
                     "gene_name": get_uniprot_gene_name(record.description),
                     "description": record.description,
@@ -74,7 +74,7 @@ def load_all_proteins(fasta_file_list:list):
     protein_dict = {}
     for fasta in fasta_file_list:
         for protein in read_fasta_file(fasta):
-            protein_dict[protein['id']] = protein
+            protein_dict[protein['protein_id']] = protein
     return protein_dict
 
 def concat_proteins(protein_dict:dict)->str:
@@ -645,14 +645,14 @@ class PredictFastaSpecLib(PredictSpecLib):
 
     def append_protein_name(self):
         if (
-            'id' not in self.protein_df or
+            'protein_id' not in self.protein_df or
             'protein_idxes' not in self._precursor_df
         ):
             return
 
         self._precursor_df['proteins'] = self._precursor_df['protein_idxes'].apply(
             protein_idxes_to_names,
-            protein_names=self.protein_df['id'].values
+            protein_names=self.protein_df['protein_id'].values
         )
 
         if 'gene_name' in self.protein_df.columns:
