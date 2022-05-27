@@ -424,4 +424,5 @@ def translate_to_tsv(
             df.to_csv(tsv, header=(i==0), sep="\t", mode='a', index=False)
     if multi_processing:
         df_head_queue.put((None, None))
+        print("Translation finished, it will take several minutes to export the rest precursors to the tsv file...")
         writing_process.join()
