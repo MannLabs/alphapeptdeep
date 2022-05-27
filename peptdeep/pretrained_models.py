@@ -645,7 +645,7 @@ class ModelManager(object):
         ],
         frag_types:list =  None,
         multiprocessing:bool = mgr_settings['predict']['multiprocessing'],
-        thread_num:int = global_settings['thread_num'],
+        process_num:int = global_settings['thread_num'],
         min_required_precursor_num_for_mp:int = 3000,
         mp_batch_size:int = 500000,
     )->Dict[str, pd.DataFrame]:
@@ -658,14 +658,14 @@ class ModelManager(object):
               `sequence`, `mods`, `mod_sites`, `charge` ... columns.
             predict_items (list, optional): items ('rt', 'mobility',
               'ms2') to predict.
-              Defaults to [ 'rt' ].
+              Defaults to ['rt' ,'mobility' ,'ms2'].
             frag_types (list, optional): fragment types to predict. If it is None,
             it then depends on `self.ms2_model.charged_frag_types` and
             `self.ms2_model.model._mask_modloss`.
               Defaults to None.
             multiprocessing (bool, optional): if use multiprocessing.
               Defaults to True.
-            thread_num (int, optional): Defaults to global_settings['thread_num']
+            process_num (int, optional): Defaults to global_settings['thread_num']
             min_required_precursor_num_for_mp (int, optional): It will not use
               multiprocessing when the number of precursors in precursor_df
               is lower than this value. Defaults to 5000.
@@ -773,7 +773,7 @@ class ModelManager(object):
             verbose_bak = self.verbose
             self.verbose = False
 
-            with mp.Pool(thread_num) as p:
+            with mp.Pool(process_num) as p:
                 for ret_dict in process_bar(
                     p.imap_unordered(
                         self._predict_all_for_mp,

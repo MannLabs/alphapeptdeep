@@ -9,6 +9,9 @@ import pandas as pd
 import torch
 from tqdm import tqdm
 
+import torch.multiprocessing as mp
+import functools
+
 from zipfile import ZipFile
 from typing import IO, Tuple, List, Union
 from alphabase.yaml_utils import save_yaml
@@ -16,6 +19,7 @@ from alphabase.peptide.precursor import is_precursor_sorted
 
 from peptdeep.settings import model_const
 from peptdeep.utils import logging
+from peptdeep.settings import global_settings
 
 
 # Cell
@@ -74,10 +78,10 @@ class ModelInterface(object):
         """
         Sets the device (e.g. gpu (cuda), cpu) to be used in the model.
         """
-        device_type = device_type.lower().replace('gpu','cuda')
+        self.device_type = device_type.lower().replace('gpu','cuda')
         if not torch.cuda.is_available():
-            device_type = 'cpu'
-        self.device = torch.device(device_type)
+            self.device_type = 'cpu'
+        self.device = torch.device(self.device_type)
         if self.model is not None:
             self.model.to(self.device)
 
@@ -169,8 +173,8 @@ class ModelInterface(object):
     def predict(self,
         precursor_df:pd.DataFrame,
         *,
-        batch_size=1024,
-        verbose=False,
+        batch_size:int=1024,
+        verbose:bool=False,
         **kwargs
     )->pd.DataFrame:
         """
@@ -209,6 +213,58 @@ class ModelInterface(object):
                     )
 
         torch.cuda.empty_cache()
+        return self.predict_df
+
+    def predict_mp(self,
+        precursor_df:pd.DataFrame,
+        *,
+        batch_size:int=1024,
+        mp_batch_size:int=100000,
+        process_num:int=global_settings['thread_num'],
+        **kwargs
+    )->pd.DataFrame:
+        """
+        Predicting with multiprocessing is no GPUs are availible.
+        Note this multiprocessing method only works for models those predict
+        values within (inplace of) the precursor_df.
+        """
+        precursor_df = append_nAA_column_if_missing(precursor_df)
+
+        if self.device_type == 'cpu':
+            return self.predict(
+                precursor_df,
+                batch_size=batch_size,
+                verbose=False,
+                **kwargs
+            )
+
+        _predict_func = functools.partial(self.predict,
+            batch_size=batch_size, verbose=False, **kwargs
+        )
+
+        from peptdeep.utils import process_bar
+
+        def batch_df_gen(precursor_df, mp_batch_size):
+            for i in range(0, len(precursor_df), mp_batch_size):
+                yield precursor_df.iloc[i:i+mp_batch_size]
+
+        self._check_predict_in_order(precursor_df)
+        self._prepare_predict_data_df(precursor_df,**kwargs)
+
+        print("Predicting with multiprocessing ...")
+        self.model.share_memory()
+        df_list = []
+        with mp.Pool(process_num) as p:
+            for ret_df in process_bar(p.imap(
+                    _predict_func,
+                    batch_df_gen(precursor_df, mp_batch_size),
+                ), len(precursor_df)//mp_batch_size+1
+            ):
+                df_list.append(ret_df)
+
+        self.predict_df = pd.concat(df_list)
+        self.predict_df.reset_index(drop=True, inplace=True)
+
         return self.predict_df
 
     def save(self, filename):
