@@ -230,7 +230,7 @@ class ModelInterface(object):
         """
         precursor_df = append_nAA_column_if_missing(precursor_df)
 
-        if self.device_type == 'cpu':
+        if self.device_type != 'cpu':
             return self.predict(
                 precursor_df,
                 batch_size=batch_size,

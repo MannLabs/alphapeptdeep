@@ -160,17 +160,14 @@ class BinaryClassification_LSTM_Model_for_AASeq(torch.nn.Module):
     ):
         super().__init__()
 
-        self.nn = torch.nn.Sequential(
-            ScalarRegression_LSTM_Model_for_AASeq(
-                hidden_dim=hidden_dim,
-                input_dim=ASCII_NUM,
-                n_lstm_layers=n_lstm_layers,
-                dropout=dropout,
-            ),
-            torch.nn.Sigmoid(),
+        self.nn = ScalarRegression_LSTM_Model_for_AASeq(
+            hidden_dim=hidden_dim,
+            input_dim=ASCII_NUM,
+            n_lstm_layers=n_lstm_layers,
+            dropout=dropout,
         )
     def forward(self, aa_x):
-        return self.nn(aa_x)
+        return torch.sigmoid(self.nn(aa_x))
 
 class BinaryClassification_Transformer_Model_for_AASeq(torch.nn.Module):
     def __init__(self,
@@ -187,16 +184,13 @@ class BinaryClassification_Transformer_Model_for_AASeq(torch.nn.Module):
         """
         super().__init__()
 
-        self.nn =  torch.nn.Sequential(
-            ScalarRegression_Transformer_Model_for_AASeq(
-                nlayers=nlayers,
-                input_dim=ASCII_NUM,
-                hidden_dim=hidden_dim,
-                output_attentions=output_attentions,
-                dropout=dropout,
-                **kwargs,
-            ),
-            torch.nn.Sigmoid(),
+        self.nn =  ScalarRegression_Transformer_Model_for_AASeq(
+            nlayers=nlayers,
+            input_dim=ASCII_NUM,
+            hidden_dim=hidden_dim,
+            output_attentions=output_attentions,
+            dropout=dropout,
+            **kwargs,
         )
 
     @property
@@ -209,7 +203,7 @@ class BinaryClassification_Transformer_Model_for_AASeq(torch.nn.Module):
         self.hidden_nn.output_attentions = val
 
     def forward(self, aa_x):
-        return self.nn(aa_x)
+        return torch.sigmoid(self.nn(aa_x))
 
 class BinaryClassification_ModelInterface_for_AASeq(ModelInterface):
     def __init__(self,
