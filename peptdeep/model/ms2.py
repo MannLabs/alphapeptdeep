@@ -554,6 +554,15 @@ class pDeepModel(model_interface.ModelInterface):
             **kwargs
         )
 
+    def predict_mp(self,
+        **kwargs
+    ) -> pd.DataFrame:
+        import warnings
+        warnings.warn(
+            "Please use pretrained_models.ModelManager::predict_all() "
+            "for MS2 prediction with multiprocessing"
+        )
+
     def bootstrap_nce_search(self,
         psm_df:pd.DataFrame,
         fragment_intensity_df:pd.DataFrame,
