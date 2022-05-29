@@ -381,7 +381,7 @@ class ModelInterface(object):
     def _save_codes(self, save_as):
         try:
             import inspect
-            code = '''import torch\nimport peptdeep.model.base as model_base\n'''
+            code = '''import torch\nimport peptdeep.model.building_block as building_block\n'''
             class_code = inspect.getsource(self.model.__class__)
             code += 'class Model' + class_code[class_code.find('('):]
             with open(save_as, 'w') as f:
