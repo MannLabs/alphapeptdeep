@@ -374,7 +374,9 @@ class ModelManager(object):
                 Currently, HLA and regular share the same models.
                 Defaults to `global_settings['model_mgr']['model_type']` ('regular').
         """
-        if model_type.lower() in ['phospho','phos']:
+        if model_type.lower() in [
+            'phospho','phos','phosphorylation'
+        ]:
             self.ms2_model.load(
                 model_zip,
                 model_path_in_zip='phospho/ms2_phos.pth'
@@ -382,6 +384,22 @@ class ModelManager(object):
             self.rt_model.load(
                 model_zip,
                 model_path_in_zip='phospho/rt_phos.pth'
+            )
+            self.ccs_model.load(
+                model_zip,
+                model_path_in_zip='regular/ccs.pth'
+            )
+        elif model_type.lower() in [
+            'digly','glygly','ubiquitylation',
+            'ubiquitination','ubiquitinylation'
+        ]:
+            self.ms2_model.load(
+                model_zip,
+                model_path_in_zip='digly/ms2_digly.pth'
+            )
+            self.rt_model.load(
+                model_zip,
+                model_path_in_zip='digly/rt_digly.pth'
             )
             self.ccs_model.load(
                 model_zip,
@@ -402,7 +420,9 @@ class ModelManager(object):
         ]:
             self.load_installed_models(model_type="regular")
         else:
-            logging.warn(f"model_type='{model_type}' is not supported, use 'regular'")
+            logging.warning(
+                f"model_type='{model_type}' is not supported, use 'regular' instead."
+            )
             self.load_installed_models(model_type="regular")
 
     def load_external_models(self,

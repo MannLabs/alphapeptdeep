@@ -7,6 +7,7 @@ import os
 import numpy as np
 import pandas as pd
 import torch
+import yaml
 from tqdm import tqdm
 
 import torch.multiprocessing as mp
@@ -14,7 +15,7 @@ import functools
 
 from zipfile import ZipFile
 from typing import IO, Tuple, List, Union
-from alphabase.yaml_utils import save_yaml
+from alphabase.yaml_utils import save_yaml, load_yaml
 from alphabase.peptide.precursor import is_precursor_sorted
 
 from peptdeep.settings import model_const
@@ -307,28 +308,49 @@ class ModelInterface(object):
         return np.sum([p.numel() for p in self.model.parameters()])
 
     def build_from_py_codes(self,
-        model_code_file:str,
+        model_code_file_or_zip:str,
         code_file_in_zip:str=None,
+        include_model_params_yaml:bool=True,
         **kwargs
     ):
         """
         Build the model based on a python file. Must contain a PyTorch
         model implemented as 'class Model(...'
         """
-        if model_code_file.lower().endswith('.zip'):
-            with ZipFile(model_code_file, 'r') as model_zip:
-                with model_zip.open(code_file_in_zip) as f:
+        if model_code_file_or_zip.lower().endswith('.zip'):
+            with ZipFile(model_code_file_or_zip, 'r') as model_zip:
+                with model_zip.open(code_file_in_zip,'r') as f:
                     codes = f.read()
+                if include_model_params_yaml:
+                    with model_zip.open(
+                        code_file_in_zip[:-len('model.py')]+'param.yaml',
+                        'r'
+                    ) as f:
+                        params = yaml.load(f, yaml.FullLoader)
         else:
-            with open(model_code_file, 'r') as f:
+            with open(model_code_file_or_zip, 'r') as f:
                 codes = f.read()
-        codes = compile(
+            if include_model_params_yaml:
+                params = load_yaml(
+                    model_code_file_or_zip[:-len('model.py')]+'param.yaml'
+                )
+
+        compiled_codes = compile(
             codes,
             filename='model_file_py',
             mode='exec'
         )
-        exec(codes) #codes must contains torch model codes 'class Model(...'
-        self.model = Model(**kwargs)
+        from types import ModuleType
+        _module = ModuleType('_apd_nn_codes')
+        #codes must contains torch model codes 'class Model(...'
+        exec(compiled_codes, _module.__dict__)
+
+        if include_model_params_yaml:
+            for key, val in params.items():
+                if key not in kwargs:
+                    kwargs[key] = val
+
+        self.model = _module.Model(**kwargs)
         self.model_params = kwargs
         self.model.to(self.device)
         self._init_for_training()
