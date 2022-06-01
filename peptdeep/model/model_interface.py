@@ -7,15 +7,20 @@ import os
 import numpy as np
 import pandas as pd
 import torch
+import yaml
 from tqdm import tqdm
+
+import torch.multiprocessing as mp
+import functools
 
 from zipfile import ZipFile
 from typing import IO, Tuple, List, Union
-from alphabase.yaml_utils import save_yaml
+from alphabase.yaml_utils import save_yaml, load_yaml
 from alphabase.peptide.precursor import is_precursor_sorted
 
 from peptdeep.settings import model_const
 from peptdeep.utils import logging
+from peptdeep.settings import global_settings
 
 
 # Cell
@@ -74,10 +79,10 @@ class ModelInterface(object):
         """
         Sets the device (e.g. gpu (cuda), cpu) to be used in the model.
         """
-        device_type = device_type.lower().replace('gpu','cuda')
+        self.device_type = device_type.lower().replace('gpu','cuda')
         if not torch.cuda.is_available():
-            device_type = 'cpu'
-        self.device = torch.device(device_type)
+            self.device_type = 'cpu'
+        self.device = torch.device(self.device_type)
         if self.model is not None:
             self.model.to(self.device)
 
@@ -169,8 +174,8 @@ class ModelInterface(object):
     def predict(self,
         precursor_df:pd.DataFrame,
         *,
-        batch_size=1024,
-        verbose=False,
+        batch_size:int=1024,
+        verbose:bool=False,
         **kwargs
     )->pd.DataFrame:
         """
@@ -209,6 +214,58 @@ class ModelInterface(object):
                     )
 
         torch.cuda.empty_cache()
+        return self.predict_df
+
+    def predict_mp(self,
+        precursor_df:pd.DataFrame,
+        *,
+        batch_size:int=1024,
+        mp_batch_size:int=100000,
+        process_num:int=global_settings['thread_num'],
+        **kwargs
+    )->pd.DataFrame:
+        """
+        Predicting with multiprocessing is no GPUs are availible.
+        Note this multiprocessing method only works for models those predict
+        values within (inplace of) the precursor_df.
+        """
+        precursor_df = append_nAA_column_if_missing(precursor_df)
+
+        if self.device_type != 'cpu':
+            return self.predict(
+                precursor_df,
+                batch_size=batch_size,
+                verbose=False,
+                **kwargs
+            )
+
+        _predict_func = functools.partial(self.predict,
+            batch_size=batch_size, verbose=False, **kwargs
+        )
+
+        from peptdeep.utils import process_bar
+
+        def batch_df_gen(precursor_df, mp_batch_size):
+            for i in range(0, len(precursor_df), mp_batch_size):
+                yield precursor_df.iloc[i:i+mp_batch_size]
+
+        self._check_predict_in_order(precursor_df)
+        self._prepare_predict_data_df(precursor_df,**kwargs)
+
+        print("Predicting with multiprocessing ...")
+        self.model.share_memory()
+        df_list = []
+        with mp.Pool(process_num) as p:
+            for ret_df in process_bar(p.imap(
+                    _predict_func,
+                    batch_df_gen(precursor_df, mp_batch_size),
+                ), len(precursor_df)//mp_batch_size+1
+            ):
+                df_list.append(ret_df)
+
+        self.predict_df = pd.concat(df_list)
+        self.predict_df.reset_index(drop=True, inplace=True)
+
         return self.predict_df
 
     def save(self, filename):
@@ -251,28 +308,49 @@ class ModelInterface(object):
         return np.sum([p.numel() for p in self.model.parameters()])
 
     def build_from_py_codes(self,
-        model_code_file:str,
+        model_code_file_or_zip:str,
         code_file_in_zip:str=None,
+        include_model_params_yaml:bool=True,
         **kwargs
     ):
         """
         Build the model based on a python file. Must contain a PyTorch
         model implemented as 'class Model(...'
         """
-        if model_code_file.lower().endswith('.zip'):
-            with ZipFile(model_code_file, 'r') as model_zip:
-                with model_zip.open(code_file_in_zip) as f:
+        if model_code_file_or_zip.lower().endswith('.zip'):
+            with ZipFile(model_code_file_or_zip, 'r') as model_zip:
+                with model_zip.open(code_file_in_zip,'r') as f:
                     codes = f.read()
+                if include_model_params_yaml:
+                    with model_zip.open(
+                        code_file_in_zip[:-len('model.py')]+'param.yaml',
+                        'r'
+                    ) as f:
+                        params = yaml.load(f, yaml.FullLoader)
         else:
-            with open(model_code_file, 'r') as f:
+            with open(model_code_file_or_zip, 'r') as f:
                 codes = f.read()
-        codes = compile(
+            if include_model_params_yaml:
+                params = load_yaml(
+                    model_code_file_or_zip[:-len('model.py')]+'param.yaml'
+                )
+
+        compiled_codes = compile(
             codes,
             filename='model_file_py',
             mode='exec'
         )
-        exec(codes) #codes must contains torch model codes 'class Model(...'
-        self.model = Model(**kwargs)
+        from types import ModuleType
+        _module = ModuleType('_apd_nn_codes')
+        #codes must contains torch model codes 'class Model(...'
+        exec(compiled_codes, _module.__dict__)
+
+        if include_model_params_yaml:
+            for key, val in params.items():
+                if key not in kwargs:
+                    kwargs[key] = val
+
+        self.model = _module.Model(**kwargs)
         self.model_params = kwargs
         self.model.to(self.device)
         self._init_for_training()
@@ -323,12 +401,15 @@ class ModelInterface(object):
             logging.warn(f"nn parameters {unexpect_keys} are UNEXPECTED while loading models in {self.__class__}")
 
     def _save_codes(self, save_as):
-        import inspect
-        code = '''import torch\nimport peptdeep.model.base as model_base\n'''
-        class_code = inspect.getsource(self.model.__class__)
-        code += 'class Model' + class_code[class_code.find('('):]
-        with open(save_as, 'w') as f:
-            f.write(code)
+        try:
+            import inspect
+            code = '''import torch\nimport peptdeep.model.building_block as building_block\n'''
+            class_code = inspect.getsource(self.model.__class__)
+            code += 'class Model' + class_code[class_code.find('('):]
+            with open(save_as, 'w') as f:
+                f.write(code)
+        except (TypeError, ValueError, KeyError) as e:
+            logging.info(f'Cannot save model source codes: {str(e)}')
 
     def _train_one_epoch(self,
         precursor_df, epoch, batch_size, verbose_each_epoch,

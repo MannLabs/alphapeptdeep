@@ -44,6 +44,7 @@ model_mgr:
   - regular
   - phos
   - hla # same as regular
+  - digly
   external_ms2_model: ''
   external_rt_model: ''
   external_ccs_model: ''

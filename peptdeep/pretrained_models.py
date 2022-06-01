@@ -374,7 +374,9 @@ class ModelManager(object):
                 Currently, HLA and regular share the same models.
                 Defaults to `global_settings['model_mgr']['model_type']` ('regular').
         """
-        if model_type.lower() in ['phospho','phos']:
+        if model_type.lower() in [
+            'phospho','phos','phosphorylation'
+        ]:
             self.ms2_model.load(
                 model_zip,
                 model_path_in_zip='phospho/ms2_phos.pth'
@@ -382,6 +384,22 @@ class ModelManager(object):
             self.rt_model.load(
                 model_zip,
                 model_path_in_zip='phospho/rt_phos.pth'
+            )
+            self.ccs_model.load(
+                model_zip,
+                model_path_in_zip='regular/ccs.pth'
+            )
+        elif model_type.lower() in [
+            'digly','glygly','ubiquitylation',
+            'ubiquitination','ubiquitinylation'
+        ]:
+            self.ms2_model.load(
+                model_zip,
+                model_path_in_zip='digly/ms2_digly.pth'
+            )
+            self.rt_model.load(
+                model_zip,
+                model_path_in_zip='digly/rt_digly.pth'
             )
             self.ccs_model.load(
                 model_zip,
@@ -402,7 +420,9 @@ class ModelManager(object):
         ]:
             self.load_installed_models(model_type="regular")
         else:
-            logging.warn(f"model_type='{model_type}' is not supported, use 'regular'")
+            logging.warning(
+                f"model_type='{model_type}' is not supported, use 'regular' instead."
+            )
             self.load_installed_models(model_type="regular")
 
     def load_external_models(self,
@@ -645,8 +665,9 @@ class ModelManager(object):
         ],
         frag_types:list =  None,
         multiprocessing:bool = mgr_settings['predict']['multiprocessing'],
-        thread_num:int = global_settings['thread_num'],
+        process_num:int = global_settings['thread_num'],
         min_required_precursor_num_for_mp:int = 3000,
+        mp_batch_size:int = 500000,
     )->Dict[str, pd.DataFrame]:
         """ predict all items defined by `predict_items`,
         which may include rt, mobility, fragment_mz
@@ -657,14 +678,14 @@ class ModelManager(object):
               `sequence`, `mods`, `mod_sites`, `charge` ... columns.
             predict_items (list, optional): items ('rt', 'mobility',
               'ms2') to predict.
-              Defaults to [ 'rt' ].
+              Defaults to ['rt' ,'mobility' ,'ms2'].
             frag_types (list, optional): fragment types to predict. If it is None,
             it then depends on `self.ms2_model.charged_frag_types` and
             `self.ms2_model.model._mask_modloss`.
               Defaults to None.
             multiprocessing (bool, optional): if use multiprocessing.
               Defaults to True.
-            thread_num (int, optional): Defaults to global_settings['thread_num']
+            process_num (int, optional): Defaults to global_settings['thread_num']
             min_required_precursor_num_for_mp (int, optional): It will not use
               multiprocessing when the number of precursors in precursor_df
               is lower than this value. Defaults to 5000.
@@ -742,13 +763,21 @@ class ModelManager(object):
 
             df_groupby = precursor_df.groupby('nAA')
 
-            def param_generator(df_groupby):
+            def get_batch_num_mp(df_groupby):
+                batch_num = 0
+                for group_len in df_groupby.size().values:
+                    for i in range(0, group_len, mp_batch_size):
+                        batch_num += 1
+                return batch_num
+
+            def mp_param_generator(df_groupby):
                 for nAA, df in df_groupby:
-                    yield {
-                        'precursor_df': df,
-                        'predict_items': predict_items,
-                        'frag_types': frag_types,
-                    }
+                    for i in range(0, len(df), mp_batch_size):
+                        yield {
+                            'precursor_df': df.iloc[i:i+mp_batch_size,:],
+                            'predict_items': predict_items,
+                            'frag_types': frag_types,
+                        }
 
             precursor_df_list = []
             if 'ms2' in predict_items:
@@ -764,12 +793,13 @@ class ModelManager(object):
             verbose_bak = self.verbose
             self.verbose = False
 
-            with mp.Pool(thread_num) as p:
+            with mp.Pool(process_num) as p:
                 for ret_dict in process_bar(
                     p.imap_unordered(
                         self._predict_all_for_mp,
-                        param_generator(df_groupby)
-                    ), df_groupby.ngroups
+                        mp_param_generator(df_groupby)
+                    ),
+                    get_batch_num_mp(df_groupby)
                 ):
                     precursor_df_list.append(ret_dict['precursor_df'])
                     if fragment_mz_df_list is not None:

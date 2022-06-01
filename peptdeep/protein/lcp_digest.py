@@ -47,4 +47,4 @@ def get_substring_indices(cat_prot, min_len=7, max_len=25, stop_char='$'):
 
 #compile
 _ = "$ABCABCD$ABCDE$ABCE$BCDEF$"
-_ = get_substring_indices(_, 2, 100)
+get_substring_indices(_, 2, 100)
