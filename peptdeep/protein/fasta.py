@@ -4,8 +4,8 @@ __all__ = ['protease_dict', 'get_uniprot_gene_name', 'read_fasta_file', 'load_al
            'cleave_sequence_with_cut_pos', 'Digest', 'get_fix_mods', 'get_candidate_sites', 'get_var_mod_sites',
            'get_var_mods_per_sites_multi_mods_on_aa', 'get_var_mods_per_sites_single_mod_on_aa', 'get_var_mods',
            'get_var_mods_per_sites', 'parse_term_mod', 'add_single_peptide_labeling', 'parse_labels',
-           'create_labeling_peptide_df', 'protein_idxes_to_names', 'PredictFastaSpecLib',
-           'append_regular_modifications']
+           'create_labeling_peptide_df', 'protein_idxes_to_names', 'append_regular_modifications',
+           'PredictFastaSpecLib']
 
 # Cell
 import regex as re
@@ -417,6 +417,41 @@ def protein_idxes_to_names(protein_idxes:str, protein_names:list):
     return ';'.join(proteins)
 
 # Cell
+def append_regular_modifications(df:pd.DataFrame,
+    var_mods = ['Phospho@S','Phospho@T','Phospho@Y'],
+    max_mod_num=1, max_combs=100,
+    keep_unmodified=True,
+):
+    mod_dict = dict([(mod[-1],mod) for mod in var_mods])
+    var_mod_aas = ''.join(mod_dict.keys())
+
+    (
+        df['mods_app'],
+        df['mod_sites_app']
+    ) = zip(*df.sequence.apply(get_var_mods,
+            var_mod_aas=var_mod_aas, mod_dict=mod_dict,
+            max_var_mod=max_mod_num, max_combs=max_combs,
+            keep_unmodified=keep_unmodified
+        )
+    )
+
+    if keep_unmodified:
+        df = df.explode(['mods_app','mod_sites_app'])
+        df.fillna('', inplace=True)
+    else:
+        df.drop(df[df.mods_app.apply(lambda x: len(x)==0)].index, inplace=True)
+        df = df.explode(['mods_app','mod_sites_app'])
+    df['mods'] = df[['mods','mods_app']].apply(
+        lambda x: ';'.join(i for i in x if i), axis=1
+    )
+    df['mod_sites'] = df[['mod_sites','mod_sites_app']].apply(
+        lambda x: ';'.join(i for i in x if i), axis=1
+    )
+    df.drop(columns=['mods_app', 'mod_sites_app'], inplace=True)
+    df.reset_index(drop=True, inplace=True)
+    return df
+
+# Cell
 
 class PredictFastaSpecLib(PredictSpecLib):
     def __init__(self,
@@ -745,6 +780,19 @@ class PredictFastaSpecLib(PredictSpecLib):
         )
         self._precursor_df.reset_index(drop=True, inplace=True)
 
+    def add_additional_modifications(self,
+        var_mods = ['Phospho@S','Phospho@T','Phospho@Y'],
+        max_mod_num=1, max_combs=100,
+        keep_unmodified=True,
+    ):
+        self._precursor_df = append_regular_modifications(
+            self.precursor_df,
+            var_mods=var_mods,
+            max_mod_num=max_mod_num,
+            max_combs=max_combs,
+            keep_unmodified=keep_unmodified
+        )
+
     def add_peptide_labeling(self, labeling_channel_dict:dict):
         """
         Add labeling onto peptides inplace of self._precursor_df
@@ -798,38 +846,3 @@ class PredictFastaSpecLib(PredictSpecLib):
             self.protein_df = _hdf.library.protein_df.values
         except (AttributeError, KeyError, ValueError, TypeError):
             print(f"No protein_df in {hdf_file}")
-
-# Cell
-def append_regular_modifications(df:pd.DataFrame,
-    var_mods = ['Phospho@S','Phospho@T','Phospho@Y'],
-    max_mod_num=1, max_combs=100,
-    keep_unmodified=True,
-):
-    mod_dict = dict([(mod[-1],mod) for mod in var_mods])
-    var_mod_aas = ''.join(mod_dict.keys())
-
-    (
-        df['mods_app'],
-        df['mod_sites_app']
-    ) = zip(*df.sequence.apply(get_var_mods,
-            var_mod_aas=var_mod_aas, mod_dict=mod_dict,
-            max_var_mod=max_mod_num, max_combs=max_combs,
-            keep_unmodified=keep_unmodified
-        )
-    )
-
-    if keep_unmodified:
-        df = df.explode(['mods_app','mod_sites_app'])
-        df.fillna('', inplace=True)
-    else:
-        df.drop(df[df.mods_app.apply(lambda x: len(x)==0)].index, inplace=True)
-        df = df.explode(['mods_app','mod_sites_app'])
-    df['mods'] = df[['mods','mods_app']].apply(
-        lambda x: ';'.join(i for i in x if i), axis=1
-    )
-    df['mod_sites'] = df[['mod_sites','mod_sites_app']].apply(
-        lambda x: ';'.join(i for i in x if i), axis=1
-    )
-    df.drop(columns=['mods_app', 'mod_sites_app'], inplace=True)
-    df.reset_index(drop=True, inplace=True)
-    return df
