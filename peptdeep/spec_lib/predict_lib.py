@@ -27,8 +27,8 @@ class PredictSpecLib(SpecLibBase):
     ):
         super().__init__(
             charged_frag_types,
-            min_precursor_mz=precursor_mz_min,
-            max_precursor_mz=precursor_mz_max,
+            precursor_mz_min=precursor_mz_min,
+            precursor_mz_max=precursor_mz_max,
             decoy = decoy
         )
         if model_manager is None:
