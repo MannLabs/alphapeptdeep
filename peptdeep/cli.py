@@ -18,6 +18,7 @@ from peptdeep.rescore.percolator import Percolator
 from peptdeep.spec_lib.library_factory import (
     library_maker_provider
 )
+from peptdeep.model.featurize import get_all_mod_features
 
 @click.group(
     context_settings=dict(

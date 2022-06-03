@@ -23,7 +23,7 @@ def mod_options():
 
         st.form_submit_button("Click to confirm the selected modifications")
         st.text("Selected modifications")
-        st.dataframe(MOD_DF.loc[fixmod+varmod,['name','classification','composition','mass','modloss_composition','modloss','modloss_importance']])
+        st.dataframe(MOD_DF.loc[fixmod+varmod,['mod_name','classification','composition','mass','modloss_composition','modloss','modloss_importance']])
 
         global_settings['common']['keep_only_important_modloss'] = st.checkbox(
             'Keep only important modification loss (fragment modloss mz=0 if modloss_importance=0)', 
