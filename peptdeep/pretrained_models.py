@@ -717,7 +717,7 @@ class ModelManager(object):
             update_precursor_mz(precursor_df)
 
         if (
-            torch.cuda.is_available() or not multiprocessing
+            self.ms2_model.device_type!='cpu' or not multiprocessing
             or len(precursor_df) < min_required_precursor_num_for_mp
         ):
             refine_df(precursor_df)

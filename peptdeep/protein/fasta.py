@@ -3,15 +3,6 @@
 __all__ = ['PredictFastaSpecLib']
 
 # Cell
-import regex as re
-import numpy as np
-import pandas as pd
-import numba
-import os
-import itertools
-from Bio import SeqIO
-from typing import Union
-
 from alphabase.protein.fasta import FastaLib
 from peptdeep.spec_lib.predict_lib import PredictSpecLib
 from peptdeep.pretrained_models import ModelManager
