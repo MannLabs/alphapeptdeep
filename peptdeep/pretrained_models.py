@@ -665,9 +665,9 @@ class ModelManager(object):
         ],
         frag_types:list =  None,
         multiprocessing:bool = mgr_settings['predict']['multiprocessing'],
-        process_num:int = global_settings['thread_num'],
         min_required_precursor_num_for_mp:int = 3000,
-        mp_batch_size:int = 500000,
+        process_num:int = global_settings['thread_num'],
+        mp_batch_size:int = 100000,
     )->Dict[str, pd.DataFrame]:
         """ predict all items defined by `predict_items`,
         which may include rt, mobility, fragment_mz
@@ -688,7 +688,9 @@ class ModelManager(object):
             process_num (int, optional): Defaults to global_settings['thread_num']
             min_required_precursor_num_for_mp (int, optional): It will not use
               multiprocessing when the number of precursors in precursor_df
-              is lower than this value. Defaults to 5000.
+              is lower than this value. Defaults to 3000.
+            mp_batch_size (int, optional): Splitting data into batches
+                for multiprocessing. Defaults to 100000.
 
         Returns:
             Dict[str, pd.DataFrame]: {'precursor_df': precursor_df}
@@ -757,6 +759,7 @@ class ModelManager(object):
             else:
                 return {'precursor_df': precursor_df}
         else:
+            logging.info("Using multiprocessing ...")
             self.ms2_model.model.share_memory()
             self.rt_model.model.share_memory()
             self.ccs_model.model.share_memory()

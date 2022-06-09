@@ -1,5 +1,6 @@
 import streamlit as st
 from peptdeep.settings import global_settings
+import multiprocessing
 
 def nce_search():
     grid_nce_first = st.number_input('Start NCE for grid NCE search',value = global_settings['model_mgr']['fine_tune']['grid_nce_first']*1.0,step = 1.0)
@@ -45,7 +46,7 @@ def model():
     model_url_zip_name = st.text_input('The downloaded zip file name from the URL:',value = global_settings['model_url_zip_name'])
     global_settings['model_url_zip_name'] = model_url_zip_name
 
-    thread_num = st.number_input('thread number:', value = global_settings['thread_num'])
+    thread_num = st.number_input('thread number:', value = multiprocessing.cpu_count()-1)
     global_settings['thread_num'] = thread_num
 
     global_settings['model_mgr']['external_ms2_model'] = st.text_input('External MS2 model')

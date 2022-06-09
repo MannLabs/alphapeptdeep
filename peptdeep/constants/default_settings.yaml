@@ -38,6 +38,23 @@ model_mgr:
     grid_nce_last: 45
     grid_nce_step: 3
     grid_instrument: ['Lumos']
+    ms2_output_path: ''
+    rt_output_path: ''
+    ccs_output_path: ''
+    psm_type: alphapept
+    psm_type_choices:
+      - alphapept
+      - pfind
+      - maxquant
+      - diann
+    psm_files: []
+    ms_file_type: alphapept_hdf
+    ms_file_type_choices:
+      - hdf
+      - thermo_raw # if alphapept is installed
+      - mgf
+      - mzml
+    ms_files: []
   mask_modloss: True
   model_type: regular
   model_choices:
