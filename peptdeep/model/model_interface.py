@@ -36,7 +36,6 @@ def get_cosine_schedule_with_warmup(
     values of the cosine function between 0 and `pi * cycles` after a warmup
     period during which it increases linearly between 0 and 1.
     """
-
     def lr_lambda(current_step):
         if current_step < num_warmup_steps:
             return float(current_step) / max(1, num_warmup_steps)
@@ -580,6 +579,8 @@ class ModelInterface(object):
                 g['lr'] = lr
 
     def _get_lr_schedule_with_warmup(self, warmup_epoch, epoch):
+        if warmup_epoch > epoch:
+            warmup_epoch = epoch//2
         return get_cosine_schedule_with_warmup(
             self.optimizer, warmup_epoch, epoch
         )
