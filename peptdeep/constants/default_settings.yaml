@@ -71,11 +71,11 @@ model_mgr:
       - mzml
     ms_files: []
   mask_modloss: True
-  model_type: regular
+  model_type: generic
   model_choices:
-  - regular
+  - generic
   - phos
-  - hla # same as regular
+  - hla # same as generic
   - digly
   external_ms2_model: ''
   external_rt_model: ''

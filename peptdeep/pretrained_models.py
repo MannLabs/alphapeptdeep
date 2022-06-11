@@ -42,7 +42,7 @@ model_zip = os.path.join(
 
 def is_model_zip(downloaded_zip):
     with ZipFile(downloaded_zip) as zip:
-        return any(x=='regular/ms2.pth' for x in zip.namelist())
+        return any(x=='generic/ms2.pth' for x in zip.namelist())
 
 def download_models(
     url:str=model_url, overwrite=True
@@ -226,16 +226,16 @@ def load_phos_models(mask_modloss=True):
     rt_model = AlphaRTModel()
     rt_model.load(model_zip, model_path_in_zip='phospho/rt_phos.pth')
     ccs_model = AlphaCCSModel()
-    ccs_model.load(model_zip, model_path_in_zip='regular/ccs.pth')
+    ccs_model.load(model_zip, model_path_in_zip='generic/ccs.pth')
     return ms2_model, rt_model, ccs_model
 
 def load_models(mask_modloss=True):
     ms2_model = pDeepModel(mask_modloss=mask_modloss)
-    ms2_model.load(model_zip, model_path_in_zip='regular/ms2.pth')
+    ms2_model.load(model_zip, model_path_in_zip='generic/ms2.pth')
     rt_model = AlphaRTModel()
-    rt_model.load(model_zip, model_path_in_zip='regular/rt.pth')
+    rt_model.load(model_zip, model_path_in_zip='generic/rt.pth')
     ccs_model = AlphaCCSModel()
-    ccs_model.load(model_zip, model_path_in_zip='regular/ccs.pth')
+    ccs_model.load(model_zip, model_path_in_zip='generic/ccs.pth')
     return ms2_model, rt_model, ccs_model
 
 def load_models_by_model_type_in_zip(model_type_in_zip:str, mask_modloss=True):
@@ -386,16 +386,15 @@ class ModelManager(object):
         """ Load built-in MS2/CCS/RT models.
         Args:
             model_type (str, optional): To load the installed MS2/RT/CCS models
-                or phos MS2/RT/CCS models. It could be 'phospho', 'HLA', or 'regular'.
-                Currently, HLA and regular share the same models.
-                Defaults to `global_settings['model_mgr']['model_type']` ('regular').
+                or phos MS2/RT/CCS models. It could be 'digly', 'phospho', 'HLA', or 'generic'.
+                Defaults to `global_settings['model_mgr']['model_type']` ('generic').
         """
         if model_type.lower() in [
             'phospho','phos','phosphorylation'
         ]:
             self.ms2_model.load(
                 model_zip,
-                model_path_in_zip='regular/ms2.pth'
+                model_path_in_zip='generic/ms2.pth'
             )
             self.rt_model.load(
                 model_zip,
@@ -403,7 +402,7 @@ class ModelManager(object):
             )
             self.ccs_model.load(
                 model_zip,
-                model_path_in_zip='regular/ccs.pth'
+                model_path_in_zip='generic/ccs.pth'
             )
         elif model_type.lower() in [
             'digly','glygly','ubiquitylation',
@@ -411,7 +410,7 @@ class ModelManager(object):
         ]:
             self.ms2_model.load(
                 model_zip,
-                model_path_in_zip='regular/ms2.pth'
+                model_path_in_zip='generic/ms2.pth'
             )
             self.rt_model.load(
                 model_zip,
@@ -419,27 +418,27 @@ class ModelManager(object):
             )
             self.ccs_model.load(
                 model_zip,
-                model_path_in_zip='regular/ccs.pth'
+                model_path_in_zip='generic/ccs.pth'
             )
-        elif model_type.lower() in ['regular','common']:
+        elif model_type.lower() in ['regular','common','generic']:
             self.ms2_model.load(
-                model_zip, model_path_in_zip='regular/ms2.pth'
+                model_zip, model_path_in_zip='generic/ms2.pth'
             )
             self.rt_model.load(
-                model_zip, model_path_in_zip='regular/rt.pth'
+                model_zip, model_path_in_zip='generic/rt.pth'
             )
             self.ccs_model.load(
-                model_zip, model_path_in_zip='regular/ccs.pth'
+                model_zip, model_path_in_zip='generic/ccs.pth'
             )
         elif model_type.lower() in [
             'hla','unspecific','non-specific', 'nonspecific'
         ]:
-            self.load_installed_models(model_type="regular")
+            self.load_installed_models(model_type="generic")
         else:
             logging.warning(
-                f"model_type='{model_type}' is not supported, use 'regular' instead."
+                f"model_type='{model_type}' is not supported, use 'generic' instead."
             )
-            self.load_installed_models(model_type="regular")
+            self.load_installed_models(model_type="generic")
 
     def load_external_models(self,
         *,

@@ -21,7 +21,7 @@ for key, val in list(global_settings['model_mgr'][
 ].items()):
     global_settings['model_mgr'][
         'instrument_group'
-    ][key.upper()] = val.upper()
+    ][key.upper()] = val
 
 model_const = load_yaml(
     os.path.join(_base_dir, 'constants/model_const.yaml')
