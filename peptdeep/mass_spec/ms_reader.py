@@ -23,7 +23,6 @@ class MSReaderBase:
         scan_indices:np.ndarray,
         rt_list:list,
         mobility_list:list = None,
-        scan_starts_from_one:bool = True,
     ):
         """Build spectrum_df by the given information
 
@@ -33,8 +32,6 @@ class MSReaderBase:
                 peaks for each scan
             rt_list (list): retention time for each scan
             mobility_list (list, optional): mobility for each scan. Defaults to None.
-            scan_starts_from_one (bool, optional): Thermo RAW scan number
-                always starts from one. Defaults to True.
         """
         def set_col(col, indexes, values, dtype, na_value):
             self.spectrum_df.loc[indexes, col] = values
@@ -42,7 +39,8 @@ class MSReaderBase:
             self.spectrum_df[col] = self.spectrum_df[col].astype(dtype)
 
         scan_list = np.array(scan_list, dtype=np.int32)
-        if scan_starts_from_one:
+        if scan_list.min() > 0:
+            # thermo scan >= 1
             scan_list -= 1
         idx_len = np.max(scan_list)+1
         self.spectrum_df = pd.DataFrame(index=np.arange(idx_len, dtype=np.int64))

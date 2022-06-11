@@ -353,6 +353,21 @@ class ModelManager(object):
             'predict'
         ]['verbose']
 
+    @property
+    def instrument(self):
+        return self._instrument
+    @instrument.setter
+    def instrument(self, instrument_name:str):
+        instrument_name = instrument_name.upper()
+        if instrument_name in global_settings['model_mgr'][
+            'instrument_group'
+        ]:
+            self._instrument = global_settings[
+                'model_mgr']['instrument_group'
+            ][instrument_name]
+        else:
+            self._instrument = 'Lumos'
+
     def set_default_nce_instrument(self, df):
         if 'nce' not in df.columns and 'instrument' not in df.columns:
             df['nce'] = self.nce

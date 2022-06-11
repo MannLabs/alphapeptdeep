@@ -19,6 +19,21 @@ common:
   keep_only_important_modloss: True
 
 model_mgr:
+  instrument_group:
+    Lumos: Lumos
+    QE: QE
+    timsTOF: timsTOF
+    SciexTOF: SciexTOF
+    Fusion: Lumos
+    Eclipse: Lumos
+    Velos: Lumos # not important
+    Elite: Lumos # not important
+    OrbitrapTribrid: Lumos
+    ThermoTribrid: Lumos
+    QEHF: QE
+    QEHFX: QE
+    Exploris: QE
+    Exploris480: QE
   predict:
     batch_size_ms2: 512
     batch_size_rt_ccs: 1024
