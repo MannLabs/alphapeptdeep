@@ -30,6 +30,7 @@ model_mgr:
     Elite: Lumos # not important
     OrbitrapTribrid: Lumos
     ThermoTribrid: Lumos
+    QE+: QE
     QEHF: QE
     QEHFX: QE
     Exploris: QE
