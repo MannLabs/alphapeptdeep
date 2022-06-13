@@ -327,21 +327,31 @@ class ModelManager(object):
             'fine_tune'
         ]['grid_nce_search']
 
-        self.psm_num_to_tune_ms2 = 5000
-        self.psm_num_per_mod_to_tune_ms2 = 0
+        self.psm_num_to_tune_ms2 = mgr_settings[
+            "fine_tune"
+        ]["psm_num_to_tune_ms2"]
         self.epoch_to_tune_ms2 = mgr_settings[
             'fine_tune'
         ]['epoch_ms2']
         self.batch_size_to_tune_ms2 = 512
 
-        self.psm_num_to_tune_rt_ccs = 3000
-        self.psm_num_per_mod_to_tune_rt_ccs = 0
+        self.psm_num_to_tune_rt_ccs = mgr_settings[
+            "fine_tune"
+        ]["psm_num_to_tune_rt_ccs"]
         self.epoch_to_tune_rt_ccs = mgr_settings[
             'fine_tune'
         ]['epoch_rt_ccs']
         self.batch_size_to_tune_rt_ccs = 1024
 
-        self.top_n_mods_to_tune = 10
+        self.psm_num_per_mod_to_tune_ms2 = mgr_settings[
+            "fine_tune"
+        ]["psm_num_per_mod_to_tune_ms2"]
+        self.psm_num_per_mod_to_tune_rt_ccs = mgr_settings[
+            "fine_tune"
+        ]["psm_num_per_mod_to_tune_rt_ccs"]
+        self.top_n_mods_to_tune = mgr_settings[
+            "fine_tune"
+        ]["top_n_mods_to_tune"]
 
         self.nce = mgr_settings[
             'predict'

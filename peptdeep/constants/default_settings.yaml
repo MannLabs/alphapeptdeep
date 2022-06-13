@@ -70,6 +70,11 @@ model_mgr:
       - mgf
       - mzml
     ms_files: []
+    psm_num_to_tune_ms2: 5000
+    psm_num_per_mod_to_tune_ms2: 50
+    psm_num_to_tune_rt_ccs: 5000
+    psm_num_per_mod_to_tune_rt_ccs: 50
+    top_n_mods_to_tune: 10
   mask_modloss: True
   model_type: generic
   model_choices:
@@ -83,11 +88,6 @@ model_mgr:
 percolator:
   require_model_tuning: True
   raw_num_to_tune: 8
-  psm_num_to_tune_ms2: 5000
-  psm_num_per_mod_to_tune_ms2: 100
-  psm_num_to_tune_rt_ccs: 5000
-  mod_psm_num_to_tune_rt_ccs: 100
-  top_n_mods_to_tune: 10
 
   require_raw_specific_tuning: True
   raw_specific_ms2_tuning: False

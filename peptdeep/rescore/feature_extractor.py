@@ -461,26 +461,6 @@ class ScoreFeatureExtractor:
 
         self.raw_num_to_tune = perc_settings['raw_num_to_tune']
 
-        (
-            self.model_mgr.psm_num_to_tune_ms2
-        ) = perc_settings['psm_num_to_tune_ms2']
-
-        (
-            self.model_mgr.psm_num_per_mod_to_tune_ms2
-        ) = perc_settings['psm_num_per_mod_to_tune_ms2']
-
-        (
-            self.model_mgr.psm_num_to_tune_rt_ccs
-        ) = perc_settings['psm_num_to_tune_rt_ccs']
-
-        (
-            self.model_mgr.mod_psm_num_to_tune_rt_ccs
-        ) = perc_settings['mod_psm_num_to_tune_rt_ccs']
-
-        (
-            self.model_mgr.top_n_mods_to_tune
-        ) = perc_settings['top_n_mods_to_tune']
-
         self.require_model_tuning = perc_settings[
             'require_model_tuning'
         ]
