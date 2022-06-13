@@ -621,11 +621,11 @@ class ScoreFeatureExtractor:
         if self.require_raw_specific_tuning:
             (
                 psm_num_to_tune_rt_ccs,
-                mod_psm_num_to_tune_rt_ccs,
+                psm_num_per_mod_to_tune_rt_ccs,
                 epoch_to_tune_rt_ccs
             ) = (
                 self.model_mgr.psm_num_to_tune_rt_ccs,
-                self.model_mgr.mod_psm_num_to_tune_rt_ccs,
+                self.model_mgr.psm_num_per_mod_to_tune_rt_ccs,
                 self.model_mgr.epoch_to_tune_rt_ccs
             )
 
@@ -633,7 +633,7 @@ class ScoreFeatureExtractor:
                 self.model_mgr.psm_num_to_tune_rt_ccs
             ) = perc_settings['psm_num_per_raw_to_tune']
 
-            self.model_mgr.mod_psm_num_to_tune_rt_ccs = 0
+            self.model_mgr.psm_num_per_mod_to_tune_rt_ccs = 0
 
             (
                 self.model_mgr.epoch_to_tune_rt_ccs
@@ -644,11 +644,11 @@ class ScoreFeatureExtractor:
 
             (
                 self.model_mgr.psm_num_to_tune_rt_ccs,
-                self.model_mgr.mod_psm_num_to_tune_rt_ccs,
+                self.model_mgr.psm_num_per_mod_to_tune_rt_ccs,
                 self.model_mgr.epoch_to_tune_rt_ccs
             ) = (
                 psm_num_to_tune_rt_ccs,
-                mod_psm_num_to_tune_rt_ccs,
+                psm_num_per_mod_to_tune_rt_ccs,
                 epoch_to_tune_rt_ccs
             )
 

@@ -70,7 +70,7 @@ class ScalarRegression_Transformer_Model_for_AASeq(torch.nn.Module):
             building_block.ascii_embedding(hidden_dim),
         )
 
-        self._output_attentions = output_attentions
+        self.output_attentions = output_attentions
 
         self.hidden_nn = building_block.HFace_Transformer_with_PositionalEncoder(
             hidden_dim, nlayers=nlayers, dropout=dropout,
@@ -85,13 +85,12 @@ class ScalarRegression_Transformer_Model_for_AASeq(torch.nn.Module):
         )
 
     @property
-    def output_attentions(self):
+    def output_attentions(self)->bool:
         return self._output_attentions
 
     @output_attentions.setter
     def output_attentions(self, val:bool):
         self._output_attentions = val
-        self.hidden_nn.output_attentions = val
 
     def forward(self, aa_x):
         aa_x = self.dropout(self.input_nn(aa_x))
@@ -123,7 +122,7 @@ class ScalarRegression_ModelInterface_for_AASeq(ModelInterface):
     def _prepare_predict_data_df(self,
         precursor_df:pd.DataFrame,
     ):
-        self._predict_column_in_df = 'target_value_pred'
+        self._predict_column_in_df = 'predicted_property'
         precursor_df[self._predict_column_in_df] = 0.
         self.predict_df = precursor_df
 
@@ -145,12 +144,14 @@ class ScalarRegression_ModelInterface_for_AASeq(ModelInterface):
         **kwargs
     ) -> torch.Tensor:
         return self._as_tensor(
-            batch_df['target_value'].values,
+            batch_df['detected_property'].values,
             dtype=torch.float32
         )
 
 # Cell
-class BinaryClassification_LSTM_Model_for_AASeq(torch.nn.Module):
+class BinaryClassification_LSTM_Model_for_AASeq(
+    ScalarRegression_LSTM_Model_for_AASeq
+):
     def __init__(self,
         *,
         hidden_dim=256,
@@ -158,18 +159,19 @@ class BinaryClassification_LSTM_Model_for_AASeq(torch.nn.Module):
         dropout=0.1,
         **kwargs,
     ):
-        super().__init__()
-
-        self.nn = ScalarRegression_LSTM_Model_for_AASeq(
+        super().__init__(
             hidden_dim=hidden_dim,
-            input_dim=ASCII_NUM,
             n_lstm_layers=n_lstm_layers,
             dropout=dropout,
         )
-    def forward(self, aa_x):
-        return torch.sigmoid(self.nn(aa_x))
 
-class BinaryClassification_Transformer_Model_for_AASeq(torch.nn.Module):
+    def forward(self, aa_x):
+        x = super().forward(aa_x)
+        return torch.sigmoid(x)
+
+class BinaryClassification_Transformer_Model_for_AASeq(
+    ScalarRegression_Transformer_Model_for_AASeq
+):
     def __init__(self,
         *,
         hidden_dim = 256,
@@ -182,28 +184,17 @@ class BinaryClassification_Transformer_Model_for_AASeq(torch.nn.Module):
         Model based on a transformer Architecture from
         Huggingface's BertEncoder class.
         """
-        super().__init__()
-
-        self.nn =  ScalarRegression_Transformer_Model_for_AASeq(
+        super().__init__(
             nlayers=nlayers,
-            input_dim=ASCII_NUM,
             hidden_dim=hidden_dim,
             output_attentions=output_attentions,
             dropout=dropout,
             **kwargs,
         )
 
-    @property
-    def output_attentions(self):
-        return self._output_attentions
-
-    @output_attentions.setter
-    def output_attentions(self, val:bool):
-        self._output_attentions = val
-        self.hidden_nn.output_attentions = val
-
     def forward(self, aa_x):
-        return torch.sigmoid(self.nn(aa_x))
+        x = super().forward(aa_x)
+        return torch.sigmoid(x)
 
 class BinaryClassification_ModelInterface_for_AASeq(ModelInterface):
     def __init__(self,
@@ -226,7 +217,7 @@ class BinaryClassification_ModelInterface_for_AASeq(ModelInterface):
     def _prepare_predict_data_df(self,
         precursor_df:pd.DataFrame,
     ):
-        self._predict_column_in_df = 'target_prob_pred'
+        self._predict_column_in_df = 'predicted_prob'
         precursor_df[self._predict_column_in_df] = 0.
         self.predict_df = precursor_df
 
@@ -247,7 +238,7 @@ class BinaryClassification_ModelInterface_for_AASeq(ModelInterface):
         **kwargs
     ) -> torch.Tensor:
         return self._as_tensor(
-            batch_df['target_prob'].values,
+            batch_df['detected_prob'].values,
             dtype=torch.float32
         )
 
@@ -311,13 +302,12 @@ class ScalarRegression_Transformer_Model_for_ModAASeq(torch.nn.Module):
         )
 
     @property
-    def output_attentions(self):
+    def output_attentions(self)->bool:
         return self._output_attentions
 
     @output_attentions.setter
     def output_attentions(self, val:bool):
         self._output_attentions = val
-        self.hidden_nn.output_attentions = val
 
     def forward(self,
         aa_indices,
@@ -354,7 +344,7 @@ class ScalarRegression_ModelInterface_for_ModAASeq(ModelInterface):
     def _prepare_predict_data_df(self,
         precursor_df:pd.DataFrame,
     ):
-        self._predict_column_in_df = 'target_value_pred'
+        self._predict_column_in_df = 'predicted_property'
         precursor_df[self._predict_column_in_df] = 0.
         self.predict_df = precursor_df
 
@@ -382,12 +372,14 @@ class ScalarRegression_ModelInterface_for_ModAASeq(ModelInterface):
         **kwargs
     ) -> torch.Tensor:
         return self._as_tensor(
-            batch_df['target_value'].values,
+            batch_df['detected_property'].values,
             dtype=torch.float32
         )
 
 # Cell
-class BinaryClassification_LSTM_Model_for_ModAASeq(torch.nn.Module):
+class BinaryClassification_LSTM_Model_for_ModAASeq(
+    ScalarRegression_LSTM_Model_for_ModAASeq
+):
     def __init__(self,
         *,
         hidden_dim=256,
@@ -395,17 +387,20 @@ class BinaryClassification_LSTM_Model_for_ModAASeq(torch.nn.Module):
         dropout=0.1,
         **kwargs,
     ):
-        super().__init__()
-        self.nn = ScalarRegression_LSTM_Model_for_ModAASeq(
+        super().__init__(
             hidden_dim=hidden_dim,
             n_lstm_layers=n_lstm_layers,
-            dropout=dropout
+            dropout=dropout,
+            **kwargs,
         )
 
     def forward(self, aa_x, mod_x):
-        return torch.sigmoid(self.nn(aa_x, mod_x))
+        x = super().forward(aa_x, mod_x)
+        return torch.sigmoid(x)
 
-class BinaryClassification_Transformer_Model_for_ModAASeq(torch.nn.Module):
+class BinaryClassification_Transformer_Model_for_ModAASeq(
+    ScalarRegression_Transformer_Model_for_ModAASeq
+):
     def __init__(self,
         *,
         hidden_dim = 256,
@@ -418,8 +413,7 @@ class BinaryClassification_Transformer_Model_for_ModAASeq(torch.nn.Module):
         Model based on a transformer Architecture from
         Huggingface's BertEncoder class.
         """
-        super().__init__()
-        self.nn = ScalarRegression_Transformer_Model_for_ModAASeq(
+        super().__init__(
             nlayers=nlayers,
             hidden_dim=hidden_dim,
             output_attentions=output_attentions,
@@ -428,19 +422,19 @@ class BinaryClassification_Transformer_Model_for_ModAASeq(torch.nn.Module):
         )
 
     @property
-    def output_attentions(self):
+    def output_attentions(self)->bool:
         return self._output_attentions
 
     @output_attentions.setter
     def output_attentions(self, val:bool):
         self._output_attentions = val
-        self.hidden_nn.output_attentions = val
 
     def forward(self,
         aa_indices,
         mod_x,
     ):
-        return torch.sigmoid(self.nn(aa_indices, mod_x))
+        x = super().forward(aa_indices, mod_x)
+        return torch.sigmoid(x)
 
 class BinaryClassification_ModelInterface_for_ModAASeq(ModelInterface):
     def __init__(self,
@@ -460,7 +454,7 @@ class BinaryClassification_ModelInterface_for_ModAASeq(ModelInterface):
     def _prepare_predict_data_df(self,
         precursor_df:pd.DataFrame,
     ):
-        self._predict_column_in_df = 'target_prob_pred'
+        self._predict_column_in_df = 'predicted_prob'
         precursor_df[self._predict_column_in_df] = 0.
         self.predict_df = precursor_df
 
@@ -487,6 +481,6 @@ class BinaryClassification_ModelInterface_for_ModAASeq(ModelInterface):
         **kwargs
     ) -> torch.Tensor:
         return self._as_tensor(
-            batch_df['target_prob'].values,
+            batch_df['detected_prob'].values,
             dtype=torch.float32
         )
