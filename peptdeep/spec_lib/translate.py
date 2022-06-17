@@ -12,7 +12,7 @@ import typing
 
 from peptdeep.utils import explode_multiple_columns
 
-from alphabase.spectrum_library.library_base import SpecLibBase
+from alphabase.spectral_library.library_base import SpecLibBase
 
 # Cell
 #@numba.njit #(cannot use numba for pd.Series)
