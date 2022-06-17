@@ -7,6 +7,8 @@ model:
   - y_modloss
   max_frag_charge: 2
 
+PEPTDEEP_HOME: "~/peptdeep" # ~ refers to user folder (e.g. C:/Users/username)
+
 local_model_zip_name: "pretrained_models.zip"
 
 # overwritable config
@@ -18,7 +20,29 @@ thread_num: 8
 common:
   keep_only_important_modloss: True
 
+peak_matching:
+  ms2_ppm: True
+  ms2_tol_value: 20.0
+  ms1_ppm: True
+  ms1_tol_value: 20.0
+
 model_mgr:
+  instrument_group:
+    Lumos: Lumos
+    QE: QE
+    timsTOF: timsTOF
+    SciexTOF: SciexTOF
+    Fusion: Lumos
+    Eclipse: Lumos
+    Velos: Lumos # not important
+    Elite: Lumos # not important
+    OrbitrapTribrid: Lumos
+    ThermoTribrid: Lumos
+    QE+: QE
+    QEHF: QE
+    QEHFX: QE
+    Exploris: QE
+    Exploris480: QE
   predict:
     batch_size_ms2: 512
     batch_size_rt_ccs: 1024
@@ -38,12 +62,34 @@ model_mgr:
     grid_nce_last: 45
     grid_nce_step: 3
     grid_instrument: ['Lumos']
+    ms2_output_path: ''
+    rt_output_path: ''
+    ccs_output_path: ''
+    psm_type: alphapept
+    psm_type_choices:
+      - alphapept
+      - pfind
+      - maxquant
+      - diann
+    psm_files: []
+    ms_file_type: alphapept_hdf
+    ms_file_type_choices:
+      - hdf
+      - thermo_raw # if alphapept is installed
+      - mgf
+      - mzml
+    ms_files: []
+    psm_num_to_tune_ms2: 5000
+    psm_num_per_mod_to_tune_ms2: 50
+    psm_num_to_tune_rt_ccs: 5000
+    psm_num_per_mod_to_tune_rt_ccs: 50
+    top_n_mods_to_tune: 10
   mask_modloss: True
-  model_type: regular
+  model_type: generic
   model_choices:
-  - regular
+  - generic
   - phos
-  - hla # same as regular
+  - hla # same as generic
   - digly
   external_ms2_model: ''
   external_rt_model: ''
@@ -51,11 +97,6 @@ model_mgr:
 percolator:
   require_model_tuning: True
   raw_num_to_tune: 8
-  psm_num_to_tune_ms2: 5000
-  psm_num_per_mod_to_tune_ms2: 100
-  psm_num_to_tune_rt_ccs: 5000
-  mod_psm_num_to_tune_rt_ccs: 100
-  top_n_mods_to_tune: 10
 
   require_raw_specific_tuning: True
   raw_specific_ms2_tuning: False

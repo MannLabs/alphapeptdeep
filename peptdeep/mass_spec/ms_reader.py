@@ -8,6 +8,7 @@ __all__ = ['MSReaderBase', 'AlphaPept_HDF_MS1_Reader', 'AlphaPept_HDF_MS2_Reader
 import os
 import numpy as np
 import pandas as pd
+from alphabase.io.hdf import HDF_File
 
 class MSReaderBase:
     def __init__(self):
@@ -23,7 +24,6 @@ class MSReaderBase:
         scan_indices:np.ndarray,
         rt_list:list,
         mobility_list:list = None,
-        scan_starts_from_one:bool = True,
     ):
         """Build spectrum_df by the given information
 
@@ -33,8 +33,6 @@ class MSReaderBase:
                 peaks for each scan
             rt_list (list): retention time for each scan
             mobility_list (list, optional): mobility for each scan. Defaults to None.
-            scan_starts_from_one (bool, optional): Thermo RAW scan number
-                always starts from one. Defaults to True.
         """
         def set_col(col, indexes, values, dtype, na_value):
             self.spectrum_df.loc[indexes, col] = values
@@ -42,7 +40,8 @@ class MSReaderBase:
             self.spectrum_df[col] = self.spectrum_df[col].astype(dtype)
 
         scan_list = np.array(scan_list, dtype=np.int32)
-        if scan_starts_from_one:
+        if scan_list.min() > 0:
+            # thermo scan >= 1
             scan_list -= 1
         idx_len = np.max(scan_list)+1
         self.spectrum_df = pd.DataFrame(index=np.arange(idx_len, dtype=np.int64))
@@ -88,48 +87,32 @@ class MSReaderBase:
 
 class AlphaPept_HDF_MS1_Reader(MSReaderBase):
     def load(self, file_path):
-        from alphapept.io import HDF_File
-        hdf_file = HDF_File(file_path)
-        self.ms_data = {}
-        for dataset_name in hdf_file.read(group_name="Raw/MS1_scans"):
-            values = hdf_file.read(
-                dataset_name=dataset_name,
-                group_name="Raw/MS1_scans",
-            )
-            self.ms_data[dataset_name] = values
-        self.mzs = self.ms_data['mass_list_ms1']
-        self.intensities = self.ms_data['int_list_ms1']
+        hdf = HDF_File(file_path)
+        self.mzs = hdf.Raw.MS1_scans.mass_list_ms1.values
+        self.intensities = hdf.Raw.MS1_scans.int_list_ms1.values
         self.build_spectrum_df(
-            scan_list=self.ms_data['scan_list_ms1'],
-            scan_indices=self.ms_data['indices_ms1'],
-            rt_list=self.ms_data['rt_list_ms1'],
-            mobility_list=self.ms_data['mobility']
-            if 'mobility' in self.ms_data else None,
+            scan_list=hdf.Raw.MS1_scans.scan_list_ms1.values,
+            scan_indices=hdf.Raw.MS1_scans.indices_ms1.values,
+            rt_list=hdf.Raw.MS1_scans.rt_list_ms1.values,
+            mobility_list=hdf.Raw.MS1_scans.mobility.values
+            if hasattr(hdf.Raw.MS1_scans, 'mobility') else None,
         )
 
 class AlphaPept_HDF_MS2_Reader(MSReaderBase):
     def load(self, file_path):
-        from alphapept.io import HDF_File
-        hdf_file = HDF_File(file_path)
-        self.ms_data = {}
-        for dataset_name in hdf_file.read(group_name="Raw/MS2_scans"):
-            values = hdf_file.read(
-                dataset_name=dataset_name,
-                group_name="Raw/MS2_scans",
-            )
-            self.ms_data[dataset_name] = values
-        self.mzs = self.ms_data['mass_list_ms2']
-        self.intensities = self.ms_data['int_list_ms2']
-        if 'mobility2' in self.ms_data:
-            scan_list = np.arange(len(self.ms_data['rt_list_ms2']))
+        hdf = HDF_File(file_path)
+        self.mzs = hdf.Raw.MS2_scans.mass_list_ms2.values
+        self.intensities = hdf.Raw.MS2_scans.int_list_ms2.values
+        if hasattr(hdf.Raw.MS2_scans, 'mobility2'):
+            scan_list = np.arange(len(hdf.Raw.MS2_scans.rt_list_ms2))
         else:
-            scan_list = self.ms_data['scan_list_ms2']
+            scan_list = hdf.Raw.MS2_scans.scan_list_ms2.values
         self.build_spectrum_df(
             scan_list=scan_list,
-            scan_indices=self.ms_data['indices_ms2'],
-            rt_list=self.ms_data['rt_list_ms2'],
-            mobility_list=self.ms_data['mobility2']
-            if 'mobility2' in self.ms_data else None,
+            scan_indices=hdf.Raw.MS2_scans.indices_ms2.values,
+            rt_list=hdf.Raw.MS2_scans.rt_list_ms2.values,
+            mobility_list=hdf.Raw.MS2_scans.mobility2.values
+            if hasattr(hdf.Raw.MS2_scans, 'mobility2') else None,
         )
 
 def read_until(file, until):

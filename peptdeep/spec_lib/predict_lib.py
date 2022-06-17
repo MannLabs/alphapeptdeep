@@ -12,7 +12,7 @@ from alphabase.peptide.precursor import (
     calc_precursor_isotope_mp, calc_precursor_isotope
 )
 from peptdeep.utils import process_bar
-from alphabase.spectrum_library.library_base import SpecLibBase
+from alphabase.spectral_library.library_base import SpecLibBase
 from peptdeep.pretrained_models import ModelManager
 from peptdeep.settings import global_settings
 
@@ -27,8 +27,8 @@ class PredictSpecLib(SpecLibBase):
     ):
         super().__init__(
             charged_frag_types,
-            min_precursor_mz=precursor_mz_min,
-            max_precursor_mz=precursor_mz_max,
+            precursor_mz_min=precursor_mz_min,
+            precursor_mz_max=precursor_mz_max,
             decoy = decoy
         )
         if model_manager is None:

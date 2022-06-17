@@ -461,26 +461,6 @@ class ScoreFeatureExtractor:
 
         self.raw_num_to_tune = perc_settings['raw_num_to_tune']
 
-        (
-            self.model_mgr.psm_num_to_tune_ms2
-        ) = perc_settings['psm_num_to_tune_ms2']
-
-        (
-            self.model_mgr.psm_num_per_mod_to_tune_ms2
-        ) = perc_settings['psm_num_per_mod_to_tune_ms2']
-
-        (
-            self.model_mgr.psm_num_to_tune_rt_ccs
-        ) = perc_settings['psm_num_to_tune_rt_ccs']
-
-        (
-            self.model_mgr.mod_psm_num_to_tune_rt_ccs
-        ) = perc_settings['mod_psm_num_to_tune_rt_ccs']
-
-        (
-            self.model_mgr.top_n_mods_to_tune
-        ) = perc_settings['top_n_mods_to_tune']
-
         self.require_model_tuning = perc_settings[
             'require_model_tuning'
         ]
@@ -641,11 +621,11 @@ class ScoreFeatureExtractor:
         if self.require_raw_specific_tuning:
             (
                 psm_num_to_tune_rt_ccs,
-                mod_psm_num_to_tune_rt_ccs,
+                psm_num_per_mod_to_tune_rt_ccs,
                 epoch_to_tune_rt_ccs
             ) = (
                 self.model_mgr.psm_num_to_tune_rt_ccs,
-                self.model_mgr.mod_psm_num_to_tune_rt_ccs,
+                self.model_mgr.psm_num_per_mod_to_tune_rt_ccs,
                 self.model_mgr.epoch_to_tune_rt_ccs
             )
 
@@ -653,7 +633,7 @@ class ScoreFeatureExtractor:
                 self.model_mgr.psm_num_to_tune_rt_ccs
             ) = perc_settings['psm_num_per_raw_to_tune']
 
-            self.model_mgr.mod_psm_num_to_tune_rt_ccs = 0
+            self.model_mgr.psm_num_per_mod_to_tune_rt_ccs = 0
 
             (
                 self.model_mgr.epoch_to_tune_rt_ccs
@@ -664,11 +644,11 @@ class ScoreFeatureExtractor:
 
             (
                 self.model_mgr.psm_num_to_tune_rt_ccs,
-                self.model_mgr.mod_psm_num_to_tune_rt_ccs,
+                self.model_mgr.psm_num_per_mod_to_tune_rt_ccs,
                 self.model_mgr.epoch_to_tune_rt_ccs
             ) = (
                 psm_num_to_tune_rt_ccs,
-                mod_psm_num_to_tune_rt_ccs,
+                psm_num_per_mod_to_tune_rt_ccs,
                 epoch_to_tune_rt_ccs
             )
 
@@ -759,7 +739,8 @@ class ScoreFeatureExtractor:
         ms2_file_dict,
         ms2_file_type,
         frag_types:list = get_charged_frag_types(['b','y'], 2),
-        ms2_ppm=True, ms2_tol=20,
+        ms2_ppm=global_settings['peak_matching']['ms2_ppm'],
+        ms2_tol=global_settings['peak_matching']['ms2_tol_value'],
     )->pd.DataFrame:
         """ Extract features and add columns (self.score_feature_list) into psm_df
 
@@ -940,7 +921,8 @@ class ScoreFeatureExtractorMP(ScoreFeatureExtractor):
         ms2_file_dict,
         ms2_file_type,
         frag_types:list = get_charged_frag_types(['b','y'], 2),
-        ms2_ppm=True, ms2_tol=20,
+        ms2_ppm=global_settings['peak_matching']['ms2_ppm'],
+        ms2_tol=global_settings['peak_matching']['ms2_tol_value'],
     )->pd.DataFrame:
 
         """ MPExtract features and add columns (self.score_feature_list) into psm_df.
