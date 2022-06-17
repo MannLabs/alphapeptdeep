@@ -7,6 +7,8 @@ model:
   - y_modloss
   max_frag_charge: 2
 
+PEPTDEEP_HOME: "~/peptdeep" # ~ refers to user folder (e.g. C:/Users/username)
+
 local_model_zip_name: "pretrained_models.zip"
 
 # overwritable config
@@ -17,6 +19,12 @@ thread_num: 8
 
 common:
   keep_only_important_modloss: True
+
+peak_matching:
+  ms2_ppm: True
+  ms2_tol_value: 20.0
+  ms1_ppm: True
+  ms1_tol_value: 20.0
 
 model_mgr:
   instrument_group:

@@ -119,34 +119,15 @@ class ScalarRegression_ModelInterface_for_AASeq(ModelInterface):
         )
         self.loss_func = torch.nn.L1Loss() # for regression
 
+        self.target_column_to_predict = 'predicted_property'
+        self.target_column_to_train = 'detected_property'
+
     def _prepare_predict_data_df(self,
         precursor_df:pd.DataFrame,
     ):
         self._predict_column_in_df = 'predicted_property'
         precursor_df[self._predict_column_in_df] = 0.
         self.predict_df = precursor_df
-
-    def _get_features_from_batch_df(self,
-        batch_df: pd.DataFrame,
-        **kwargs,
-    ):
-        aa_indices = self._as_tensor(
-            get_ascii_indices(
-                batch_df['sequence'].values.astype('U')
-            ),
-            dtype=torch.long
-        )
-
-        return aa_indices
-
-    def _get_targets_from_batch_df(self,
-        batch_df: pd.DataFrame,
-        **kwargs
-    ) -> torch.Tensor:
-        return self._as_tensor(
-            batch_df['detected_property'].values,
-            dtype=torch.float32
-        )
 
 # Cell
 class BinaryClassification_LSTM_Model_for_AASeq(
@@ -213,34 +194,8 @@ class BinaryClassification_ModelInterface_for_AASeq(ModelInterface):
             **kwargs
         )
         self.loss_func = torch.nn.BCELoss() # for binary classification
-
-    def _prepare_predict_data_df(self,
-        precursor_df:pd.DataFrame,
-    ):
-        self._predict_column_in_df = 'predicted_prob'
-        precursor_df[self._predict_column_in_df] = 0.
-        self.predict_df = precursor_df
-
-    def _get_features_from_batch_df(self,
-        batch_df: pd.DataFrame,
-        **kwargs,
-    ):
-        aa_indices = self._as_tensor(
-            get_ascii_indices(
-                batch_df['sequence'].values.astype('U')
-            ), dtype=torch.long
-        )
-
-        return aa_indices
-
-    def _get_targets_from_batch_df(self,
-        batch_df: pd.DataFrame,
-        **kwargs
-    ) -> torch.Tensor:
-        return self._as_tensor(
-            batch_df['detected_prob'].values,
-            dtype=torch.float32
-        )
+        self.target_column_to_predict = 'predicted_prob'
+        self.target_column_to_train = 'detected_prob'
 
 # Cell
 class ScalarRegression_LSTM_Model_for_ModAASeq(torch.nn.Module):
@@ -341,39 +296,16 @@ class ScalarRegression_ModelInterface_for_ModAASeq(ModelInterface):
         )
         self.loss_func = torch.nn.L1Loss() # for regression
 
-    def _prepare_predict_data_df(self,
-        precursor_df:pd.DataFrame,
-    ):
-        self._predict_column_in_df = 'predicted_property'
-        precursor_df[self._predict_column_in_df] = 0.
-        self.predict_df = precursor_df
+        self.target_column_to_predict = 'predicted_property'
+        self.target_column_to_train = 'detected_property'
 
     def _get_features_from_batch_df(self,
         batch_df: pd.DataFrame,
         **kwargs,
     ):
-        aa_indices = self._as_tensor(
-            get_ascii_indices(
-                batch_df['sequence'].values.astype('U')
-            ),
-            dtype=torch.long
-        )
-
-        mod_x = self._as_tensor(
-            get_batch_mod_feature(
-                batch_df
-            )
-        )
-
-        return aa_indices, mod_x
-
-    def _get_targets_from_batch_df(self,
-        batch_df: pd.DataFrame,
-        **kwargs
-    ) -> torch.Tensor:
-        return self._as_tensor(
-            batch_df['detected_property'].values,
-            dtype=torch.float32
+        return (
+            self._get_aa_indice_features(batch_df),
+            self._get_mod_features(batch_df)
         )
 
 # Cell
@@ -451,36 +383,13 @@ class BinaryClassification_ModelInterface_for_ModAASeq(ModelInterface):
         )
         self.loss_func = torch.nn.BCELoss() # for regression
 
-    def _prepare_predict_data_df(self,
-        precursor_df:pd.DataFrame,
-    ):
-        self._predict_column_in_df = 'predicted_prob'
-        precursor_df[self._predict_column_in_df] = 0.
-        self.predict_df = precursor_df
+        self.target_column_to_predict = 'predicted_prob'
+        self.target_column_to_train = 'detected_prob'
 
     def _get_features_from_batch_df(self,
         batch_df: pd.DataFrame,
     ):
-        aa_indices = self._as_tensor(
-            get_ascii_indices(
-                batch_df['sequence'].values.astype('U')
-            ),
-            dtype=torch.long
-        )
-
-        mod_x = self._as_tensor(
-            get_batch_mod_feature(
-                batch_df
-            )
-        )
-
-        return aa_indices, mod_x
-
-    def _get_targets_from_batch_df(self,
-        batch_df: pd.DataFrame,
-        **kwargs
-    ) -> torch.Tensor:
-        return self._as_tensor(
-            batch_df['detected_prob'].values,
-            dtype=torch.float32
+        return (
+            self._get_aa_indice_features(batch_df),
+            self._get_mod_features(batch_df)
         )

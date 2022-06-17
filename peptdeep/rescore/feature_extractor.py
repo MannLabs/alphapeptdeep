@@ -739,7 +739,8 @@ class ScoreFeatureExtractor:
         ms2_file_dict,
         ms2_file_type,
         frag_types:list = get_charged_frag_types(['b','y'], 2),
-        ms2_ppm=True, ms2_tol=20,
+        ms2_ppm=global_settings['peak_matching']['ms2_ppm'],
+        ms2_tol=global_settings['peak_matching']['ms2_tol_value'],
     )->pd.DataFrame:
         """ Extract features and add columns (self.score_feature_list) into psm_df
 
@@ -920,7 +921,8 @@ class ScoreFeatureExtractorMP(ScoreFeatureExtractor):
         ms2_file_dict,
         ms2_file_type,
         frag_types:list = get_charged_frag_types(['b','y'], 2),
-        ms2_ppm=True, ms2_tol=20,
+        ms2_ppm=global_settings['peak_matching']['ms2_ppm'],
+        ms2_tol=global_settings['peak_matching']['ms2_tol_value'],
     )->pd.DataFrame:
 
         """ MPExtract features and add columns (self.score_feature_list) into psm_df.

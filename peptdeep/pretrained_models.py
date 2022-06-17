@@ -24,8 +24,10 @@ from peptdeep.settings import global_settings
 
 pretrain_dir = os.path.join(
     os.path.join(
-        str(pathlib.Path.home()),
-        "peptdeep/pretrained_models"
+        os.path.expanduser(
+            global_settings['PEPTDEEP_HOME']
+        ),
+        "pretrained_models"
     )
 )
 
