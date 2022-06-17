@@ -122,13 +122,6 @@ class ScalarRegression_ModelInterface_for_AASeq(ModelInterface):
         self.target_column_to_predict = 'predicted_property'
         self.target_column_to_train = 'detected_property'
 
-    def _prepare_predict_data_df(self,
-        precursor_df:pd.DataFrame,
-    ):
-        self._predict_column_in_df = 'predicted_property'
-        precursor_df[self._predict_column_in_df] = 0.
-        self.predict_df = precursor_df
-
 # Cell
 class BinaryClassification_LSTM_Model_for_AASeq(
     ScalarRegression_LSTM_Model_for_AASeq
