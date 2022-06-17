@@ -2,7 +2,7 @@
 
 
 __project__ = "peptdeep"
-__version__ = "0.1.0"
+__version__ = "0.1.1"
 __license__ = "Apache 2.0"
 __description__ = "The AlphaPept Deep (PeptDeep) Learning Platform for Proteomics"
 __author__ = "Mann Labs"
