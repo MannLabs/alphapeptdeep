@@ -556,18 +556,29 @@ class ModelInterface(object):
             get_batch_mod_feature(batch_df)
         )
 
+    def _get_aa_mod_features(self,
+        batch_df:pd.DataFrame, **kwargs,
+    )->Tuple[torch.Tensor]:
+        return (
+            self._get_aa_indice_features(batch_df),
+            self._get_mod_features(batch_df)
+        )
+
     def _get_features_from_batch_df(self,
         batch_df:pd.DataFrame, **kwargs,
     )->Union[torch.Tensor, Tuple[torch.Tensor]]:
         """
         Get input feature tensors of a batch of the precursor dataframe for the model.
+        This will call `self._get_aa_indice_features(batch_df)` for sequence-level prediciton,
+        or `self._get_aa_mod_features(batch_df)` for modified sequence-level.
 
         Args:
             batch_df (pd.DataFrame): Batch of precursor dataframe.
 
         Returns:
             Union[torch.Tensor, Tuple[torch.Tensor]]:
-                a feature tensor or a tuple of tensors.
+                A feature tensor if call `self._get_aa_indice_features(batch_df)` (default).
+                Or a tuple of tensors if call `self._get_aa_mod_features(batch_df)`.
         """
         return self._get_aa_indice_features(batch_df)
 

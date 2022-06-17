@@ -296,10 +296,7 @@ class ScalarRegression_ModelInterface_for_ModAASeq(ModelInterface):
         batch_df: pd.DataFrame,
         **kwargs,
     ):
-        return (
-            self._get_aa_indice_features(batch_df),
-            self._get_mod_features(batch_df)
-        )
+        return self._get_aa_mod_features(batch_df)
 
 # Cell
 class BinaryClassification_LSTM_Model_for_ModAASeq(
@@ -382,7 +379,4 @@ class BinaryClassification_ModelInterface_for_ModAASeq(ModelInterface):
     def _get_features_from_batch_df(self,
         batch_df: pd.DataFrame,
     ):
-        return (
-            self._get_aa_indice_features(batch_df),
-            self._get_mod_features(batch_df)
-        )
+        return self._get_aa_mod_features(batch_df)
