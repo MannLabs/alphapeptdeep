@@ -310,9 +310,9 @@ class ModelManager(object):
             epoch_to_tune_rt_ccs (int): Number of epoches to fine-tune RT/CCS model.
                 Defaults to global_settings['model_mgr']['fine_tune']['epoch_rt_ccs'].
             nce (float): Default NCE value for a precursor_df without the 'nce' column.
-                Defaults to global_settings['model_mgr']['predict']['default_nce'].
+                Defaults to global_settings['model_mgr']['default_nce'].
             instrument (str): Default instrument type for a precursor_df without the 'instrument' column.
-                Defaults to global_settings['model_mgr']['predict']['default_instrument'].
+                Defaults to global_settings['model_mgr']['default_instrument'].
             use_grid_nce_search (bool): If self.ms2_model uses
                 :py:meth:`peptdeep.model.ms2.pDeepModel.grid_nce_search` to determine optimal
                 NCE and instrument type. This will change `self.nce` and `self.instrument` values.
@@ -355,12 +355,8 @@ class ModelManager(object):
             "fine_tune"
         ]["top_n_mods_to_tune"]
 
-        self.nce = mgr_settings[
-            'predict'
-        ]['default_nce']
-        self.instrument = mgr_settings[
-            'predict'
-        ]['default_instrument']
+        self.nce = mgr_settings['default_nce']
+        self.instrument = mgr_settings['default_instrument']
         self.verbose = mgr_settings[
             'predict'
         ]['verbose']

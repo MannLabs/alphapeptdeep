@@ -599,6 +599,10 @@ class pDeepModel(model_interface.ModelInterface):
             metric_row = '50%'
         else:
             metric_row = '>0.90'
+        search_instruments = set([
+            settings['model_mgr']['instrument_group'][inst]
+            for inst in search_instruments
+        ])
         for inst in search_instruments:
             for nce in np.arange(nce_first, nce_last+nce_step, nce_step):
                 psm_df['nce'] = nce

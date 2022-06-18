@@ -46,12 +46,6 @@ model_mgr:
   predict:
     batch_size_ms2: 512
     batch_size_rt_ccs: 1024
-    default_nce: 30
-    default_instrument: Lumos
-    instrument_choices:
-    - Lumos
-    - QE
-    - timsTOF
     verbose: True
     multiprocessing: True
   fine_tune:
@@ -84,6 +78,8 @@ model_mgr:
     psm_num_to_tune_rt_ccs: 5000
     psm_num_per_mod_to_tune_rt_ccs: 50
     top_n_mods_to_tune: 10
+  default_nce: 30
+  default_instrument: Lumos
   mask_modloss: True
   model_type: generic
   model_choices:
