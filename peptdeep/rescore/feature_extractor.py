@@ -54,7 +54,7 @@ def match_one_raw(
         frag_mass_calibrator = MassCalibratorForRT_KNN()
         _df_fdr = psm_df.query("fdr<0.01")
 
-        matched_mz_err_df = frag_mass_calibrator.fit(
+        frag_mass_calibrator.fit(
             _df_fdr, matched_mz_err_df
         )
         matched_mz_err_df =  frag_mass_calibrator.calibrate(
