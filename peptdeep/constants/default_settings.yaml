@@ -104,6 +104,7 @@ percolator:
   top_k_frags_to_calc_spc: 10
   ms2_ppm: True
   ms2_tol: 20
+  calibrate_frag_mass_error: False
   max_perc_train_sample: 1000000
   min_perc_train_sample: 100
 

@@ -179,10 +179,11 @@ class PepSpecMatch(object):
             tol (int, optional): tolerance. Defaults to 20.
 
         Returns:
-            pd.DataFrame: psm dataframe with fragment index information
-            pd.DataFrame: fragment mz dataframe
-            pd.DataFrame: matched intensity dataframe
-            pd.DataFrame: matched mass error dataframe
+            pd.DataFrame: psm dataframe with fragment index information.
+            pd.DataFrame: fragment mz dataframe.
+            pd.DataFrame: matched intensity dataframe.
+            pd.DataFrame: matched mass error dataframe.
+                np.inf if a fragment is not matched.
         """
         psm_df = psm_df_one_raw
         if isinstance(ms2_file, MSReaderBase):

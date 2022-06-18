@@ -2,7 +2,10 @@
 
 __all__ = ["index", "modules", "custom_doc_links", "git_url"]
 
-index = {"match_centroid_mz": "match.ipynb",
+index = {"get_fragment_median": "mass_calibration.ipynb",
+         "calibrate_one": "mass_calibration.ipynb",
+         "MassCalibratorForRT_KNN": "mass_calibration.ipynb",
+         "match_centroid_mz": "match.ipynb",
          "match_profile_mz": "match.ipynb",
          "match_one_raw_with_numba": "match.ipynb",
          "PepSpecMatch": "match.ipynb",
@@ -215,7 +218,8 @@ index = {"match_centroid_mz": "match.ipynb",
          "evaluate_linear_regression": "utils.ipynb",
          "evaluate_linear_regression_plot": "utils.ipynb"}
 
-modules = ["mass_spec/match.py",
+modules = ["mass_spec/mass_calibration.py",
+           "mass_spec/match.py",
            "mass_spec/ms_reader.py",
            "model/building_block.py",
            "model/ccs.py",

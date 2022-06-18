@@ -23,6 +23,9 @@ from peptdeep.utils import process_bar, logging
 from peptdeep.settings import global_settings
 perc_settings = global_settings['percolator']
 
+from peptdeep.mass_spec.mass_calibration import (
+    MassCalibratorForRT_KNN
+)
 
 def match_one_raw(
     psm_df_one_raw,
@@ -470,6 +473,10 @@ class ScoreFeatureExtractor:
         self.raw_specific_ms2_tuning = perc_settings[
             'raw_specific_ms2_tuning'
         ]
+        self.calibrate_frag_mass_error = perc_settings[
+            'calibrate_frag_mass_error'
+        ]
+        self.frag_mass_calibrator = MassCalibratorForRT_KNN()
 
         self.score_feature_list = [
             'sa','spc','pcc',
@@ -785,6 +792,15 @@ class ScoreFeatureExtractor:
                 frag_types,
                 ms2_ppm, ms2_tol,
             )
+
+            if self.calibrate_frag_mass_error:
+                _df_fdr = df.query("fdr<0.01")
+                frag_merr_df = self.frag_mass_calibrator.fit(
+                    _df_fdr, frag_merr_df
+                )
+                frag_merr_df =  self.frag_mass_calibrator.calibrate(
+                    df, frag_merr_df
+                )
 
             self.extract_rt_features(df)
             self.extract_mobility_features(df)
