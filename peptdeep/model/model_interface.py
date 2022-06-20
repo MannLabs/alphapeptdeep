@@ -22,6 +22,11 @@ from peptdeep.settings import model_const
 from peptdeep.utils import logging
 from peptdeep.settings import global_settings
 
+from peptdeep.model.featurize import (
+    get_ascii_indices, get_batch_aa_indices,
+    get_batch_mod_feature
+)
+
 
 # Cell
 from torch.optim.lr_scheduler import LambdaLR
@@ -36,7 +41,6 @@ def get_cosine_schedule_with_warmup(
     values of the cosine function between 0 and `pi * cycles` after a warmup
     period during which it increases linearly between 0 and 1.
     """
-
     def lr_lambda(current_step):
         if current_step < num_warmup_steps:
             return float(current_step) / max(1, num_warmup_steps)
@@ -74,6 +78,24 @@ class ModelInterface(object):
         self.optimizer = None
         self.model_params:dict = {}
         self.set_device(device)
+
+        self._min_pred_value = 0.0
+
+    @property
+    def target_column_to_predict(self)->str:
+        return self._target_column_to_predict
+
+    @target_column_to_predict.setter
+    def target_column_to_predict(self, column:str):
+        self._target_column_to_predict = column
+
+    @property
+    def target_column_to_train(self)->str:
+        return self._target_column_to_train
+
+    @target_column_to_train.setter
+    def target_column_to_train(self, column:str):
+        self._target_column_to_train = column
 
     def set_device(self, device_type = 'gpu'):
         """
@@ -114,7 +136,7 @@ class ModelInterface(object):
         Trains the model according to specifications. Includes a warumup
         phase with linear rate scheduling (cosine schedule).
         """
-        self._pre_training(precursor_df, lr, **kwargs)
+        self._prepare_training(precursor_df, lr, **kwargs)
 
         lr_scheduler = self._get_lr_schedule_with_warmup(
             warmup_epoch, epoch
@@ -159,7 +181,7 @@ class ModelInterface(object):
                 **kwargs
             )
         else:
-            self._pre_training(precursor_df, lr, **kwargs)
+            self._prepare_training(precursor_df, lr, **kwargs)
 
             for epoch in range(epoch):
                 batch_cost = self._train_one_epoch(
@@ -403,7 +425,9 @@ class ModelInterface(object):
     def _save_codes(self, save_as):
         try:
             import inspect
-            code = '''import torch\nimport peptdeep.model.building_block as building_block\n'''
+            code = '''import torch\n'''
+            code += '''import peptdeep.model.building_block as building_block\n'''
+            code += '''from peptdeep.model.model_shop import *'''
             class_code = inspect.getsource(self.model.__class__)
             code += 'class Model' + class_code[class_code.find('('):]
             with open(save_as, 'w') as f:
@@ -490,48 +514,85 @@ class ModelInterface(object):
         Returns:
             torch.Tensor: Target value tensor
         """
-        raise NotImplementedError(
-            'Must implement _get_targets_from_batch_df() method'
+        return self._as_tensor(
+            batch_df[self.target_column_to_train].values,
+            dtype=torch.float32
+        )
+
+    def _get_aa_indice_features(
+        self, batch_df:pd.DataFrame
+    )->torch.LongTensor:
+        """
+        Get indices values for 128 ascii codes.
+        """
+        return self._as_tensor(
+            get_ascii_indices(
+                batch_df['sequence'].values.astype('U')
+            ),
+            dtype=torch.long
+        )
+
+    def _get_26aa_indice_features(
+        self, batch_df:pd.DataFrame
+    )->torch.LongTensor:
+        """
+        Get indices values for 26 upper-case letters (amino acids),
+        from 1 to 26. 0 is used for padding.
+        """
+        return self._as_tensor(
+            get_batch_aa_indices(
+                batch_df['sequence'].values.astype('U')
+            ),
+            dtype=torch.long
+        )
+
+    def _get_mod_features(
+        self, batch_df:pd.DataFrame
+    )->torch.Tensor:
+        """
+        Get modification features.
+        """
+        return self._as_tensor(
+            get_batch_mod_feature(batch_df)
+        )
+
+    def _get_aa_mod_features(self,
+        batch_df:pd.DataFrame, **kwargs,
+    )->Tuple[torch.Tensor]:
+        return (
+            self._get_aa_indice_features(batch_df),
+            self._get_mod_features(batch_df)
         )
 
     def _get_features_from_batch_df(self,
         batch_df:pd.DataFrame, **kwargs,
-    )->Tuple[torch.Tensor]:
-        """Tell `train()` and `predict()` methods how to get feature tensors from the `batch_df`.
-           All sub-classes must re-implement this method.
-           Use torch.tensor(np.array, dtype=..., device=self.device) to convert tensor.
+    )->Union[torch.Tensor, Tuple[torch.Tensor]]:
+        """
+        Get input feature tensors of a batch of the precursor dataframe for the model.
+        This will call `self._get_aa_indice_features(batch_df)` for sequence-level prediciton,
+        or `self._get_aa_mod_features(batch_df)` for modified sequence-level.
 
         Args:
-            batch_df (pd.DataFrame): Dataframe of each mini batch.
-            nAA (int, optional): Peptide length. Defaults to None.
-
-        Raises:
-            NotImplementedError: 'Must implement _get_features_from_batch_df() method'
+            batch_df (pd.DataFrame): Batch of precursor dataframe.
 
         Returns:
-            Tuple[torch.Tensor]: A feature tensor or multiple feature tensors.
+            Union[torch.Tensor, Tuple[torch.Tensor]]:
+                A feature tensor if call `self._get_aa_indice_features(batch_df)` (default).
+                Or a tuple of tensors if call `self._get_aa_mod_features(batch_df)`.
         """
-        raise NotImplementedError(
-            'Must implement _get_features_from_batch_df() method'
-        )
+        return self._get_aa_indice_features(batch_df)
 
     def _prepare_predict_data_df(self,
         precursor_df:pd.DataFrame,
         **kwargs
     ):
         """
-        This method must define `self._predict_column_in_df` and create a `self.predict_df` dataframe.
-        All sub-classes must re-implement this method.
-
-        For example for RT prediction:
-        >>> self._predict_column_in_df = 'rt_pred'
-        >>> precursor_df[self._predict_column_in_df] = 0 #initialize the predict column in the df
-        >>> self.predict_df = precursor_df
-        ...
+        This methods fills 0s in the column of
+        `self.target_column_to_predict` in `precursor_df`,
+        and then does `self.predict_df=precursor_df`.
         """
-        raise NotImplementedError(
-            'Must implement _prepare_predict_data_df() method'
-        )
+        precursor_df[self.target_column_to_predict] = 0.0
+        self.predict_df = precursor_df
 
     def _prepare_train_data_df(self,
         precursor_df:pd.DataFrame,
@@ -555,14 +616,14 @@ class ModelInterface(object):
             batch_df (pd.DataFrame): Dataframe of mini batch when predicting
             predict_values (np.array): Predicted values
         """
-        predict_values[predict_values<0] = 0.0
+        predict_values[predict_values<self._min_pred_value] = self._min_pred_value
         if self._predict_in_order:
-            self.predict_df.loc[:,self._predict_column_in_df].values[
+            self.predict_df.loc[:,self.target_column_to_predict].values[
                 batch_df.index.values[0]:batch_df.index.values[-1]+1
             ] = predict_values
         else:
             self.predict_df.loc[
-                batch_df.index,self._predict_column_in_df
+                batch_df.index,self.target_column_to_predict
             ] = predict_values
 
     def _set_optimizer(self, lr):
@@ -580,11 +641,13 @@ class ModelInterface(object):
                 g['lr'] = lr
 
     def _get_lr_schedule_with_warmup(self, warmup_epoch, epoch):
+        if warmup_epoch > epoch:
+            warmup_epoch = epoch//2
         return get_cosine_schedule_with_warmup(
             self.optimizer, warmup_epoch, epoch
         )
 
-    def _pre_training(self, precursor_df, lr, **kwargs):
+    def _prepare_training(self, precursor_df, lr, **kwargs):
         if 'nAA' not in precursor_df.columns:
             precursor_df['nAA'] = precursor_df.sequence.str.len()
         self._prepare_train_data_df(precursor_df, **kwargs)

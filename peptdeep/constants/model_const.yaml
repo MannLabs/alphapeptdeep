@@ -115,7 +115,7 @@ mod_elements:
 # We can add at most 3 instruments after SciexTOF
 instruments:
 - QE
-- Lumos # or Fusion
+- Lumos
 - timsTOF
 - SciexTOF
 # DO NOT change values below, unless you know how to deal with them

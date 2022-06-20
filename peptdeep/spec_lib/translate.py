@@ -12,7 +12,7 @@ import typing
 
 from peptdeep.utils import explode_multiple_columns
 
-from alphabase.spectrum_library.library_base import SpecLibBase
+from alphabase.spectral_library.library_base import SpecLibBase
 
 # Cell
 #@numba.njit #(cannot use numba for pd.Series)
@@ -379,9 +379,9 @@ def translate_to_tsv(
     min_frag_nAA:int = 0,
     batch_size:int = 100000,
     translate_mod_dict:dict = mod_to_modname_dict,
-    multi_processing:bool=True
+    multiprocessing:bool=True
 ):
-    if multi_processing:
+    if multiprocessing:
         queue_size = 1000000//batch_size
         if queue_size < 2:
             queue_size = 2
@@ -418,11 +418,11 @@ def translate_to_tsv(
             min_frag_nAA=0,
             verbose=False
         )
-        if multi_processing:
+        if multiprocessing:
             df_head_queue.put((df, i))
         else:
             df.to_csv(tsv, header=(i==0), sep="\t", mode='a', index=False)
-    if multi_processing:
+    if multiprocessing:
         df_head_queue.put((None, None))
         print("Translation finished, it will take several minutes to export the rest precursors to the tsv file...")
         writing_process.join()

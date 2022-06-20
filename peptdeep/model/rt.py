@@ -156,37 +156,15 @@ class AlphaRTModel(model_interface.ModelInterface):
             dropout=dropout,
             **kwargs
         )
-
-    def _prepare_predict_data_df(self,
-        precursor_df:pd.DataFrame,
-    ):
-        self._predict_column_in_df = 'rt_pred'
-        precursor_df[self._predict_column_in_df] = 0.
-        self.predict_df = precursor_df
+        self.target_column_to_predict = 'rt_pred'
+        self.target_column_to_train = 'rt_norm'
 
     def _get_features_from_batch_df(self,
         batch_df: pd.DataFrame,
     ):
-        aa_indices = self._as_tensor(
-            get_batch_aa_indices(
-                batch_df['sequence'].values.astype('U')
-            ),
-            dtype=torch.long
-        )
-
-        mod_x = self._as_tensor(
-            get_batch_mod_feature(
-                batch_df
-            )
-        )
-
-        return aa_indices, mod_x
-
-    def _get_targets_from_batch_df(self,
-        batch_df: pd.DataFrame,
-    ) -> torch.Tensor:
-        return self._as_tensor(
-            batch_df['rt_norm'].values
+        return (
+            self._get_26aa_indice_features(batch_df),
+            self._get_mod_features(batch_df)
         )
 
     def add_irt_column_to_precursor_df(self,

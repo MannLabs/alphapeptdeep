@@ -12,7 +12,7 @@ from alphabase.peptide.precursor import (
     calc_precursor_isotope_mp, calc_precursor_isotope
 )
 from peptdeep.utils import process_bar
-from alphabase.spectrum_library.library_base import SpecLibBase
+from alphabase.spectral_library.library_base import SpecLibBase
 from peptdeep.pretrained_models import ModelManager
 from peptdeep.settings import global_settings
 

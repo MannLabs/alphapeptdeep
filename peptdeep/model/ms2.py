@@ -422,18 +422,9 @@ class pDeepModel(model_interface.ModelInterface):
         batch_df: pd.DataFrame,
         **kwargs,
     ) -> Tuple[torch.Tensor]:
-        aa_indices = self._as_tensor(
-            get_batch_aa_indices(
-                batch_df['sequence'].values.astype('U')
-            ),
-            dtype=torch.long
-        )
+        aa_indices = self._get_26aa_indice_features(batch_df)
 
-        mod_x = self._as_tensor(
-            get_batch_mod_feature(
-                batch_df
-            )
-        )
+        mod_x = self._get_mod_features(batch_df)
 
         charges = self._as_tensor(
             batch_df['charge'].values
@@ -499,7 +490,7 @@ class pDeepModel(model_interface.ModelInterface):
         batch_size=1024,
         epoch=10,
         warmup_epoch=5,
-        lr = 1e-4,
+        lr = 1e-5,
         verbose=False,
         verbose_each_epoch=False,
         **kwargs
@@ -523,6 +514,7 @@ class pDeepModel(model_interface.ModelInterface):
         batch_size=1024,
         epoch=20,
         warmup_epoch=0,
+        lr = 1e-5,
         verbose=False,
         verbose_each_epoch=False,
         **kwargs
@@ -533,6 +525,7 @@ class pDeepModel(model_interface.ModelInterface):
             batch_size=batch_size,
             epoch=epoch,
             warmup_epoch=warmup_epoch,
+            lr=lr,
             verbose=verbose,
             verbose_each_epoch=verbose_each_epoch,
             **kwargs
@@ -606,6 +599,10 @@ class pDeepModel(model_interface.ModelInterface):
             metric_row = '50%'
         else:
             metric_row = '>0.90'
+        search_instruments = set([
+            settings['model_mgr']['instrument_group'][inst]
+            for inst in search_instruments
+        ])
         for inst in search_instruments:
             for nce in np.arange(nce_first, nce_last+nce_step, nce_step):
                 psm_df['nce'] = nce

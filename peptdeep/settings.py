@@ -16,6 +16,12 @@ _base_dir = os.path.dirname(__file__)
 global_settings = load_yaml(
     os.path.join(_base_dir, 'constants/default_settings.yaml')
 )
+for key, val in list(global_settings['model_mgr'][
+    'instrument_group'
+].items()):
+    global_settings['model_mgr'][
+        'instrument_group'
+    ][key.upper()] = val
 
 model_const = load_yaml(
     os.path.join(_base_dir, 'constants/model_const.yaml')

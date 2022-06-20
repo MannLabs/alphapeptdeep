@@ -7,6 +7,8 @@ model:
   - y_modloss
   max_frag_charge: 2
 
+PEPTDEEP_HOME: "~/peptdeep" # ~ refers to user folder (e.g. C:/Users/username)
+
 local_model_zip_name: "pretrained_models.zip"
 
 # overwritable config
@@ -18,16 +20,32 @@ thread_num: 8
 common:
   keep_only_important_modloss: True
 
+peak_matching:
+  ms2_ppm: True
+  ms2_tol_value: 20.0
+  ms1_ppm: True
+  ms1_tol_value: 20.0
+
 model_mgr:
+  instrument_group:
+    Lumos: Lumos
+    QE: QE
+    timsTOF: timsTOF
+    SciexTOF: SciexTOF
+    Fusion: Lumos
+    Eclipse: Lumos
+    Velos: Lumos # not important
+    Elite: Lumos # not important
+    OrbitrapTribrid: Lumos
+    ThermoTribrid: Lumos
+    QE+: QE
+    QEHF: QE
+    QEHFX: QE
+    Exploris: QE
+    Exploris480: QE
   predict:
     batch_size_ms2: 512
     batch_size_rt_ccs: 1024
-    default_nce: 30
-    default_instrument: Lumos
-    instrument_choices:
-    - Lumos
-    - QE
-    - timsTOF
     verbose: True
     multiprocessing: True
   fine_tune:
@@ -55,12 +73,19 @@ model_mgr:
       - mgf
       - mzml
     ms_files: []
+    psm_num_to_tune_ms2: 5000
+    psm_num_per_mod_to_tune_ms2: 50
+    psm_num_to_tune_rt_ccs: 5000
+    psm_num_per_mod_to_tune_rt_ccs: 50
+    top_n_mods_to_tune: 10
+  default_nce: 30
+  default_instrument: Lumos
   mask_modloss: True
-  model_type: regular
+  model_type: generic
   model_choices:
-  - regular
+  - generic
   - phos
-  - hla # same as regular
+  - hla # same as generic
   - digly
   external_ms2_model: ''
   external_rt_model: ''
@@ -68,11 +93,6 @@ model_mgr:
 percolator:
   require_model_tuning: True
   raw_num_to_tune: 8
-  psm_num_to_tune_ms2: 5000
-  psm_num_per_mod_to_tune_ms2: 100
-  psm_num_to_tune_rt_ccs: 5000
-  mod_psm_num_to_tune_rt_ccs: 100
-  top_n_mods_to_tune: 10
 
   require_raw_specific_tuning: True
   raw_specific_ms2_tuning: False
@@ -84,6 +104,7 @@ percolator:
   top_k_frags_to_calc_spc: 10
   ms2_ppm: True
   ms2_tol: 20
+  calibrate_frag_mass_error: False
   max_perc_train_sample: 1000000
   min_perc_train_sample: 100
 
