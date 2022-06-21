@@ -52,9 +52,9 @@ model_mgr:
     epoch_ms2: 10
     epoch_rt_ccs: 20
     grid_nce_search: True
-    grid_nce_first: 15
-    grid_nce_last: 45
-    grid_nce_step: 3
+    grid_nce_first: 15.0
+    grid_nce_last: 45.0
+    grid_nce_step: 3.0
     grid_instrument: ['Lumos']
     ms2_output_path: ''
     rt_output_path: ''
@@ -78,7 +78,7 @@ model_mgr:
     psm_num_to_tune_rt_ccs: 5000
     psm_num_per_mod_to_tune_rt_ccs: 50
     top_n_mods_to_tune: 10
-  default_nce: 30
+  default_nce: 30.0
   default_instrument: Lumos
   mask_modloss: True
   model_type: generic

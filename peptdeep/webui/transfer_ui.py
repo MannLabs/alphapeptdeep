@@ -20,11 +20,11 @@ def show():
     grid_nce_search = st.checkbox('Grid nce search', global_settings['model_mgr']['fine_tune']['grid_nce_search'])
     global_settings['model_mgr']['fine_tune']['grid_nce_search'] = grid_nce_search
 
-    grid_nce_first = st.number_input('Grid nce first', value = global_settings['model_mgr']['fine_tune']['grid_nce_first'], step = 1)
+    grid_nce_first = st.number_input('Grid nce first', value = global_settings['model_mgr']['fine_tune']['grid_nce_first'],step = 0.5)
     global_settings['model_mgr']['fine_tune']['grid_nce_first'] = grid_nce_first
-    grid_nce_last = st.number_input('Grid nce last', value = global_settings['model_mgr']['fine_tune']['grid_nce_last'], step = 1)
+    grid_nce_last = st.number_input('Grid nce last', value = global_settings['model_mgr']['fine_tune']['grid_nce_last'], step = 0.5)
     global_settings['model_mgr']['fine_tune']['grid_nce_last'] = grid_nce_last
-    grid_nce_step = st.number_input('Grid nce steps', value = global_settings['model_mgr']['fine_tune']['grid_nce_step'], step = 1)
+    grid_nce_step = st.number_input('Grid nce steps', value = global_settings['model_mgr']['fine_tune']['grid_nce_step'],step = 0.5)
     global_settings['model_mgr']['fine_tune']['grid_nce_step'] = grid_nce_step
     grid_instrument = st.selectbox('Grid instrument',global_settings['model_mgr']['instrument_group'])
     global_settings['model_mgr']['fine_tune']['grid_instrument'] = grid_instrument
@@ -45,13 +45,17 @@ def show():
     ms_files = st.text_input('MS file folder')
     global_settings['model_mgr']['fine_tune']['ms_files'] = ms_files
 
-    psm_num_to_tune_ms2 = st.number_input('PSM num to tune MS2', global_settings['model_mgr']['fine_tune']['psm_num_to_tune_ms2'], step = 1)
+    psm_num_to_tune_ms2 = st.number_input('PSM num to tune MS2', value = int(global_settings['model_mgr']['fine_tune']['psm_num_to_tune_ms2']), step = 1)
     global_settings['model_mgr']['fine_tune']['psm_num_to_tune_ms2'] = psm_num_to_tune_ms2
-    psm_num_per_mod_to_tune_ms2 = st.number_input('PSM num per mod to tune MS2', global_settings['model_mgr']['fine_tune']['psm_num_per_mod_to_tune_ms2'], step = 1)
+    psm_num_per_mod_to_tune_ms2 = st.number_input('PSM num per mod to tune MS2', value = int(global_settings['model_mgr']['fine_tune']['psm_num_per_mod_to_tune_ms2']), step = 1)
     global_settings['model_mgr']['fine_tune']['psm_num_per_mod_to_tune_ms2'] = psm_num_per_mod_to_tune_ms2
-    psm_num_to_tune_rt_ccs = st.number_input('PSM num to tune RT CCS', global_settings['model_mgr']['fine_tune']['psm_num_to_tune_rt_ccs'], step = 1)
+    psm_num_to_tune_rt_ccs = st.number_input('PSM num to tune RT CCS', value = int(global_settings['model_mgr']['fine_tune']['psm_num_to_tune_rt_ccs']), step = 1)
     global_settings['model_mgr']['fine_tune']['psm_num_to_tune_rt_ccs'] = psm_num_to_tune_rt_ccs
-    psm_num_per_mod_to_tune_rt_ccs = st.number_input('PSM num per mod to tune RT CCS', global_settings['model_mgr']['fine_tune']['psm_num_per_mod_to_tune_rt_ccs'], step = 1)
+    psm_num_per_mod_to_tune_rt_ccs = st.number_input('PSM num per mod to tune RT CCS', value = int(global_settings['model_mgr']['fine_tune']['psm_num_per_mod_to_tune_rt_ccs']), step = 1)
     global_settings['model_mgr']['fine_tune']['psm_num_per_mod_to_tune_rt_ccs'] = psm_num_per_mod_to_tune_rt_ccs
-    top_n_mods_to_tune = st.number_input('Top n mods to tune', global_settings['model_mgr']['fine_tune']['top_n_mods_to_tune'], step = 1)
+    top_n_mods_to_tune = st.number_input('Top n mods to tune', value = int(global_settings['model_mgr']['fine_tune']['top_n_mods_to_tune']), step = 1)
     global_settings['model_mgr']['fine_tune']['top_n_mods_to_tune'] = top_n_mods_to_tune
+
+    if st.button('Run transfer model'):
+        #generate transfer-learning model 
+        st.write('Running transfer-learning model')  
