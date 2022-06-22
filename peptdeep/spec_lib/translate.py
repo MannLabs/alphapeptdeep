@@ -287,22 +287,16 @@ def speclib_to_single_df(
         speclib.calc_precursor_mz()
     df['PrecursorMz'] = speclib._precursor_df['precursor_mz']
 
-    if 'proteins' in speclib._precursor_df.columns:
-        df['ProteinName'] = speclib._precursor_df['proteins']
-        df['UniprotID'] = df['ProteinName']
-        df['ProteinGroups'] = df['ProteinName']
-
     if 'uniprot_ids' in speclib._precursor_df.columns:
-        df['UniprotID'] = speclib._precursor_df['uniprot_ids']
-        if 'ProteinName' not in df.columns:
-            df['ProteinName'] = df['UniprotID']
-            df['ProteinGroups'] = df['UniprotID']
+        df['ProteinID'] = speclib._precursor_df.uniprot_ids
+    elif 'proteins' in speclib._precursor_df.columns:
+        df['ProteinID'] = speclib._precursor_df.proteins
 
     if 'genes' in speclib._precursor_df.columns:
         df['Genes'] = speclib._precursor_df['genes']
 
-    if 'protein_group' in speclib._precursor_df.columns:
-        df['ProteinGroups'] = speclib._precursor_df['protein_group']
+    # if 'protein_group' in speclib._precursor_df.columns:
+    #     df['ProteinGroups'] = speclib._precursor_df['protein_group']
 
     if min_frag_mz > 0 or max_frag_mz > 0:
         mask_fragment_intensity_by_mz_(
