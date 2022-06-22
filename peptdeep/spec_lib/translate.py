@@ -280,7 +280,7 @@ def speclib_to_single_df(
     elif 'mobility' in speclib._precursor_df.columns:
         df['IonMobility'] = speclib._precursor_df.mobility
 
-    # df['LabelModifiedSequence'] = df['ModifiedPeptide']
+    df['LabelModifiedSequence'] = df['ModifiedPeptide']
     df['StrippedPeptide'] = speclib._precursor_df['sequence']
 
     if 'precursor_mz' not in speclib._precursor_df.columns:
@@ -288,9 +288,9 @@ def speclib_to_single_df(
     df['PrecursorMz'] = speclib._precursor_df['precursor_mz']
 
     if 'uniprot_ids' in speclib._precursor_df.columns:
-        df['ProteinID'] = speclib._precursor_df.uniprot_ids
+        df['UniprotID'] = speclib._precursor_df.uniprot_ids
     elif 'proteins' in speclib._precursor_df.columns:
-        df['ProteinID'] = speclib._precursor_df.proteins
+        df['UniprotID'] = speclib._precursor_df.proteins
 
     if 'genes' in speclib._precursor_df.columns:
         df['Genes'] = speclib._precursor_df['genes']
