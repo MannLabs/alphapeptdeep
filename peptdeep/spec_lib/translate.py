@@ -86,10 +86,10 @@ def merge_precursor_fragment_df(
     top_n_inten:int,
     frag_type_head:str='FragmentType',
     frag_mass_head:str='FragmentMz',
-    frag_inten_head:str='LibraryIntensity',
+    frag_inten_head:str='RelativeIntensity',
     frag_charge_head:str='FragmentCharge',
     frag_loss_head:str='FragmentLossType',
-    frag_num_head:str='FragmentSeriesNumber',
+    frag_num_head:str='FragmentNumber',
     verbose=True,
 ):
     '''
@@ -236,10 +236,10 @@ def speclib_to_single_df(
     modloss='H3PO4',
     frag_type_head:str='FragmentType',
     frag_mass_head:str='FragmentMz',
-    frag_inten_head:str='LibraryIntensity',
+    frag_inten_head:str='RelativeIntensity',
     frag_charge_head:str='FragmentCharge',
     frag_loss_head:str='FragmentLossType',
-    frag_num_head:str='FragmentSeriesNumber',
+    frag_num_head:str='FragmentNumber',
     verbose = True,
 )->pd.DataFrame:
     '''
@@ -280,7 +280,7 @@ def speclib_to_single_df(
     elif 'mobility' in speclib._precursor_df.columns:
         df['IonMobility'] = speclib._precursor_df.mobility
 
-    df['LabelModifiedSequence'] = df['ModifiedPeptide']
+    # df['LabelModifiedSequence'] = df['ModifiedPeptide']
     df['StrippedPeptide'] = speclib._precursor_df['sequence']
 
     if 'precursor_mz' not in speclib._precursor_df.columns:
@@ -325,7 +325,7 @@ def speclib_to_single_df(
         frag_num_head=frag_num_head,
         verbose=verbose
     )
-    df = df[df['LibraryIntensity']>min_frag_intensity]
+    df = df[df['RelativeIntensity']>min_frag_intensity]
     df.loc[df[frag_loss_head]=='modloss',frag_loss_head] = modloss
 
     return df.drop(['frag_start_idx','frag_end_idx'], axis=1)
