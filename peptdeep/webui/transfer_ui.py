@@ -44,12 +44,8 @@ def show():
         nce_search()
     
     st.write('### Setup')
-    ms2_output_path = st.text_input('MS2 output path')
-    global_settings['model_mgr']['fine_tune']['ms2_output_path'] = ms2_output_path
-    rt_output_path = st.text_input('RT output path')
-    global_settings['model_mgr']['fine_tune']['rt_output_path'] = rt_output_path
-    ccs_output_path = st.text_input('CCS output path')
-    global_settings['model_mgr']['fine_tune']['ccs_output_path'] = ccs_output_path
+    model_output_folder = st.text_input('Model output folder')
+    global_settings['model_mgr']['fine_tune']['model_output_folder'] = model_output_folder
 
     psm_type = st.selectbox('PSM type choice',global_settings['model_mgr']['fine_tune']['psm_type_choices'], index = 0)
     global_settings['model_mgr']['fine_tune']['psm_type'] = psm_type
