@@ -288,9 +288,9 @@ def speclib_to_single_df(
     df['PrecursorMz'] = speclib._precursor_df['precursor_mz']
 
     if 'uniprot_ids' in speclib._precursor_df.columns:
-        df['UniprotID'] = speclib._precursor_df.uniprot_ids
+        df['ProteinID'] = speclib._precursor_df.uniprot_ids
     elif 'proteins' in speclib._precursor_df.columns:
-        df['UniprotID'] = speclib._precursor_df.proteins
+        df['ProteinID'] = speclib._precursor_df.proteins
 
     if 'genes' in speclib._precursor_df.columns:
         df['Genes'] = speclib._precursor_df['genes']
