@@ -86,10 +86,10 @@ def merge_precursor_fragment_df(
     top_n_inten:int,
     frag_type_head:str='FragmentType',
     frag_mass_head:str='FragmentMz',
-    frag_inten_head:str='LibraryIntensity',
+    frag_inten_head:str='RelativeIntensity',
     frag_charge_head:str='FragmentCharge',
     frag_loss_head:str='FragmentLossType',
-    frag_num_head:str='FragmentSeriesNumber',
+    frag_num_head:str='FragmentNumber',
     verbose=True,
 ):
     '''
@@ -236,10 +236,10 @@ def speclib_to_single_df(
     modloss='H3PO4',
     frag_type_head:str='FragmentType',
     frag_mass_head:str='FragmentMz',
-    frag_inten_head:str='LibraryIntensity',
+    frag_inten_head:str='RelativeIntensity',
     frag_charge_head:str='FragmentCharge',
     frag_loss_head:str='FragmentLossType',
-    frag_num_head:str='FragmentSeriesNumber',
+    frag_num_head:str='FragmentNumber',
     verbose = True,
 )->pd.DataFrame:
     '''
@@ -280,29 +280,23 @@ def speclib_to_single_df(
     elif 'mobility' in speclib._precursor_df.columns:
         df['IonMobility'] = speclib._precursor_df.mobility
 
-    df['LabelModifiedSequence'] = df['ModifiedPeptide']
+    # df['LabelModifiedSequence'] = df['ModifiedPeptide']
     df['StrippedPeptide'] = speclib._precursor_df['sequence']
 
     if 'precursor_mz' not in speclib._precursor_df.columns:
         speclib.calc_precursor_mz()
     df['PrecursorMz'] = speclib._precursor_df['precursor_mz']
 
-    if 'proteins' in speclib._precursor_df.columns:
-        df['ProteinName'] = speclib._precursor_df['proteins']
-        df['UniprotID'] = df['ProteinName']
-        df['ProteinGroups'] = df['ProteinName']
-
     if 'uniprot_ids' in speclib._precursor_df.columns:
-        df['UniprotID'] = speclib._precursor_df['uniprot_ids']
-        if 'ProteinName' not in df.columns:
-            df['ProteinName'] = df['UniprotID']
-            df['ProteinGroups'] = df['UniprotID']
+        df['ProteinID'] = speclib._precursor_df.uniprot_ids
+    elif 'proteins' in speclib._precursor_df.columns:
+        df['ProteinID'] = speclib._precursor_df.proteins
 
     if 'genes' in speclib._precursor_df.columns:
         df['Genes'] = speclib._precursor_df['genes']
 
-    if 'protein_group' in speclib._precursor_df.columns:
-        df['ProteinGroups'] = speclib._precursor_df['protein_group']
+    # if 'protein_group' in speclib._precursor_df.columns:
+    #     df['ProteinGroups'] = speclib._precursor_df['protein_group']
 
     if min_frag_mz > 0 or max_frag_mz > 0:
         mask_fragment_intensity_by_mz_(
@@ -331,7 +325,7 @@ def speclib_to_single_df(
         frag_num_head=frag_num_head,
         verbose=verbose
     )
-    df = df[df['LibraryIntensity']>min_frag_intensity]
+    df = df[df['RelativeIntensity']>min_frag_intensity]
     df.loc[df[frag_loss_head]=='modloss',frag_loss_head] = modloss
 
     return df.drop(['frag_start_idx','frag_end_idx'], axis=1)

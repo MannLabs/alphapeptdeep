@@ -9,7 +9,9 @@ import numpy as np
 
 def get_fragment_median(start_end_idxes, frag_df:pd.DataFrame):
     start_idx, end_idx = start_end_idxes
-    return np.nanmedian(frag_df.values[start_idx:end_idx])
+    ret = np.nanmedian(frag_df.values[start_idx:end_idx])
+    if np.isnan(ret): return 0.0
+    else: return ret
 
 def calibrate_one(start_end_shift, frag_df):
     start_idx, end_idx, mass_shift = start_end_shift

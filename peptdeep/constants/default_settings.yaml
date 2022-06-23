@@ -49,6 +49,7 @@ model_mgr:
     verbose: True
     multiprocessing: True
   fine_tune:
+    model_output_folder: ''
     epoch_ms2: 10
     epoch_rt_ccs: 20
     grid_nce_search: True
@@ -56,9 +57,6 @@ model_mgr:
     grid_nce_last: 45.0
     grid_nce_step: 3.0
     grid_instrument: ['Lumos']
-    ms2_output_path: ''
-    rt_output_path: ''
-    ccs_output_path: ''
     psm_type: alphapept
     psm_type_choices:
       - alphapept
