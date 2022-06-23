@@ -184,9 +184,9 @@ def show():
 
     st.write("### Output")
 
-    output_dir = st.text_input("Output folder", value=global_settings['library']['output_dir'])
-    output_dir = os.path.abspath(os.path.expanduser(os.path.expandvars(output_dir)))
-    global_settings['library']['output_dir'] = output_dir
+    output_folder = st.text_input("Output folder", value=global_settings['library']['output_folder'])
+    output_folder = os.path.abspath(os.path.expanduser(os.path.expandvars(output_folder)))
+    global_settings['library']['output_folder'] = output_folder
 
     tsv_enabled = bool(st.checkbox('Output TSV (for DiaNN/Spectronaut)'))
     global_settings['library']['output_tsv']['enabled'] = tsv_enabled
