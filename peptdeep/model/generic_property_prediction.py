@@ -108,7 +108,7 @@ class Model_for_Generic_AASeq_Regression_Transformer(torch.nn.Module):
 class ModelInterface_for_Generic_AASeq_Regression(ModelInterface):
     def __init__(self,
         dropout=0.1,
-        model_class:torch.nn.Module=Model_for_Generic_AASeq_Regression_LSTM, #one of the two models defined above can be specified, default LSTM
+        model_class:torch.nn.Module=Model_for_Generic_AASeq_Regression_LSTM,
         device:str='gpu',
         **kwargs,
     ):
