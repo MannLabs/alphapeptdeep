@@ -37,13 +37,7 @@ def show():
 
     fine_tune()
 
-    st.write('### Grid NCE and instrument search for DDA rescoring')
-    grid_nce_search = st.checkbox('Enabled', global_settings['model_mgr']['fine_tune']['grid_nce_search'])
-    global_settings['model_mgr']['fine_tune']['grid_nce_search'] = grid_nce_search
-    if grid_nce_search is True:
-        nce_search()
     
-    st.write('### Setup')
     model_output_folder = st.text_input('Model output folder')
     global_settings['model_mgr']['fine_tune']['model_output_folder'] = model_output_folder
 
@@ -67,6 +61,16 @@ def show():
     top_n_mods_to_tune = st.number_input('Top n mods to tune', value = int(global_settings['model_mgr']['fine_tune']['top_n_mods_to_tune']), step = 1)
     global_settings['model_mgr']['fine_tune']['top_n_mods_to_tune'] = top_n_mods_to_tune
 
+
+    st.write('### Grid NCE and instrument search for DDA rescoring')
+    grid_nce_search = st.checkbox('Enabled', global_settings['model_mgr']['fine_tune']['grid_nce_search'])
+    global_settings['model_mgr']['fine_tune']['grid_nce_search'] = grid_nce_search
+    if grid_nce_search is True:
+        nce_search()
+
+    
     if st.button('Run transfer model'):
         #generate transfer-learning model 
-        st.write('Running transfer-learning model')  
+        st.write('Start running transfer-learning model') 
+        #fine_tune()
+        #st.write ('Fine_tuned model generated.')
