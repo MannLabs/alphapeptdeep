@@ -56,7 +56,7 @@ class ModelMS2Transformer(torch.nn.Module):
             self._mask_modloss = True
 
         meta_dim = 8
-        self.input_nn = building_block.Input_AA_Mod_PositionalEncoding(hidden-meta_dim)
+        self.input_nn = building_block.Input_26AA_Mod_PositionalEncoding(hidden-meta_dim)
 
         self.meta_nn = building_block.Meta_Embedding(meta_dim)
 
@@ -148,7 +148,7 @@ class ModelMS2Bert(torch.nn.Module):
             self._mask_modloss = True
 
         meta_dim = 8
-        self.input_nn = building_block.Input_AA_Mod_PositionalEncoding(hidden-meta_dim)
+        self.input_nn = building_block.Input_26AA_Mod_PositionalEncoding(hidden-meta_dim)
 
         self.meta_nn = building_block.Meta_Embedding(meta_dim)
 

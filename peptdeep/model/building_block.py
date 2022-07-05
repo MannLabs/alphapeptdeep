@@ -5,7 +5,7 @@ __all__ = ['mod_feature_size', 'max_instrument_num', 'frag_types', 'max_frag_cha
            'xavier_param', 'init_state', 'SeqCNN_MultiKernel', 'SeqCNN', 'Seq_Transformer', 'Hidden_Transformer',
            'Hidden_HFace_Transformer', 'HFace_Transformer_with_PositionalEncoder', 'HiddenBert', 'SeqLSTM', 'SeqGRU',
            'SeqAttentionSum', 'PositionalEncoding', 'PositionalEmbedding', 'Meta_Embedding', 'Mod_Embedding_FixFirstK',
-           'AA_Mod_Embedding', 'Mod_Embedding', 'Input_AA_Mod_PositionalEncoding',
+           'AA_Mod_Embedding', 'Mod_Embedding', 'Input_26AA_Mod_PositionalEncoding', 'Input_AA_Mod_PositionalEncoding',
            'Input_AA_Mod_Charge_PositionalEncoding', 'InputMetaNet', 'InputModNetFixFirstK', 'InputAAEmbedding',
            'InputModNet', 'AATransformerEncoding', 'Input_AA_Mod_LSTM', 'Input_AA_Mod_Meta_LSTM',
            'Input_AA_Mod_Charge_LSTM', 'InputAALSTM', 'InputAALSTM_cat_Meta', 'InputAALSTM_cat_Charge', 'Seq_Meta_LSTM',
@@ -497,7 +497,7 @@ class Mod_Embedding(torch.nn.Module):
 #legacy
 InputModNet = Mod_Embedding
 
-class Input_AA_Mod_PositionalEncoding(torch.nn.Module):
+class Input_26AA_Mod_PositionalEncoding(torch.nn.Module):
     """
     Encodes AA and modification vector
     """
@@ -519,7 +519,29 @@ class Input_AA_Mod_PositionalEncoding(torch.nn.Module):
         x = self.aa_emb(aa_indices)
         return self.pos_encoder(torch.cat((x, mod_x), 2))
 #legacy
-AATransformerEncoding = Input_AA_Mod_PositionalEncoding
+AATransformerEncoding = Input_26AA_Mod_PositionalEncoding
+
+class Input_AA_Mod_PositionalEncoding(torch.nn.Module):
+    """
+    Encodes AA and modification vector
+    """
+    def __init__(self, out_features, max_len=200):
+        super().__init__()
+        mod_hidden = 8
+        self.mod_nn = Mod_Embedding_FixFirstK(mod_hidden)
+        self.aa_emb = ascii_embedding(
+            out_features-mod_hidden
+        )
+        self.pos_encoder = PositionalEncoding(
+            out_features, max_len
+        )
+
+    def forward(self,
+        aa_indices, mod_x
+    ):
+        mod_x = self.mod_nn(mod_x)
+        x = self.aa_emb(aa_indices)
+        return self.pos_encoder(torch.cat((x, mod_x), 2))
 
 class Input_AA_Mod_Charge_PositionalEncoding(torch.nn.Module):
     """
@@ -530,7 +552,7 @@ class Input_AA_Mod_Charge_PositionalEncoding(torch.nn.Module):
         mod_hidden = 8
         self.charge_dim = 2
         self.mod_nn = Mod_Embedding_FixFirstK(mod_hidden)
-        self.aa_emb = aa_embedding(
+        self.aa_emb = ascii_embedding(
             out_features-mod_hidden-self.charge_dim
         )
         self.pos_encoder = PositionalEncoding(
@@ -849,6 +871,7 @@ class Encoder_AA_Mod_Charge_Transformer(torch.nn.Module):
     ):
         super().__init__()
 
+        self.dropout = torch.nn.Dropout(dropout)
         self.input_nn = Input_AA_Mod_Charge_PositionalEncoding(out_features)
 
         self.output_attentions = output_attentions

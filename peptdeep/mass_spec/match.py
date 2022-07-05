@@ -43,7 +43,6 @@ def match_centroid_mz(
 
 
 @numba.njit
-
 def match_profile_mz(
     spec_mzs:np.ndarray,
     query_mzs:np.ndarray,
@@ -304,7 +303,8 @@ class PepSpecMatch(object):
                 df_group.frag_start_idx.values,
                 df_group.frag_end_idx.values,
                 self.fragment_mz_df.values,
-                ms2_reader.mzs, ms2_reader.intensities,
+                ms2_reader.peak_df.mz.values,
+                ms2_reader.peak_df.intensity.values,
                 ms2_reader.spectrum_df.peak_start_idx.values,
                 ms2_reader.spectrum_df.peak_end_idx.values,
                 self.matched_intensity_df.values,
