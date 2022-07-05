@@ -119,7 +119,7 @@ class Model_RT_LSTM_CNN(torch.nn.Module):
         self.dropout = torch.nn.Dropout(dropout)
 
         hidden = 256
-        self.rt_encoder = building_block.Encoder_AA_Mod_CNN_LSTM_AttnSum(
+        self.rt_encoder = building_block.Encoder_26AA_Mod_CNN_LSTM_AttnSum(
             hidden
         )
 

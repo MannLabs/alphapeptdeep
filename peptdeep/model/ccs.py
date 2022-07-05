@@ -96,7 +96,7 @@ class Model_CCS_LSTM(torch.nn.Module):
         hidden = 256
 
         self.ccs_encoder = (
-            model_base.Encoder_AA_Mod_Charge_CNN_LSTM_AttnSum(
+            model_base.Encoder_26AA_Mod_Charge_CNN_LSTM_AttnSum(
                 hidden
             )
         )

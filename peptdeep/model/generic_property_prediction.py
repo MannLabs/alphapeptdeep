@@ -135,7 +135,7 @@ class Model_for_Generic_ModAASeq_Regression_LSTM(torch.nn.Module):
         super().__init__()
         self.dropout = torch.nn.Dropout(dropout)
 
-        self.encoder_nn = building_block.Encoder_AsciiAA_Mod_CNN_LSTM_AttnSum(
+        self.encoder_nn = building_block.Encoder_AA_Mod_CNN_LSTM_AttnSum(
             hidden_dim,
             n_lstm_layers=n_lstm_layers,
         )

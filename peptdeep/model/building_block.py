@@ -7,12 +7,12 @@ __all__ = ['mod_feature_size', 'max_instrument_num', 'frag_types', 'max_frag_cha
            'SeqAttentionSum', 'PositionalEncoding', 'PositionalEmbedding', 'Meta_Embedding', 'Mod_Embedding_FixFirstK',
            'AA_Mod_Embedding', 'Mod_Embedding', 'Input_26AA_Mod_PositionalEncoding', 'Input_AA_Mod_PositionalEncoding',
            'Input_AA_Mod_Charge_PositionalEncoding', 'InputMetaNet', 'InputModNetFixFirstK', 'InputAAEmbedding',
-           'InputModNet', 'AATransformerEncoding', 'Input_AA_Mod_LSTM', 'Input_AA_Mod_Meta_LSTM',
-           'Input_AA_Mod_Charge_LSTM', 'InputAALSTM', 'InputAALSTM_cat_Meta', 'InputAALSTM_cat_Charge', 'Seq_Meta_LSTM',
-           'Seq_Meta_Linear', 'OutputLSTM_cat_Meta', 'OutputLinear_cat_Meta', 'Encoder_AA_Mod_LSTM',
-           'Encoder_AA_Mod_CNN_LSTM', 'Encoder_AA_Mod_CNN_LSTM_AttnSum', 'Encoder_AsciiAA_Mod_CNN_LSTM_AttnSum',
+           'InputModNet', 'AATransformerEncoding', 'Input_26AA_Mod_LSTM', 'Input_26AA_Mod_Meta_LSTM',
+           'Input_26AA_Mod_Charge_LSTM', 'InputAALSTM', 'InputAALSTM_cat_Meta', 'InputAALSTM_cat_Charge',
+           'Seq_Meta_LSTM', 'Seq_Meta_Linear', 'OutputLSTM_cat_Meta', 'OutputLinear_cat_Meta', 'Encoder_26AA_Mod_LSTM',
+           'Encoder_26AA_Mod_CNN_LSTM', 'Encoder_26AA_Mod_CNN_LSTM_AttnSum', 'Encoder_AA_Mod_CNN_LSTM_AttnSum',
            'Encoder_AA_Mod_Transformer', 'Encoder_AA_Mod_Transformer_AttnSum', 'Encoder_AA_Mod_Charge_Transformer',
-           'Encoder_AA_Mod_Charge_Transformer_AttnSum', 'Encoder_AA_Mod_Charge_CNN_LSTM_AttnSum',
+           'Encoder_AA_Mod_Charge_Transformer_AttnSum', 'Encoder_26AA_Mod_Charge_CNN_LSTM_AttnSum',
            'Input_AA_LSTM_Encoder', 'Input_AA_CNN_Encoder', 'Input_AA_CNN_LSTM_Encoder',
            'Input_AA_CNN_LSTM_cat_Charge_Encoder', 'Decoder_LSTM', 'Decoder_GRU', 'SeqLSTMDecoder', 'SeqGRUDecoder',
            'Decoder_Linear', 'LinearDecoder']
@@ -457,7 +457,7 @@ InputModNetFixFirstK = Mod_Embedding_FixFirstK
 
 class AA_Mod_Embedding(torch.nn.Module):
     """
-    concatenates the AA embedding with the modifcation vector
+    Concatenates the AA (128 ASCII codes) embedding with the modifcation vector
     """
     def __init__(self,
         out_features,
@@ -499,7 +499,7 @@ InputModNet = Mod_Embedding
 
 class Input_26AA_Mod_PositionalEncoding(torch.nn.Module):
     """
-    Encodes AA and modification vector
+    Encodes AA (26 AA letters) and modification vector
     """
     def __init__(self, out_features, max_len=200):
         super().__init__()
@@ -523,7 +523,7 @@ AATransformerEncoding = Input_26AA_Mod_PositionalEncoding
 
 class Input_AA_Mod_PositionalEncoding(torch.nn.Module):
     """
-    Encodes AA and modification vector
+    Encodes AA (ASCII codes) and modification vector
     """
     def __init__(self, out_features, max_len=200):
         super().__init__()
@@ -545,7 +545,7 @@ class Input_AA_Mod_PositionalEncoding(torch.nn.Module):
 
 class Input_AA_Mod_Charge_PositionalEncoding(torch.nn.Module):
     """
-    Encodes AA and modification vector
+    Embed AA (128 ASCII codes), modification, and charge state
     """
     def __init__(self, out_features, max_len=200):
         super().__init__()
@@ -571,9 +571,9 @@ class Input_AA_Mod_Charge_PositionalEncoding(torch.nn.Module):
 
 # Cell
 
-class Input_AA_Mod_LSTM(torch.nn.Module):
+class Input_26AA_Mod_LSTM(torch.nn.Module):
     """
-    applies an LSTM network to a peptide-modification combination
+    Applies an LSTM network to a AA (26 AA letters) sequence & modifications
     """
     def __init__(self,
         out_features,
@@ -585,7 +585,7 @@ class Input_AA_Mod_LSTM(torch.nn.Module):
         self.lstm = SeqLSTM(
             aa_embedding_size+mod_hidden,
             out_features,
-            n_lstm_layers=1,
+            n_lstm_layers=n_lstm_layers,
             bidirectional=True
         )
     def forward(self, aa_indices, mod_x):
@@ -593,12 +593,13 @@ class Input_AA_Mod_LSTM(torch.nn.Module):
         x = aa_one_hot(aa_indices, mod_x)
         return self.lstm(x)
 #legacy
-InputAALSTM = Input_AA_Mod_LSTM
+InputAALSTM = Input_26AA_Mod_LSTM
 
 
-class Input_AA_Mod_Meta_LSTM(torch.nn.Module):
+class Input_26AA_Mod_Meta_LSTM(torch.nn.Module):
     """
-    applies a LSTM network to a peptide-modification combination and concatenates with 'meta' information (charge, nce, instrument_indices)
+    Applies a LSTM network to a AA (26 AA letters) sequence and modifications,
+    and concatenates with 'meta' information (charge, nce, instrument_indices)
     """
     def __init__(self,
         out_features,
@@ -625,12 +626,13 @@ class Input_AA_Mod_Meta_LSTM(torch.nn.Module):
         ).unsqueeze(1).repeat(1, mod_x.size(1), 1)
         return torch.cat((x, meta_x), 2)
 #legacy
-InputAALSTM_cat_Meta = Input_AA_Mod_Meta_LSTM
+InputAALSTM_cat_Meta = Input_26AA_Mod_Meta_LSTM
 
 
-class Input_AA_Mod_Charge_LSTM(torch.nn.Module):
+class Input_26AA_Mod_Charge_LSTM(torch.nn.Module):
     """
-    applies a LSTM network to a peptide-modification combination and concatenates with charge state information
+    Applies a LSTM network to a AA (26 AA letters) sequence and modifications,
+    and concatenates with charge state information
     """
     def __init__(self,
         out_features,
@@ -654,7 +656,7 @@ class Input_AA_Mod_Charge_LSTM(torch.nn.Module):
         )
         return torch.cat((x, charge_x), 2)
 #legacy
-InputAALSTM_cat_Charge = Input_AA_Mod_Charge_LSTM
+InputAALSTM_cat_Charge = Input_26AA_Mod_Charge_LSTM
 
 
 # Cell
@@ -711,14 +713,14 @@ OutputLinear_cat_Meta = Seq_Meta_Linear
 
 # Cell
 
-class Encoder_AA_Mod_LSTM(torch.nn.Module):
+class Encoder_26AA_Mod_LSTM(torch.nn.Module):
     """
-    two LSTM layers on AA and mod info
+    Two LSTM layers on AA (26 AA letters) and modifications.
     """
     def __init__(self, out_features, n_lstm_layers=1):
         super().__init__()
 
-        self.input_nn = Input_AA_Mod_LSTM(out_features)
+        self.input_nn = Input_26AA_Mod_LSTM(out_features)
         self.nn = SeqLSTM(
             out_features, out_features,
             rnn_layer=n_lstm_layers
@@ -730,12 +732,12 @@ class Encoder_AA_Mod_LSTM(torch.nn.Module):
         return x
 
 #legacy
-Input_AA_LSTM_Encoder = Encoder_AA_Mod_LSTM
+Input_AA_LSTM_Encoder = Encoder_26AA_Mod_LSTM
 
 
-class Encoder_AA_Mod_CNN_LSTM(torch.nn.Module):
+class Encoder_26AA_Mod_CNN_LSTM(torch.nn.Module):
     """
-    linear NN for modification, CNN and LSTM layer
+    Encode AAs (26 AA letters) and modifications by CNN and LSTM layers
     """
     def __init__(self, out_features, n_lstm_layers=1):
         super().__init__()
@@ -757,11 +759,12 @@ class Encoder_AA_Mod_CNN_LSTM(torch.nn.Module):
         return x
 
 #legacy
-Input_AA_CNN_Encoder = Encoder_AA_Mod_CNN_LSTM
+Input_AA_CNN_Encoder = Encoder_26AA_Mod_CNN_LSTM
 
-class Encoder_AA_Mod_CNN_LSTM_AttnSum(torch.nn.Module):
+class Encoder_26AA_Mod_CNN_LSTM_AttnSum(torch.nn.Module):
     """
-    linear NN for modification, CNN, LSTM, Attention sum (linear + softmax)
+    Encode AAs (26 AA letters) and modifications by CNN and LSTM layers,
+    then by 'SeqAttentionSum'.
     """
     def __init__(self, out_features, n_lstm_layers=2):
         super().__init__()
@@ -785,11 +788,12 @@ class Encoder_AA_Mod_CNN_LSTM_AttnSum(torch.nn.Module):
         x = self.attn_sum(x)
         return x
 #legacy
-Input_AA_CNN_LSTM_Encoder = Encoder_AA_Mod_CNN_LSTM_AttnSum
+Input_AA_CNN_LSTM_Encoder = Encoder_26AA_Mod_CNN_LSTM_AttnSum
 
-class Encoder_AsciiAA_Mod_CNN_LSTM_AttnSum(torch.nn.Module):
+class Encoder_AA_Mod_CNN_LSTM_AttnSum(torch.nn.Module):
     """
-    linear NN for modification, CNN, LSTM, Attention sum (linear + softmax)
+    Encode AAs (128 ASCII codes) and modifications by CNN and LSTM layers,
+    and then by 'SeqAttentionSum'.
     """
     def __init__(self, out_features, n_lstm_layers=2):
         super().__init__()
@@ -815,6 +819,10 @@ class Encoder_AsciiAA_Mod_CNN_LSTM_AttnSum(torch.nn.Module):
 
 
 class Encoder_AA_Mod_Transformer(torch.nn.Module):
+    """
+    AAs (128 ASCII codes) and modifications embedded by CNN and LSTM layers,
+    then encoded by 'SeqAttentionSum'.
+    """
     def __init__(self,out_features,
         dropout=0.1,
         nlayers=4,
@@ -844,6 +852,9 @@ class Encoder_AA_Mod_Transformer(torch.nn.Module):
         return x[0]
 
 class Encoder_AA_Mod_Transformer_AttnSum(torch.nn.Module):
+    """
+    Encode AAs (128 ASCII codes) and modifications by transformers.
+    """
     def __init__(self,out_features,
         dropout=0.1,
         nlayers=4,
@@ -864,6 +875,9 @@ class Encoder_AA_Mod_Transformer_AttnSum(torch.nn.Module):
         return self.dropout(self.attn_sum(x))
 
 class Encoder_AA_Mod_Charge_Transformer(torch.nn.Module):
+    """
+    Encode AAs (128 ASCII codes), modifications and charge by transformers.
+    """
     def __init__(self,out_features,
         dropout=0.1,
         nlayers=4,
@@ -892,6 +906,10 @@ class Encoder_AA_Mod_Charge_Transformer(torch.nn.Module):
         return x[0]
 
 class Encoder_AA_Mod_Charge_Transformer_AttnSum(torch.nn.Module):
+    """
+    Encode AAs (128 ASCII codes), modifications and charge by transformers,
+    and then by 'SeqAttentionSum'
+    """
     def __init__(self,out_features,
         dropout=0.1,
         nlayers=4,
@@ -910,9 +928,10 @@ class Encoder_AA_Mod_Charge_Transformer_AttnSum(torch.nn.Module):
         x = self.encoder_nn(aa_indices, mod_x, charges)
         return self.dropout(self.attn_sum(x))
 
-class Encoder_AA_Mod_Charge_CNN_LSTM_AttnSum(torch.nn.Module):
+class Encoder_26AA_Mod_Charge_CNN_LSTM_AttnSum(torch.nn.Module):
     """
-    linear NN for modification, charge concatenated, CNN, LSTM, Attention sum (linear + softmax)
+    Encode AAs (26 AA letters), modifications and charge by transformers,
+    and then by 'SeqAttentionSum'
     """
     def __init__(self, out_features):
         super().__init__()
@@ -939,7 +958,7 @@ class Encoder_AA_Mod_Charge_CNN_LSTM_AttnSum(torch.nn.Module):
         return x
 
 #legacy
-Input_AA_CNN_LSTM_cat_Charge_Encoder = Encoder_AA_Mod_Charge_CNN_LSTM_AttnSum
+Input_AA_CNN_LSTM_cat_Charge_Encoder = Encoder_26AA_Mod_Charge_CNN_LSTM_AttnSum
 
 
 # Cell
