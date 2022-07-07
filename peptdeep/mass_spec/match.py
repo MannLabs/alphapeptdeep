@@ -159,6 +159,14 @@ class PepSpecMatch(object):
     ):
         self.charged_frag_types = charged_frag_types
 
+    def _preprocess_psms(self, psm_df):
+        pass
+
+    def get_fragment_mz_df(self, psm_df):
+        return create_fragment_mz_dataframe(
+            psm_df, self.charged_frag_types
+        )
+
     def match_ms2_one_raw(self,
         psm_df_one_raw: pd.DataFrame,
         ms2_file:str,
@@ -184,6 +192,7 @@ class PepSpecMatch(object):
             pd.DataFrame: matched mass error dataframe.
                 np.inf if a fragment is not matched.
         """
+        self._preprocess_psms(psm_df_one_raw)
         psm_df = psm_df_one_raw
         if isinstance(ms2_file, MSReaderBase):
             ms2_reader = ms2_file
@@ -214,9 +223,7 @@ class PepSpecMatch(object):
             if 'rt' in add_spec_info_list:
                 psm_df['rt_norm'] = psm_df.rt/ms2_reader.spectrum_df.rt.max()
 
-        fragment_mz_df = create_fragment_mz_dataframe(
-            psm_df, self.charged_frag_types
-        )
+        fragment_mz_df = self.get_fragment_mz_df(psm_df)
 
         matched_intensity_df = pd.DataFrame(
             np.zeros_like(
@@ -328,15 +335,14 @@ class PepSpecMatch(object):
             ppm (bool, optional): Defaults to True.
             tol (float, optional): PPM units, defaults to 20.0.
         """
+        self._preprocess_psms(psm_df)
         self.psm_df = psm_df
 
         if 'frag_start_idx' in self.psm_df.columns:
             del self.psm_df['frag_start_idx']
             del self.psm_df['frag_end_idx']
 
-        self.fragment_mz_df = create_fragment_mz_dataframe(
-            self.psm_df, self.charged_frag_types
-        )
+        self.fragment_mz_df = self.get_fragment_mz_df(self.psm_df)
 
         self.matched_intensity_df = pd.DataFrame(
             np.zeros_like(
