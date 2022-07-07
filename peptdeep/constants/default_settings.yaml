@@ -84,7 +84,7 @@ model_mgr:
     psm_num_to_tune_rt_ccs: 5000
     psm_num_per_mod_to_tune_rt_ccs: 50
     top_n_mods_to_tune: 10
-  default_nce: 30
+  default_nce: 30.0
   default_instrument: Lumos
   mask_modloss: True
   model_type: generic
