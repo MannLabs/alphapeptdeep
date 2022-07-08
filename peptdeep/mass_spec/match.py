@@ -87,6 +87,7 @@ def match_profile_mz(
 # Cell
 import pandas as pd
 import numpy as np
+import tqdm
 
 from peptdeep.mass_spec.ms_reader import (
     ms2_reader_provider, MSReaderBase
@@ -367,5 +368,7 @@ class PepSpecMatch(object):
             self.rt_not_in_df = True
         else:
             self.rt_not_in_df = False
-        for raw_name, df_group in self.psm_df.groupby('raw_name'):
+        for raw_name, df_group in tqdm.tqdm(
+            self.psm_df.groupby('raw_name')
+        ):
             self._match_ms2_centroid_one_raw(raw_name, df_group)
