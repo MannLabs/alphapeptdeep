@@ -38,7 +38,7 @@ def parse_phos_probs(mods, prob_seq, prob):
             end = prob_seq.find(')',idx+2)
             if float(prob_seq[idx+1:end])>=prob:
                 keep_probs.append(prob_seq[idx+1:end])
-                keep_sites.append(str(idx+1))
+                keep_sites.append(str(idx))
             prob_seq = prob_seq[:idx]+prob_seq[end+1:]
         idx = prob_seq.find('(',idx)
     if len(keep_probs) >= num_phos:
