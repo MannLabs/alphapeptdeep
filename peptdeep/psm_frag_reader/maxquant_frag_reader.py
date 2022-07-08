@@ -34,12 +34,12 @@ def parse_phos_probs(mods, prob_seq, prob):
     keep_probs = []
     keep_sites = []
     while idx != -1:
+        end = prob_seq.find(')',idx+2)
         if prob_seq[idx-1] in 'STY':
-            end = prob_seq.find(')',idx+2)
             if float(prob_seq[idx+1:end])>=prob:
                 keep_probs.append(prob_seq[idx+1:end])
                 keep_sites.append(str(idx))
-            prob_seq = prob_seq[:idx]+prob_seq[end+1:]
+        prob_seq = prob_seq[:idx]+prob_seq[end+1:]
         idx = prob_seq.find('(',idx)
     if len(keep_probs) >= num_phos:
         return ';'.join(keep_probs),';'.join(keep_sites)
