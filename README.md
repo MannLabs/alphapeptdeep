@@ -1,12 +1,12 @@
-![Pip installation](https://github.com/MannLabs/peptdeep/workflows/Default%20installation%20and%20tests/badge.svg)
-![GUI and PyPi releases](https://github.com/MannLabs/peptdeep/workflows/Publish%20on%20PyPi%20and%20release%20on%20GitHub/badge.svg)
+![Pip installation](https://github.com/MannLabs/alphapeptdeep/workflows/Default%20installation%20and%20tests/badge.svg)
+![GUI and PyPi releases](https://github.com/MannLabs/alphapeptdeep/workflows/Publish%20on%20PyPi%20and%20release%20on%20GitHub/badge.svg)
 [![Downloads](https://pepy.tech/badge/peptdeep)](https://pepy.tech/project/peptdeep)
 [![Downloads](https://pepy.tech/badge/peptdeep/month)](https://pepy.tech/project/peptdeep)
 [![Downloads](https://pepy.tech/badge/peptdeep/week)](https://pepy.tech/project/peptdeep)
 
 
-# peptdeep
-An open-source Python package of the AlphaPept ecosystem from the [Mann Labs at the Max Planck Institute of Biochemistry](https://www.biochem.mpg.de/mann) and the [University of Copenhagen](https://www.cpr.ku.dk/research/proteomics/mann/). To enable all hyperlinks in this document, please view it at [GitHub](https://github.com/MannLabs/peptdeep).
+# AlphaPeptDeep (peptdeep)
+An open-source Python package of the AlphaPept ecosystem from the [Mann Labs at the Max Planck Institute of Biochemistry](https://www.biochem.mpg.de/mann) and the [University of Copenhagen](https://www.cpr.ku.dk/research/proteomics/mann/). To enable all hyperlinks in this document, please view it at [GitHub](https://github.com/MannLabs/alphapeptdeep).
 
 * [**About**](#about)
 * [**License**](#license)
@@ -47,11 +47,11 @@ There are three different types of installation possible:
 
 The GUI of peptdeep is a completely stand-alone tool that requires no knowledge of Python or CLI tools. Click on one of the links below to download the latest release for:
 
-* [**Windows**](https://github.com/MannLabs/peptdeep/releases/latest/download/peptdeep_gui_installer_windows.exe)
-* [**macOS**](https://github.com/MannLabs/peptdeep/releases/latest/download/peptdeep_gui_installer_macos.pkg)
-* [**Linux**](https://github.com/MannLabs/peptdeep/releases/latest/download/peptdeep_gui_installer_linux.deb)
+* [**Windows**](https://github.com/MannLabs/alphapeptdeep/releases/latest/download/peptdeep_gui_installer_windows.exe)
+* [**macOS**](https://github.com/MannLabs/alphapeptdeep/releases/latest/download/peptdeep_gui_installer_macos.pkg)
+* [**Linux**](https://github.com/MannLabs/alphapeptdeep/releases/latest/download/peptdeep_gui_installer_linux.deb)
 
-Older releases remain available on the [release page](https://github.com/MannLabs/peptdeep/releases), but no backwards compatibility is guaranteed.
+Older releases remain available on the [release page](https://github.com/MannLabs/alphapeptdeep/releases), but no backwards compatibility is guaranteed.
 
 ### Pip
 
@@ -67,12 +67,12 @@ Installing peptdeep like this avoids conflicts when integrating it in other tool
 pip install "peptdeep[stable]"
 ```
 
-NOTE: You might need to run `pip install pip==21.0` before installing peptdeep like this. Also note the double quotes `"`.
+NOTE: You might need to run `pip install pip` before installing peptdeep like this. Also note the double quotes `"`.
 
 For those who are really adventurous, it is also possible to directly install any branch (e.g. `@development`) with any extras (e.g. `#egg=peptdeep[stable,development-stable]`) from GitHub with e.g.
 
 ```bash
-pip install "git+https://github.com/MannLabs/peptdeep.git@development#egg=peptdeep[stable,development-stable]"
+pip install "git+https://github.com/MannLabs/alphapeptdeep.git@development#egg=peptdeep[stable,development-stable]"
 ```
 
 ### Developer
@@ -89,7 +89,7 @@ cd ~/folder/where/to/install/software
 Next, download the peptdeep repository from GitHub either directly or with a `git` command. This creates a new peptdeep subfolder in your current directory.
 
 ```bash
-git clone https://github.com/MannLabs/peptdeep.git
+git clone https://github.com/MannLabs/alphapeptdeep.git
 ```
 
 For any Python package, it is highly recommended to use a separate [conda virtual environment](https://docs.conda.io/en/latest/), as otherwise *dependancy conflicts can occur with already existing packages*.
@@ -151,8 +151,8 @@ A brief [Jupyter notebook tutorial](nbs/tutorial.ipynb) on how to use the API is
 
 In case of issues, check out the following:
 
-* [Issues](https://github.com/MannLabs/peptdeep/issues): Try a few different search terms to find out if a similar problem has been encountered before
-* [Discussions](https://github.com/MannLabs/peptdeep/discussions): Check if your problem or feature requests has been discussed before.
+* [Issues](https://github.com/MannLabs/alphapeptdeep/issues): Try a few different search terms to find out if a similar problem has been encountered before
+* [Discussions](https://github.com/MannLabs/alphapeptdeep/discussions): Check if your problem or feature requests has been discussed before.
 
 ---
 ## Citations
@@ -162,7 +162,7 @@ There are currently no plans to draft a manuscript.
 ---
 ## How to contribute
 
-If you like this software, you can give us a [star](https://github.com/MannLabs/peptdeep/stargazers) to boost our visibility! All direct contributions are also welcome. Feel free to post a new [issue](https://github.com/MannLabs/peptdeep/issues) or clone the repository and create a [pull request](https://github.com/MannLabs/peptdeep/pulls) with a new branch. For an even more interactive participation, check out the [discussions](https://github.com/MannLabs/peptdeep/discussions) and the [the Contributors License Agreement](misc/CLA.md).
+If you like this software, you can give us a [star](https://github.com/MannLabs/alphapeptdeep/stargazers) to boost our visibility! All direct contributions are also welcome. Feel free to post a new [issue](https://github.com/MannLabs/alphapeptdeep/issues) or clone the repository and create a [pull request](https://github.com/MannLabs/alphapeptdeep/pulls) with a new branch. For an even more interactive participation, check out the [discussions](https://github.com/MannLabs/alphapeptdeep/discussions) and the [the Contributors License Agreement](misc/CLA.md).
 
 ---
 ## Changelog
