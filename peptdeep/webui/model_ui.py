@@ -11,7 +11,7 @@ def nce_search():
     global_settings['model_mgr']['fine_tune']['grid_nce_step'] = grid_nce_step
 
     grid_instrument = st.multiselect('Instruments for grid NCE search', (
-        global_settings['model_mgr']['predict']['instrument_choices']
+        global_settings['model_mgr']['instrument_group']
     ),default = global_settings['model_mgr']['fine_tune']['grid_instrument']) 
     global_settings['model_mgr']['fine_tune']['grid_instrument'] = grid_instrument
 
@@ -28,10 +28,10 @@ def predict():
     batch_size_rt_ccs = st.number_input('Batch size to predict RT and CCS', value = global_settings['model_mgr']['predict']['batch_size_rt_ccs'])
     global_settings['model_mgr']['predict']['batch_size_rt_ccs'] = batch_size_rt_ccs
 
-    default_instrument = st.selectbox('Instrument',(global_settings['model_mgr']['predict']['instrument_choices']),index = 0)
-    global_settings['model_mgr']['predict']['default_instrument'] = default_instrument
-    default_nce = st.number_input('NCE', value = global_settings['model_mgr']['predict']['default_nce'],disabled=(default_instrument=='timsTOF'))
-    global_settings['model_mgr']['predict']['default_nce'] = default_nce
+    default_instrument = st.selectbox('Instrument',(list(global_settings['model_mgr']['instrument_group'].keys())),index = 0)
+    global_settings['model_mgr']['default_instrument'] = default_instrument
+    default_nce = st.number_input('NCE', value = global_settings['model_mgr']['default_nce'],disabled=(default_instrument=='timsTOF'))
+    global_settings['model_mgr']['default_nce'] = default_nce
 
 
     verbose = st.checkbox('Verbose', global_settings['model_mgr']['predict']['verbose'])
@@ -40,13 +40,13 @@ def predict():
     global_settings['model_mgr']['predict']['multiprocessing'] = multiprocessing
 
 def model():
-    model_url = st.text_input('URL to download the pre-trained models:',value = global_settings['model_url'])
+    model_url = st.text_input('URL to download the pre-trained models',value = global_settings['model_url'])
     global_settings['model_url'] = model_url
 
-    model_url_zip_name = st.text_input('The downloaded zip file name from the URL:',value = global_settings['model_url_zip_name'])
+    model_url_zip_name = st.text_input('The downloaded zip file name from the URL',value = global_settings['model_url_zip_name'])
     global_settings['model_url_zip_name'] = model_url_zip_name
 
-    thread_num = st.number_input('thread number:', value = multiprocessing.cpu_count()-1)
+    thread_num = st.number_input('Thread number', value = multiprocessing.cpu_count()-1)
     global_settings['thread_num'] = thread_num
 
     global_settings['model_mgr']['external_ms2_model'] = st.text_input('External MS2 model')

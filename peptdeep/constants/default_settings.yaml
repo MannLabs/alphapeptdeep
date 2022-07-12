@@ -16,6 +16,13 @@ model_url: "https://datashare.biochem.mpg.de/s/ABnQuD2KkXfIGF3/download"
 model_url_zip_name: "released_models"
 
 thread_num: 8
+log_level: info
+log_level_choices:
+  - debug
+  - info
+  - warning
+  - error
+  - critical
 
 common:
   keep_only_important_modloss: True
@@ -46,25 +53,17 @@ model_mgr:
   predict:
     batch_size_ms2: 512
     batch_size_rt_ccs: 1024
-    default_nce: 30
-    default_instrument: Lumos
-    instrument_choices:
-    - Lumos
-    - QE
-    - timsTOF
     verbose: True
     multiprocessing: True
   fine_tune:
-    epoch_ms2: 10
-    epoch_rt_ccs: 20
+    model_output_folder: ''
+    epoch_ms2: 20
+    epoch_rt_ccs: 40
     grid_nce_search: True
-    grid_nce_first: 15
-    grid_nce_last: 45
-    grid_nce_step: 3
+    grid_nce_first: 15.0
+    grid_nce_last: 45.0
+    grid_nce_step: 3.0
     grid_instrument: ['Lumos']
-    ms2_output_path: ''
-    rt_output_path: ''
-    ccs_output_path: ''
     psm_type: alphapept
     psm_type_choices:
       - alphapept
@@ -74,7 +73,8 @@ model_mgr:
     psm_files: []
     ms_file_type: alphapept_hdf
     ms_file_type_choices:
-      - hdf
+      - alphapept_hdf
+      - hdf # the same as alphapept_hdf
       - thermo_raw # if alphapept is installed
       - mgf
       - mzml
@@ -84,6 +84,8 @@ model_mgr:
     psm_num_to_tune_rt_ccs: 5000
     psm_num_per_mod_to_tune_rt_ccs: 50
     top_n_mods_to_tune: 10
+  default_nce: 30.0
+  default_instrument: Lumos
   mask_modloss: True
   model_type: generic
   model_choices:
@@ -108,6 +110,7 @@ percolator:
   top_k_frags_to_calc_spc: 10
   ms2_ppm: True
   ms2_tol: 20
+  calibrate_frag_mass_error: False
   max_perc_train_sample: 1000000
   min_perc_train_sample: 100
 
@@ -157,7 +160,7 @@ percolator:
         hyperscore: hyperscore
         nextscore: nextscore
       maxquant: {}
-  output_dir: C:/datasets/percolaotr
+  output_folder: C:/datasets/percolaotr
 library:
   input:
     type: fasta
@@ -202,7 +205,7 @@ library:
     frag_types:
     - b
     - y
-  output_dir: ~/peptdeep_library
+  output_folder: ~/peptdeep_library
   output_tsv:
     enabled: False
     min_fragment_mz: 200

@@ -136,8 +136,8 @@ class Percolator:
         percolator_backend:str=perc_settings['percolator_backend'],
         cv_fold:int = perc_settings['cv_fold'],
         iter_num:int = perc_settings['percolator_iter_num'],
-        ms2_ppm:bool = perc_settings['ms2_ppm'],
-        ms2_tol:float = perc_settings['ms2_tol'],
+        ms2_ppm:bool = global_settings['peak_matching']['ms2_ppm'],
+        ms2_tol:float = global_settings['peak_matching']['ms2_tol_value'],
         model_mgr:ModelManager = None
     ):
         """Percolator model
@@ -201,7 +201,6 @@ class Percolator:
             f for f in self.feature_extractor.score_feature_list
         ]
         self.feature_list += ['score','nAA','charge']
-        #self.feature_list.append('ml_score') #self-boosted, may have overfitting
         psm_type = perc_settings['input_files']['psm_type']
         self.feature_list += list(perc_settings['input_files'][
             'other_score_column_mapping'

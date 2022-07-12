@@ -23,6 +23,9 @@ from peptdeep.utils import process_bar, logging
 from peptdeep.settings import global_settings
 perc_settings = global_settings['percolator']
 
+from peptdeep.mass_spec.mass_calibration import (
+    MassCalibratorForRT_KNN
+)
 
 def match_one_raw(
     psm_df_one_raw,
@@ -30,22 +33,39 @@ def match_one_raw(
     ms2_file_type,
     frag_types_to_match,
     ms2_ppm, ms2_tol,
+    calibrate_frag_mass_error,
 ):
     """ Internal function """
     match = PepSpecMatch(
         charged_frag_types=frag_types_to_match
     )
 
-    # (
-    #     psm_df, fragment_mz_df,
-    #     matched_intensity_df, matched_mz_err_df
-    # ) =
-    return match.match_ms2_one_raw(
+    (
+        psm_df, fragment_mz_df,
+        matched_intensity_df, matched_mz_err_df
+    ) = match.match_ms2_one_raw(
         refine_precursor_df(psm_df_one_raw),
         ms2_file=ms2_file,
         ms2_file_type=ms2_file_type,
         ppm=ms2_ppm, tol=ms2_tol,
     )
+
+    if calibrate_frag_mass_error:
+        frag_mass_calibrator = MassCalibratorForRT_KNN()
+        _df_fdr = psm_df.query("fdr<0.01")
+
+        frag_mass_calibrator.fit(
+            _df_fdr, matched_mz_err_df
+        )
+        matched_mz_err_df =  frag_mass_calibrator.calibrate(
+            psm_df, matched_mz_err_df
+        )
+
+    return (
+        psm_df, fragment_mz_df,
+        matched_intensity_df, matched_mz_err_df
+    )
+
 
 def get_psm_scores(
     psm_df:pd.DataFrame,
@@ -470,6 +490,9 @@ class ScoreFeatureExtractor:
         self.raw_specific_ms2_tuning = perc_settings[
             'raw_specific_ms2_tuning'
         ]
+        self.calibrate_frag_mass_error = perc_settings[
+            'calibrate_frag_mass_error'
+        ]
 
         self.score_feature_list = [
             'sa','spc','pcc',
@@ -591,6 +614,7 @@ class ScoreFeatureExtractor:
                 ms2_file_type,
                 frag_types_to_match,
                 ms2_ppm, ms2_tol,
+                self.calibrate_frag_mass_error,
             )
             psm_df_list.append(df)
             matched_intensity_df_list.append(inten_df)
@@ -784,6 +808,7 @@ class ScoreFeatureExtractor:
                 ms2_file_type,
                 frag_types,
                 ms2_ppm, ms2_tol,
+                self.calibrate_frag_mass_error,
             )
 
             self.extract_rt_features(df)
@@ -866,6 +891,7 @@ class ScoreFeatureExtractorMP(ScoreFeatureExtractor):
                     ms2_file_type,
                     frag_types_to_match,
                     ms2_ppm, ms2_tol,
+                    self.calibrate_frag_mass_error,
                 )
 
         logging.info('Preparing for fine-tuning ...')
@@ -896,13 +922,16 @@ class ScoreFeatureExtractorMP(ScoreFeatureExtractor):
         ms2_file_type,
         frag_types,
         ms2_ppm, ms2_tol,
+        calibrate_frag_mass_error,
     ):
         (
             df, frag_mz_df, frag_inten_df, frag_merr_df
         ) = match_one_raw(df_one_raw,
             ms2_file, ms2_file_type, frag_types,
-            ms2_ppm, ms2_tol
+            ms2_ppm, ms2_tol,
+            calibrate_frag_mass_error,
         )
+
 
         self.extract_rt_features(df)
         self.extract_mobility_features(df)
@@ -964,6 +993,7 @@ class ScoreFeatureExtractorMP(ScoreFeatureExtractor):
                     ms2_file_type,
                     used_frag_types,
                     ms2_ppm, ms2_tol,
+                    self.calibrate_frag_mass_error,
                 )
 
         logging.info(

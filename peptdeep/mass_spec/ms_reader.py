@@ -13,8 +13,9 @@ from alphabase.io.hdf import HDF_File
 class MSReaderBase:
     def __init__(self):
         self.spectrum_df:pd.DataFrame = pd.DataFrame()
-        self.mzs: np.ndarray = np.array([])
-        self.intensities: np.ndarray = np.array([])
+        self.peak_df:pd.DataFrame = pd.DataFrame()
+        # self.mzs: np.ndarray = np.array([])
+        # self.intensities: np.ndarray = np.array([])
 
     def load(self, file_path):
         raise NotImplementedError('load()')
@@ -31,7 +32,7 @@ class MSReaderBase:
             scan_list (list): scan number list
             scan_indices (np.array): starts and end positions of ms2
                 peaks for each scan
-            rt_list (list): retention time for each scan
+            rt_list (list): retention time (minutes) for each scan
             mobility_list (list, optional): mobility for each scan. Defaults to None.
         """
         def set_col(col, indexes, values, dtype, na_value):
@@ -69,8 +70,8 @@ class MSReaderBase:
             spec_idx, ['peak_start_idx','peak_end_idx']
         ].values.astype(np.int64)
         return (
-            self.mzs[start_idx:end_idx],
-            self.intensities[start_idx:end_idx]
+            self.peak_df.mz.values[start_idx:end_idx],
+            self.peak_df.intensity.values[start_idx:end_idx]
         )
 
     def get_peaks_by_scan_num(self, scan_num:int):
@@ -88,8 +89,8 @@ class MSReaderBase:
 class AlphaPept_HDF_MS1_Reader(MSReaderBase):
     def load(self, file_path):
         hdf = HDF_File(file_path)
-        self.mzs = hdf.Raw.MS1_scans.mass_list_ms1.values
-        self.intensities = hdf.Raw.MS1_scans.int_list_ms1.values
+        self.peak_df['mz'] = hdf.Raw.MS1_scans.mass_list_ms1.values
+        self.peak_df['intensity'] = hdf.Raw.MS1_scans.int_list_ms1.values
         self.build_spectrum_df(
             scan_list=hdf.Raw.MS1_scans.scan_list_ms1.values,
             scan_indices=hdf.Raw.MS1_scans.indices_ms1.values,
@@ -101,8 +102,8 @@ class AlphaPept_HDF_MS1_Reader(MSReaderBase):
 class AlphaPept_HDF_MS2_Reader(MSReaderBase):
     def load(self, file_path):
         hdf = HDF_File(file_path)
-        self.mzs = hdf.Raw.MS2_scans.mass_list_ms2.values
-        self.intensities = hdf.Raw.MS2_scans.int_list_ms2.values
+        self.peak_df['mz'] = hdf.Raw.MS2_scans.mass_list_ms2.values
+        self.peak_df['intensity'] = hdf.Raw.MS2_scans.int_list_ms2.values
         if hasattr(hdf.Raw.MS2_scans, 'mobility2'):
             scan_list = np.arange(len(hdf.Raw.MS2_scans.rt_list_ms2))
         else:
@@ -199,9 +200,8 @@ class MGFReader(MSReaderBase):
             index_ragged_list(masses_list),
             rt_list
         )
-        self.mzs = np.concatenate(masses_list)
-        self.intensities = np.concatenate(intens_list)
-
+        self.peak_df['mz'] = np.concatenate(masses_list)
+        self.peak_df['intensity'] = np.concatenate(intens_list)
 
 class MSReaderProvider:
     def __init__(self):
@@ -267,8 +267,8 @@ try:
                 index_ragged_list(masses_list),
                 rt_list,
             )
-            self.mzs = np.concatenate(masses_list)
-            self.intensities = np.concatenate(intens_list)
+            self.peak_df['mz'] = np.concatenate(masses_list)
+            self.peak_df['intensity'] = np.concatenate(intens_list)
             rawfile.Close()
 
     class ThermoRawMS2Reader(MSReaderBase):
@@ -312,8 +312,8 @@ try:
                 index_ragged_list(masses_list),
                 rt_list,
             )
-            self.mzs = np.concatenate(masses_list)
-            self.intensities = np.concatenate(intens_list)
+            self.peak_df['mz'] = np.concatenate(masses_list)
+            self.peak_df['intensity'] = np.concatenate(intens_list)
             rawfile.Close()
 
     ms2_reader_provider.register_reader('thermo', ThermoRawMS2Reader)
