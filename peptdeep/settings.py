@@ -7,13 +7,21 @@ import os
 import collections
 
 from alphabase.yaml_utils import load_yaml
-from alphabase.constants.modification import load_mod_df
+from alphabase.constants.modification import (
+    load_mod_df, _keep_only_important_modloss
+)
 
 _base_dir = os.path.dirname(__file__)
 
 global_settings = load_yaml(
     os.path.join(_base_dir, 'constants/default_settings.yaml')
 )
+for key, val in list(global_settings['model_mgr'][
+    'instrument_group'
+].items()):
+    global_settings['model_mgr'][
+        'instrument_group'
+    ][key.upper()] = val
 
 model_const = load_yaml(
     os.path.join(_base_dir, 'constants/model_const.yaml')
@@ -32,7 +40,11 @@ def update_modifications(tsv:str="",
 ):
     if os.path.isfile(tsv):
         load_mod_df(tsv, keep_only_important_modloss=keep_only_important_modloss)
+
+        from peptdeep.model.featurize import get_all_mod_features
+        get_all_mod_features()
     else:
-        load_mod_df(keep_only_important_modloss=keep_only_important_modloss)
+        if keep_only_important_modloss:
+            _keep_only_important_modloss()
 
 update_modifications()

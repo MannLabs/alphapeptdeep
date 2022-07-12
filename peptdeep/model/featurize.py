@@ -103,8 +103,7 @@ def get_batch_aa_indices(
     '''
     Convert peptide sequences into AA ID array. ID=0 is reserved for masking,
     so ID of 'A' is 1, ID of 'B' is 2, ..., ID of 'Z' is 26 (maximum).
-    Zeros is padded into the N- and C-term of each sequence after
-    this conversion.
+    Zeros are padded into the N- and C-term for each sequence.
 
     Args:
         seq_array (Union[List,np.ndarray]):
@@ -126,19 +125,22 @@ def get_ascii_indices(
     '''
     Convert peptide sequences into ASCII code array.
     The values are from 0 to 127.
+    Zeros are padded into the N- and C-term for each sequence.
 
     Args:
         seq_array (Union[List,np.ndarray]):
             list or 1-D array of sequences.
     Returns:
         np.array: 2-D `np.int32` array with the shape
-        `(len(seq_array), max seq length)`.
+        `(len(seq_array), max seq length+2)`.
         For the the sequence whose length is shorter than max seq length,
         zeros are padded to the missing values.
     '''
-    return np.array(seq_array).view(np.int32).reshape(
+
+    x = np.array(seq_array).view(np.int32).reshape(
         len(seq_array), -1
     )
+    return np.pad(x, [(0,0)]*(len(x.shape)-1)+[(1,1)])
 
 # Cell
 instrument_dict = dict(
@@ -152,7 +154,7 @@ unknown_inst_index = model_const['max_instrument_num']-1
 # Cell
 def parse_instrument_indices(instrument_list):
     instrument_list = [inst.upper() for inst in instrument_list]
-    instrument_list = [inst if inst!='FUSION' else 'LUMOS' for inst in instrument_list]
+    instrument_list = [inst for inst in instrument_list]
     return [
         instrument_dict[inst] if inst in instrument_dict
         else unknown_inst_index for inst in instrument_list

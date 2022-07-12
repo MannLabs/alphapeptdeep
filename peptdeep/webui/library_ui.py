@@ -6,30 +6,29 @@ from peptdeep.settings import global_settings
 from peptdeep.cli import generate_library
 from alphabase.constants.modification import MOD_DF
 
-
-@st.cache
-def modloss_df():
-    return MOD_DF.loc[MOD_DF.modloss_importance>0,['name','classification','composition','mass','modloss_composition','modloss','modloss_importance']]
-
 def mod_options():
-    fixmod, = st.multiselect(
-            'Please select fixed modifications',
-            MOD_DF.index.values,
-            default = global_settings['library']['input']['fix_mods']
-        ),
-    varmod, = st.multiselect(
-            'Please select variable modifications',
-            MOD_DF.index.values,
-            default = global_settings['library']['input']['var_mods']
-        ),
-    global_settings['library']['input']['fix_mods'] = fixmod
-    global_settings['library']['input']['var_mods'] = varmod
+    with st.form("Select modifications"):
+        fixmod, = st.multiselect(
+                'Please select fixed modifications',
+                MOD_DF.index.values,
+                default = global_settings['library']['input']['fix_mods']
+            ),
+        varmod, = st.multiselect(
+                'Please select variable modifications',
+                MOD_DF.index.values,
+                default = global_settings['library']['input']['var_mods']
+            ),
+        global_settings['library']['input']['fix_mods'] = fixmod
+        global_settings['library']['input']['var_mods'] = varmod
 
-    global_settings['common']['keep_only_important_modloss'] = st.checkbox(
-        'Keep only important modification loss (fragment modloss mz=0 if modloss_importance=0)', 
-        value=global_settings['common']['keep_only_important_modloss']
-    )
-    st.dataframe(modloss_df())
+        st.form_submit_button("Click to confirm the selected modifications")
+        st.text("Selected modifications")
+        st.dataframe(MOD_DF.loc[fixmod+varmod,['mod_name','classification','composition','mass','modloss_composition','modloss','modloss_importance']])
+
+        global_settings['common']['keep_only_important_modloss'] = st.checkbox(
+            'Keep only important modification loss (fragment modloss mz=0 if modloss_importance=0)', 
+            value=global_settings['common']['keep_only_important_modloss']
+        )
 
 def varmod_range():
     min_varmod = st.number_input('Min number of variable modifications',min_value = 0, max_value = 1, value = global_settings['library']['input']['min_var_mod_num'], step = 1)
@@ -67,18 +66,18 @@ def choose_protease():
     global_settings['library']['input']['fasta']['max_miss_cleave'] = max_miss_cleave
 
 def choose_peptide_len():
-    min_peptide_len = st.number_input('Min peptide length:', value = global_settings['library']['input']['min_peptide_len'])
-    max_peptide_len = st.number_input('Max peptide length:', min_value = min_peptide_len, value = global_settings['library']['input']['max_peptide_len'])
+    min_peptide_len = st.number_input('Min peptide length', value = global_settings['library']['input']['min_peptide_len'])
+    max_peptide_len = st.number_input('Max peptide length', min_value = min_peptide_len, value = global_settings['library']['input']['max_peptide_len'])
     global_settings['library']['input']['min_peptide_len'] = min_peptide_len
     global_settings['library']['input']['max_peptide_len'] = max_peptide_len
 
 def choose_frag_types():
     frag_types = st.multiselect(
-        'fragment types',(global_settings['model']['frag_types']),
+        'Fragment types',(global_settings['model']['frag_types']),
         default = global_settings['library']['input']['frag_types']
     )
     global_settings['library']['input']['frag_types'] = frag_types
-    max_frag_charge = st.number_input('Max fragment charge:',min_value = 1, max_value = 2, value = global_settings['library']['input']['max_frag_charge'], step = 1)
+    max_frag_charge = st.number_input('Max fragment charge',min_value = 1, max_value = 2, value = global_settings['library']['input']['max_frag_charge'], step = 1)
     global_settings['library']['input']['max_frag_charge'] = max_frag_charge
 
 def output_tsv():
@@ -185,9 +184,9 @@ def show():
 
     st.write("### Output")
 
-    output_dir = st.text_input("Output folder", value=global_settings['library']['output_dir'])
-    output_dir = os.path.abspath(os.path.expanduser(os.path.expandvars(output_dir)))
-    global_settings['library']['output_dir'] = output_dir
+    output_folder = st.text_input("Output folder", value=global_settings['library']['output_folder'])
+    output_folder = os.path.abspath(os.path.expanduser(os.path.expandvars(output_folder)))
+    global_settings['library']['output_folder'] = output_folder
 
     tsv_enabled = bool(st.checkbox('Output TSV (for DiaNN/Spectronaut)'))
     global_settings['library']['output_tsv']['enabled'] = tsv_enabled

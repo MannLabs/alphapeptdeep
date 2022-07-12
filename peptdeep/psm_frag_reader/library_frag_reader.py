@@ -10,6 +10,8 @@ from alphabase.io.psm_reader.dia_search_reader import (
     SpectronautReader
 )
 
+import alphabase.peptide.mobility as mobility
+
 from peptdeep.psm_frag_reader.psm_frag_reader import (
     PSMReader_w_FragBase,
     psm_w_frag_reader_provider
@@ -47,6 +49,11 @@ class SpectronautMSMSReader(SpectronautReader, PSMReader_w_FragBase):
             if col in lib_df.columns:
                 self.rt_col = col
                 break
+        self.mob_col = None
+        for col in self.column_mapping['mobility']:
+            if col in lib_df.columns:
+                self.mob_col = col
+                break
         self.raw_col = None
         if self.groupby_raw_name:
             if isinstance(self.column_mapping['raw_name'],str):
@@ -71,6 +78,7 @@ class SpectronautMSMSReader(SpectronautReader, PSMReader_w_FragBase):
         seq_list = []
         charge_list = []
         rt_list = []
+        mob_list = []
         frag_intens_list = []
         nAA_list = []
         raw_list = []
@@ -124,6 +132,7 @@ class SpectronautMSMSReader(SpectronautReader, PSMReader_w_FragBase):
             seq_list.append(seq)
             charge_list.append(charge)
             rt_list.append(df_group[self.rt_col].values[0])
+            mob_list.append(df_group[self.mob_col].values[0])
             frag_intens_list.append(intens)
             nAA_list.append(nAA)
             if self.raw_col is not None:
@@ -134,6 +143,7 @@ class SpectronautMSMSReader(SpectronautReader, PSMReader_w_FragBase):
             self.seq_col: seq_list,
             'PrecursorCharge': charge_list,
             self.rt_col: rt_list,
+            self.mob_col: mob_list,
         })
 
         if self.raw_col is not None:
@@ -171,9 +181,19 @@ class SpectronautMSMSReader(SpectronautReader, PSMReader_w_FragBase):
 
         self.normalize_rt_by_raw_name()
 
+        if (
+            'mobility' in self._psm_df.columns
+        ):
+            self._psm_df['ccs'] = (
+                mobility.mobility_to_ccs_for_df(
+                    self._psm_df,
+                    'mobility'
+                )
+            )
+
         self._psm_df = self._psm_df[
             ~self._psm_df.mods.isna()
-        ].reset_index(drop=False)
+        ].reset_index(drop=True)
 
 
 
