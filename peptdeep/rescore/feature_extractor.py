@@ -573,7 +573,7 @@ class ScoreFeatureExtractor:
 
         return df_groupby_raw, raw_list
 
-    def fine_tune_models(self,
+    def fine_train_models(self,
         psm_df:pd.DataFrame,
         ms2_file_dict:dict,
         ms2_file_type:str,
@@ -627,53 +627,51 @@ class ScoreFeatureExtractor:
                 matched_intensity_df_list
             )
         )
+        logging.info('Fine-tuning done')
 
     def _tune(self,
         psm_df,
         matched_intensity_df
     ):
-        if 'ccs' in psm_df.columns:
-            self.model_mgr.fine_tune_ccs_model(psm_df)
-
-        self.model_mgr.fine_tune_rt_model(psm_df)
-
-        self.model_mgr.fine_tune_ms2_model(
+        self.model_mgr.train_ccs_model(psm_df)
+        self.model_mgr.train_rt_model(psm_df)
+        self.model_mgr.train_ms2_model(
             psm_df, matched_intensity_df
         )
 
     def extract_rt_features(self, psm_df):
         if self.require_raw_specific_tuning:
             (
-                psm_num_to_tune_rt_ccs,
-                psm_num_per_mod_to_tune_rt_ccs,
-                epoch_to_tune_rt_ccs
+                psm_num_to_train_rt_ccs,
+                psm_num_per_mod_to_train_rt_ccs,
+                epoch_to_train_rt_ccs
             ) = (
-                self.model_mgr.psm_num_to_tune_rt_ccs,
-                self.model_mgr.psm_num_per_mod_to_tune_rt_ccs,
-                self.model_mgr.epoch_to_tune_rt_ccs
+                self.model_mgr.psm_num_to_train_rt_ccs,
+                self.model_mgr.psm_num_per_mod_to_train_rt_ccs,
+                self.model_mgr.epoch_to_train_rt_ccs
             )
 
             (
-                self.model_mgr.psm_num_to_tune_rt_ccs
+                self.model_mgr.psm_num_to_train_rt_ccs
             ) = perc_settings['psm_num_per_raw_to_tune']
 
-            self.model_mgr.psm_num_per_mod_to_tune_rt_ccs = 0
+            self.model_mgr.psm_num_per_mod_to_train_rt_ccs = 0
 
             (
-                self.model_mgr.epoch_to_tune_rt_ccs
+                self.model_mgr.epoch_to_train_rt_ccs
             ) = perc_settings['epoch_per_raw_to_tune']
-            self.model_mgr.fine_tune_rt_model(
+            self.model_mgr.train_rt_model(
                 psm_df[(psm_df.fdr<0.01)&(psm_df.decoy==0)]
             )
 
             (
-                self.model_mgr.psm_num_to_tune_rt_ccs,
-                self.model_mgr.psm_num_per_mod_to_tune_rt_ccs,
-                self.model_mgr.epoch_to_tune_rt_ccs
+                self.model_mgr.psm_num_to_train_rt_ccs,
+                self.model_mgr.psm_num_per_mod_to_train_rt_ccs,
+                self.model_mgr.epoch_to_train_rt_ccs
             ) = (
-                psm_num_to_tune_rt_ccs,
-                psm_num_per_mod_to_tune_rt_ccs,
-                epoch_to_tune_rt_ccs
+                psm_num_to_train_rt_ccs,
+                psm_num_per_mod_to_train_rt_ccs,
+                epoch_to_train_rt_ccs
             )
 
         if 'rt_norm' in psm_df.columns:
@@ -788,7 +786,7 @@ class ScoreFeatureExtractor:
 
         if self.require_model_tuning:
             logging.info('Fine-tuning models ...')
-            self.fine_tune_models(
+            self.fine_train_models(
                 psm_df,
                 ms2_file_dict, ms2_file_type,
                 frag_types, ms2_ppm, ms2_tol
@@ -855,7 +853,7 @@ class ScoreFeatureExtractorMP(ScoreFeatureExtractor):
         self.model_mgr.ccs_model.model.share_memory()
 
 
-    def fine_tune_models(self,
+    def fine_train_models(self,
         psm_df,
         ms2_file_dict,
         ms2_file_type,
@@ -977,7 +975,7 @@ class ScoreFeatureExtractorMP(ScoreFeatureExtractor):
 
         if self.require_model_tuning:
             logging.info('Fine-tuning models ...')
-            self.fine_tune_models(
+            self.fine_train_models(
                 psm_df,
                 ms2_file_dict, ms2_file_type,
                 used_frag_types, ms2_ppm, ms2_tol
@@ -1033,44 +1031,44 @@ class ScoreFeatureExtractorMP(ScoreFeatureExtractor):
                             and self.raw_specific_ms2_tuning
                         ):
                             (
-                                psm_num_to_tune_ms2,
-                                psm_num_per_mod_to_tune_ms2,
-                                epoch_to_tune_ms2,
+                                psm_num_to_train_ms2,
+                                psm_num_per_mod_to_train_ms2,
+                                epoch_to_train_ms2,
                                 use_grid_nce_search
                             ) = (
-                                self.model_mgr.psm_num_to_tune_ms2,
-                                self.model_mgr.psm_num_per_mod_to_tune_ms2,
-                                self.model_mgr.epoch_to_tune_ms2,
+                                self.model_mgr.psm_num_to_train_ms2,
+                                self.model_mgr.psm_num_per_mod_to_train_ms2,
+                                self.model_mgr.epoch_to_train_ms2,
                                 self.model_mgr.use_grid_nce_search
                             )
 
                             (
-                                self.model_mgr.psm_num_to_tune_ms2
+                                self.model_mgr.psm_num_to_train_ms2
                             ) = perc_settings['psm_num_per_raw_to_tune']
 
-                            self.model_mgr.psm_num_per_mod_to_tune_ms2 = 0
+                            self.model_mgr.psm_num_per_mod_to_train_ms2 = 0
 
-                            self.model_mgr.epoch_to_tune_ms2 = 3
+                            self.model_mgr.epoch_to_train_ms2 = 3
 
                             self.model_mgr.use_grid_nce_search = False
 
                             if 'nce' not in df.columns:
                                 self.model_mgr.set_default_nce(df)
 
-                            self.model_mgr.fine_tune_ms2_model(
+                            self.model_mgr.train_ms2_model(
                                 df[(df.fdr<0.01)&(df.decoy==0)],
                                 frag_inten_df
                             )
 
                             (
-                                self.model_mgr.psm_num_to_tune_ms2,
-                                self.model_mgr.psm_num_per_mod_to_tune_ms2,
-                                self.model_mgr.epoch_to_tune_ms2,
+                                self.model_mgr.psm_num_to_train_ms2,
+                                self.model_mgr.psm_num_per_mod_to_train_ms2,
+                                self.model_mgr.epoch_to_train_ms2,
                                 self.model_mgr.use_grid_nce_search
                             ) = (
-                                psm_num_to_tune_ms2,
-                                psm_num_per_mod_to_tune_ms2,
-                                epoch_to_tune_ms2,
+                                psm_num_to_train_ms2,
+                                psm_num_per_mod_to_train_ms2,
+                                epoch_to_train_ms2,
                                 use_grid_nce_search
                             )
 

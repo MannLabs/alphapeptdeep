@@ -4,9 +4,9 @@
 [![Downloads](https://pepy.tech/badge/peptdeep/month)](https://pepy.tech/project/peptdeep)
 [![Downloads](https://pepy.tech/badge/peptdeep/week)](https://pepy.tech/project/peptdeep)
 
-
 # AlphaPeptDeep (peptdeep)
-An open-source Python package of the AlphaPept ecosystem from the [Mann Labs at the Max Planck Institute of Biochemistry](https://www.biochem.mpg.de/mann) and the [University of Copenhagen](https://www.cpr.ku.dk/research/proteomics/mann/). To enable all hyperlinks in this document, please view it at [GitHub](https://github.com/MannLabs/alphapeptdeep).
+
+An open-source Python package of the AlphaPept ecosystem from the [Mann Labs at the Max Planck Institute of Biochemistry](https://www.biochem.mpg.de/mann) and the [University of Copenhagen](https://www.cpr.ku.dk/research/proteomics/mann/). To enable all hyperlinks in this document, please view it at [GitHub](https://github.com/MannLabs/alphapeptdeep). For documentation, please see [GitHub Pages](https://mannlabs.github.io/alphapeptdeep/)
 
 * [**About**](#about)
 * [**License**](#license)
@@ -168,3 +168,4 @@ If you like this software, you can give us a [star](https://github.com/MannLabs/
 ## Changelog
 
 See the [HISTORY.md](HISTORY.md) for a full overview of the changes made in each version.
+
