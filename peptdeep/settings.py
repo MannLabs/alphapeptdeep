@@ -3,6 +3,11 @@
 __all__ = ['update_settings', 'update_modifications', 'global_settings', 'model_const']
 
 # Cell
+# for nbdev_build_docs
+# import os
+# __file__ = os.path.expanduser('~/Workspace/alphapeptdeep/peptdeep/settings.py')
+
+# Cell
 import os
 import collections
 

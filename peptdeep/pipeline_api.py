@@ -1,5 +1,6 @@
 import os
 import pandas as pd
+import traceback
 
 from alphabase.yaml_utils import save_yaml
 from alphabase.io.psm_reader import psm_reader_provider
@@ -102,7 +103,7 @@ def transfer_learn(settings_dict:dict=settings.global_settings, verbose=True):
         mgr_settings['transfer']['verbose'] = verbose
 
         output_folder = mgr_settings['transfer']['model_output_folder']
-        if len(output_folder) == 0:
+        if  not output_folder:
             output_folder = os.path.join(
                 os.path.expanduser(
                     settings_dict['PEPTDEEP_HOME']
@@ -111,6 +112,7 @@ def transfer_learn(settings_dict:dict=settings.global_settings, verbose=True):
             )
         if not os.path.exists(output_folder):
             os.makedirs(output_folder)
+
         set_logger(
             log_file_name=os.path.join(output_folder, 'peptdeep_transfer.log'),
             log_level=settings_dict['log_level'],
@@ -142,7 +144,7 @@ def transfer_learn(settings_dict:dict=settings.global_settings, verbose=True):
         model_mgr.ms2_model.save(os.path.join(output_folder, 'ms2.pth'))
         logging.info(f"Models were saved in {output_folder}")
     except Exception as e:
-        logging.error(str(e))
+        logging.error(traceback.format_exc())
         raise e
     
 def rescore_psms(settings_dict:dict=settings.global_settings):
@@ -185,7 +187,7 @@ def rescore_psms(settings_dict:dict=settings.global_settings):
             sep='\t', index=False
         )
     except Exception as e:
-        logging.error(str(e))
+        logging.error(traceback.format_exc())
         raise e
 
 
@@ -247,5 +249,5 @@ def generate_library(settings_dict:dict=settings.global_settings):
             )
         logging.info("Library generated!!")
     except Exception as e:
-        logging.error(str(e))
+        logging.error(traceback.format_exc())
         raise e

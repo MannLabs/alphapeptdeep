@@ -10,7 +10,7 @@ import os
 import sys
 import tqdm
 
-BASE_PATH = os.path.dirname(__file__)
+BASE_PATH = os.path.expanduser('~/peptdeep')
 LOG_PATH = os.path.join(BASE_PATH, "logs")
 
 # from alphatims
