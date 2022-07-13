@@ -12,8 +12,7 @@ PEPTDEEP_HOME: "~/peptdeep" # ~ refers to user folder (e.g. C:/Users/username)
 local_model_zip_name: "pretrained_models.zip"
 
 # overwritable config
-model_url: "https://datashare.biochem.mpg.de/s/ABnQuD2KkXfIGF3/download"
-model_url_zip_name: "released_models"
+model_url: "https://github.com/MannLabs/alphapeptdeep/releases/download/pre-trained-models/pretrained_models.zip"
 
 thread_num: 8
 log_level: info
@@ -25,7 +24,7 @@ log_level_choices:
   - critical
 
 common:
-  keep_only_important_modloss: True
+  modloss_importance_level: 1.0
 
 peak_matching:
   ms2_ppm: True
@@ -34,6 +33,18 @@ peak_matching:
   ms1_tol_value: 20.0
 
 model_mgr:
+  default_nce: 30.0
+  default_instrument: Lumos
+  mask_modloss: True
+  model_type: generic
+  model_choices:
+  - generic
+  - phos
+  - hla # same as generic
+  - digly
+  external_ms2_model: ''
+  external_rt_model: ''
+  external_ccs_model: ''
   instrument_group:
     Lumos: Lumos
     QE: QE
@@ -55,10 +66,17 @@ model_mgr:
     batch_size_rt_ccs: 1024
     verbose: True
     multiprocessing: True
-  fine_tune:
+  transfer:
     model_output_folder: ''
     epoch_ms2: 20
+    warmup_epoch_ms2: 10
+    batch_size_ms2: 512
+    lr_ms2: 0.0001
     epoch_rt_ccs: 40
+    warmup_epoch_rt_ccs: 10
+    batch_size_rt_ccs: 1024
+    lr_rt_ccs: 0.0001
+    verbose: False
     grid_nce_search: True
     grid_nce_first: 15.0
     grid_nce_last: 45.0
@@ -79,23 +97,11 @@ model_mgr:
       - mgf
       - mzml
     ms_files: []
-    psm_num_to_tune_ms2: 5000
-    psm_num_per_mod_to_tune_ms2: 50
-    psm_num_to_tune_rt_ccs: 5000
-    psm_num_per_mod_to_tune_rt_ccs: 50
-    top_n_mods_to_tune: 10
-  default_nce: 30.0
-  default_instrument: Lumos
-  mask_modloss: True
-  model_type: generic
-  model_choices:
-  - generic
-  - phos
-  - hla # same as generic
-  - digly
-  external_ms2_model: ''
-  external_rt_model: ''
-  external_ccs_model: ''
+    psm_num_to_train_ms2: 100000000
+    psm_num_per_mod_to_train_ms2: 50
+    psm_num_to_train_rt_ccs: 100000000
+    psm_num_per_mod_to_train_rt_ccs: 50
+    top_n_mods_to_train: 10
 percolator:
   require_model_tuning: True
   raw_num_to_tune: 8

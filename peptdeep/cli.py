@@ -1,24 +1,14 @@
 #!python
 
 
-# external
 import click
-import os
-import pandas as pd
 
-# local
 import peptdeep
 from peptdeep import settings
-from peptdeep.utils import (
-    logging, set_logger, 
-    show_platform_info, show_python_info
+from peptdeep.pipeline_api import (
+    rescore_psms, generate_library, 
+    transfer_learn, load_settings
 )
-from alphabase.yaml_utils import save_yaml
-from peptdeep.rescore.percolator import Percolator
-from peptdeep.spec_lib.library_factory import (
-    library_maker_provider
-)
-from peptdeep.model.featurize import get_all_mod_features
 
 @click.group(
     context_settings=dict(
@@ -59,10 +49,10 @@ def gui(port):
     import peptdeep.gui
     peptdeep.gui.run(port)
 
-@run.command("install-model", help="Install peptdeep pretrained models.")
+@run.command("install-models", help="Install peptdeep pretrained models.")
 @click.option("--model-file", default=None, type=str,
     show_default=True, help="The model file (.zip or .tar) to install. "
-    "If not set, peptdeep will download the model file from out DataShare."
+    "If not set, peptdeep will download the model file from GitHub."
 )
 @click.option("--overwrite", default=True, type=bool,
     show_default=True, help="If overwrite existing model file."
@@ -76,121 +66,11 @@ def install_model(model_file, overwrite):
     else:
         download_models(model_file, overwrite=overwrite)
 
-def load_settings(settings_yaml):
-    settings_dict = settings.load_yaml(settings_yaml)
-    settings.global_settings = settings.update_settings(
-        settings.global_settings, settings_dict
-    )
-
 @run.command("rescore", help="Rescore DDA results.")
 @click.argument("settings_yaml", type=str)
 def rescore(settings_yaml):
     load_settings(settings_yaml)
     rescore_psms()
-
-def rescore_psms(settings_dict:dict=settings.global_settings):
-    try:
-        perc_settings = settings_dict.global_settings['percolator']
-        output_folder = perc_settings['output_folder']
-        if not os.path.exists(output_folder):
-            os.makedirs(output_folder)
-        set_logger(
-            log_file_name=os.path.join(output_folder, 'peptdeep.log'),
-            log_level=settings_dict['log_level'],
-            overwrite=True, stream=True, 
-        )
-        percolator = Percolator()
-        psm_df = percolator.load_psms(
-            perc_settings['input_files']['psm_files'],
-            perc_settings['input_files']['psm_type']
-        )
-
-        ms_file_dict = percolator.parse_ms_files_to_dict(
-            perc_settings['input_files']['ms_files']
-        )
-
-        psm_df = percolator.extract_features(
-            psm_df, ms_file_dict, 
-            perc_settings['input_files']['ms_file_type']
-        )
-        
-        psm_df = percolator.re_score(psm_df)
-        psm_df.to_csv(
-            os.path.join(output_folder, 'peptdeep.tsv'), 
-            sep='\t', index=False
-        )
-
-        df_fdr = psm_df[
-            (psm_df.fdr<0.01)&(psm_df.decoy==0)
-        ]
-        df_fdr.to_csv(
-            os.path.join(output_folder, 'peptdeep_fdr.tsv'), 
-            sep='\t', index=False
-        )
-    except Exception as e:
-        logging.error(str(e))
-        raise e
-
-def _get_delimiter(csv_file, bytes=4096):
-    import csv
-    with open(csv_file, "r") as f:
-        return csv.Sniffer().sniff(f.read(bytes)).delimiter
-
-def generate_library(settings_dict:dict=settings.global_settings):
-    try:
-        lib_settings = settings_dict['library']
-        output_folder = lib_settings['output_folder']
-        if not os.path.exists(output_folder):
-            os.makedirs(output_folder)
-        set_logger(
-            log_file_name=os.path.join(output_folder, 'peptdeep.log'),
-            log_level=settings_dict['log_level'],
-            overwrite=True, stream=True, 
-        )
-        show_platform_info()
-        show_python_info()
-        settings.update_modifications(
-            keep_only_important_modloss=settings_dict['common']['keep_only_important_modloss']
-        )
-
-        lib_maker = library_maker_provider.get_maker(
-            lib_settings['input']['type']
-        )
-        if lib_settings['input']['type'] == 'fasta':
-            lib_maker.make_library(lib_settings['input']['paths'])
-        else:
-            df_list = []
-            for file_path in lib_settings['input']['paths']:
-                sep = _get_delimiter(file_path)
-                df_list.append(pd.read_csv(file_path, sep=sep))
-            df = pd.concat(df_list, ignore_index=True)
-            lib_maker.make_library(df)
-        save_yaml(
-            os.path.join(output_folder, 'peptdeep_settings.yaml'),
-            settings_dict
-        )
-        hdf_path = os.path.join(
-            output_folder, 
-            'predict.speclib.hdf'
-        )
-        logging.info(f"Saving HDF library to {hdf_path} ...")
-        lib_maker.spec_lib.save_hdf(hdf_path)
-        if lib_settings['output_tsv']['enabled']:
-            tsv_path = os.path.join(
-                output_folder, 
-                'predict.speclib.tsv'
-            )
-            from peptdeep.spec_lib.translate import mod_to_unimod_dict
-            lib_maker.translate_to_tsv(
-                tsv_path, 
-                translate_mod_dict=mod_to_unimod_dict 
-                if lib_settings['output_tsv']['translate_mod_to_unimod_id'] 
-                else None
-            )
-        logging.info("Library generated!!")
-    except Exception as e:
-        logging.error(str(e))
-        raise e
 
 @run.command("library", help="Predict library for DIA search.")
 @click.argument("settings_yaml", type=str)
@@ -198,5 +78,10 @@ def library(settings_yaml:str):
     load_settings(settings_yaml)
     generate_library()
 
-#def fine_tune(settings_dict:dict=settings.global_settings):
+@run.command("transfer", help="Transfer learning for different data types.")
+@click.argument("settings_yaml", type=str)
+def transfer(settings_yaml:str):
+    load_settings(settings_yaml)
+    transfer_learn()
+
     

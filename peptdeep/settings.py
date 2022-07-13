@@ -3,12 +3,17 @@
 __all__ = ['update_settings', 'update_modifications', 'global_settings', 'model_const']
 
 # Cell
+# for nbdev_build_docs
+# import os
+# __file__ = os.path.expanduser('~/Workspace/alphapeptdeep/peptdeep/settings.py')
+
+# Cell
 import os
 import collections
 
 from alphabase.yaml_utils import load_yaml
 from alphabase.constants.modification import (
-    load_mod_df, _keep_only_important_modloss
+    load_mod_df, keep_modloss_by_importance
 )
 
 _base_dir = os.path.dirname(__file__)
@@ -36,15 +41,17 @@ def update_settings(dict_, new_dict):
     return dict_
 
 def update_modifications(tsv:str="",
-    keep_only_important_modloss:bool=global_settings['common']['keep_only_important_modloss']
+    modloss_importance_level:bool=global_settings[
+        'common']['modloss_importance_level'
+    ]
 ):
     if os.path.isfile(tsv):
-        load_mod_df(tsv, keep_only_important_modloss=keep_only_important_modloss)
+        load_mod_df(tsv, modloss_importance_level=modloss_importance_level)
 
         from peptdeep.model.featurize import get_all_mod_features
+
         get_all_mod_features()
     else:
-        if keep_only_important_modloss:
-            _keep_only_important_modloss()
+        keep_modloss_by_importance(modloss_importance_level)
 
 update_modifications()
