@@ -415,26 +415,6 @@ class Percolator:
                 psm_df_list.append(_df)
         return pd.concat(psm_df_list)
 
-    def parse_ms_files_to_dict(self,
-        ms_file_list:list
-    )->dict:
-        """Load spectrum file paths into a dict:
-          "/Users/xxx/name.raw" -> {"name":"/Users/xxx/name.raw"}
-
-        Args:
-            spectrum_file_list (list): File path list
-
-        Returns:
-            dict: {"name":"/Users/xxx/name.raw", ...}
-        """
-        spec_dict = {}
-        for ms_file in ms_file_list:
-            basename = os.path.splitext(
-                os.path.basename(ms_file)
-            )[0]
-            spec_dict[basename] = ms_file
-        return spec_dict
-
     def extract_features(self,
         psm_df:pd.DataFrame, ms2_file_dict:dict, ms2_file_type:str
     )->pd.DataFrame:

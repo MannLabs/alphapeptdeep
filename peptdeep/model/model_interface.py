@@ -427,7 +427,7 @@ class ModelInterface(object):
             import inspect
             code = '''import torch\n'''
             code += '''import peptdeep.model.building_block as building_block\n'''
-            code += '''from peptdeep.model.model_shop import *'''
+            code += '''from peptdeep.model.model_shop import *\n'''
             class_code = inspect.getsource(self.model.__class__)
             code += 'class Model' + class_code[class_code.find('('):]
             with open(save_as, 'w') as f:
