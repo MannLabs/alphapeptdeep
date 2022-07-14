@@ -10,6 +10,7 @@ tqdm
 psutil
 wget
 nbdev
+pyinstaller
 
 click
 pandas
