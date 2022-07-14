@@ -1,7 +1,7 @@
-repository: MannLabs/peptdeep
+repository: MannLabs/alphapeptdeep
 output: web
-topnav_title: peptdeep
-site_title: peptdeep
+topnav_title: alphapeptdeep
+site_title: alphapeptdeep
 company_name: MannLabs
 description: Deep Learning in Proteomics
 # Set to false to disable KaTeX math
@@ -63,4 +63,4 @@ plugins:
     - jekyll-remote-theme
     
 remote_theme: fastai/nbdev-jekyll-theme
-baseurl: /peptdeep/
+baseurl: /alphapeptdeep/
