@@ -1,8 +1,5 @@
 on:
-  # push:
-  #   branches: [ main ]
   workflow_dispatch:
-
 
 name: Release installers for different OS
 
