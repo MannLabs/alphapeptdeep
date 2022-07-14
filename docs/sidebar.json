@@ -1,5 +1,5 @@
 {
-  "peptdeep": {
+  "alphapeptdeep": {
     "Overview": "/",
     "Mass calibration": "mass_calibration.html",
     "Peak matching functionalities": "match.html",

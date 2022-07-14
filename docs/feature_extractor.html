@@ -177,9 +177,9 @@ predict_intensity_df and matched_intensity_df. It will add columns into psm_df:
 
 <div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="ScoreFeatureExtractor">ScoreFeatureExtractor<a class="anchor-link" href="#ScoreFeatureExtractor"> </a></h3><p><a href="/peptdeep/feature_extractor.html#ScoreFeatureExtractor"><code>ScoreFeatureExtractor</code></a> and its sub-classes are the most important functionalities for rescoring.</p>
+<h3 id="ScoreFeatureExtractor">ScoreFeatureExtractor<a class="anchor-link" href="#ScoreFeatureExtractor"> </a></h3><p><a href="/alphapeptdeep/feature_extractor.html#ScoreFeatureExtractor"><code>ScoreFeatureExtractor</code></a> and its sub-classes are the most important functionalities for rescoring.</p>
 <p>They define the fine-tuning parameters to tune RT/CCS/MS2 models. They also define the feature list to feed to Percolator.</p>
-<p>We recommend to use <a href="/peptdeep/feature_extractor.html#ScoreFeatureExtractorMP"><code>ScoreFeatureExtractorMP</code></a> as it is faster by using multiprocessing while remain the prediction performance.</p>
+<p>We recommend to use <a href="/alphapeptdeep/feature_extractor.html#ScoreFeatureExtractorMP"><code>ScoreFeatureExtractorMP</code></a> as it is faster by using multiprocessing while remain the prediction performance.</p>
 
 </div>
 </div>
@@ -195,7 +195,7 @@ predict_intensity_df and matched_intensity_df. It will add columns into psm_df:
 
 
 <div class="output_markdown rendered_html output_subarea ">
-<h2 id="ScoreFeatureExtractor" class="doc_header"><code>class</code> <code>ScoreFeatureExtractor</code><a href="https://github.com/MannLabs/peptdeep/tree/main/peptdeep/rescore/feature_extractor.py#L469" class="source_link" style="float:right">[source]</a></h2><blockquote><p><code>ScoreFeatureExtractor</code>(<strong><code>model_mgr</code></strong>:<a href="/peptdeep/pretrained_models.html#ModelManager"><code>ModelManager</code></a>)</p>
+<h2 id="ScoreFeatureExtractor" class="doc_header"><code>class</code> <code>ScoreFeatureExtractor</code><a href="https://github.com/MannLabs/peptdeep/tree/main/peptdeep/rescore/feature_extractor.py#L469" class="source_link" style="float:right">[source]</a></h2><blockquote><p><code>ScoreFeatureExtractor</code>(<strong><code>model_mgr</code></strong>:<a href="/alphapeptdeep/pretrained_models.html#ModelManager"><code>ModelManager</code></a>)</p>
 </blockquote>
 
 </div>
@@ -217,14 +217,14 @@ predict_intensity_df and matched_intensity_df. It will add columns into psm_df:
 
 <div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="ScoreFeatureExtractorMP">ScoreFeatureExtractorMP<a class="anchor-link" href="#ScoreFeatureExtractorMP"> </a></h3><p><a href="/peptdeep/feature_extractor.html#ScoreFeatureExtractorMP"><code>ScoreFeatureExtractorMP</code></a> uses multiprocessing to accelerate the feature extraction procedure. The pipeline is:</p>
+<h3 id="ScoreFeatureExtractorMP">ScoreFeatureExtractorMP<a class="anchor-link" href="#ScoreFeatureExtractorMP"> </a></h3><p><a href="/alphapeptdeep/feature_extractor.html#ScoreFeatureExtractorMP"><code>ScoreFeatureExtractorMP</code></a> uses multiprocessing to accelerate the feature extraction procedure. The pipeline is:</p>
 <ol>
 <li>Randomly select some raw files to fine-tuning the model. This step also includes two steps: a. ms2 matching with multiprocessing; b. model tuning with a single thread (or GPU). </li>
 <li>Match PSM results of each raw file in the psm_df against the corresponding ms2 file in ms2_file_dict ({<code>raw_name</code>: <code>ms2_file_path</code>}) to get matched fragment intensity with multiprocessing.</li>
 <li>Predict fragment intensity as well as RT and mobility with a single thread (or GPU). We use a single thread here becauase GPU memory is the main limitation, and we also enable raw-specific fine-tuning for different raw files.</li>
 <li>Calculate the feature values with multiprocessing.</li>
 </ol>
-<p>The key in <a href="/peptdeep/feature_extractor.html#ScoreFeatureExtractorMP"><code>ScoreFeatureExtractorMP</code></a> is to access the GPU section without multiprocessing to avoid GPU memory conflicts.</p>
+<p>The key in <a href="/alphapeptdeep/feature_extractor.html#ScoreFeatureExtractorMP"><code>ScoreFeatureExtractorMP</code></a> is to access the GPU section without multiprocessing to avoid GPU memory conflicts.</p>
 <p>The processing speed is very fast with a normal GPU (GTX1080). In our testing, peptdeep can rescore 371 HLA raw files within 1 hour.</p>
 
 </div>
@@ -241,7 +241,7 @@ predict_intensity_df and matched_intensity_df. It will add columns into psm_df:
 
 
 <div class="output_markdown rendered_html output_subarea ">
-<h2 id="ScoreFeatureExtractorMP" class="doc_header"><code>class</code> <code>ScoreFeatureExtractorMP</code><a href="https://github.com/MannLabs/peptdeep/tree/main/peptdeep/rescore/feature_extractor.py#L838" class="source_link" style="float:right">[source]</a></h2><blockquote><p><code>ScoreFeatureExtractorMP</code>(<strong><code>model_mgr</code></strong>:<a href="/peptdeep/pretrained_models.html#ModelManager"><code>ModelManager</code></a>) :: <a href="/peptdeep/feature_extractor.html#ScoreFeatureExtractor"><code>ScoreFeatureExtractor</code></a></p>
+<h2 id="ScoreFeatureExtractorMP" class="doc_header"><code>class</code> <code>ScoreFeatureExtractorMP</code><a href="https://github.com/MannLabs/peptdeep/tree/main/peptdeep/rescore/feature_extractor.py#L838" class="source_link" style="float:right">[source]</a></h2><blockquote><p><code>ScoreFeatureExtractorMP</code>(<strong><code>model_mgr</code></strong>:<a href="/alphapeptdeep/pretrained_models.html#ModelManager"><code>ModelManager</code></a>) :: <a href="/alphapeptdeep/feature_extractor.html#ScoreFeatureExtractor"><code>ScoreFeatureExtractor</code></a></p>
 </blockquote>
 
 </div>

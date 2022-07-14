@@ -250,7 +250,7 @@ nb_path: "nbdev_nbs/pretrained_models.ipynb"
 
 <div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="3.-Using-ModelManager">3. Using <a href="/peptdeep/pretrained_models.html#ModelManager"><code>ModelManager</code></a><a class="anchor-link" href="#3.-Using-ModelManager"> </a></h2><p>For users, <a href="/peptdeep/pretrained_models.html#ModelManager"><code>ModelManager</code></a> class is the only thing we need to manage models (loading, transfer learning, etc). According to different arguments, <code>ModelManager::load_installed_models()</code> will call <code>load_models()</code> or <code>load_phos_models()</code>. For external models, <code>ModelManager::load_external_models()</code> will load them by file path or file stream. Here is an example:</p>
+<h2 id="3.-Using-ModelManager">3. Using <a href="/alphapeptdeep/pretrained_models.html#ModelManager"><code>ModelManager</code></a><a class="anchor-link" href="#3.-Using-ModelManager"> </a></h2><p>For users, <a href="/alphapeptdeep/pretrained_models.html#ModelManager"><code>ModelManager</code></a> class is the only thing we need to manage models (loading, transfer learning, etc). According to different arguments, <code>ModelManager::load_installed_models()</code> will call <code>load_models()</code> or <code>load_phos_models()</code>. For external models, <code>ModelManager::load_external_models()</code> will load them by file path or file stream. Here is an example:</p>
 
 <pre><code>from zipfile import ZipFile
 
@@ -260,7 +260,7 @@ rt_model_path = '/path/to/rt.pth' # model as file path
 with ZipFile(ext_zip) as model_zip:
     with model_zip.open('generic/ms2.pth','r') as ms2_file:
         admodel.load_external_models(ms2_model_file=ms2_file, rt_model_file=rt_model_path)</code></pre>
-<p>Transfer learning for different models could also be done in <a href="/peptdeep/pretrained_models.html#ModelManager"><code>ModelManager</code></a> by using the given training dataframes.</p>
+<p>Transfer learning for different models could also be done in <a href="/alphapeptdeep/pretrained_models.html#ModelManager"><code>ModelManager</code></a> by using the given training dataframes.</p>
 
 </div>
 </div>

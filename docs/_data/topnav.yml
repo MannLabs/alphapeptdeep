@@ -2,7 +2,7 @@ topnav:
 - title: Topnav
   items:
     - title: github
-      external_url: https://github.com/MannLabs/peptdeep/tree/main/
+      external_url: https://github.com/MannLabs/alphapeptdeep/tree/main/
 
 #Topnav dropdowns
 topnav_dropdowns:
