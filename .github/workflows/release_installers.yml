@@ -9,7 +9,6 @@ name: Release installers for different OS
 jobs:
   Create_Draft_On_GitHub:
       runs-on: ubuntu-latest
-      needs: Version_Bumped
       outputs:
         upload_url: ${{ steps.draft_release.outputs.upload_url }}
       steps:
