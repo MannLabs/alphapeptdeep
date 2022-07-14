@@ -64,4 +64,3 @@ plugins:
     
 remote_theme: fastai/nbdev-jekyll-theme
 baseurl: /alphapeptdeep/
-theme: jekyll-theme-cayman§
