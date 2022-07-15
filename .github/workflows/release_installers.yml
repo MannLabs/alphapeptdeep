@@ -20,7 +20,7 @@ jobs:
         shell: bash -l {0}
         run: |
           cd misc
-          . ./check_version.sh
+          . ./get_version.sh
           echo ::set-output name=version::$current_version
   Create_Draft_On_GitHub:
     runs-on: ubuntu-latest
