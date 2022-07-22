@@ -8,7 +8,6 @@ from alphabase.peptide.fragment import (
     get_charged_frag_types,
     concat_precursor_fragment_dataframes
 )
-from torch import norm
 
 from peptdeep import settings
 from peptdeep.utils import (

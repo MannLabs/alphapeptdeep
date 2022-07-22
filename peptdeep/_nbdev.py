@@ -245,7 +245,7 @@ modules = ["mass_spec/mass_calibration.py",
            "spec_lib/translate.py",
            "utils.py"]
 
-doc_url = "https://MannLabs.github.io/peptdeep/"
+doc_url = "https://MannLabs.github.io/alphapeptdeep/"
 
 git_url = "https://github.com/MannLabs/peptdeep/tree/main/"
 

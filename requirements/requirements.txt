@@ -14,5 +14,6 @@ transformers
 scikit-learn
 streamlit
 sqlalchemy
+lxml
 
 alphabase
