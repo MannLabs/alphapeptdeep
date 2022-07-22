@@ -25,9 +25,9 @@ def mod_options():
         st.text("Selected modifications")
         st.dataframe(MOD_DF.loc[fixmod+varmod,['mod_name','classification','composition','mass','modloss_composition','modloss','modloss_importance']])
 
-        global_settings['common']['keep_only_important_modloss'] = st.checkbox(
-            'Keep only important modification loss (fragment modloss mz=0 if modloss_importance=0)', 
-            value=global_settings['common']['keep_only_important_modloss']
+        global_settings['common']['modloss_importance_level'] = st.number_input(
+            'Modification loss importance level (for a PTM, fragment modloss mz=0 if modloss_importance<modloss_importance_level)', 
+            value=global_settings['common']['modloss_importance_level']
         )
 
 def varmod_range():

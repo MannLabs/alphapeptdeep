@@ -210,7 +210,7 @@ def generate_library(settings_dict:dict=settings.global_settings):
         show_platform_info()
         show_python_info()
         settings.update_modifications(
-            keep_only_important_modloss=settings_dict['common']['keep_only_important_modloss']
+            modloss_importance_level=settings_dict['common']['modloss_importance_level']
         )
 
         lib_maker = library_maker_provider.get_maker(

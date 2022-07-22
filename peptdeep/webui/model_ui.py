@@ -40,12 +40,9 @@ def predict():
     global_settings['model_mgr']['predict']['multiprocessing'] = multiprocessing
 
 def model():
-    model_url = st.text_input('URL to download the pre-trained models',value = global_settings['model_url'])
+    model_url = st.text_input('URL (or local path) to download the pre-trained models',value = global_settings['model_url'])
     global_settings['model_url'] = model_url
-
-    model_url_zip_name = st.text_input('The downloaded zip file name from the URL (or local path)', value = global_settings['model_url'])
-    global_settings['model_url'] = model_url_zip_name
-
+    
     thread_num = st.number_input('Thread number', value = multiprocessing.cpu_count()-1)
     global_settings['thread_num'] = thread_num
 
