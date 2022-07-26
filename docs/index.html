@@ -86,6 +86,12 @@ There are three different types of installation possible:</p>
 <p>For those who are really adventurous, it is also possible to directly install any branch (e.g. <code>@development</code>) with any extras (e.g. <code>#egg=peptdeep[stable,development-stable]</code>) from GitHub with e.g.</p>
 <div class="highlight"><pre><span></span>pip install <span class="s2">&quot;git+https://github.com/MannLabs/alphapeptdeep.git@development#egg=peptdeep[stable,development-stable]&quot;</span>
 </pre></div>
+<h3 id="GPU">Install GPU version of PyTorch<a class="anchor-link" href="#GPU"> </a></h3>
+<p>To install GPU version, using
+<div class="highlight"><pre><span></span>pip install torch --extra-index-url https://download.pytorch.org/whl/cu116
+</pre></div>
+</p>
+<p>See <a href="https://pytorch.org/get-started/locally/" target="_blank">pytorch.org</a> for details.</p>
 <h3 id="Developer">Developer<a class="anchor-link" href="#Developer"> </a></h3><p>peptdeep can also be installed in editable (i.e. developer) mode with a few <code>bash</code> commands. This allows to fully customize the software and even modify the source code to your specific needs. When an editable Python package is installed, its source code is stored in a transparent location of your choice. While optional, it is advised to first (create and) navigate to e.g. a general software folder:</p>
 <div class="highlight"><pre><span></span>mkdir ~/folder/where/to/install/software
 <span class="nb">cd</span> ~/folder/where/to/install/software
@@ -99,9 +105,9 @@ There are three different types of installation possible:</p>
 conda activate peptdeep
 </pre></div>
 <p>Finally, peptdeep and all its <a href="requirements">dependancies</a> need to be installed. To take advantage of all features and allow development (with the <code>-e</code> flag), this is best done by also installing the <a href="requirements/requirements_development.txt">development dependencies</a> instead of only the <a href="requirements/requirements.txt">core dependencies</a>:</p>
-<div class="highlight"><pre><span></span>pip install -e <span class="s2">&quot;./peptdeep[development]&quot;</span>
+<div class="highlight"><pre><span></span>pip install -e <span class="s2">&quot;.[development]&quot;</span>
 </pre></div>
-<p>By default this installs loose dependancies (no explicit versioning), although it is also possible to use stable dependencies (e.g. <code>pip install -e "./peptdeep[stable,development-stable]"</code>).</p>
+<p>By default this installs loose dependancies (no explicit versioning), although it is also possible to use stable dependencies (e.g. <code>pip install -e ".[stable,development-stable]"</code>).</p>
 <p><strong><em>By using the editable flag <code>-e</code>, all modifications to the <a href="peptdeep">peptdeep source code folder</a> are directly reflected when running peptdeep. Note that the peptdeep folder cannot be moved and/or renamed if an editable version is installed. In case of confusion, you can always retrieve the location of any Python module with e.g. the command <code>import module</code> followed by <code>module.__file__</code>.</em></strong></p>
 <hr>
 <h2 id="Usage">Usage<a class="anchor-link" href="#Usage"> </a></h2><p>There are three ways to use peptdeep:</p>
