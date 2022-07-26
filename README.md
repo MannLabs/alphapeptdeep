@@ -112,7 +112,7 @@ Finally, peptdeep and all its [dependancies](requirements) need to be installed.
 pip install -e ".[development]"
 ```
 
-By default this installs loose dependancies (no explicit versioning), although it is also possible to use stable dependencies (e.g. `pip install -e "./[stable,development-stable]"`).
+By default this installs loose dependancies (no explicit versioning), although it is also possible to use stable dependencies (e.g. `pip install -e ".[stable,development-stable]"`).
 
 ***By using the editable flag `-e`, all modifications to the [peptdeep source code folder](peptdeep) are directly reflected when running peptdeep. Note that the peptdeep folder cannot be moved and/or renamed if an editable version is installed. In case of confusion, you can always retrieve the location of any Python module with e.g. the command `import module` followed by `module.__file__`.***
 
