@@ -178,7 +178,7 @@ class SequenceLibraryMaker(PeptideLibraryMaker):
 class FastaLibraryMaker(PredictLibraryMakerBase):
     """For fasta or a list of fasta files"""
     def _input(self, fasta:Union[str,list]):
-        self.spec_lib.from_fasta(fasta)
+        self.spec_lib.get_peptides_from_fasta(fasta)
         self.spec_lib.append_decoy_sequence()
         self.spec_lib.add_modifications()
         self.spec_lib.add_charge()
