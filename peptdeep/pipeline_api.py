@@ -124,7 +124,13 @@ def transfer_learn(settings_dict:dict=settings.global_settings, verbose=True):
         )
 
         logging.info('Loading PSMs and extracting fragments ...')
-        psm_df, frag_df = match_psms(settings_dict)
+        if (
+            model_mgr.psm_num_to_train_ms2 > 0 and 
+            len(mgr_settings['transfer']['ms_files'])>0
+        ):
+            psm_df, frag_df = match_psms(settings_dict)
+        else:
+            frag_df = None
 
         logging.info("Training CCS model ...")
         model_mgr.train_ccs_model(psm_df)
@@ -134,9 +140,10 @@ def transfer_learn(settings_dict:dict=settings.global_settings, verbose=True):
         model_mgr.train_rt_model(psm_df)
         logging.info("Finished training RT model")
 
-        logging.info("Training MS2 model ...")
-        model_mgr.train_ms2_model(psm_df, frag_df)
-        logging.info("Finished training MS2 model")
+        if frag_df is not None and len(frag_df)>0:
+            logging.info("Training MS2 model ...")
+            model_mgr.train_ms2_model(psm_df, frag_df)
+            logging.info("Finished training MS2 model")
 
         model_mgr.ccs_model.save(os.path.join(output_folder, 'ccs.pth'))
         model_mgr.rt_model.save(os.path.join(output_folder, 'rt.pth'))

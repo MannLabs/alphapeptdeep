@@ -210,7 +210,8 @@ from alphabase.peptide.precursor import (
     update_precursor_mz
 )
 from alphabase.peptide.mobility import (
-    mobility_to_ccs_for_df
+    mobility_to_ccs_for_df,
+    ccs_to_mobility_for_df
 )
 
 from peptdeep.settings import global_settings
@@ -491,14 +492,19 @@ class ModelManager(object):
             if `self.psm_num_to_train_rt_ccs` is zero.
 
         Args:
-            psm_df (pd.DataFrame): training psm_df which contains 'ccs' column.
+            psm_df (pd.DataFrame): training psm_df which contains
+            'ccs' or 'mobility' column.
         """
 
-        if 'mobility' not in psm_df.columns:
+        if 'mobility' not in psm_df.columns or 'ccs' not in psm_df.columns:
             return
-        if 'ccs' not in psm_df.columns:
+        elif 'ccs' not in psm_df.columns:
             psm_df['ccs'] = mobility_to_ccs_for_df(
                 psm_df, 'mobility'
+            )
+        elif 'mobility' not in psm_df.columns:
+            psm_df['mobility'] = ccs_to_mobility_for_df(
+                psm_df, 'ccs'
             )
 
         if self.psm_num_to_train_rt_ccs > 0:
