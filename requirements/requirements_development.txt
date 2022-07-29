@@ -23,7 +23,6 @@ numba
 psutil
 biopython
 streamlit
-sqlalchemy
 transformers
 scikit-learn
 lxml

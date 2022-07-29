@@ -1,10 +1,13 @@
 import streamlit as st
 import pandas as pd
 import os
-from datetime import datetime
 from peptdeep.settings import global_settings
 from peptdeep.cli import generate_library
 from alphabase.constants.modification import MOD_DF
+
+from peptdeep.webui.ui_utils import (
+    files_in_pandas, update_input_paths
+)
 
 def mod_options():
     with st.form("Select modifications"):
@@ -91,24 +94,6 @@ def output_tsv():
     global_settings['library']['output_tsv']['keep_higest_k_peaks'] = keep_higest_k_peaks
     global_settings['library']['output_tsv']['translate_mod_to_unimod_id']=bool(st.checkbox('Translate modifications to Unimod ids'))
 
-@st.cache
-def files_in_pandas(files:list) -> pd.DataFrame:
-    """Reads a folder and returns a pandas dataframe containing the files and additional information.
-    Args:
-        folder (str): Path to folder.
-
-    Returns:
-        pd.DataFrame: PandasDataFrame.
-    """
-    ctimes = [os.path.getctime(_) for _ in files]
-    created = [datetime.fromtimestamp(_).strftime("%Y-%m-%d %H:%M:%S") for _ in ctimes]
-    sizes = [os.path.getsize(_) / 1024 ** 2 for _ in files]
-    df = pd.DataFrame(files, columns=["File Path"])
-    df["Created Time"] = created
-    df["File Size (Mb)"] = sizes
-
-    return df
-
 def select_files(_input_type):
     path = st.text_input(f"File paths ({_input_type if _input_type=='fasta' else 'tsv/csv/txt'} files)")
     col1, col2, col3 = st.columns([0.5,0.5,2])
@@ -126,7 +111,7 @@ def select_files(_input_type):
             global_settings['library']['input']['paths'].remove(path)
     if clear is True:
         global_settings['library']['input']['paths'] = []
-    update_input_paths()
+    update_input_paths(global_settings['library']['input']['paths'])
     st.table(files_in_pandas(global_settings['library']['input']['paths']))
 
 def input_files():
@@ -135,7 +120,7 @@ def input_files():
             st.warning("Please clear all input files before changing the input file type")
             st.session_state.input_type = global_settings['library']['input']['type']
             
-    update_input_paths()
+    update_input_paths(global_settings['library']['input']['paths'])
     input_type = st.selectbox(
         'Input file type',
         global_settings['library']['input']['type_choices'],
@@ -146,12 +131,6 @@ def input_files():
 
     select_files(input_type)
     return input_type
-
-def update_input_paths():
-    global_settings['library']['input']['paths'] = [
-        _ for _ in global_settings['library']['input']['paths']
-        if os.path.isfile(_)
-    ]
 
 def show():
     st.write("# Library Prediction")

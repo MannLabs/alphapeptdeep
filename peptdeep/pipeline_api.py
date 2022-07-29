@@ -117,6 +117,8 @@ def transfer_learn(settings_dict:dict=settings.global_settings, verbose=True):
             log_level=settings_dict['log_level'],
             overwrite=True, stream=True, 
         )
+        show_platform_info()
+        show_python_info()
 
         model_mgr = ModelManager(
             mask_modloss=mgr_settings['mask_modloss'],
@@ -124,7 +126,17 @@ def transfer_learn(settings_dict:dict=settings.global_settings, verbose=True):
         )
 
         logging.info('Loading PSMs and extracting fragments ...')
-        psm_df, frag_df = match_psms(settings_dict)
+        if (
+            model_mgr.psm_num_to_train_ms2 > 0 and 
+            len(mgr_settings['transfer']['ms_files'])>0
+        ):
+            psm_df, frag_df = match_psms(settings_dict)
+        else:
+            psm_df = import_psm_df(
+                mgr_settings['transfer']['psm_files'],
+                mgr_settings['transfer']['psm_type'],
+            )
+            frag_df = None
 
         logging.info("Training CCS model ...")
         model_mgr.train_ccs_model(psm_df)
@@ -134,9 +146,10 @@ def transfer_learn(settings_dict:dict=settings.global_settings, verbose=True):
         model_mgr.train_rt_model(psm_df)
         logging.info("Finished training RT model")
 
-        logging.info("Training MS2 model ...")
-        model_mgr.train_ms2_model(psm_df, frag_df)
-        logging.info("Finished training MS2 model")
+        if frag_df is not None and len(frag_df)>0:
+            logging.info("Training MS2 model ...")
+            model_mgr.train_ms2_model(psm_df, frag_df)
+            logging.info("Finished training MS2 model")
 
         model_mgr.ccs_model.save(os.path.join(output_folder, 'ccs.pth'))
         model_mgr.rt_model.save(os.path.join(output_folder, 'rt.pth'))
@@ -157,6 +170,8 @@ def rescore_psms(settings_dict:dict=settings.global_settings):
             log_level=settings_dict['log_level'],
             overwrite=True, stream=True, 
         )
+        show_platform_info()
+        show_python_info()
         percolator = Percolator()
         psm_df = percolator.load_psms(
             perc_settings['input_files']['psm_files'],
@@ -233,6 +248,7 @@ def generate_library(settings_dict:dict=settings.global_settings):
             'predict.speclib.hdf'
         )
         logging.info(f"Saving HDF library to {hdf_path} ...")
+        lib_maker.spec_lib.rt_to_irt_pred()
         lib_maker.spec_lib.save_hdf(hdf_path)
         if lib_settings['output_tsv']['enabled']:
             tsv_path = os.path.join(
