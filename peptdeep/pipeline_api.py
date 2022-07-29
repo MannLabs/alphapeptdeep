@@ -117,6 +117,8 @@ def transfer_learn(settings_dict:dict=settings.global_settings, verbose=True):
             log_level=settings_dict['log_level'],
             overwrite=True, stream=True, 
         )
+        show_platform_info()
+        show_python_info()
 
         model_mgr = ModelManager(
             mask_modloss=mgr_settings['mask_modloss'],
@@ -168,6 +170,8 @@ def rescore_psms(settings_dict:dict=settings.global_settings):
             log_level=settings_dict['log_level'],
             overwrite=True, stream=True, 
         )
+        show_platform_info()
+        show_python_info()
         percolator = Percolator()
         psm_df = percolator.load_psms(
             perc_settings['input_files']['psm_files'],
