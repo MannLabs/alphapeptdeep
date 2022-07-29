@@ -5,6 +5,9 @@ import time
 
 from peptdeep.settings import global_settings
 from peptdeep.pipeline_api import transfer_learn
+from peptdeep.webui.ui_utils import (
+    files_in_pandas, select_files
+)
 
 def nce_search():
     grid_nce_first = st.number_input('Start NCE for grid NCE search',value = global_settings['model_mgr']['transfer']['grid_nce_first']*1.0,step = 1.0)
@@ -38,7 +41,6 @@ def fine_tune():
     lr_rt_ccs = st.number_input('Learning rate to train RT and CCS model', value = global_settings['model_mgr']['transfer']['lr_rt_ccs'], format='%e', step=1e-5)
     global_settings['model_mgr']['transfer']['lr_rt_ccs'] = lr_rt_ccs
 
-
 def show():
     st.write("# Transfer model setup")
 
@@ -47,8 +49,7 @@ def show():
 
     psm_type = st.selectbox('PSM type choice',global_settings['model_mgr']['transfer']['psm_type_choices'], index = 0)
     global_settings['model_mgr']['transfer']['psm_type'] = psm_type
-    psm_files = st.text_input('PSM file folder')
-    global_settings['model_mgr']['transfer']['psm_files'] = psm_files
+    select_files(global_settings['model_mgr']['transfer']['psm_files'])
     ms_file_type = st.selectbox('MS file type',global_settings['model_mgr']['transfer']['ms_file_type_choices'], index = 0)
     global_settings['model_mgr']['transfer']['ms_file_type'] = ms_file_type
     ms_files = st.text_input('MS file folder')

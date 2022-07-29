@@ -9,6 +9,51 @@ import time
 import pandas as pd
 from typing import Callable, Union, Tuple
 
+@st.cache
+def files_in_pandas(files:list) -> pd.DataFrame:
+    """Reads a folder and returns a pandas dataframe containing the files and additional information.
+    Args:
+        folder (str): Path to folder.
+
+    Returns:
+        pd.DataFrame: PandasDataFrame.
+    """
+    ctimes = [os.path.getctime(_) for _ in files]
+    created = [datetime.fromtimestamp(_).strftime("%Y-%m-%d %H:%M:%S") for _ in ctimes]
+    sizes = [os.path.getsize(_) / 1024 ** 2 for _ in files]
+    df = pd.DataFrame(files, columns=["File Path"])
+    df["Created Time"] = created
+    df["File Size (Mb)"] = sizes
+
+    return df
+
+def update_input_paths(file_list:list):
+    _list = [
+        _ for _ in file_list
+        if os.path.isfile(_)
+    ]
+    file_list.clear()
+    file_list.extend(_list)
+
+def select_files(file_list):
+    path = st.text_input("Files")
+    col1, col2, col3 = st.columns([0.5,0.5,2])
+    with col1:
+        add = st.button('Add')
+    with col2:
+        remove = st.button('Remove')
+    with col3:
+        clear = st.button('Clear all files')
+    if add is True:
+        if path not in file_list:
+            file_list.append(path)
+    if remove is True:
+        if path in file_list:
+            file_list.remove(path)
+    if clear is True:
+        file_list.clear()
+    update_input_paths(file_list)
+    st.table(files_in_pandas(file_list))
 
 def escape_markdown(text: str) -> str:
     """Helper function to escape markdown in text.
