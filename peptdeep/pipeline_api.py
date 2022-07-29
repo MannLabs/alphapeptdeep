@@ -130,6 +130,10 @@ def transfer_learn(settings_dict:dict=settings.global_settings, verbose=True):
         ):
             psm_df, frag_df = match_psms(settings_dict)
         else:
+            psm_df = import_psm_df(
+                mgr_settings['transfer']['psm_files'],
+                mgr_settings['transfer']['psm_type'],
+            )
             frag_df = None
 
         logging.info("Training CCS model ...")
