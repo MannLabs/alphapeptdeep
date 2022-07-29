@@ -65,7 +65,7 @@ def show():
     if result_folder:
         st.text(
             f"PeptDeep looks for PSM files in {result_folder}.\nThese can be selected in the new experiment tab.\nYou can add own files to this folder."
-            )
+        )
 
         st.write("### Existing files")
 

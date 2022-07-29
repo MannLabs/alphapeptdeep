@@ -8,6 +8,10 @@ import psutil
 import time
 import pandas as pd
 from typing import Callable, Union, Tuple
+import pathlib
+
+def get_posix(_path:str):
+    return pathlib.PureWindowsPath(_path).as_posix()
 
 @st.cache
 def files_in_pandas(files:list) -> pd.DataFrame:
@@ -37,6 +41,7 @@ def update_input_paths(file_list:list):
 
 def select_files(file_list, ui_label="File"):
     path = st.text_input(ui_label)
+    path = get_posix(path)
     col1, col2, col3 = st.columns([0.5,0.5,2])
     with col1:
         add = st.button('Add')

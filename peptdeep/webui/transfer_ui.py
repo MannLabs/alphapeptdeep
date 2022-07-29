@@ -6,7 +6,7 @@ import time
 from peptdeep.settings import global_settings
 from peptdeep.pipeline_api import transfer_learn
 from peptdeep.webui.ui_utils import (
-    files_in_pandas, select_files
+    get_posix, select_files,
 )
 
 def nce_search():
@@ -45,6 +45,7 @@ def show():
     st.write("# Transfer model setup")
 
     model_output_folder = st.text_input('Model output folder')
+    model_output_folder = get_posix(model_output_folder)
     global_settings['model_mgr']['transfer']['model_output_folder'] = model_output_folder
 
     psm_type = st.selectbox('PSM type choice',global_settings['model_mgr']['transfer']['psm_type_choices'], index = 0)
@@ -53,7 +54,7 @@ def show():
     ms_file_type = st.selectbox('MS file type',global_settings['model_mgr']['transfer']['ms_file_type_choices'], index = 0)
     global_settings['model_mgr']['transfer']['ms_file_type'] = ms_file_type
     ms_files = st.text_input('MS file folder')
-    global_settings['model_mgr']['transfer']['ms_files'] = ms_files
+    global_settings['model_mgr']['transfer']['ms_files'] = [ms_files]
 
     ms2_ppm = st.checkbox('MS2 ppm (otherwise Da)', global_settings['peak_matching']['ms2_ppm'])
     #ms2_ppm = st.selectbox('MS2 ppm',('True','False'))
