@@ -1,7 +1,6 @@
 import streamlit as st
 import pandas as pd
 import os
-from datetime import datetime
 from peptdeep.settings import global_settings
 from peptdeep.cli import generate_library
 from alphabase.constants.modification import MOD_DF

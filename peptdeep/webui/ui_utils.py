@@ -19,7 +19,7 @@ def files_in_pandas(files:list) -> pd.DataFrame:
         pd.DataFrame: PandasDataFrame.
     """
     ctimes = [os.path.getctime(_) for _ in files]
-    created = [datetime.fromtimestamp(_).strftime("%Y-%m-%d %H:%M:%S") for _ in ctimes]
+    created = [datetime.datetime.fromtimestamp(_).strftime("%Y-%m-%d %H:%M:%S") for _ in ctimes]
     sizes = [os.path.getsize(_) / 1024 ** 2 for _ in files]
     df = pd.DataFrame(files, columns=["File Path"])
     df["Created Time"] = created
@@ -35,8 +35,8 @@ def update_input_paths(file_list:list):
     file_list.clear()
     file_list.extend(_list)
 
-def select_files(file_list):
-    path = st.text_input("Files")
+def select_files(file_list, ui_label="File"):
+    path = st.text_input(ui_label)
     col1, col2, col3 = st.columns([0.5,0.5,2])
     with col1:
         add = st.button('Add')
