@@ -88,11 +88,11 @@ model_mgr:
       - pfind
       - maxquant
       - diann
+      - speclib_tsv
     psm_files: []
     ms_file_type: alphapept_hdf
     ms_file_type_choices:
       - alphapept_hdf
-      - hdf # the same as alphapept_hdf
       - thermo_raw # if alphapept is installed
       - mgf
       - mzml

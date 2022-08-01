@@ -113,8 +113,7 @@ def files_in_folder(folder: str, ending: str, sort: str = "name") -> list:
 
     return files
 
-
-def files_in_folder_pandas(folder: str) -> pd.DataFrame:
+def files_in_folder_pandas(folder: str, file_type:str=None) -> pd.DataFrame:
     """Reads a folder and returns a pandas dataframe containing the files and additional information.
     Args:
         folder (str): Path to folder.
@@ -122,7 +121,14 @@ def files_in_folder_pandas(folder: str) -> pd.DataFrame:
     Returns:
         pd.DataFrame: PandasDataFrame.
     """
-    files = os.listdir(folder)
+    if file_type is None:
+        files = os.listdir(folder)
+    else:
+        file_type = file_type.lower()
+        files = [
+            file for file in os.listdir(folder) 
+            if file.lower().endswith(f".{file_type}") or file.lower() == file_type
+        ]
     created = [time.ctime(os.path.getctime(os.path.join(folder, _))) for _ in files]
     sizes = [os.path.getsize(os.path.join(folder, _)) / 1024 ** 2 for _ in files]
     df = pd.DataFrame(files, columns=["File"])

@@ -49,8 +49,11 @@ def show():
     global_settings['model_mgr']['transfer']['model_output_folder'] = model_output_folder
 
     psm_type = st.selectbox('PSM type choice',global_settings['model_mgr']['transfer']['psm_type_choices'], index = 0)
+    if psm_type == "speclib_tsv":
+        psm_type = "swath"
     global_settings['model_mgr']['transfer']['psm_type'] = psm_type
     select_files(global_settings['model_mgr']['transfer']['psm_files'], "PSM files")
+    
     ms_file_type = st.selectbox('MS file type',global_settings['model_mgr']['transfer']['ms_file_type_choices'], index = 0)
     global_settings['model_mgr']['transfer']['ms_file_type'] = ms_file_type
     ms_files = st.text_input('MS file folder')
