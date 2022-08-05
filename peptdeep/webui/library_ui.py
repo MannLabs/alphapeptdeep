@@ -6,7 +6,8 @@ from peptdeep.cli import generate_library
 from alphabase.constants.modification import MOD_DF
 
 from peptdeep.webui.ui_utils import (
-    files_in_pandas, update_input_paths
+    files_in_pandas, update_input_paths,
+    get_posix
 )
 
 def mod_options():
@@ -96,6 +97,7 @@ def output_tsv():
 
 def select_files(_input_type):
     path = st.text_input(f"File paths ({_input_type if _input_type=='fasta' else 'tsv/csv/txt'} files)")
+    path = get_posix(path)
     col1, col2, col3 = st.columns([0.5,0.5,2])
     with col1:
         add = st.button('Add')
@@ -165,6 +167,7 @@ def show():
 
     output_folder = st.text_input("Output folder", value=global_settings['library']['output_folder'])
     output_folder = os.path.abspath(os.path.expanduser(os.path.expandvars(output_folder)))
+    output_folder = get_posix(output_folder)
     global_settings['library']['output_folder'] = output_folder
 
     tsv_enabled = bool(st.checkbox('Output TSV (for DiaNN/Spectronaut)'))

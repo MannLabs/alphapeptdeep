@@ -4,30 +4,7 @@ import os
 import time
 
 from peptdeep.settings import global_settings
-
-def files_in_folder_pandas(folder: str, file_type:str=None) -> pd.DataFrame:
-    """Reads a folder and returns a pandas dataframe containing the files and additional information.
-    Args:
-        folder (str): Path to folder.
-
-    Returns:
-        pd.DataFrame: PandasDataFrame.
-    """
-    if file_type is None:
-        files = os.listdir(folder)
-    else:
-        file_type = file_type.lower()
-        files = [
-            file for file in os.listdir(folder) 
-            if file.lower().endswith(f".{file_type}") or file.lower() == file_type
-        ]
-    created = [time.ctime(os.path.getctime(os.path.join(folder, _))) for _ in files]
-    sizes = [os.path.getsize(os.path.join(folder, _)) / 1024 ** 2 for _ in files]
-    df = pd.DataFrame(files, columns=["File"])
-    df["Created"] = created
-    df["Filesize (Mb)"] = sizes
-
-    return df
+from peptdeep.webui.ui_utils import files_in_folder_pandas
 
 def show():
     """Streamlit page that displays information on how to rescore."""
@@ -56,16 +33,16 @@ def show():
      'PSM file type',
      ('AlphaPept', 'pFind', 'MaxQuant'))
     if PSM_type == 'AlphaPept':
-        psm_type = 'hdf'
+        psm_type = 'ms_data.hdf'
     elif PSM_type == 'pFind':
         psm_type = 'spectra'
     elif PSM_type == 'MaxQuant':
-        psm_type = 'txt'
+        psm_type = 'msms.txt'
     #st.write('You selected:', PSM_type)
     if result_folder:
         st.text(
             f"PeptDeep looks for PSM files in {result_folder}.\nThese can be selected in the new experiment tab.\nYou can add own files to this folder."
-            )
+        )
 
         st.write("### Existing files")
 

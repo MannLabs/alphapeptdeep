@@ -6,7 +6,7 @@ import time
 from peptdeep.settings import global_settings
 from peptdeep.pipeline_api import transfer_learn
 from peptdeep.webui.ui_utils import (
-    files_in_pandas, select_files
+    get_posix, select_files,
 )
 
 def nce_search():
@@ -25,7 +25,7 @@ def nce_search():
 def fine_tune():
     epoch_ms2 = st.number_input('Epoch to train MS2 model', value = global_settings['model_mgr']['transfer']['epoch_ms2'])
     global_settings['model_mgr']['transfer']['epoch_ms2'] = epoch_ms2
-    warmup_epoch_ms2 = st.number_input('Warmup epoch to train MS2 model', value = global_settings['model_mgr']['transfer']['epoch_ms2'], max_value=epoch_ms2)
+    warmup_epoch_ms2 = st.number_input('Warmup epoch to train MS2 model', value = global_settings['model_mgr']['transfer']['warmup_epoch_ms2'], max_value=epoch_ms2)
     global_settings['model_mgr']['transfer']['warmup_epoch_ms2'] = warmup_epoch_ms2
     batch_size_ms2 = st.number_input('Mini-batch size to train MS2 model', value = global_settings['model_mgr']['transfer']['batch_size_ms2'])
     global_settings['model_mgr']['transfer']['batch_size_ms2'] = batch_size_ms2
@@ -34,7 +34,7 @@ def fine_tune():
     
     epoch_rt_ccs = st.number_input('Epoch to train RT and CCS models', value = global_settings['model_mgr']['transfer']['epoch_rt_ccs'])
     global_settings['model_mgr']['transfer']['epoch_rt_ccs'] = epoch_rt_ccs
-    warmup_epoch_rt_ccs = st.number_input('Warmup epoch to train RT and CCS model', value = global_settings['model_mgr']['transfer']['epoch_rt_ccs'], max_value=epoch_rt_ccs)
+    warmup_epoch_rt_ccs = st.number_input('Warmup epoch to train RT and CCS model', value = global_settings['model_mgr']['transfer']['warmup_epoch_rt_ccs'], max_value=epoch_rt_ccs)
     global_settings['model_mgr']['transfer']['warmup_epoch_rt_ccs'] = warmup_epoch_rt_ccs
     batch_size_rt_ccs = st.number_input('Mini-batch size to train RT and CCS model', value = global_settings['model_mgr']['transfer']['batch_size_rt_ccs'])
     global_settings['model_mgr']['transfer']['batch_size_rt_ccs'] = batch_size_rt_ccs
@@ -45,15 +45,19 @@ def show():
     st.write("# Transfer model setup")
 
     model_output_folder = st.text_input('Model output folder')
+    model_output_folder = get_posix(model_output_folder)
     global_settings['model_mgr']['transfer']['model_output_folder'] = model_output_folder
 
     psm_type = st.selectbox('PSM type choice',global_settings['model_mgr']['transfer']['psm_type_choices'], index = 0)
+    if psm_type == "speclib_tsv":
+        psm_type = "swath"
     global_settings['model_mgr']['transfer']['psm_type'] = psm_type
     select_files(global_settings['model_mgr']['transfer']['psm_files'], "PSM files")
+    
     ms_file_type = st.selectbox('MS file type',global_settings['model_mgr']['transfer']['ms_file_type_choices'], index = 0)
     global_settings['model_mgr']['transfer']['ms_file_type'] = ms_file_type
     ms_files = st.text_input('MS file folder')
-    global_settings['model_mgr']['transfer']['ms_files'] = ms_files
+    global_settings['model_mgr']['transfer']['ms_files'] = [ms_files]
 
     ms2_ppm = st.checkbox('MS2 ppm (otherwise Da)', global_settings['peak_matching']['ms2_ppm'])
     #ms2_ppm = st.selectbox('MS2 ppm',('True','False'))
