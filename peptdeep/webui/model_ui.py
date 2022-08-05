@@ -26,9 +26,9 @@ def model():
     thread_num = st.number_input('Thread number', value = multiprocessing.cpu_count()-1)
     global_settings['thread_num'] = thread_num
 
-    global_settings['model_mgr']['external_ms2_model'] = st.text_input('External MS2 model')
-    global_settings['model_mgr']['external_rt_model'] = st.text_input('External RT model')
-    global_settings['model_mgr']['external_ccs_model'] = st.text_input('External CCS model')
+    global_settings['model_mgr']['external_ms2_model'] = st.text_input('External MS2 model', value=global_settings['model_mgr']['external_ms2_model'])
+    global_settings['model_mgr']['external_rt_model'] = st.text_input('External RT model', value=global_settings['model_mgr']['external_rt_model'])
+    global_settings['model_mgr']['external_ccs_model'] = st.text_input('External CCS model', value=global_settings['model_mgr']['external_ccs_model'])
 
 
 def show():
