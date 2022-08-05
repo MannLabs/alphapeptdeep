@@ -25,7 +25,7 @@ def nce_search():
 def fine_tune():
     epoch_ms2 = st.number_input('Epoch to train MS2 model', value = global_settings['model_mgr']['transfer']['epoch_ms2'])
     global_settings['model_mgr']['transfer']['epoch_ms2'] = epoch_ms2
-    warmup_epoch_ms2 = st.number_input('Warmup epoch to train MS2 model', value = global_settings['model_mgr']['transfer']['epoch_ms2'], max_value=epoch_ms2)
+    warmup_epoch_ms2 = st.number_input('Warmup epoch to train MS2 model', value = global_settings['model_mgr']['transfer']['warmup_epoch_ms2'], max_value=epoch_ms2)
     global_settings['model_mgr']['transfer']['warmup_epoch_ms2'] = warmup_epoch_ms2
     batch_size_ms2 = st.number_input('Mini-batch size to train MS2 model', value = global_settings['model_mgr']['transfer']['batch_size_ms2'])
     global_settings['model_mgr']['transfer']['batch_size_ms2'] = batch_size_ms2
@@ -34,7 +34,7 @@ def fine_tune():
     
     epoch_rt_ccs = st.number_input('Epoch to train RT and CCS models', value = global_settings['model_mgr']['transfer']['epoch_rt_ccs'])
     global_settings['model_mgr']['transfer']['epoch_rt_ccs'] = epoch_rt_ccs
-    warmup_epoch_rt_ccs = st.number_input('Warmup epoch to train RT and CCS model', value = global_settings['model_mgr']['transfer']['epoch_rt_ccs'], max_value=epoch_rt_ccs)
+    warmup_epoch_rt_ccs = st.number_input('Warmup epoch to train RT and CCS model', value = global_settings['model_mgr']['transfer']['warmup_epoch_rt_ccs'], max_value=epoch_rt_ccs)
     global_settings['model_mgr']['transfer']['warmup_epoch_rt_ccs'] = warmup_epoch_rt_ccs
     batch_size_rt_ccs = st.number_input('Mini-batch size to train RT and CCS model', value = global_settings['model_mgr']['transfer']['batch_size_rt_ccs'])
     global_settings['model_mgr']['transfer']['batch_size_rt_ccs'] = batch_size_rt_ccs
