@@ -1,0 +1,945 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.1.149">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>alphapeptdeep - Model Interface</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1.6em;
+  vertical-align: middle;
+}
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { color: #008000; } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { color: #008000; font-weight: bold; } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit"
+  }
+}</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" integrity="sha512-c3Nl8+7g4LMSTdrm621y7kf9v3SDPnhxLNhcjFJbKECVnmZHTdo+IRO05sNLTH/D3vA6u1X32ehoLC7WFVdheg==" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script>
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
+
+
+<link rel="stylesheet" href="styles.css">
+<meta property="og:title" content="alphapeptdeep - Model Interface">
+<meta property="og:description" content="This notebook mainly defines the basic interface that is used to interact with the deep learning models.">
+<meta property="og:site-name" content="alphapeptdeep">
+<meta name="twitter:title" content="alphapeptdeep - Model Interface">
+<meta name="twitter:description" content="This notebook mainly defines the basic interface that is used to interact with the deep learning models.">
+<meta name="twitter:card" content="summary">
+</head>
+
+<body class="nav-sidebar floating nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container">
+    <a class="navbar-brand" href="../index.html">
+    <span class="navbar-title">alphapeptdeep</span>
+    </a>
+  </div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/MannLabs/alphapeptdeep/tree/main/"><i class="bi bi-github" role="img">
+</i> 
+ </a>
+  </li>  
+</ul>
+              <div class="quarto-toggle-container">
+                  <a href="" class="quarto-reader-toggle nav-link" onclick="window.quartoToggleReader(); return false;" title="Toggle reader mode">
+  <div class="quarto-reader-toggle-btn">
+  <i class="bi"></i>
+  </div>
+</a>
+              </div>
+              <div id="quarto-search" class="" title="Search"></div>
+          </div> <!-- /navcollapse -->
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+    <div class="container-fluid d-flex justify-content-between">
+      <h1 class="quarto-secondary-nav-title">Model Interface</h1>
+      <button type="button" class="quarto-btn-toggle btn" aria-label="Show secondary navigation">
+        <i class="bi bi-chevron-right"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse sidebar-navigation floating overflow-auto">
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../index.html" class="sidebar-item-text sidebar-link">Index</a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pipeline_api.html" class="sidebar-item-text sidebar-link">The high-level pipeline APIs</a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pretrained_models.html" class="sidebar-item-text sidebar-link">Integrated functionalities for MS2/RT/CCS models</a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../settings.html" class="sidebar-item-text sidebar-link">All global settings for peptdeep</a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../test_ui.html" class="sidebar-item-text sidebar-link">Testing GUI</a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../utils.html" class="sidebar-item-text sidebar-link">Utils</a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true">mass_spec</a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../mass_spec/mass_spec.mass_calibration.html" class="sidebar-item-text sidebar-link">Mass calibration</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../mass_spec/mass_spec.match.html" class="sidebar-item-text sidebar-link">Peak matching functionalities</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../mass_spec/mass_spec.ms_reader.html" class="sidebar-item-text sidebar-link">Basic spectrum file readers</a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" aria-expanded="true">model</a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" aria-expanded="true">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../model/model.building_block.html" class="sidebar-item-text sidebar-link">NN Building Block</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../model/model.ccs.html" class="sidebar-item-text sidebar-link">CCS model and interface</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../model/model.featurize.html" class="sidebar-item-text sidebar-link">Functionalities for featurization/tensorization</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../model/model.generic_property_prediction.html" class="sidebar-item-text sidebar-link">Generic Property Prediction</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../model/model.model_interface.html" class="sidebar-item-text sidebar-link active">Model Interface</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../model/model.model_shop.html" class="sidebar-item-text sidebar-link">legacy, see <code>generic_property_prediction.ipynb</code></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../model/model.ms2.html" class="sidebar-item-text sidebar-link">pDeepModel for MS/MS prediction</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../model/model.rt.html" class="sidebar-item-text sidebar-link">Retention Time Prediction Models</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../model/test_predict_mp.html" class="sidebar-item-text sidebar-link">Testing predict_mp()</a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" aria-expanded="true">protein</a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" aria-expanded="true">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../protein/protein.fasta.html" class="sidebar-item-text sidebar-link">Predicting libraries from fasta or sequences</a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" aria-expanded="true">psm_frag_reader</a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" aria-expanded="true">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../psm_frag_reader/psm_frag_reader.library_frag_reader.html" class="sidebar-item-text sidebar-link">PSM reader with fragments: TSV lib</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../psm_frag_reader/psm_frag_reader.maxquant_frag_reader.html" class="sidebar-item-text sidebar-link">PSM Reader with fragments: MaxQuant msms.txt</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../psm_frag_reader/psm_frag_reader.psm_frag_reader.html" class="sidebar-item-text sidebar-link">PSM reader with fragments</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../psm_frag_reader/psm_frag_reader.psmlabel_reader.html" class="sidebar-item-text sidebar-link">Legacy: psmlabel (pDeep) reader with fragments</a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" aria-expanded="true">rescore</a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" aria-expanded="true">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../rescore/rescore.fdr.html" class="sidebar-item-text sidebar-link">Functionalities to calculate FDRs</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../rescore/rescore.feature_extractor.html" class="sidebar-item-text sidebar-link">Functionalities to extract features from peptdeep prediction</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../rescore/rescore.percolator.html" class="sidebar-item-text sidebar-link">Percolator functionalities</a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" aria-expanded="true">spec_lib</a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" aria-expanded="true">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../spec_lib/spec_lib.library_factory.html" class="sidebar-item-text sidebar-link">Factory classes to predict libraries from different sources</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../spec_lib/spec_lib.predict_lib.html" class="sidebar-item-text sidebar-link">Base functionalities to predict libraries</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../spec_lib/test_translate_tsv.html" class="sidebar-item-text sidebar-link">Testing translate_tsv()</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../spec_lib/spec_lib.translate.html" class="sidebar-item-text sidebar-link">Translate peptdeep spectral libraries into other formats (e.g.&nbsp;TSV)</a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#description" id="toc-description" class="nav-link active" data-scroll-target="#description">Description</a></li>
+  <li><a href="#imports" id="toc-imports" class="nav-link" data-scroll-target="#imports">Imports</a></li>
+  <li><a href="#utility-functions" id="toc-utility-functions" class="nav-link" data-scroll-target="#utility-functions">Utility functions</a>
+  <ul>
+  <li><a href="#append_naa_column_if_missing" id="toc-append_naa_column_if_missing" class="nav-link" data-scroll-target="#append_naa_column_if_missing">append_nAA_column_if_missing</a></li>
+  <li><a href="#get_cosine_schedule_with_warmup" id="toc-get_cosine_schedule_with_warmup" class="nav-link" data-scroll-target="#get_cosine_schedule_with_warmup">get_cosine_schedule_with_warmup</a></li>
+  </ul></li>
+  <li><a href="#interface-class" id="toc-interface-class" class="nav-link" data-scroll-target="#interface-class">Interface Class</a>
+  <ul>
+  <li><a href="#modelinterface" id="toc-modelinterface" class="nav-link" data-scroll-target="#modelinterface">ModelInterface</a></li>
+  </ul></li>
+  <li><a href="#testing-the-apis" id="toc-testing-the-apis" class="nav-link" data-scroll-target="#testing-the-apis">Testing the APIs</a>
+  <ul>
+  <li><a href="#test-build_from_py_codes" id="toc-test-build_from_py_codes" class="nav-link" data-scroll-target="#test-build_from_py_codes">Test <code>build_from_py_codes()</code></a></li>
+  </ul></li>
+  </ul>
+<div class="toc-actions"><div><i class="bi bi-github"></i></div><div class="action-links"><p><a href="https://github.com/MannLabs/alphapeptdeep/tree/main/issues/new" class="toc-action">Report an issue</a></p></div></div></nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title d-none d-lg-block">Model Interface</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+    
+  </div>
+  
+
+</header>
+
+<!-- WARNING: THIS FILE WAS AUTOGENERATED! DO NOT EDIT! -->
+<section id="description" class="level2">
+<h2 class="anchored" data-anchor-id="description">Description</h2>
+<p>This notebook mainly defines the basic interface that is used to interact with the deep learning models. Its ‘public’ functions are intended to stay untouched over the project, while the specific workings of the interface can be changed (i.e.&nbsp;programming polymorphism concept). For example, models can always be loaded with the <code>load()</code> function and details of the loading can be changed by inheriting the interface and changing the functions that <code>load()</code> calls. More details are given below.</p>
+</section>
+<section id="imports" class="level2">
+<h2 class="anchored" data-anchor-id="imports">Imports</h2>
+</section>
+<section id="utility-functions" class="level2">
+<h2 class="anchored" data-anchor-id="utility-functions">Utility functions</h2>
+<hr>
+<section id="append_naa_column_if_missing" class="level3">
+<h3 class="anchored" data-anchor-id="append_naa_column_if_missing">append_nAA_column_if_missing</h3>
+<blockquote class="blockquote">
+<pre><code> append_nAA_column_if_missing (precursor_df)</code></pre>
+</blockquote>
+<p>Append a column containing the number of Amino Acids</p>
+<hr>
+</section>
+<section id="get_cosine_schedule_with_warmup" class="level3">
+<h3 class="anchored" data-anchor-id="get_cosine_schedule_with_warmup">get_cosine_schedule_with_warmup</h3>
+<blockquote class="blockquote">
+<pre><code> get_cosine_schedule_with_warmup (optimizer, num_warmup_steps,
+                                  num_training_steps, num_cycles=0.5,
+                                  last_epoch=-1)</code></pre>
+</blockquote>
+<p>Create a schedule with a learning rate that decreases following the values of the cosine function between 0 and <code>pi * cycles</code> after a warmup period during which it increases linearly between 0 and 1.</p>
+</section>
+</section>
+<section id="interface-class" class="level2">
+<h2 class="anchored" data-anchor-id="interface-class">Interface Class</h2>
+<p>The <code>ModelInterface</code> below is intended to provide a standardized way to handle deep learning models. It does not contain the PyTorch-based models themselves, but provides methods to <code>load()</code>, <code>save()</code>, <code>build()</code>, <code>train()</code> and <code>predict()</code> new models. These methods are intended to stay unchanged. To adapt the interface to a new usecase, we inherit the interface in a new class and re-implement the relevant method <code>_get_features_from_batch_df()</code>. Sometimes we also need to re-implement <code>_get_targets_from_batch_df()</code> and <code>_prepare_predict_data_df()</code>.</p>
+<p>The interface will adapt the training and prediction procedures. The implementation below will automatically empty the GPU cache at the end of <code>train()</code> and <code>predict()</code> to save GPU memory.</p>
+<p>For example, if we would like to design a new model for peptides with different purposes, for example RT prediction, we need to:</p>
+<ul>
+<li><p>Design the pytorch model (<code>class RTPrediction(torch.nn.Module):...</code>).</p></li>
+<li><p>Design the sub-class inherited from ModelInterface (<code>class RTPredictionModel(ModelInterface):...</code>).</p></li>
+<li><p>In <code>__init__</code> method, define <code>self.target_column_to_train = "detect_value"</code> and <code>self.target_column_to_predict = "predict_value"</code>. Also define <code>self._min_pred_value = some_value</code>.</p></li>
+<li><p>Re-implement <code>def _get_features_from_batch_df(self, batch_df): return self._get_aa_indice_features(batch_df)</code> (default) to predict property for sequence. For modified sequence, use <code>def _get_features_from_batch_df(self, batch_df): return self._get_aa_mod_features(batch_df)</code>.</p></li>
+<li><p>At last, execute the model in a python script or a notebook:</p></li>
+</ul>
+<pre><code>model = RTPredictionModel()
+model.build(model_class=RTPrediction)
+df = ... # the training data
+model.train(df)
+pred_df = model.predict(df)</code></pre>
+<p>Check out <code>peptdeep.model.generic_property_prediction</code> for details. <code>peptdeep.model.rt.AlphaRTModel</code> and <code>peptdeep.model.ccs.AlphaCCSModel</code> are also similar. MS2 prediction model is more complicated as the output value for a peptide is not a scalar value, see <code>peptdeep.model.ms2.pDeepModel</code>.</p>
+<hr>
+<section id="modelinterface" class="level3">
+<h3 class="anchored" data-anchor-id="modelinterface">ModelInterface</h3>
+<blockquote class="blockquote">
+<pre><code> ModelInterface (device:str='gpu', **kwargs)</code></pre>
+</blockquote>
+<p>Provides standardized methods to interact with ml models. Inherit into new class and override the abstract (i.e.&nbsp;not implemented) methods.</p>
+</section>
+</section>
+<section id="testing-the-apis" class="level2">
+<h2 class="anchored" data-anchor-id="testing-the-apis">Testing the APIs</h2>
+<p>Building a model for peptide classification (e.g.&nbsp;detectability)</p>
+<p>First, design the <code>torch.nn.Module</code> (Transformer model)</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> peptdeep.model.building_block <span class="im">as</span> building_block</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Test_Bert(torch.nn.Module):</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>,</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>        nlayers <span class="op">=</span> <span class="dv">3</span>,</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>        input_dim <span class="op">=</span> <span class="dv">128</span>, <span class="co">#ascii code number</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>        hidden_dim <span class="op">=</span> <span class="dv">256</span>,</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>        dropout <span class="op">=</span> <span class="fl">0.1</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>    ):</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>        <span class="co">"""</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a><span class="co">        Model based on a transformer Architecture from </span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a><span class="co">        Huggingface's BertEncoder class.</span></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a><span class="co">        """</span></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>().<span class="fu">__init__</span>()</span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.dropout <span class="op">=</span> torch.nn.Dropout(dropout)</span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.input_nn <span class="op">=</span>  torch.nn.Sequential(</span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>            torch.nn.Embedding(input_dim, hidden_dim),</span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>            building_block.PositionalEncoding(hidden_dim)</span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.hidden_nn <span class="op">=</span> building_block.Hidden_HFace_Transformer(</span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a>            hidden_dim, nlayers<span class="op">=</span>nlayers, dropout<span class="op">=</span>dropout</span>
+<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.output_nn <span class="op">=</span> torch.nn.Sequential(</span>
+<span id="cb5-28"><a href="#cb5-28" aria-hidden="true" tabindex="-1"></a>            building_block.SeqAttentionSum(hidden_dim),</span>
+<span id="cb5-29"><a href="#cb5-29" aria-hidden="true" tabindex="-1"></a>            torch.nn.PReLU(),</span>
+<span id="cb5-30"><a href="#cb5-30" aria-hidden="true" tabindex="-1"></a>            <span class="va">self</span>.dropout,</span>
+<span id="cb5-31"><a href="#cb5-31" aria-hidden="true" tabindex="-1"></a>            torch.nn.Linear(hidden_dim, <span class="dv">1</span>),</span>
+<span id="cb5-32"><a href="#cb5-32" aria-hidden="true" tabindex="-1"></a>            torch.nn.Sigmoid()</span>
+<span id="cb5-33"><a href="#cb5-33" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb5-34"><a href="#cb5-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-35"><a href="#cb5-35" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> forward(<span class="va">self</span>, x):</span>
+<span id="cb5-36"><a href="#cb5-36" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> <span class="va">self</span>.dropout(<span class="va">self</span>.input_nn(x))</span>
+<span id="cb5-37"><a href="#cb5-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-38"><a href="#cb5-38" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> <span class="va">self</span>.hidden_nn(x)</span>
+<span id="cb5-39"><a href="#cb5-39" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> <span class="va">self</span>.dropout(x[<span class="dv">0</span>])</span>
+<span id="cb5-40"><a href="#cb5-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-41"><a href="#cb5-41" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">self</span>.output_nn(x).squeeze(<span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Second, implement the ModelInterface APIs</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Test_Model(ModelInterface):</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, </span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>        dropout<span class="op">=</span><span class="fl">0.1</span>,</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>        model_class:torch.nn.Module<span class="op">=</span>Test_Bert, <span class="co">#model class defined above</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>        device:<span class="bu">str</span><span class="op">=</span><span class="st">'gpu'</span>,</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>        <span class="op">**</span>kwargs,</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>    ):</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>().<span class="fu">__init__</span>(device<span class="op">=</span>device)</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.build(</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>            model_class,</span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>            dropout<span class="op">=</span>dropout,</span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>            <span class="op">**</span>kwargs</span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.loss_func <span class="op">=</span> torch.nn.BCELoss() <span class="co"># loss for binary classification</span></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.target_column_to_predict <span class="op">=</span> <span class="st">'predicted_prob'</span></span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.target_column_to_train <span class="op">=</span> <span class="st">'detected_prob'</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Last, test the model</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.DataFrame({</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">'sequence'</span>:[<span class="st">'ABCD'</span>]<span class="op">*</span><span class="dv">10</span>,</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>df[<span class="st">'detected_prob'</span>] <span class="op">=</span> <span class="fl">1.0</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> Test_Model()</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>model.train(df, epoch<span class="op">=</span><span class="dv">2</span>)</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>model.predict(df)</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="st">'predicted_prob'</span> <span class="kw">in</span> df.columns</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>df</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+
+<div>
+
+<table class="dataframe table table-sm table-striped">
+  <thead>
+    <tr>
+      <th></th>
+      <th>sequence</th>
+      <th>detected_prob</th>
+      <th>nAA</th>
+      <th>predicted_prob</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>ABCD</td>
+      <td>1.0</td>
+      <td>4</td>
+      <td>0.781049</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>ABCD</td>
+      <td>1.0</td>
+      <td>4</td>
+      <td>0.781049</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>ABCD</td>
+      <td>1.0</td>
+      <td>4</td>
+      <td>0.781049</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>ABCD</td>
+      <td>1.0</td>
+      <td>4</td>
+      <td>0.781049</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>ABCD</td>
+      <td>1.0</td>
+      <td>4</td>
+      <td>0.781049</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>ABCD</td>
+      <td>1.0</td>
+      <td>4</td>
+      <td>0.781049</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>ABCD</td>
+      <td>1.0</td>
+      <td>4</td>
+      <td>0.781049</td>
+    </tr>
+    <tr>
+      <th>7</th>
+      <td>ABCD</td>
+      <td>1.0</td>
+      <td>4</td>
+      <td>0.781049</td>
+    </tr>
+    <tr>
+      <th>8</th>
+      <td>ABCD</td>
+      <td>1.0</td>
+      <td>4</td>
+      <td>0.781049</td>
+    </tr>
+    <tr>
+      <th>9</th>
+      <td>ABCD</td>
+      <td>1.0</td>
+      <td>4</td>
+      <td>0.781049</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+</div>
+<section id="test-build_from_py_codes" class="level3">
+<h3 class="anchored" data-anchor-id="test-build_from_py_codes">Test <code>build_from_py_codes()</code></h3>
+<div class="cell" data-execution_count="4">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> peptdeep.model.ms2 <span class="im">import</span> pDeepModel</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> peptdeep.pretrained_models <span class="im">import</span> model_zip</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>ms2_model <span class="op">=</span> pDeepModel()</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>ms2_model.build_from_py_codes(</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>    model_zip, <span class="st">'generic/ms2.pth.model.py'</span>, </span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>    include_model_params_yaml<span class="op">=</span><span class="va">True</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>ms2_model.model</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="4">
+<pre><code>Model(
+  (dropout): Dropout(p=0.1, inplace=False)
+  (input_nn): Input_AA_Mod_PositionalEncoding(
+    (mod_nn): Mod_Embedding_FixFirstK(
+      (nn): Linear(in_features=103, out_features=2, bias=False)
+    )
+    (aa_emb): Embedding(128, 240, padding_idx=0)
+    (pos_encoder): PositionalEncoding()
+  )
+  (meta_nn): Meta_Embedding(
+    (nn): Linear(in_features=9, out_features=7, bias=True)
+  )
+  (hidden_nn): Hidden_HFace_Transformer(
+    (bert): BertEncoder(
+      (layer): ModuleList(
+        (0): BertLayer(
+          (attention): BertAttention(
+            (self): BertSelfAttention(
+              (query): Linear(in_features=256, out_features=256, bias=True)
+              (key): Linear(in_features=256, out_features=256, bias=True)
+              (value): Linear(in_features=256, out_features=256, bias=True)
+              (dropout): Dropout(p=0.1, inplace=False)
+            )
+            (output): BertSelfOutput(
+              (dense): Linear(in_features=256, out_features=256, bias=True)
+              (LayerNorm): LayerNorm((256,), eps=1e-08, elementwise_affine=True)
+              (dropout): Dropout(p=0.1, inplace=False)
+            )
+          )
+          (intermediate): BertIntermediate(
+            (dense): Linear(in_features=256, out_features=1024, bias=True)
+          )
+          (output): BertOutput(
+            (dense): Linear(in_features=1024, out_features=256, bias=True)
+            (LayerNorm): LayerNorm((256,), eps=1e-08, elementwise_affine=True)
+            (dropout): Dropout(p=0.1, inplace=False)
+          )
+        )
+        (1): BertLayer(
+          (attention): BertAttention(
+            (self): BertSelfAttention(
+              (query): Linear(in_features=256, out_features=256, bias=True)
+              (key): Linear(in_features=256, out_features=256, bias=True)
+              (value): Linear(in_features=256, out_features=256, bias=True)
+              (dropout): Dropout(p=0.1, inplace=False)
+            )
+            (output): BertSelfOutput(
+              (dense): Linear(in_features=256, out_features=256, bias=True)
+              (LayerNorm): LayerNorm((256,), eps=1e-08, elementwise_affine=True)
+              (dropout): Dropout(p=0.1, inplace=False)
+            )
+          )
+          (intermediate): BertIntermediate(
+            (dense): Linear(in_features=256, out_features=1024, bias=True)
+          )
+          (output): BertOutput(
+            (dense): Linear(in_features=1024, out_features=256, bias=True)
+            (LayerNorm): LayerNorm((256,), eps=1e-08, elementwise_affine=True)
+            (dropout): Dropout(p=0.1, inplace=False)
+          )
+        )
+        (2): BertLayer(
+          (attention): BertAttention(
+            (self): BertSelfAttention(
+              (query): Linear(in_features=256, out_features=256, bias=True)
+              (key): Linear(in_features=256, out_features=256, bias=True)
+              (value): Linear(in_features=256, out_features=256, bias=True)
+              (dropout): Dropout(p=0.1, inplace=False)
+            )
+            (output): BertSelfOutput(
+              (dense): Linear(in_features=256, out_features=256, bias=True)
+              (LayerNorm): LayerNorm((256,), eps=1e-08, elementwise_affine=True)
+              (dropout): Dropout(p=0.1, inplace=False)
+            )
+          )
+          (intermediate): BertIntermediate(
+            (dense): Linear(in_features=256, out_features=1024, bias=True)
+          )
+          (output): BertOutput(
+            (dense): Linear(in_features=1024, out_features=256, bias=True)
+            (LayerNorm): LayerNorm((256,), eps=1e-08, elementwise_affine=True)
+            (dropout): Dropout(p=0.1, inplace=False)
+          )
+        )
+        (3): BertLayer(
+          (attention): BertAttention(
+            (self): BertSelfAttention(
+              (query): Linear(in_features=256, out_features=256, bias=True)
+              (key): Linear(in_features=256, out_features=256, bias=True)
+              (value): Linear(in_features=256, out_features=256, bias=True)
+              (dropout): Dropout(p=0.1, inplace=False)
+            )
+            (output): BertSelfOutput(
+              (dense): Linear(in_features=256, out_features=256, bias=True)
+              (LayerNorm): LayerNorm((256,), eps=1e-08, elementwise_affine=True)
+              (dropout): Dropout(p=0.1, inplace=False)
+            )
+          )
+          (intermediate): BertIntermediate(
+            (dense): Linear(in_features=256, out_features=1024, bias=True)
+          )
+          (output): BertOutput(
+            (dense): Linear(in_features=1024, out_features=256, bias=True)
+            (LayerNorm): LayerNorm((256,), eps=1e-08, elementwise_affine=True)
+            (dropout): Dropout(p=0.1, inplace=False)
+          )
+        )
+      )
+    )
+  )
+  (output_nn): Decoder_Linear(
+    (nn): Sequential(
+      (0): Linear(in_features=256, out_features=64, bias=True)
+      (1): PReLU(num_parameters=1)
+      (2): Linear(in_features=64, out_features=4, bias=True)
+    )
+  )
+  (modloss_nn): ModuleList(
+    (0): Hidden_HFace_Transformer(
+      (bert): BertEncoder(
+        (layer): ModuleList(
+          (0): BertLayer(
+            (attention): BertAttention(
+              (self): BertSelfAttention(
+                (query): Linear(in_features=256, out_features=256, bias=True)
+                (key): Linear(in_features=256, out_features=256, bias=True)
+                (value): Linear(in_features=256, out_features=256, bias=True)
+                (dropout): Dropout(p=0.1, inplace=False)
+              )
+              (output): BertSelfOutput(
+                (dense): Linear(in_features=256, out_features=256, bias=True)
+                (LayerNorm): LayerNorm((256,), eps=1e-08, elementwise_affine=True)
+                (dropout): Dropout(p=0.1, inplace=False)
+              )
+            )
+            (intermediate): BertIntermediate(
+              (dense): Linear(in_features=256, out_features=1024, bias=True)
+            )
+            (output): BertOutput(
+              (dense): Linear(in_features=1024, out_features=256, bias=True)
+              (LayerNorm): LayerNorm((256,), eps=1e-08, elementwise_affine=True)
+              (dropout): Dropout(p=0.1, inplace=False)
+            )
+          )
+        )
+      )
+    )
+    (1): Decoder_Linear(
+      (nn): Sequential(
+        (0): Linear(in_features=256, out_features=64, bias=True)
+        (1): PReLU(num_parameters=1)
+        (2): Linear(in_features=64, out_features=4, bias=True)
+      )
+    )
+  )
+)</code></pre>
+</div>
+</div>
+
+
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    target: function(trigger) {
+      return trigger.previousElementSibling;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    setTimeout(function() {
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const cites = ref.parentNode.getAttribute('data-cites').split(' ');
+    tippyHover(ref, function() {
+      var popup = window.document.createElement('div');
+      cites.forEach(function(cite) {
+        var citeDiv = window.document.createElement('div');
+        citeDiv.classList.add('hanging-indent');
+        citeDiv.classList.add('csl-entry');
+        var biblioDiv = window.document.getElementById('ref-' + cite);
+        if (biblioDiv) {
+          citeDiv.innerHTML = biblioDiv.innerHTML;
+        }
+        popup.appendChild(citeDiv);
+      });
+      return popup.innerHTML;
+    });
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>
