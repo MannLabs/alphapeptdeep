@@ -47,7 +47,7 @@ nb_path: "nbdev_nbs/model/ccs.ipynb"
 
 
 <div class="output_markdown rendered_html output_subarea ">
-<h2 id="Model_CCS_Bert" class="doc_header"><code>class</code> <code>Model_CCS_Bert</code><a href="https://github.com/MannLabs/peptdeep/tree/main/peptdeep/model/ccs.py#L30" class="source_link" style="float:right">[source]</a></h2><blockquote><p><code>Model_CCS_Bert</code>(<strong><code>dropout</code></strong>=<em><code>0.1</code></em>, <strong><code>nlayers</code></strong>=<em><code>4</code></em>, <strong><code>hidden</code></strong>=<em><code>128</code></em>, <strong><code>output_attentions</code></strong>=<em><code>False</code></em>, <strong>**<code>kwargs</code></strong>) :: <code>Module</code></p>
+<h2 id="Model_CCS_Bert" class="doc_header"><code>class</code> <code>Model_CCS_Bert</code><a href="https://github.com/MannLabs/alphapeptdeep/tree/main/peptdeep/model/ccs.py#L30" class="source_link" style="float:right">[source]</a></h2><blockquote><p><code>Model_CCS_Bert</code>(<strong><code>dropout</code></strong>=<em><code>0.1</code></em>, <strong><code>nlayers</code></strong>=<em><code>4</code></em>, <strong><code>hidden</code></strong>=<em><code>128</code></em>, <strong><code>output_attentions</code></strong>=<em><code>False</code></em>, <strong>**<code>kwargs</code></strong>) :: <code>Module</code></p>
 </blockquote>
 <p>Base class for all neural network modules.</p>
 <p>Your models should also subclass this class.</p>
@@ -102,7 +102,7 @@ parameters converted too when you call :meth:<code>to</code>, etc.</p>
 
 
 <div class="output_markdown rendered_html output_subarea ">
-<h2 id="Model_CCS_LSTM" class="doc_header"><code>class</code> <code>Model_CCS_LSTM</code><a href="https://github.com/MannLabs/peptdeep/tree/main/peptdeep/model/ccs.py#L88" class="source_link" style="float:right">[source]</a></h2><blockquote><p><code>Model_CCS_LSTM</code>(<strong><code>dropout</code></strong>=<em><code>0.1</code></em>) :: <code>Module</code></p>
+<h2 id="Model_CCS_LSTM" class="doc_header"><code>class</code> <code>Model_CCS_LSTM</code><a href="https://github.com/MannLabs/alphapeptdeep/tree/main/peptdeep/model/ccs.py#L88" class="source_link" style="float:right">[source]</a></h2><blockquote><p><code>Model_CCS_LSTM</code>(<strong><code>dropout</code></strong>=<em><code>0.1</code></em>) :: <code>Module</code></p>
 </blockquote>
 <p>Base class for all neural network modules.</p>
 <p>Your models should also subclass this class.</p>
@@ -157,7 +157,7 @@ parameters converted too when you call :meth:<code>to</code>, etc.</p>
 
 
 <div class="output_markdown rendered_html output_subarea ">
-<h4 id="ccs_to_mobility_pred_df" class="doc_header"><code>ccs_to_mobility_pred_df</code><a href="https://github.com/MannLabs/peptdeep/tree/main/peptdeep/model/ccs.py#L120" class="source_link" style="float:right">[source]</a></h4><blockquote><p><code>ccs_to_mobility_pred_df</code>(<strong><code>precursor_df</code></strong>:<code>DataFrame</code>)</p>
+<h4 id="ccs_to_mobility_pred_df" class="doc_header"><code>ccs_to_mobility_pred_df</code><a href="https://github.com/MannLabs/alphapeptdeep/tree/main/peptdeep/model/ccs.py#L120" class="source_link" style="float:right">[source]</a></h4><blockquote><p><code>ccs_to_mobility_pred_df</code>(<strong><code>precursor_df</code></strong>:<code>DataFrame</code>)</p>
 </blockquote>
 <p>Add 'mobility_pred' into precursor_df inplace</p>
 
@@ -182,7 +182,7 @@ parameters converted too when you call :meth:<code>to</code>, etc.</p>
 
 
 <div class="output_markdown rendered_html output_subarea ">
-<h4 id="mobility_to_ccs_df_" class="doc_header"><code>mobility_to_ccs_df_</code><a href="https://github.com/MannLabs/peptdeep/tree/main/peptdeep/model/ccs.py#L131" class="source_link" style="float:right">[source]</a></h4><blockquote><p><code>mobility_to_ccs_df_</code>(<strong><code>precursor_df</code></strong>:<code>DataFrame</code>)</p>
+<h4 id="mobility_to_ccs_df_" class="doc_header"><code>mobility_to_ccs_df_</code><a href="https://github.com/MannLabs/alphapeptdeep/tree/main/peptdeep/model/ccs.py#L131" class="source_link" style="float:right">[source]</a></h4><blockquote><p><code>mobility_to_ccs_df_</code>(<strong><code>precursor_df</code></strong>:<code>DataFrame</code>)</p>
 </blockquote>
 <p>Add 'ccs' into precursor_df inplace</p>
 
@@ -214,7 +214,7 @@ parameters converted too when you call :meth:<code>to</code>, etc.</p>
 
 
 <div class="output_markdown rendered_html output_subarea ">
-<h2 id="AlphaCCSModel" class="doc_header"><code>class</code> <code>AlphaCCSModel</code><a href="https://github.com/MannLabs/peptdeep/tree/main/peptdeep/model/ccs.py#L144" class="source_link" style="float:right">[source]</a></h2><blockquote><p><code>AlphaCCSModel</code>(<strong><code>dropout</code></strong>=<em><code>0.1</code></em>, <strong><code>model_class</code></strong>:<code>Module</code>=<em><code>Model_CCS_LSTM</code></em>, <strong><code>device</code></strong>:<code>str</code>=<em><code>'gpu'</code></em>, <strong>**<code>kwargs</code></strong>) :: <a href="/alphapeptdeep/model_interface.html#ModelInterface"><code>ModelInterface</code></a></p>
+<h2 id="AlphaCCSModel" class="doc_header"><code>class</code> <code>AlphaCCSModel</code><a href="https://github.com/MannLabs/alphapeptdeep/tree/main/peptdeep/model/ccs.py#L144" class="source_link" style="float:right">[source]</a></h2><blockquote><p><code>AlphaCCSModel</code>(<strong><code>dropout</code></strong>=<em><code>0.1</code></em>, <strong><code>model_class</code></strong>:<code>Module</code>=<em><code>Model_CCS_LSTM</code></em>, <strong><code>device</code></strong>:<code>str</code>=<em><code>'gpu'</code></em>, <strong>**<code>kwargs</code></strong>) :: <a href="/alphapeptdeep/model_interface.html#ModelInterface"><code>ModelInterface</code></a></p>
 </blockquote>
 <p>Provides standardized methods to interact
 with ml models. Inherit into new class and override

@@ -55,7 +55,7 @@ def get_cosine_schedule_with_warmup(
 
 def append_nAA_column_if_missing(precursor_df):
     """
-    column containing the number of Amino Acids
+    Append a column containing the number of Amino Acids
     """
     if 'nAA' not in precursor_df.columns:
         precursor_df['nAA'] = precursor_df.sequence.str.len()

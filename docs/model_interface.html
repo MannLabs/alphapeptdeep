@@ -66,7 +66,7 @@ nb_path: "nbdev_nbs/model/model_interface.ipynb"
 
 
 <div class="output_markdown rendered_html output_subarea ">
-<h4 id="get_cosine_schedule_with_warmup" class="doc_header"><code>get_cosine_schedule_with_warmup</code><a href="https://github.com/MannLabs/peptdeep/tree/main/peptdeep/model/model_interface.py#L35" class="source_link" style="float:right">[source]</a></h4><blockquote><p><code>get_cosine_schedule_with_warmup</code>(<strong><code>optimizer</code></strong>, <strong><code>num_warmup_steps</code></strong>, <strong><code>num_training_steps</code></strong>, <strong><code>num_cycles</code></strong>=<em><code>0.5</code></em>, <strong><code>last_epoch</code></strong>=<em><code>-1</code></em>)</p>
+<h4 id="get_cosine_schedule_with_warmup" class="doc_header"><code>get_cosine_schedule_with_warmup</code><a href="https://github.com/MannLabs/alphapeptdeep/tree/main/peptdeep/model/model_interface.py#L35" class="source_link" style="float:right">[source]</a></h4><blockquote><p><code>get_cosine_schedule_with_warmup</code>(<strong><code>optimizer</code></strong>, <strong><code>num_warmup_steps</code></strong>, <strong><code>num_training_steps</code></strong>, <strong><code>num_cycles</code></strong>=<em><code>0.5</code></em>, <strong><code>last_epoch</code></strong>=<em><code>-1</code></em>)</p>
 </blockquote>
 <p>Create a schedule with a learning rate that decreases following the
 values of the cosine function between 0 and <code>pi * cycles</code> after a warmup
@@ -93,9 +93,9 @@ period during which it increases linearly between 0 and 1.</p>
 
 
 <div class="output_markdown rendered_html output_subarea ">
-<h4 id="append_nAA_column_if_missing" class="doc_header"><code>append_nAA_column_if_missing</code><a href="https://github.com/MannLabs/peptdeep/tree/main/peptdeep/model/model_interface.py#L56" class="source_link" style="float:right">[source]</a></h4><blockquote><p><code>append_nAA_column_if_missing</code>(<strong><code>precursor_df</code></strong>)</p>
+<h4 id="append_nAA_column_if_missing" class="doc_header"><code>append_nAA_column_if_missing</code><a href="https://github.com/MannLabs/alphapeptdeep/tree/main/peptdeep/model/model_interface.py#L56" class="source_link" style="float:right">[source]</a></h4><blockquote><p><code>append_nAA_column_if_missing</code>(<strong><code>precursor_df</code></strong>)</p>
 </blockquote>
-<p>column containing the number of Amino Acids</p>
+<p>Append a column containing the number of Amino Acids</p>
 
 </div>
 
@@ -151,7 +151,7 @@ pred_df = model.predict(df)</code></pre>
 
 
 <div class="output_markdown rendered_html output_subarea ">
-<h2 id="ModelInterface" class="doc_header"><code>class</code> <code>ModelInterface</code><a href="https://github.com/MannLabs/peptdeep/tree/main/peptdeep/model/model_interface.py#L67" class="source_link" style="float:right">[source]</a></h2><blockquote><p><code>ModelInterface</code>(<strong><code>device</code></strong>:<code>str</code>=<em><code>'gpu'</code></em>, <strong>**<code>kwargs</code></strong>)</p>
+<h2 id="ModelInterface" class="doc_header"><code>class</code> <code>ModelInterface</code><a href="https://github.com/MannLabs/alphapeptdeep/tree/main/peptdeep/model/model_interface.py#L67" class="source_link" style="float:right">[source]</a></h2><blockquote><p><code>ModelInterface</code>(<strong><code>device</code></strong>:<code>str</code>=<em><code>'gpu'</code></em>, <strong>**<code>kwargs</code></strong>)</p>
 </blockquote>
 <p>Provides standardized methods to interact
 with ml models. Inherit into new class and override
@@ -176,7 +176,7 @@ the abstract (i.e. not implemented) methods.</p>
 
 <div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h1 id="Testing-the-APIs">Testing the APIs<a class="anchor-link" href="#Testing-the-APIs"> </a></h1><p>Building a model for peptide classification (e.g. detectability)</p>
+<h2 id="Testing-the-APIs">Testing the APIs<a class="anchor-link" href="#Testing-the-APIs"> </a></h2><p>Building a model for peptide classification (e.g. detectability)</p>
 
 </div>
 </div>

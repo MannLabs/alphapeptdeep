@@ -1,3 +1,7 @@
+# AlphaPeptDeep (peptdeep)
+
+
+
 ![Pip installation](https://github.com/MannLabs/alphapeptdeep/workflows/Default%20installation%20and%20tests/badge.svg)
 ![GUI and PyPi releases](https://github.com/MannLabs/alphapeptdeep/workflows/Publish%20on%20PyPi%20and%20release%20on%20GitHub/badge.svg)
 [![Downloads](https://pepy.tech/badge/peptdeep)](https://pepy.tech/project/peptdeep)
@@ -6,7 +10,7 @@
 
 # AlphaPeptDeep (peptdeep)
 
-An open-source Python package of the AlphaPept ecosystem from the [Mann Labs at the Max Planck Institute of Biochemistry](https://www.biochem.mpg.de/mann) and the [University of Copenhagen](https://www.cpr.ku.dk/research/proteomics/mann/). To enable all hyperlinks in this document, please view it at [GitHub](https://github.com/MannLabs/alphapeptdeep). For documentation, see [GitHub pages](https://mannlabs.github.io/alphapeptdeep/)
+An open-source Python package of the AlphaPept ecosystem from the [Mann Labs at the Max Planck Institute of Biochemistry](https://www.biochem.mpg.de/mann) and the [University of Copenhagen](https://www.cpr.ku.dk/research/proteomics/mann/). To enable all hyperlinks in this document, please view it at [GitHub](https://github.com/MannLabs/alphapeptdeep). For documentation, see [GitHub pages](https://mannlabs.github.io/alphapeptdeep/).
 
 * [**About**](#about)
 * [**License**](#license)
@@ -75,13 +79,6 @@ For those who are really adventurous, it is also possible to directly install an
 pip install "git+https://github.com/MannLabs/alphapeptdeep.git@development#egg=peptdeep[stable,development-stable]"
 ```
 
-### Install GPU version of PyTorch
-
-```bash
-pip install torch --extra-index-url https://download.pytorch.org/whl/cu116
-```
-See [pytorch.org](https://pytorch.org/get-started/locally/) for details.
-
 ### Developer
 
 peptdeep can also be installed in editable (i.e. developer) mode with a few `bash` commands. This allows to fully customize the software and even modify the source code to your specific needs. When an editable Python package is installed, its source code is stored in a transparent location of your choice. While optional, it is advised to first (create and) navigate to e.g. a general software folder:
@@ -109,10 +106,10 @@ conda activate peptdeep
 Finally, peptdeep and all its [dependancies](requirements) need to be installed. To take advantage of all features and allow development (with the `-e` flag), this is best done by also installing the [development dependencies](requirements/requirements_development.txt) instead of only the [core dependencies](requirements/requirements.txt):
 
 ```bash
-pip install -e ".[development]"
+pip install -e "./peptdeep[development]"
 ```
 
-By default this installs loose dependancies (no explicit versioning), although it is also possible to use stable dependencies (e.g. `pip install -e ".[stable,development-stable]"`).
+By default this installs loose dependancies (no explicit versioning), although it is also possible to use stable dependencies (e.g. `pip install -e "./peptdeep[stable,development-stable]"`).
 
 ***By using the editable flag `-e`, all modifications to the [peptdeep source code folder](peptdeep) are directly reflected when running peptdeep. Note that the peptdeep folder cannot be moved and/or renamed if an editable version is installed. In case of confusion, you can always retrieve the location of any Python module with e.g. the command `import module` followed by `module.__file__`.***
 

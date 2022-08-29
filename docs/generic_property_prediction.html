@@ -1,6 +1,6 @@
 ---
 
-title: Generic Property Prediction
+title: *Generic Property Prediction
 
 
 keywords: fastai
@@ -50,7 +50,7 @@ nb_path: "nbdev_nbs/model/generic_property_prediction.ipynb"
 <div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
 <h2 id="Description">Description<a class="anchor-link" href="#Description"> </a></h2><h3 id="Scope-of-the-generic-property-prediction">Scope of the generic property prediction<a class="anchor-link" href="#Scope-of-the-generic-property-prediction"> </a></h3><p>One focus of the AlpahPeptDeep framework is on the prediction of retention times, MS2 Spectra and Collisional Cross sections of peptides. The Models to predict these properties are defined in the notebooks <code>rt.ipynb</code>, <code>ms2.ipynb</code> and <code>ccs.ipynb</code> respectively. In the following notebook, we define a more generalized model, which in principle allows to predict or classify arbitrary properties of peptides. The classes allow users to create new deep learning predictions of peptide properties, even without prior expertise in deep learning.</p>
-<h3 id="How-to-build-new-models,-even-without-experience-in-deep-learning">How to build new models, even without experience in deep learning<a class="anchor-link" href="#How-to-build-new-models,-even-without-experience-in-deep-learning"> </a></h3><p>In order to predict or classify novel properties of peptides, the user simply needs to provide a list of peptides with a corresponding property (e.g. 'binding affinity') for each peptide. The user only needs to initialize one the <a href="/peptdeep/model_interface.html#ModelInterface"><code>ModelInterface</code></a> classes below and specify the name of the <code>target_column_to_train</code> and optionally the <code>target_column_to_predict</code>. The generic model classes will try to derive predictions or classifications of the property from the peptide sequence. Additional classes are also given, which complement the peptide sequence info with site-specific PTM infos.</p>
+<h3 id="How-to-build-new-models,-even-without-experience-in-deep-learning">How to build new models, even without experience in deep learning<a class="anchor-link" href="#How-to-build-new-models,-even-without-experience-in-deep-learning"> </a></h3><p>In order to predict or classify novel properties of peptides, the user simply needs to provide a list of peptides with a corresponding property (e.g. 'binding affinity') for each peptide. The user only needs to initialize one the <a href="/alphapeptdeep/model_interface.html#ModelInterface"><code>ModelInterface</code></a> classes below and specify the name of the <code>target_column_to_train</code> and optionally the <code>target_column_to_predict</code>. The generic model classes will try to derive predictions or classifications of the property from the peptide sequence. Additional classes are also given, which complement the peptide sequence info with site-specific PTM infos.</p>
 
 </div>
 </div>
@@ -85,7 +85,7 @@ nb_path: "nbdev_nbs/model/generic_property_prediction.ipynb"
 
 
 <div class="output_markdown rendered_html output_subarea ">
-<h2 id="Model_for_Generic_AASeq_Regression_LSTM" class="doc_header"><code>class</code> <code>Model_for_Generic_AASeq_Regression_LSTM</code><a href="https://github.com/MannLabs/peptdeep/tree/main/peptdeep/model/generic_property_prediction.py#L24" class="source_link" style="float:right">[source]</a></h2><blockquote><p><code>Model_for_Generic_AASeq_Regression_LSTM</code>(<strong><code>hidden_dim</code></strong>=<em><code>256</code></em>, <strong><code>n_lstm_layers</code></strong>=<em><code>4</code></em>, <strong><code>dropout</code></strong>=<em><code>0.1</code></em>, <strong>**<code>kwargs</code></strong>) :: <code>Module</code></p>
+<h2 id="Model_for_Generic_AASeq_Regression_LSTM" class="doc_header"><code>class</code> <code>Model_for_Generic_AASeq_Regression_LSTM</code><a href="https://github.com/MannLabs/alphapeptdeep/tree/main/peptdeep/model/generic_property_prediction.py#L24" class="source_link" style="float:right">[source]</a></h2><blockquote><p><code>Model_for_Generic_AASeq_Regression_LSTM</code>(<strong><code>hidden_dim</code></strong>=<em><code>256</code></em>, <strong><code>n_lstm_layers</code></strong>=<em><code>4</code></em>, <strong><code>dropout</code></strong>=<em><code>0.1</code></em>, <strong>**<code>kwargs</code></strong>) :: <code>Module</code></p>
 </blockquote>
 <p>Base class for all neural network modules.</p>
 <p>Your models should also subclass this class.</p>
@@ -133,7 +133,7 @@ parameters converted too when you call :meth:<code>to</code>, etc.</p>
 
 
 <div class="output_markdown rendered_html output_subarea ">
-<h2 id="Model_for_Generic_AASeq_Regression_Transformer" class="doc_header"><code>class</code> <code>Model_for_Generic_AASeq_Regression_Transformer</code><a href="https://github.com/MannLabs/peptdeep/tree/main/peptdeep/model/generic_property_prediction.py#L52" class="source_link" style="float:right">[source]</a></h2><blockquote><p><code>Model_for_Generic_AASeq_Regression_Transformer</code>(<strong><code>hidden_dim</code></strong>=<em><code>256</code></em>, <strong><code>nlayers</code></strong>=<em><code>4</code></em>, <strong><code>output_attentions</code></strong>=<em><code>False</code></em>, <strong><code>dropout</code></strong>=<em><code>0.1</code></em>, <strong>**<code>kwargs</code></strong>) :: <code>Module</code></p>
+<h2 id="Model_for_Generic_AASeq_Regression_Transformer" class="doc_header"><code>class</code> <code>Model_for_Generic_AASeq_Regression_Transformer</code><a href="https://github.com/MannLabs/alphapeptdeep/tree/main/peptdeep/model/generic_property_prediction.py#L52" class="source_link" style="float:right">[source]</a></h2><blockquote><p><code>Model_for_Generic_AASeq_Regression_Transformer</code>(<strong><code>hidden_dim</code></strong>=<em><code>256</code></em>, <strong><code>nlayers</code></strong>=<em><code>4</code></em>, <strong><code>output_attentions</code></strong>=<em><code>False</code></em>, <strong><code>dropout</code></strong>=<em><code>0.1</code></em>, <strong>**<code>kwargs</code></strong>) :: <code>Module</code></p>
 </blockquote>
 <p>Base class for all neural network modules.</p>
 <p>Your models should also subclass this class.</p>
@@ -181,7 +181,7 @@ parameters converted too when you call :meth:<code>to</code>, etc.</p>
 
 
 <div class="output_markdown rendered_html output_subarea ">
-<h2 id="ModelInterface_for_Generic_AASeq_Regression" class="doc_header"><code>class</code> <code>ModelInterface_for_Generic_AASeq_Regression</code><a href="https://github.com/MannLabs/peptdeep/tree/main/peptdeep/model/generic_property_prediction.py#L108" class="source_link" style="float:right">[source]</a></h2><blockquote><p><code>ModelInterface_for_Generic_AASeq_Regression</code>(<strong><code>dropout</code></strong>=<em><code>0.1</code></em>, <strong><code>model_class</code></strong>:<code>Module</code>=<em><code>Model_for_Generic_AASeq_Regression_LSTM</code></em>, <strong><code>device</code></strong>:<code>str</code>=<em><code>'gpu'</code></em>, <strong>**<code>kwargs</code></strong>) :: <a href="/peptdeep/model_interface.html#ModelInterface"><code>ModelInterface</code></a></p>
+<h2 id="ModelInterface_for_Generic_AASeq_Regression" class="doc_header"><code>class</code> <code>ModelInterface_for_Generic_AASeq_Regression</code><a href="https://github.com/MannLabs/alphapeptdeep/tree/main/peptdeep/model/generic_property_prediction.py#L108" class="source_link" style="float:right">[source]</a></h2><blockquote><p><code>ModelInterface_for_Generic_AASeq_Regression</code>(<strong><code>dropout</code></strong>=<em><code>0.1</code></em>, <strong><code>model_class</code></strong>:<code>Module</code>=<em><code>Model_for_Generic_AASeq_Regression_LSTM</code></em>, <strong><code>device</code></strong>:<code>str</code>=<em><code>'gpu'</code></em>, <strong>**<code>kwargs</code></strong>) :: <a href="/alphapeptdeep/model_interface.html#ModelInterface"><code>ModelInterface</code></a></p>
 </blockquote>
 <p>Provides standardized methods to interact
 with ml models. Inherit into new class and override
@@ -399,7 +399,7 @@ the abstract (i.e. not implemented) methods.</p>
 
 <div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h4 id="Building-an-RT-model-based-on-Model_for_Generic_AASeq_Regression_LSTM">Building an RT model based on <a href="/peptdeep/generic_property_prediction.html#Model_for_Generic_AASeq_Regression_LSTM"><code>Model_for_Generic_AASeq_Regression_LSTM</code></a><a class="anchor-link" href="#Building-an-RT-model-based-on-Model_for_Generic_AASeq_Regression_LSTM"> </a></h4>
+<h4 id="Building-an-RT-model-based-on-Model_for_Generic_AASeq_Regression_LSTM">Building an RT model based on <a href="/alphapeptdeep/generic_property_prediction.html#Model_for_Generic_AASeq_Regression_LSTM"><code>Model_for_Generic_AASeq_Regression_LSTM</code></a><a class="anchor-link" href="#Building-an-RT-model-based-on-Model_for_Generic_AASeq_Regression_LSTM"> </a></h4>
 </div>
 </div>
 </div>
@@ -749,7 +749,7 @@ the abstract (i.e. not implemented) methods.</p>
 
 <div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h4 id="Building-an-RT-model-for-only-sequences-based-on-Model_for_Generic_AASeq_Regression_Transformer">Building an RT model for only sequences based on <a href="/peptdeep/generic_property_prediction.html#Model_for_Generic_AASeq_Regression_Transformer"><code>Model_for_Generic_AASeq_Regression_Transformer</code></a><a class="anchor-link" href="#Building-an-RT-model-for-only-sequences-based-on-Model_for_Generic_AASeq_Regression_Transformer"> </a></h4>
+<h4 id="Building-an-RT-model-for-only-sequences-based-on-Model_for_Generic_AASeq_Regression_Transformer">Building an RT model for only sequences based on <a href="/alphapeptdeep/generic_property_prediction.html#Model_for_Generic_AASeq_Regression_Transformer"><code>Model_for_Generic_AASeq_Regression_Transformer</code></a><a class="anchor-link" href="#Building-an-RT-model-for-only-sequences-based-on-Model_for_Generic_AASeq_Regression_Transformer"> </a></h4>
 </div>
 </div>
 </div>
@@ -1114,7 +1114,7 @@ the abstract (i.e. not implemented) methods.</p>
 
 
 <div class="output_markdown rendered_html output_subarea ">
-<h2 id="Model_for_Generic_ModAASeq_Regression_LSTM" class="doc_header"><code>class</code> <code>Model_for_Generic_ModAASeq_Regression_LSTM</code><a href="https://github.com/MannLabs/peptdeep/tree/main/peptdeep/model/generic_property_prediction.py#L127" class="source_link" style="float:right">[source]</a></h2><blockquote><p><code>Model_for_Generic_ModAASeq_Regression_LSTM</code>(<strong><code>hidden_dim</code></strong>=<em><code>256</code></em>, <strong><code>n_lstm_layers</code></strong>=<em><code>4</code></em>, <strong><code>dropout</code></strong>=<em><code>0.1</code></em>, <strong>**<code>kwargs</code></strong>) :: <code>Module</code></p>
+<h2 id="Model_for_Generic_ModAASeq_Regression_LSTM" class="doc_header"><code>class</code> <code>Model_for_Generic_ModAASeq_Regression_LSTM</code><a href="https://github.com/MannLabs/alphapeptdeep/tree/main/peptdeep/model/generic_property_prediction.py#L127" class="source_link" style="float:right">[source]</a></h2><blockquote><p><code>Model_for_Generic_ModAASeq_Regression_LSTM</code>(<strong><code>hidden_dim</code></strong>=<em><code>256</code></em>, <strong><code>n_lstm_layers</code></strong>=<em><code>4</code></em>, <strong><code>dropout</code></strong>=<em><code>0.1</code></em>, <strong>**<code>kwargs</code></strong>) :: <code>Module</code></p>
 </blockquote>
 <p>Base class for all neural network modules.</p>
 <p>Your models should also subclass this class.</p>
@@ -1162,7 +1162,7 @@ parameters converted too when you call :meth:<code>to</code>, etc.</p>
 
 
 <div class="output_markdown rendered_html output_subarea ">
-<h2 id="Model_for_Generic_ModAASeq_Regression_Transformer" class="doc_header"><code>class</code> <code>Model_for_Generic_ModAASeq_Regression_Transformer</code><a href="https://github.com/MannLabs/peptdeep/tree/main/peptdeep/model/generic_property_prediction.py#L152" class="source_link" style="float:right">[source]</a></h2><blockquote><p><code>Model_for_Generic_ModAASeq_Regression_Transformer</code>(<strong><code>hidden_dim</code></strong>=<em><code>256</code></em>, <strong><code>nlayers</code></strong>=<em><code>4</code></em>, <strong><code>output_attentions</code></strong>=<em><code>False</code></em>, <strong><code>dropout</code></strong>=<em><code>0.1</code></em>, <strong>**<code>kwargs</code></strong>) :: <code>Module</code></p>
+<h2 id="Model_for_Generic_ModAASeq_Regression_Transformer" class="doc_header"><code>class</code> <code>Model_for_Generic_ModAASeq_Regression_Transformer</code><a href="https://github.com/MannLabs/alphapeptdeep/tree/main/peptdeep/model/generic_property_prediction.py#L152" class="source_link" style="float:right">[source]</a></h2><blockquote><p><code>Model_for_Generic_ModAASeq_Regression_Transformer</code>(<strong><code>hidden_dim</code></strong>=<em><code>256</code></em>, <strong><code>nlayers</code></strong>=<em><code>4</code></em>, <strong><code>output_attentions</code></strong>=<em><code>False</code></em>, <strong><code>dropout</code></strong>=<em><code>0.1</code></em>, <strong>**<code>kwargs</code></strong>) :: <code>Module</code></p>
 </blockquote>
 <p>Base class for all neural network modules.</p>
 <p>Your models should also subclass this class.</p>
@@ -1210,7 +1210,7 @@ parameters converted too when you call :meth:<code>to</code>, etc.</p>
 
 
 <div class="output_markdown rendered_html output_subarea ">
-<h2 id="ModelInterface_for_Generic_ModAASeq_Regression" class="doc_header"><code>class</code> <code>ModelInterface_for_Generic_ModAASeq_Regression</code><a href="https://github.com/MannLabs/peptdeep/tree/main/peptdeep/model/generic_property_prediction.py#L210" class="source_link" style="float:right">[source]</a></h2><blockquote><p><code>ModelInterface_for_Generic_ModAASeq_Regression</code>(<strong><code>dropout</code></strong>=<em><code>0.1</code></em>, <strong><code>model_class</code></strong>:<code>Module</code>=<em><code>Model_for_Generic_ModAASeq_Regression_LSTM</code></em>, <strong><code>device</code></strong>:<code>str</code>=<em><code>'gpu'</code></em>, <strong>**<code>kwargs</code></strong>) :: <a href="/peptdeep/model_interface.html#ModelInterface"><code>ModelInterface</code></a></p>
+<h2 id="ModelInterface_for_Generic_ModAASeq_Regression" class="doc_header"><code>class</code> <code>ModelInterface_for_Generic_ModAASeq_Regression</code><a href="https://github.com/MannLabs/alphapeptdeep/tree/main/peptdeep/model/generic_property_prediction.py#L210" class="source_link" style="float:right">[source]</a></h2><blockquote><p><code>ModelInterface_for_Generic_ModAASeq_Regression</code>(<strong><code>dropout</code></strong>=<em><code>0.1</code></em>, <strong><code>model_class</code></strong>:<code>Module</code>=<em><code>Model_for_Generic_ModAASeq_Regression_LSTM</code></em>, <strong><code>device</code></strong>:<code>str</code>=<em><code>'gpu'</code></em>, <strong>**<code>kwargs</code></strong>) :: <a href="/alphapeptdeep/model_interface.html#ModelInterface"><code>ModelInterface</code></a></p>
 </blockquote>
 <p>Provides standardized methods to interact
 with ml models. Inherit into new class and override
@@ -1235,7 +1235,7 @@ the abstract (i.e. not implemented) methods.</p>
 
 <div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h4 id="Scalar-regression-model-(RT)-with-modified-AA-sequences-using-Model_for_Generic_ModAASeq_Regression_LSTM">Scalar regression model (RT) with modified AA sequences using <a href="/peptdeep/generic_property_prediction.html#Model_for_Generic_ModAASeq_Regression_LSTM"><code>Model_for_Generic_ModAASeq_Regression_LSTM</code></a><a class="anchor-link" href="#Scalar-regression-model-(RT)-with-modified-AA-sequences-using-Model_for_Generic_ModAASeq_Regression_LSTM"> </a></h4>
+<h4 id="Scalar-regression-model-(RT)-with-modified-AA-sequences-using-Model_for_Generic_ModAASeq_Regression_LSTM">Scalar regression model (RT) with modified AA sequences using <a href="/alphapeptdeep/generic_property_prediction.html#Model_for_Generic_ModAASeq_Regression_LSTM"><code>Model_for_Generic_ModAASeq_Regression_LSTM</code></a><a class="anchor-link" href="#Scalar-regression-model-(RT)-with-modified-AA-sequences-using-Model_for_Generic_ModAASeq_Regression_LSTM"> </a></h4>
 </div>
 </div>
 </div>
@@ -1435,7 +1435,7 @@ the abstract (i.e. not implemented) methods.</p>
 
 <div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h4 id="Scalar-regression-model-(RT)-with-modified-AA-sequences-using-Model_for_Generic_ModAASeq_Regression_Transformer">Scalar regression model (RT) with modified AA sequences using <a href="/peptdeep/generic_property_prediction.html#Model_for_Generic_ModAASeq_Regression_Transformer"><code>Model_for_Generic_ModAASeq_Regression_Transformer</code></a><a class="anchor-link" href="#Scalar-regression-model-(RT)-with-modified-AA-sequences-using-Model_for_Generic_ModAASeq_Regression_Transformer"> </a></h4>
+<h4 id="Scalar-regression-model-(RT)-with-modified-AA-sequences-using-Model_for_Generic_ModAASeq_Regression_Transformer">Scalar regression model (RT) with modified AA sequences using <a href="/alphapeptdeep/generic_property_prediction.html#Model_for_Generic_ModAASeq_Regression_Transformer"><code>Model_for_Generic_ModAASeq_Regression_Transformer</code></a><a class="anchor-link" href="#Scalar-regression-model-(RT)-with-modified-AA-sequences-using-Model_for_Generic_ModAASeq_Regression_Transformer"> </a></h4>
 </div>
 </div>
 </div>
@@ -1650,7 +1650,7 @@ the abstract (i.e. not implemented) methods.</p>
 
 
 <div class="output_markdown rendered_html output_subarea ">
-<h2 id="Model_for_Generic_AASeq_BinaryClassification_LSTM" class="doc_header"><code>class</code> <code>Model_for_Generic_AASeq_BinaryClassification_LSTM</code><a href="https://github.com/MannLabs/peptdeep/tree/main/peptdeep/model/generic_property_prediction.py#L235" class="source_link" style="float:right">[source]</a></h2><blockquote><p><code>Model_for_Generic_AASeq_BinaryClassification_LSTM</code>(<strong><code>hidden_dim</code></strong>=<em><code>256</code></em>, <strong><code>n_lstm_layers</code></strong>=<em><code>4</code></em>, <strong><code>dropout</code></strong>=<em><code>0.1</code></em>, <strong>**<code>kwargs</code></strong>) :: <a href="/peptdeep/generic_property_prediction.html#Model_for_Generic_AASeq_Regression_LSTM"><code>Model_for_Generic_AASeq_Regression_LSTM</code></a></p>
+<h2 id="Model_for_Generic_AASeq_BinaryClassification_LSTM" class="doc_header"><code>class</code> <code>Model_for_Generic_AASeq_BinaryClassification_LSTM</code><a href="https://github.com/MannLabs/alphapeptdeep/tree/main/peptdeep/model/generic_property_prediction.py#L235" class="source_link" style="float:right">[source]</a></h2><blockquote><p><code>Model_for_Generic_AASeq_BinaryClassification_LSTM</code>(<strong><code>hidden_dim</code></strong>=<em><code>256</code></em>, <strong><code>n_lstm_layers</code></strong>=<em><code>4</code></em>, <strong><code>dropout</code></strong>=<em><code>0.1</code></em>, <strong>**<code>kwargs</code></strong>) :: <a href="/alphapeptdeep/generic_property_prediction.html#Model_for_Generic_AASeq_Regression_LSTM"><code>Model_for_Generic_AASeq_Regression_LSTM</code></a></p>
 </blockquote>
 <p>Base class for all neural network modules.</p>
 <p>Your models should also subclass this class.</p>
@@ -1698,7 +1698,7 @@ parameters converted too when you call :meth:<code>to</code>, etc.</p>
 
 
 <div class="output_markdown rendered_html output_subarea ">
-<h2 id="Model_for_Generic_AASeq_BinaryClassification_Transformer" class="doc_header"><code>class</code> <code>Model_for_Generic_AASeq_BinaryClassification_Transformer</code><a href="https://github.com/MannLabs/peptdeep/tree/main/peptdeep/model/generic_property_prediction.py#L255" class="source_link" style="float:right">[source]</a></h2><blockquote><p><code>Model_for_Generic_AASeq_BinaryClassification_Transformer</code>(<strong><code>hidden_dim</code></strong>=<em><code>256</code></em>, <strong><code>nlayers</code></strong>=<em><code>4</code></em>, <strong><code>output_attentions</code></strong>=<em><code>False</code></em>, <strong><code>dropout</code></strong>=<em><code>0.1</code></em>, <strong>**<code>kwargs</code></strong>) :: <a href="/peptdeep/generic_property_prediction.html#Model_for_Generic_AASeq_Regression_Transformer"><code>Model_for_Generic_AASeq_Regression_Transformer</code></a></p>
+<h2 id="Model_for_Generic_AASeq_BinaryClassification_Transformer" class="doc_header"><code>class</code> <code>Model_for_Generic_AASeq_BinaryClassification_Transformer</code><a href="https://github.com/MannLabs/alphapeptdeep/tree/main/peptdeep/model/generic_property_prediction.py#L255" class="source_link" style="float:right">[source]</a></h2><blockquote><p><code>Model_for_Generic_AASeq_BinaryClassification_Transformer</code>(<strong><code>hidden_dim</code></strong>=<em><code>256</code></em>, <strong><code>nlayers</code></strong>=<em><code>4</code></em>, <strong><code>output_attentions</code></strong>=<em><code>False</code></em>, <strong><code>dropout</code></strong>=<em><code>0.1</code></em>, <strong>**<code>kwargs</code></strong>) :: <a href="/alphapeptdeep/generic_property_prediction.html#Model_for_Generic_AASeq_Regression_Transformer"><code>Model_for_Generic_AASeq_Regression_Transformer</code></a></p>
 </blockquote>
 <p>Base class for all neural network modules.</p>
 <p>Your models should also subclass this class.</p>
@@ -1746,7 +1746,7 @@ parameters converted too when you call :meth:<code>to</code>, etc.</p>
 
 
 <div class="output_markdown rendered_html output_subarea ">
-<h2 id="ModelInterface_for_Generic_AASeq_BinaryClassification" class="doc_header"><code>class</code> <code>ModelInterface_for_Generic_AASeq_BinaryClassification</code><a href="https://github.com/MannLabs/peptdeep/tree/main/peptdeep/model/generic_property_prediction.py#L282" class="source_link" style="float:right">[source]</a></h2><blockquote><p><code>ModelInterface_for_Generic_AASeq_BinaryClassification</code>(<strong><code>dropout</code></strong>=<em><code>0.1</code></em>, <strong><code>model_class</code></strong>:<code>Module</code>=<em><code>Model_for_Generic_AASeq_BinaryClassification_LSTM</code></em>, <strong><code>device</code></strong>:<code>str</code>=<em><code>'gpu'</code></em>, <strong>**<code>kwargs</code></strong>) :: <a href="/peptdeep/model_interface.html#ModelInterface"><code>ModelInterface</code></a></p>
+<h2 id="ModelInterface_for_Generic_AASeq_BinaryClassification" class="doc_header"><code>class</code> <code>ModelInterface_for_Generic_AASeq_BinaryClassification</code><a href="https://github.com/MannLabs/alphapeptdeep/tree/main/peptdeep/model/generic_property_prediction.py#L282" class="source_link" style="float:right">[source]</a></h2><blockquote><p><code>ModelInterface_for_Generic_AASeq_BinaryClassification</code>(<strong><code>dropout</code></strong>=<em><code>0.1</code></em>, <strong><code>model_class</code></strong>:<code>Module</code>=<em><code>Model_for_Generic_AASeq_BinaryClassification_LSTM</code></em>, <strong><code>device</code></strong>:<code>str</code>=<em><code>'gpu'</code></em>, <strong>**<code>kwargs</code></strong>) :: <a href="/alphapeptdeep/model_interface.html#ModelInterface"><code>ModelInterface</code></a></p>
 </blockquote>
 <p>Provides standardized methods to interact
 with ml models. Inherit into new class and override
@@ -1798,7 +1798,7 @@ the abstract (i.e. not implemented) methods.</p>
 
 <div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h4 id="A-sequence-classification-model-using-Model_for_Generic_AASeq_BinaryClassification_LSTM">A sequence classification model using <a href="/peptdeep/generic_property_prediction.html#Model_for_Generic_AASeq_BinaryClassification_LSTM"><code>Model_for_Generic_AASeq_BinaryClassification_LSTM</code></a><a class="anchor-link" href="#A-sequence-classification-model-using-Model_for_Generic_AASeq_BinaryClassification_LSTM"> </a></h4>
+<h4 id="A-sequence-classification-model-using-Model_for_Generic_AASeq_BinaryClassification_LSTM">A sequence classification model using <a href="/alphapeptdeep/generic_property_prediction.html#Model_for_Generic_AASeq_BinaryClassification_LSTM"><code>Model_for_Generic_AASeq_BinaryClassification_LSTM</code></a><a class="anchor-link" href="#A-sequence-classification-model-using-Model_for_Generic_AASeq_BinaryClassification_LSTM"> </a></h4>
 </div>
 </div>
 </div>
@@ -2010,7 +2010,7 @@ the abstract (i.e. not implemented) methods.</p>
 
 <div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h4 id="A-sequence-classification-model-using-Model_for_Generic_AASeq_BinaryClassification_Transformer">A sequence classification model using <a href="/peptdeep/generic_property_prediction.html#Model_for_Generic_AASeq_BinaryClassification_Transformer"><code>Model_for_Generic_AASeq_BinaryClassification_Transformer</code></a><a class="anchor-link" href="#A-sequence-classification-model-using-Model_for_Generic_AASeq_BinaryClassification_Transformer"> </a></h4>
+<h4 id="A-sequence-classification-model-using-Model_for_Generic_AASeq_BinaryClassification_Transformer">A sequence classification model using <a href="/alphapeptdeep/generic_property_prediction.html#Model_for_Generic_AASeq_BinaryClassification_Transformer"><code>Model_for_Generic_AASeq_BinaryClassification_Transformer</code></a><a class="anchor-link" href="#A-sequence-classification-model-using-Model_for_Generic_AASeq_BinaryClassification_Transformer"> </a></h4>
 </div>
 </div>
 </div>
@@ -2237,7 +2237,7 @@ the abstract (i.e. not implemented) methods.</p>
 
 
 <div class="output_markdown rendered_html output_subarea ">
-<h2 id="Model_for_Generic_ModAASeq_BinaryClassification_LSTM" class="doc_header"><code>class</code> <code>Model_for_Generic_ModAASeq_BinaryClassification_LSTM</code><a href="https://github.com/MannLabs/peptdeep/tree/main/peptdeep/model/generic_property_prediction.py#L303" class="source_link" style="float:right">[source]</a></h2><blockquote><p><code>Model_for_Generic_ModAASeq_BinaryClassification_LSTM</code>(<strong><code>hidden_dim</code></strong>=<em><code>256</code></em>, <strong><code>n_lstm_layers</code></strong>=<em><code>4</code></em>, <strong><code>dropout</code></strong>=<em><code>0.1</code></em>, <strong>**<code>kwargs</code></strong>) :: <a href="/peptdeep/generic_property_prediction.html#Model_for_Generic_ModAASeq_Regression_LSTM"><code>Model_for_Generic_ModAASeq_Regression_LSTM</code></a></p>
+<h2 id="Model_for_Generic_ModAASeq_BinaryClassification_LSTM" class="doc_header"><code>class</code> <code>Model_for_Generic_ModAASeq_BinaryClassification_LSTM</code><a href="https://github.com/MannLabs/alphapeptdeep/tree/main/peptdeep/model/generic_property_prediction.py#L303" class="source_link" style="float:right">[source]</a></h2><blockquote><p><code>Model_for_Generic_ModAASeq_BinaryClassification_LSTM</code>(<strong><code>hidden_dim</code></strong>=<em><code>256</code></em>, <strong><code>n_lstm_layers</code></strong>=<em><code>4</code></em>, <strong><code>dropout</code></strong>=<em><code>0.1</code></em>, <strong>**<code>kwargs</code></strong>) :: <a href="/alphapeptdeep/generic_property_prediction.html#Model_for_Generic_ModAASeq_Regression_LSTM"><code>Model_for_Generic_ModAASeq_Regression_LSTM</code></a></p>
 </blockquote>
 <p>Base class for all neural network modules.</p>
 <p>Your models should also subclass this class.</p>
@@ -2285,7 +2285,7 @@ parameters converted too when you call :meth:<code>to</code>, etc.</p>
 
 
 <div class="output_markdown rendered_html output_subarea ">
-<h2 id="Model_for_Generic_ModAASeq_BinaryClassification_Transformer" class="doc_header"><code>class</code> <code>Model_for_Generic_ModAASeq_BinaryClassification_Transformer</code><a href="https://github.com/MannLabs/peptdeep/tree/main/peptdeep/model/generic_property_prediction.py#L325" class="source_link" style="float:right">[source]</a></h2><blockquote><p><code>Model_for_Generic_ModAASeq_BinaryClassification_Transformer</code>(<strong><code>hidden_dim</code></strong>=<em><code>256</code></em>, <strong><code>nlayers</code></strong>=<em><code>4</code></em>, <strong><code>output_attentions</code></strong>=<em><code>False</code></em>, <strong><code>dropout</code></strong>=<em><code>0.1</code></em>, <strong>**<code>kwargs</code></strong>) :: <a href="/peptdeep/generic_property_prediction.html#Model_for_Generic_ModAASeq_Regression_Transformer"><code>Model_for_Generic_ModAASeq_Regression_Transformer</code></a></p>
+<h2 id="Model_for_Generic_ModAASeq_BinaryClassification_Transformer" class="doc_header"><code>class</code> <code>Model_for_Generic_ModAASeq_BinaryClassification_Transformer</code><a href="https://github.com/MannLabs/alphapeptdeep/tree/main/peptdeep/model/generic_property_prediction.py#L325" class="source_link" style="float:right">[source]</a></h2><blockquote><p><code>Model_for_Generic_ModAASeq_BinaryClassification_Transformer</code>(<strong><code>hidden_dim</code></strong>=<em><code>256</code></em>, <strong><code>nlayers</code></strong>=<em><code>4</code></em>, <strong><code>output_attentions</code></strong>=<em><code>False</code></em>, <strong><code>dropout</code></strong>=<em><code>0.1</code></em>, <strong>**<code>kwargs</code></strong>) :: <a href="/alphapeptdeep/generic_property_prediction.html#Model_for_Generic_ModAASeq_Regression_Transformer"><code>Model_for_Generic_ModAASeq_Regression_Transformer</code></a></p>
 </blockquote>
 <p>Base class for all neural network modules.</p>
 <p>Your models should also subclass this class.</p>
@@ -2333,7 +2333,7 @@ parameters converted too when you call :meth:<code>to</code>, etc.</p>
 
 
 <div class="output_markdown rendered_html output_subarea ">
-<h2 id="ModelInterface_for_Generic_ModAASeq_BinaryClassification" class="doc_header"><code>class</code> <code>ModelInterface_for_Generic_ModAASeq_BinaryClassification</code><a href="https://github.com/MannLabs/peptdeep/tree/main/peptdeep/model/generic_property_prediction.py#L364" class="source_link" style="float:right">[source]</a></h2><blockquote><p><code>ModelInterface_for_Generic_ModAASeq_BinaryClassification</code>(<strong><code>dropout</code></strong>=<em><code>0.1</code></em>, <strong><code>model_class</code></strong>:<code>Module</code>=<em><code>Model_for_Generic_ModAASeq_BinaryClassification_LSTM</code></em>, <strong><code>device</code></strong>:<code>str</code>=<em><code>'gpu'</code></em>, <strong>**<code>kwargs</code></strong>) :: <a href="/peptdeep/model_interface.html#ModelInterface"><code>ModelInterface</code></a></p>
+<h2 id="ModelInterface_for_Generic_ModAASeq_BinaryClassification" class="doc_header"><code>class</code> <code>ModelInterface_for_Generic_ModAASeq_BinaryClassification</code><a href="https://github.com/MannLabs/alphapeptdeep/tree/main/peptdeep/model/generic_property_prediction.py#L364" class="source_link" style="float:right">[source]</a></h2><blockquote><p><code>ModelInterface_for_Generic_ModAASeq_BinaryClassification</code>(<strong><code>dropout</code></strong>=<em><code>0.1</code></em>, <strong><code>model_class</code></strong>:<code>Module</code>=<em><code>Model_for_Generic_ModAASeq_BinaryClassification_LSTM</code></em>, <strong><code>device</code></strong>:<code>str</code>=<em><code>'gpu'</code></em>, <strong>**<code>kwargs</code></strong>) :: <a href="/alphapeptdeep/model_interface.html#ModelInterface"><code>ModelInterface</code></a></p>
 </blockquote>
 <p>Provides standardized methods to interact
 with ml models. Inherit into new class and override
@@ -2385,7 +2385,7 @@ the abstract (i.e. not implemented) methods.</p>
 
 <div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h4 id="A-sequence-classification-model-using-Model_for_Generic_ModAASeq_BinaryClassification_LSTM">A sequence classification model using <a href="/peptdeep/generic_property_prediction.html#Model_for_Generic_ModAASeq_BinaryClassification_LSTM"><code>Model_for_Generic_ModAASeq_BinaryClassification_LSTM</code></a><a class="anchor-link" href="#A-sequence-classification-model-using-Model_for_Generic_ModAASeq_BinaryClassification_LSTM"> </a></h4>
+<h4 id="A-sequence-classification-model-using-Model_for_Generic_ModAASeq_BinaryClassification_LSTM">A sequence classification model using <a href="/alphapeptdeep/generic_property_prediction.html#Model_for_Generic_ModAASeq_BinaryClassification_LSTM"><code>Model_for_Generic_ModAASeq_BinaryClassification_LSTM</code></a><a class="anchor-link" href="#A-sequence-classification-model-using-Model_for_Generic_ModAASeq_BinaryClassification_LSTM"> </a></h4>
 </div>
 </div>
 </div>
@@ -2597,7 +2597,7 @@ the abstract (i.e. not implemented) methods.</p>
 
 <div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h4 id="A-sequence-classification-model-using-Model_for_Generic_ModAASeq_BinaryClassification_Transformer">A sequence classification model using <a href="/peptdeep/generic_property_prediction.html#Model_for_Generic_ModAASeq_BinaryClassification_Transformer"><code>Model_for_Generic_ModAASeq_BinaryClassification_Transformer</code></a><a class="anchor-link" href="#A-sequence-classification-model-using-Model_for_Generic_ModAASeq_BinaryClassification_Transformer"> </a></h4>
+<h4 id="A-sequence-classification-model-using-Model_for_Generic_ModAASeq_BinaryClassification_Transformer">A sequence classification model using <a href="/alphapeptdeep/generic_property_prediction.html#Model_for_Generic_ModAASeq_BinaryClassification_Transformer"><code>Model_for_Generic_ModAASeq_BinaryClassification_Transformer</code></a><a class="anchor-link" href="#A-sequence-classification-model-using-Model_for_Generic_ModAASeq_BinaryClassification_Transformer"> </a></h4>
 </div>
 </div>
 </div>

@@ -138,6 +138,12 @@ index = {"get_fragment_median": "mass_calibration.ipynb",
          "Model_RT_LSTM_CNN": "rt.ipynb",
          "Model_RT_LSTM": "rt.ipynb",
          "AlphaRTModel": "rt.ipynb",
+         "load_settings": "pipeline_api.ipynb",
+         "import_psm_df": "pipeline_api.ipynb",
+         "match_psms": "pipeline_api.ipynb",
+         "transfer_learn": "pipeline_api.ipynb",
+         "generate_library": "pipeline_api.ipynb",
+         "rescore_psms": "pipeline_api.ipynb",
          "is_model_zip": "pretrained_models.ipynb",
          "download_models": "pretrained_models.ipynb",
          "pretrain_dir": "pretrained_models.ipynb",
@@ -230,6 +236,7 @@ modules = ["mass_spec/mass_calibration.py",
            "model/model_shop.py",
            "model/ms2.py",
            "model/rt.py",
+           "pipeline_api.py",
            "pretrained_models.py",
            "protein/fasta.py",
            "psm_frag_reader/library_frag_reader.py",
@@ -247,6 +254,6 @@ modules = ["mass_spec/mass_calibration.py",
 
 doc_url = "https://MannLabs.github.io/alphapeptdeep/"
 
-git_url = "https://github.com/MannLabs/peptdeep/tree/main/"
+git_url = "https://github.com/MannLabs/alphapeptdeep/tree/main/"
 
 def custom_doc_links(name): return None

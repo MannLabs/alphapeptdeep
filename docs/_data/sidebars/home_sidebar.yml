@@ -19,7 +19,7 @@ entries:
       title: Basic spectrum file readers
       url: ms_reader.html
     - output: web,pdf
-      title: NN Building Block
+      title: '*NN Building Block'
       url: building_block.html
     - output: web,pdf
       title: CCS model and interface
@@ -28,7 +28,7 @@ entries:
       title: Functionalities for featurization/tensorization
       url: featurize.html
     - output: web,pdf
-      title: Generic Property Prediction
+      title: '*Generic Property Prediction'
       url: generic_property_prediction.html
     - output: web,pdf
       title: Model Interface
@@ -46,19 +46,22 @@ entries:
       title: Testing predict_mp()
       url: test_predict_mp.html
     - output: web,pdf
-      title: Integrated functionalities for MS2/RT/CCS models
+      title: '*The high-level pipeline APIs'
+      url: pipeline_api.html
+    - output: web,pdf
+      title: '*Integrated functionalities for MS2/RT/CCS models'
       url: pretrained_models.html
     - output: web,pdf
-      title: Predicting libraries from fasta or sequences
+      title: '*Predicting libraries from fasta or sequences'
       url: fasta.html
     - output: web,pdf
-      title: 'Legacy: TSV lib reader with fragments'
+      title: 'PSM reader with fragments: TSV lib'
       url: library_frag_reader.html
     - output: web,pdf
-      title: 'Legacy: MaxQuant reader with fragments'
+      title: 'PSM Reader with fragments: MaxQuant msms.txt'
       url: maxquant_frag_reader.html
     - output: web,pdf
-      title: 'Legacy: PSM reader with fragments'
+      title: PSM reader with fragments
       url: psm_frag_reader.html
     - output: web,pdf
       title: 'Legacy: psmlabel (pDeep) reader with fragments'
@@ -76,10 +79,10 @@ entries:
       title: All global settings for peptdeep
       url: settings.html
     - output: web,pdf
-      title: Factory classes to predict libraries from different sources
+      title: '*Factory classes to predict libraries from different sources'
       url: library_factory.html
     - output: web,pdf
-      title: Base functionalities to predict libraries
+      title: '*Base functionalities to predict libraries'
       url: predict_lib.html
     - output: web,pdf
       title: Testing translate_tsv()
@@ -87,6 +90,9 @@ entries:
     - output: web,pdf
       title: Translate peptdeep spectral libraries into other formats (e.g. TSV)
       url: translate.html
+    - output: web,pdf
+      title: Testing GUI
+      url: test_ui.html
     - output: web,pdf
       title: Utils
       url: utils.html

@@ -40,7 +40,7 @@ nb_path: "nbdev_nbs/mass_spec/match.ipynb"
 
 
 <div class="output_markdown rendered_html output_subarea ">
-<h4 id="match_centroid_mz" class="doc_header"><code>match_centroid_mz</code><a href="https://github.com/MannLabs/peptdeep/tree/main/peptdeep/mass_spec/match.py#L10" class="source_link" style="float:right">[source]</a></h4><blockquote><p><code>match_centroid_mz</code>(<strong><code>spec_mzs</code></strong>:<code>ndarray</code>, <strong><code>query_mzs</code></strong>:<code>ndarray</code>, <strong><code>spec_mz_tols</code></strong>:<code>ndarray</code>)</p>
+<h4 id="match_centroid_mz" class="doc_header"><code>match_centroid_mz</code><a href="https://github.com/MannLabs/alphapeptdeep/tree/main/peptdeep/mass_spec/match.py#L10" class="source_link" style="float:right">[source]</a></h4><blockquote><p><code>match_centroid_mz</code>(<strong><code>spec_mzs</code></strong>:<code>ndarray</code>, <strong><code>query_mzs</code></strong>:<code>ndarray</code>, <strong><code>spec_mz_tols</code></strong>:<code>ndarray</code>)</p>
 </blockquote>
 <p>Matching query masses against sorted MS2/spec centroid masses,
 only closest (minimal mass error) peaks are matched.</p>
@@ -73,7 +73,7 @@ only closest (minimal mass error) peaks are matched.</p>
 
 
 <div class="output_markdown rendered_html output_subarea ">
-<h4 id="match_profile_mz" class="doc_header"><code>match_profile_mz</code><a href="https://github.com/MannLabs/peptdeep/tree/main/peptdeep/mass_spec/match.py#L45" class="source_link" style="float:right">[source]</a></h4><blockquote><p><code>match_profile_mz</code>(<strong><code>spec_mzs</code></strong>:<code>ndarray</code>, <strong><code>query_mzs</code></strong>:<code>ndarray</code>, <strong><code>spec_mz_tols</code></strong>:<code>ndarray</code>, <strong><code>spec_intens</code></strong>:<code>ndarray</code>)</p>
+<h4 id="match_profile_mz" class="doc_header"><code>match_profile_mz</code><a href="https://github.com/MannLabs/alphapeptdeep/tree/main/peptdeep/mass_spec/match.py#L45" class="source_link" style="float:right">[source]</a></h4><blockquote><p><code>match_profile_mz</code>(<strong><code>spec_mzs</code></strong>:<code>ndarray</code>, <strong><code>query_mzs</code></strong>:<code>ndarray</code>, <strong><code>spec_mz_tols</code></strong>:<code>ndarray</code>, <strong><code>spec_intens</code></strong>:<code>ndarray</code>)</p>
 </blockquote>
 <p>Matching query masses against sorted MS2/spec profile masses,
 only highest peaks are matched.</p>
@@ -113,7 +113,7 @@ only highest peaks are matched.</p>
 
 
 <div class="output_markdown rendered_html output_subarea ">
-<h4 id="match_one_raw_with_numba" class="doc_header"><code>match_one_raw_with_numba</code><a href="https://github.com/MannLabs/peptdeep/tree/main/peptdeep/mass_spec/match.py#L100" class="source_link" style="float:right">[source]</a></h4><blockquote><p><code>match_one_raw_with_numba</code>(<strong><code>spec_idxes</code></strong>, <strong><code>frag_start_idxes</code></strong>, <strong><code>frag_end_idxes</code></strong>, <strong><code>all_frag_mzs</code></strong>, <strong><code>all_spec_mzs</code></strong>, <strong><code>all_spec_intensities</code></strong>, <strong><code>peak_start_idxes</code></strong>, <strong><code>peak_end_idxes</code></strong>, <strong><code>matched_intensities</code></strong>, <strong><code>matched_mz_errs</code></strong>, <strong><code>ppm</code></strong>, <strong><code>tol</code></strong>)</p>
+<h4 id="match_one_raw_with_numba" class="doc_header"><code>match_one_raw_with_numba</code><a href="https://github.com/MannLabs/alphapeptdeep/tree/main/peptdeep/mass_spec/match.py#L100" class="source_link" style="float:right">[source]</a></h4><blockquote><p><code>match_one_raw_with_numba</code>(<strong><code>spec_idxes</code></strong>, <strong><code>frag_start_idxes</code></strong>, <strong><code>frag_end_idxes</code></strong>, <strong><code>all_frag_mzs</code></strong>, <strong><code>all_spec_mzs</code></strong>, <strong><code>all_spec_intensities</code></strong>, <strong><code>peak_start_idxes</code></strong>, <strong><code>peak_end_idxes</code></strong>, <strong><code>matched_intensities</code></strong>, <strong><code>matched_mz_errs</code></strong>, <strong><code>ppm</code></strong>, <strong><code>tol</code></strong>)</p>
 </blockquote>
 <p>Internel function to match fragment mz values to spectrum mz values.
 Matched_mz_errs[i] = np.inf if no peaks are matched.</p>
@@ -146,7 +146,7 @@ Matched_mz_errs[i] = np.inf if no peaks are matched.</p>
 
 
 <div class="output_markdown rendered_html output_subarea ">
-<h2 id="PepSpecMatch" class="doc_header"><code>class</code> <code>PepSpecMatch</code><a href="https://github.com/MannLabs/peptdeep/tree/main/peptdeep/mass_spec/match.py#L154" class="source_link" style="float:right">[source]</a></h2><blockquote><p><code>PepSpecMatch</code>(<strong><code>charged_frag_types</code></strong>=<em><code>['b_z1', 'b_z2', 'y_z1', 'y_z2', 'b_modloss_z1', 'b_modloss_z2', 'y_modloss_z1', 'y_modloss_z2']</code></em>)</p>
+<h2 id="PepSpecMatch" class="doc_header"><code>class</code> <code>PepSpecMatch</code><a href="https://github.com/MannLabs/alphapeptdeep/tree/main/peptdeep/mass_spec/match.py#L154" class="source_link" style="float:right">[source]</a></h2><blockquote><p><code>PepSpecMatch</code>(<strong><code>charged_frag_types</code></strong>=<em><code>['b_z1', 'b_z2', 'y_z1', 'y_z2', 'b_modloss_z1', 'b_modloss_z2', 'y_modloss_z1', 'y_modloss_z2']</code></em>)</p>
 </blockquote>
 
 </div>

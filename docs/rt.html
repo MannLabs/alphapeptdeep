@@ -74,7 +74,7 @@ nb_path: "nbdev_nbs/model/rt.ipynb"
 
 
 <div class="output_markdown rendered_html output_subarea ">
-<h2 id="Model_RT_Bert" class="doc_header"><code>class</code> <code>Model_RT_Bert</code><a href="https://github.com/MannLabs/peptdeep/tree/main/peptdeep/model/rt.py#L50" class="source_link" style="float:right">[source]</a></h2><blockquote><p><code>Model_RT_Bert</code>(<strong><code>dropout</code></strong>=<em><code>0.1</code></em>, <strong><code>nlayers</code></strong>=<em><code>4</code></em>, <strong><code>hidden</code></strong>=<em><code>128</code></em>, <strong><code>output_attentions</code></strong>=<em><code>False</code></em>, <strong>**<code>kwargs</code></strong>) :: <code>Module</code></p>
+<h2 id="Model_RT_Bert" class="doc_header"><code>class</code> <code>Model_RT_Bert</code><a href="https://github.com/MannLabs/alphapeptdeep/tree/main/peptdeep/model/rt.py#L50" class="source_link" style="float:right">[source]</a></h2><blockquote><p><code>Model_RT_Bert</code>(<strong><code>dropout</code></strong>=<em><code>0.1</code></em>, <strong><code>nlayers</code></strong>=<em><code>4</code></em>, <strong><code>hidden</code></strong>=<em><code>128</code></em>, <strong><code>output_attentions</code></strong>=<em><code>False</code></em>, <strong>**<code>kwargs</code></strong>) :: <code>Module</code></p>
 </blockquote>
 <p>Base class for all neural network modules.</p>
 <p>Your models should also subclass this class.</p>
@@ -135,7 +135,7 @@ parameters converted too when you call :meth:<code>to</code>, etc.</p>
 
 
 <div class="output_markdown rendered_html output_subarea ">
-<h2 id="Model_RT_LSTM_CNN" class="doc_header"><code>class</code> <code>Model_RT_LSTM_CNN</code><a href="https://github.com/MannLabs/peptdeep/tree/main/peptdeep/model/rt.py#L110" class="source_link" style="float:right">[source]</a></h2><blockquote><p><code>Model_RT_LSTM_CNN</code>(<strong><code>dropout</code></strong>=<em><code>0.2</code></em>) :: <code>Module</code></p>
+<h2 id="Model_RT_LSTM_CNN" class="doc_header"><code>class</code> <code>Model_RT_LSTM_CNN</code><a href="https://github.com/MannLabs/alphapeptdeep/tree/main/peptdeep/model/rt.py#L110" class="source_link" style="float:right">[source]</a></h2><blockquote><p><code>Model_RT_LSTM_CNN</code>(<strong><code>dropout</code></strong>=<em><code>0.2</code></em>) :: <code>Module</code></p>
 </blockquote>
 <p>Base class for all neural network modules.</p>
 <p>Your models should also subclass this class.</p>
@@ -181,7 +181,7 @@ parameters converted too when you call :meth:<code>to</code>, etc.</p>
 
 <div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="Model-Pipeline">Model Pipeline<a class="anchor-link" href="#Model-Pipeline"> </a></h2><p>The final model which is used to interact with the data is defined below, utilizing the <a href="/peptdeep/model_interface.html#ModelInterface"><code>ModelInterface</code></a> class defined in <code>model_interface.ipynb</code></p>
+<h2 id="Model-Pipeline">Model Pipeline<a class="anchor-link" href="#Model-Pipeline"> </a></h2><p>The final model which is used to interact with the data is defined below, utilizing the <a href="/alphapeptdeep/model_interface.html#ModelInterface"><code>ModelInterface</code></a> class defined in <code>model_interface.ipynb</code></p>
 
 </div>
 </div>
@@ -197,7 +197,7 @@ parameters converted too when you call :meth:<code>to</code>, etc.</p>
 
 
 <div class="output_markdown rendered_html output_subarea ">
-<h2 id="AlphaRTModel" class="doc_header"><code>class</code> <code>AlphaRTModel</code><a href="https://github.com/MannLabs/peptdeep/tree/main/peptdeep/model/rt.py#L143" class="source_link" style="float:right">[source]</a></h2><blockquote><p><code>AlphaRTModel</code>(<strong><code>dropout</code></strong>=<em><code>0.1</code></em>, <strong><code>model_class</code></strong>:<code>Module</code>=<em><code>Model_RT_LSTM_CNN</code></em>, <strong><code>device</code></strong>:<code>str</code>=<em><code>'gpu'</code></em>, <strong>**<code>kwargs</code></strong>) :: <a href="/peptdeep/model_interface.html#ModelInterface"><code>ModelInterface</code></a></p>
+<h2 id="AlphaRTModel" class="doc_header"><code>class</code> <code>AlphaRTModel</code><a href="https://github.com/MannLabs/alphapeptdeep/tree/main/peptdeep/model/rt.py#L143" class="source_link" style="float:right">[source]</a></h2><blockquote><p><code>AlphaRTModel</code>(<strong><code>dropout</code></strong>=<em><code>0.1</code></em>, <strong><code>model_class</code></strong>:<code>Module</code>=<em><code>Model_RT_LSTM_CNN</code></em>, <strong><code>device</code></strong>:<code>str</code>=<em><code>'gpu'</code></em>, <strong>**<code>kwargs</code></strong>) :: <a href="/alphapeptdeep/model_interface.html#ModelInterface"><code>ModelInterface</code></a></p>
 </blockquote>
 <p>Provides standardized methods to interact
 with ml models. Inherit into new class and override

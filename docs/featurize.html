@@ -47,7 +47,7 @@ nb_path: "nbdev_nbs/model/featurize.ipynb"
 
 
 <div class="output_markdown rendered_html output_subarea ">
-<h4 id="get_all_mod_features" class="doc_header"><code>get_all_mod_features</code><a href="https://github.com/MannLabs/peptdeep/tree/main/peptdeep/model/featurize.py#L37" class="source_link" style="float:right">[source]</a></h4><blockquote><p><code>get_all_mod_features</code>()</p>
+<h4 id="get_all_mod_features" class="doc_header"><code>get_all_mod_features</code><a href="https://github.com/MannLabs/alphapeptdeep/tree/main/peptdeep/model/featurize.py#L37" class="source_link" style="float:right">[source]</a></h4><blockquote><p><code>get_all_mod_features</code>()</p>
 </blockquote>
 
 </div>
@@ -117,7 +117,7 @@ nb_path: "nbdev_nbs/model/featurize.ipynb"
 
 
 <div class="output_markdown rendered_html output_subarea ">
-<h4 id="parse_mod_feature" class="doc_header"><code>parse_mod_feature</code><a href="https://github.com/MannLabs/peptdeep/tree/main/peptdeep/model/featurize.py#L45" class="source_link" style="float:right">[source]</a></h4><blockquote><p><code>parse_mod_feature</code>(<strong><code>nAA</code></strong>:<code>int</code>, <strong><code>mod_names</code></strong>:<code>List</code>[<code>str</code>], <strong><code>mod_sites</code></strong>:<code>List</code>[<code>int</code>])</p>
+<h4 id="parse_mod_feature" class="doc_header"><code>parse_mod_feature</code><a href="https://github.com/MannLabs/alphapeptdeep/tree/main/peptdeep/model/featurize.py#L45" class="source_link" style="float:right">[source]</a></h4><blockquote><p><code>parse_mod_feature</code>(<strong><code>nAA</code></strong>:<code>int</code>, <strong><code>mod_names</code></strong>:<code>List</code>[<code>str</code>], <strong><code>mod_sites</code></strong>:<code>List</code>[<code>int</code>])</p>
 </blockquote>
 <p>Get modification feature of a given peptide (len=nAA).
 Note that <code>site=0</code> is for peptide N-term modification,
@@ -159,7 +159,7 @@ Returns:
 
 
 <div class="output_markdown rendered_html output_subarea ">
-<h4 id="get_batch_mod_feature" class="doc_header"><code>get_batch_mod_feature</code><a href="https://github.com/MannLabs/peptdeep/tree/main/peptdeep/model/featurize.py#L69" class="source_link" style="float:right">[source]</a></h4><blockquote><p><code>get_batch_mod_feature</code>(<strong><code>batch_df</code></strong>:<code>DataFrame</code>)</p>
+<h4 id="get_batch_mod_feature" class="doc_header"><code>get_batch_mod_feature</code><a href="https://github.com/MannLabs/alphapeptdeep/tree/main/peptdeep/model/featurize.py#L69" class="source_link" style="float:right">[source]</a></h4><blockquote><p><code>get_batch_mod_feature</code>(<strong><code>batch_df</code></strong>:<code>DataFrame</code>)</p>
 </blockquote>
 <p>Args:
     batch_df (pd.DataFrame): dataframe with 'sequence', 'mods', 'mod_sites' and 'nAA' columns.
@@ -195,7 +195,7 @@ Returns:
 
 
 <div class="output_markdown rendered_html output_subarea ">
-<h4 id="get_batch_aa_indices" class="doc_header"><code>get_batch_aa_indices</code><a href="https://github.com/MannLabs/peptdeep/tree/main/peptdeep/model/featurize.py#L100" class="source_link" style="float:right">[source]</a></h4><blockquote><p><code>get_batch_aa_indices</code>(<strong><code>seq_array</code></strong>:<code>Union</code>[<code>List</code>[<code>T</code>], <code>ndarray</code>])</p>
+<h4 id="get_batch_aa_indices" class="doc_header"><code>get_batch_aa_indices</code><a href="https://github.com/MannLabs/alphapeptdeep/tree/main/peptdeep/model/featurize.py#L100" class="source_link" style="float:right">[source]</a></h4><blockquote><p><code>get_batch_aa_indices</code>(<strong><code>seq_array</code></strong>:<code>Union</code>[<code>List</code>[<code>T</code>], <code>ndarray</code>])</p>
 </blockquote>
 <p>Convert peptide sequences into AA ID array. ID=0 is reserved for masking,
 so ID of 'A' is 1, ID of 'B' is 2, ..., ID of 'Z' is 26 (maximum).
@@ -229,7 +229,7 @@ Returns:
 
 
 <div class="output_markdown rendered_html output_subarea ">
-<h4 id="get_ascii_indices" class="doc_header"><code>get_ascii_indices</code><a href="https://github.com/MannLabs/peptdeep/tree/main/peptdeep/model/featurize.py#L122" class="source_link" style="float:right">[source]</a></h4><blockquote><p><code>get_ascii_indices</code>(<strong><code>seq_array</code></strong>:<code>Union</code>[<code>List</code>[<code>T</code>], <code>ndarray</code>])</p>
+<h4 id="get_ascii_indices" class="doc_header"><code>get_ascii_indices</code><a href="https://github.com/MannLabs/alphapeptdeep/tree/main/peptdeep/model/featurize.py#L122" class="source_link" style="float:right">[source]</a></h4><blockquote><p><code>get_ascii_indices</code>(<strong><code>seq_array</code></strong>:<code>Union</code>[<code>List</code>[<code>T</code>], <code>ndarray</code>])</p>
 </blockquote>
 <p>Convert peptide sequences into ASCII code array.
 The values are from 0 to 127.
@@ -278,7 +278,7 @@ Returns:
 
 
 <div class="output_markdown rendered_html output_subarea ">
-<h4 id="parse_instrument_indices" class="doc_header"><code>parse_instrument_indices</code><a href="https://github.com/MannLabs/peptdeep/tree/main/peptdeep/model/featurize.py#L155" class="source_link" style="float:right">[source]</a></h4><blockquote><p><code>parse_instrument_indices</code>(<strong><code>instrument_list</code></strong>)</p>
+<h4 id="parse_instrument_indices" class="doc_header"><code>parse_instrument_indices</code><a href="https://github.com/MannLabs/alphapeptdeep/tree/main/peptdeep/model/featurize.py#L155" class="source_link" style="float:right">[source]</a></h4><blockquote><p><code>parse_instrument_indices</code>(<strong><code>instrument_list</code></strong>)</p>
 </blockquote>
 
 </div>

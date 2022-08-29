@@ -1,6 +1,6 @@
 ---
 
-title: Legacy: MaxQuant reader with fragments
+title: PSM Reader with fragments: MaxQuant msms.txt
 
 
 keywords: fastai
@@ -40,7 +40,7 @@ nb_path: "nbdev_nbs/psm_frag_reader/maxquant_frag_reader.ipynb"
 
 
 <div class="output_markdown rendered_html output_subarea ">
-<h4 id="parse_phos_probs" class="doc_header"><code>parse_phos_probs</code><a href="https://github.com/MannLabs/peptdeep/tree/main/peptdeep/psm_frag_reader/maxquant_frag_reader.py#L22" class="source_link" style="float:right">[source]</a></h4><blockquote><p><code>parse_phos_probs</code>(<strong><code>mods</code></strong>, <strong><code>prob_seq</code></strong>, <strong><code>prob</code></strong>)</p>
+<h4 id="parse_phos_probs" class="doc_header"><code>parse_phos_probs</code><a href="https://github.com/MannLabs/alphapeptdeep/tree/main/peptdeep/psm_frag_reader/maxquant_frag_reader.py#L22" class="source_link" style="float:right">[source]</a></h4><blockquote><p><code>parse_phos_probs</code>(<strong><code>mods</code></strong>, <strong><code>prob_seq</code></strong>, <strong><code>prob</code></strong>)</p>
 </blockquote>
 
 </div>
@@ -64,7 +64,7 @@ nb_path: "nbdev_nbs/psm_frag_reader/maxquant_frag_reader.ipynb"
 
 
 <div class="output_markdown rendered_html output_subarea ">
-<h4 id="filter_phos" class="doc_header"><code>filter_phos</code><a href="https://github.com/MannLabs/peptdeep/tree/main/peptdeep/psm_frag_reader/maxquant_frag_reader.py#L48" class="source_link" style="float:right">[source]</a></h4><blockquote><p><code>filter_phos</code>(<strong><code>mq_df</code></strong>, <strong><code>prob</code></strong>)</p>
+<h4 id="filter_phos" class="doc_header"><code>filter_phos</code><a href="https://github.com/MannLabs/alphapeptdeep/tree/main/peptdeep/psm_frag_reader/maxquant_frag_reader.py#L48" class="source_link" style="float:right">[source]</a></h4><blockquote><p><code>filter_phos</code>(<strong><code>mq_df</code></strong>, <strong><code>prob</code></strong>)</p>
 </blockquote>
 
 </div>
@@ -88,7 +88,7 @@ nb_path: "nbdev_nbs/psm_frag_reader/maxquant_frag_reader.ipynb"
 
 
 <div class="output_markdown rendered_html output_subarea ">
-<h2 id="MaxQuantMSMSReader" class="doc_header"><code>class</code> <code>MaxQuantMSMSReader</code><a href="https://github.com/MannLabs/peptdeep/tree/main/peptdeep/psm_frag_reader/maxquant_frag_reader.py#L62" class="source_link" style="float:right">[source]</a></h2><blockquote><p><code>MaxQuantMSMSReader</code>(<strong><code>frag_types</code></strong>=<em><code>['b', 'y', 'b_modloss', 'y_modloss']</code></em>, <strong><code>max_frag_charge</code></strong>=<em><code>2</code></em>, <strong><code>score_threshold</code></strong>=<em><code>100</code></em>, <strong>**<code>kwargs</code></strong>) :: <code>MaxQuantReader</code></p>
+<h2 id="MaxQuantMSMSReader" class="doc_header"><code>class</code> <code>MaxQuantMSMSReader</code><a href="https://github.com/MannLabs/alphapeptdeep/tree/main/peptdeep/psm_frag_reader/maxquant_frag_reader.py#L62" class="source_link" style="float:right">[source]</a></h2><blockquote><p><code>MaxQuantMSMSReader</code>(<strong><code>frag_types</code></strong>=<em><code>['b', 'y', 'b_modloss', 'y_modloss']</code></em>, <strong><code>max_frag_charge</code></strong>=<em><code>2</code></em>, <strong><code>score_threshold</code></strong>=<em><code>100</code></em>, <strong>**<code>kwargs</code></strong>) :: <code>MaxQuantReader</code></p>
 </blockquote>
 <p>Read PSMs and fragments</p>
 
