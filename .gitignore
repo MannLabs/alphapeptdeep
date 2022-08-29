@@ -134,3 +134,4 @@ peptdeep/logs
 *sandbox*
 *installed_models*
 *.last_checked*
+*_docs*
