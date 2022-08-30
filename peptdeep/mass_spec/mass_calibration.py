@@ -8,7 +8,8 @@ from sklearn.neighbors import KNeighborsRegressor
 import pandas as pd
 import numpy as np
 
-def get_fragment_median(start_end_idxes, frag_df:pd.DataFrame):
+# %% ../../nbdev_nbs/mass_spec/mass_calibration.ipynb 3
+def get_fragment_median(start_end_idxes:tuple, frag_df:pd.DataFrame):
     start_idx, end_idx = start_end_idxes
     ret = np.nanmedian(frag_df.values[start_idx:end_idx])
     if np.isnan(ret): return 0.0

@@ -7,16 +7,18 @@ __all__ = ['lib_settings', 'PredictSpecLib']
 import pandas as pd
 import numpy as np
 import torch
-from ..utils import logging
 
 from alphabase.peptide.precursor import (
     calc_precursor_isotope_mp, calc_precursor_isotope
 )
-from ..utils import process_bar
 from alphabase.spectral_library.library_base import SpecLibBase
+
 from ..pretrained_models import ModelManager
 from ..settings import global_settings
+from ..utils import logging
+from ..utils import process_bar
 
+# %% ../../nbdev_nbs/spec_lib/predict_lib.ipynb 4
 lib_settings = global_settings['library']
 
 class PredictSpecLib(SpecLibBase):

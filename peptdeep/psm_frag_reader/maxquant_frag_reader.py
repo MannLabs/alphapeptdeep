@@ -20,6 +20,7 @@ from peptdeep.psm_frag_reader.psm_frag_reader import (
     psm_w_frag_reader_provider
 )
 
+# %% ../../nbdev_nbs/psm_frag_reader/maxquant_frag_reader.ipynb 3
 def parse_phos_probs(mods, prob_seq, prob):
     if mods == 'Unmodified': return '', ''
     idx = mods.find('Phospho')

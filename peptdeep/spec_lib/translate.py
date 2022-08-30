@@ -10,10 +10,14 @@ import pandas as pd
 import numpy as np
 import tqdm
 import typing
+import numba
+import multiprocessing as mp
 
-from ..utils import explode_multiple_columns
+from alphabase.constants.modification import MOD_DF
 
 from alphabase.spectral_library.library_base import SpecLibBase
+
+from ..utils import explode_multiple_columns
 
 # %% ../../nbdev_nbs/spec_lib/translate.ipynb 3
 #@numba.njit #(cannot use numba for pd.Series)
@@ -53,8 +57,6 @@ def create_modified_sequence(
     return nterm + mod_seq + cterm
 
 # %% ../../nbdev_nbs/spec_lib/translate.ipynb 7
-import numba
-
 @numba.njit
 def _get_frag_info_from_column_name(column:str):
     '''
@@ -173,7 +175,6 @@ def merge_precursor_fragment_df(
     #     df[frag_num_head] = _flatten(frag_num_list)
     #     return df
 
-from alphabase.constants.modification import MOD_DF
 mod_to_unimod_dict = {}
 mod_to_modname_dict = {}
 for mod_name,unimod_id in MOD_DF[['mod_name','unimod_id']].values:
@@ -347,8 +348,6 @@ def speclib_to_swath_df(
         max_frag_mz = max_frag_mz,
         min_frag_intensity = min_frag_intensity,
     )
-
-import multiprocessing as mp
 
 class WritingProcess(mp.Process):
     def __init__(self, task_queue, tsv, *args, **kwargs):

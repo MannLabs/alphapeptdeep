@@ -7,6 +7,7 @@ __all__ = ['load_settings', 'import_psm_df', 'match_psms', 'transfer_learn', 'ge
 import os
 import pandas as pd
 import traceback
+import csv
 
 from alphabase.yaml_utils import save_yaml
 from alphabase.io.psm_reader import psm_reader_provider
@@ -15,6 +16,7 @@ from alphabase.peptide.fragment import (
     concat_precursor_fragment_dataframes
 )
 
+from .spec_lib.translate import mod_to_unimod_dict
 from . import settings
 from peptdeep.utils import (
     logging, set_logger, 
@@ -33,6 +35,7 @@ from .utils import parse_ms_file_names_to_dict
 
 from .utils import process_bar
 
+# %% ../nbdev_nbs/pipeline_api.ipynb 3
 def load_settings(settings_yaml:str):
     """Load settings yaml file into 
     `peptdeep.settings.global_settings` (dict).
@@ -40,6 +43,7 @@ def load_settings(settings_yaml:str):
     Parameters
     ----------
     settings_yaml : str
+    
         The settings yaml file.
     """
     settings_dict = settings.load_yaml(settings_yaml)
@@ -47,20 +51,23 @@ def load_settings(settings_yaml:str):
         settings.global_settings, settings_dict
     )
 
-# %% ../nbdev_nbs/pipeline_api.ipynb 4
+# %% ../nbdev_nbs/pipeline_api.ipynb 5
 def import_psm_df(psm_files:list, psm_type:str)->pd.DataFrame:
     """Import PSM files of a search engine as a pd.DataFrame
 
     Parameters
     ----------
-    psm_files : list of str
+    psm_files : list[str]
+
         PSM file paths
+        
     psm_type : str
         PSM type or search engine name/type
 
     Returns
     -------
     pd.DataFrame
+
         DataFrame that contains all PSM information
     """
     psm_reader = psm_reader_provider.get_reader(
@@ -92,11 +99,14 @@ def match_psms(settings_dict:dict=settings.global_settings)->tuple:
 
     Parameters
     ----------
-    settings_dict : dict, optional
-        The settings dict, by default `peptdeep.settings.global_settings`.
+    settings_dict : dict
+
+        The settings dict. Optional, by default `peptdeep.settings.global_settings`.
+    
     Returns
     -------
-    tuple of pd.DataFrame
+    tuple[pd.DataFrame]
+
         The PSM DataFrame and the matched fragment intensity DataFrame
     """
     mgr_settings = settings_dict['model_mgr']
@@ -168,14 +178,18 @@ def transfer_learn(settings_dict:dict=settings.global_settings, verbose=True):
 
     Parameters
     ----------
-    settings_dict : dict, optional
-        The settings dict, by default `peptdeep.settings.global_settings`.
-    verbose : bool, optional
-        Print the training details, by default True
+    settings_dict : dict
+
+        The settings dict. Optional, by default `peptdeep.settings.global_settings`
+    
+    verbose : bool
+
+        Print the training details. Optional, default True
 
     Raises
     ------
     Exception
+    
         Any kinds of exception if the pipeline fails.
     """
     try:
@@ -240,9 +254,8 @@ def transfer_learn(settings_dict:dict=settings.global_settings, verbose=True):
         logging.error(traceback.format_exc())
         raise e
 
-# %% ../nbdev_nbs/pipeline_api.ipynb 6
+# %% ../nbdev_nbs/pipeline_api.ipynb 7
 def _get_delimiter(csv_file, bytes=4096):
-    import csv
     with open(csv_file, "r") as f:
         return csv.Sniffer().sniff(f.read(bytes)).delimiter
 
@@ -257,14 +270,17 @@ def generate_library(settings_dict:dict=settings.global_settings):
     lib_settings['input']['paths'] # list of str. Input files to generate librarys
     lib_settings['output_tsv']['enabled'] # bool. If output tsv for diann/spectronaut
     ```
+    
     Parameters
     ----------
-    settings_dict : dict, optional
-        The settings dict, by default `peptdeep.settings.global_settings`.
+    settings_dict : dict
+
+        The settings dict. Optional, by default `peptdeep.settings.global_settings`.
 
     Raises
     ------
     Exception
+    
         Any kinds of exception if the pipeline fails.
     """
     try:
@@ -311,7 +327,6 @@ def generate_library(settings_dict:dict=settings.global_settings):
                 output_folder, 
                 'predict.speclib.tsv'
             )
-            from peptdeep.spec_lib.translate import mod_to_unimod_dict
             lib_maker.translate_to_tsv(
                 tsv_path, 
                 translate_mod_dict=mod_to_unimod_dict 
@@ -323,7 +338,7 @@ def generate_library(settings_dict:dict=settings.global_settings):
         logging.error(traceback.format_exc())
         raise e
 
-# %% ../nbdev_nbs/pipeline_api.ipynb 8
+# %% ../nbdev_nbs/pipeline_api.ipynb 9
 def rescore_psms(settings_dict:dict=settings.global_settings):
     """Generate/predict a spectral library.
     
@@ -336,14 +351,17 @@ def rescore_psms(settings_dict:dict=settings.global_settings):
     perc_settings['input_files']['ms_file_type'] # str. Could be alphapept_hdf, thermo, ...
     perc_settings['input_files']['ms_files'] # list of str. MS file list to match MS2 peaks
     ```
+    
     Parameters
     ----------
-    settings_dict : dict, optional
-        The settings dict, by default `peptdeep.settings.global_settings`.
+    settings_dict : dict
+    
+        The settings dict. Optional, by default `peptdeep.settings.global_settings`.
 
     Raises
     ------
     Exception
+
         Any kinds of exception if the pipeline fails.
     """
     try:

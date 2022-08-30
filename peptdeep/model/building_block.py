@@ -20,10 +20,15 @@ __all__ = ['mod_feature_size', 'max_instrument_num', 'frag_types', 'max_frag_cha
 
 # %% ../../nbdev_nbs/model/building_block.ipynb 4
 import torch
-torch.set_num_threads(2)
+import numpy as np
+#BERT from huggingface
+from transformers.models.bert.modeling_bert import BertEncoder
 
 from ..settings import model_const
 from ..settings import global_settings as settings
+
+# %% ../../nbdev_nbs/model/building_block.ipynb 5
+torch.set_num_threads(2)
 
 mod_feature_size = len(model_const['mod_elements'])
 max_instrument_num = model_const['max_instrument_num']
@@ -32,7 +37,7 @@ max_frag_charge = settings['model']['max_frag_charge']
 num_ion_types = len(frag_types)*max_frag_charge
 aa_embedding_size = model_const['aa_embedding_size']
 
-# %% ../../nbdev_nbs/model/building_block.ipynb 7
+# %% ../../nbdev_nbs/model/building_block.ipynb 8
 def aa_embedding(hidden_size):
     return torch.nn.Embedding(aa_embedding_size, hidden_size, padding_idx=0)
 
@@ -48,7 +53,7 @@ def aa_one_hot(aa_indices, *cat_others):
 def instrument_embedding(hidden_size):
     return torch.nn.Embedding(max_instrument_num, hidden_size)
 
-# %% ../../nbdev_nbs/model/building_block.ipynb 9
+# %% ../../nbdev_nbs/model/building_block.ipynb 10
 def zero_param(*shape):
     return torch.nn.Parameter(torch.zeros(shape), requires_grad=False)
 
@@ -59,7 +64,7 @@ def xavier_param(*shape):
 
 init_state = xavier_param
 
-# %% ../../nbdev_nbs/model/building_block.ipynb 12
+# %% ../../nbdev_nbs/model/building_block.ipynb 13
 class SeqCNN_MultiKernel(torch.nn.Module):
     """
     Extract sequence features using `torch.nn.Conv1D` with 
@@ -131,7 +136,7 @@ class SeqCNN(torch.nn.Module):
         return torch.cat((x, x1, x2, x3), dim=1).transpose(1,2)
 
 
-# %% ../../nbdev_nbs/model/building_block.ipynb 14
+# %% ../../nbdev_nbs/model/building_block.ipynb 15
 class Seq_Transformer(torch.nn.Module):
     """
     Using PyTorch built-in Transformer layers
@@ -171,11 +176,7 @@ class Hidden_Transformer(torch.nn.Module):
     def forward(self, x):
         return self.transormer(x)
 
-# %% ../../nbdev_nbs/model/building_block.ipynb 16
-#BERT from huggingface
-import numpy as np
-from transformers.models.bert.modeling_bert import BertEncoder
-
+# %% ../../nbdev_nbs/model/building_block.ipynb 17
 class _Pseudo_Bert_Config:
     def __init__(self, 
         hidden_dim=256, 
@@ -275,7 +276,7 @@ class HFace_Transformer_with_PositionalEncoder(torch.nn.Module):
         x = self.pos_encoder(x)
         return self.bert(x)
 
-# %% ../../nbdev_nbs/model/building_block.ipynb 17
+# %% ../../nbdev_nbs/model/building_block.ipynb 18
 class SeqLSTM(torch.nn.Module):
     def __init__(self, in_features, out_features, 
                  rnn_layer=2, bidirectional=True
@@ -314,7 +315,7 @@ class SeqLSTM(torch.nn.Module):
         x, _ = self.rnn(x, (h0,c0))
         return x
 
-# %% ../../nbdev_nbs/model/building_block.ipynb 18
+# %% ../../nbdev_nbs/model/building_block.ipynb 19
 class SeqGRU(torch.nn.Module):
     def __init__(self, in_features, out_features, 
                  rnn_layer=2, bidirectional=True
@@ -350,7 +351,7 @@ class SeqGRU(torch.nn.Module):
         x, _ = self.rnn(x, h0)
         return x
 
-# %% ../../nbdev_nbs/model/building_block.ipynb 20
+# %% ../../nbdev_nbs/model/building_block.ipynb 21
 class SeqAttentionSum(torch.nn.Module):
     """
     apply linear transformation and tensor rescaling with softmax
@@ -366,7 +367,7 @@ class SeqAttentionSum(torch.nn.Module):
         attn = self.attn(x)
         return torch.sum(torch.mul(x, attn), dim=1)
 
-# %% ../../nbdev_nbs/model/building_block.ipynb 22
+# %% ../../nbdev_nbs/model/building_block.ipynb 23
 class PositionalEncoding(torch.nn.Module):
     """
     transform sequence input into a positional representation
@@ -404,7 +405,7 @@ class PositionalEmbedding(torch.nn.Module):
             x.size(1), dtype=torch.long, device=x.device
         ).unsqueeze(0))
 
-# %% ../../nbdev_nbs/model/building_block.ipynb 26
+# %% ../../nbdev_nbs/model/building_block.ipynb 27
 class Meta_Embedding(torch.nn.Module):
     # Meta = Charge, NCE and Instrument
     """Encodes Charge state, Normalized Collision Energy (NCE) and Instrument for a given spectrum 
@@ -568,7 +569,7 @@ class Input_AA_Mod_Charge_PositionalEncoding(torch.nn.Module):
         )
         return self.pos_encoder(torch.cat((x, mod_x,charge_x), 2))
 
-# %% ../../nbdev_nbs/model/building_block.ipynb 28
+# %% ../../nbdev_nbs/model/building_block.ipynb 29
 class Input_26AA_Mod_LSTM(torch.nn.Module):
     """
     Applies an LSTM network to a AA (26 AA letters) sequence & modifications
@@ -657,7 +658,7 @@ class Input_26AA_Mod_Charge_LSTM(torch.nn.Module):
 InputAALSTM_cat_Charge = Input_26AA_Mod_Charge_LSTM
 
 
-# %% ../../nbdev_nbs/model/building_block.ipynb 30
+# %% ../../nbdev_nbs/model/building_block.ipynb 31
 class Seq_Meta_LSTM(torch.nn.Module):
     """
     takes a hidden layer which processes the hidden tensor 
@@ -709,7 +710,7 @@ class Seq_Meta_Linear(torch.nn.Module):
 #legacy
 OutputLinear_cat_Meta = Seq_Meta_Linear
 
-# %% ../../nbdev_nbs/model/building_block.ipynb 32
+# %% ../../nbdev_nbs/model/building_block.ipynb 33
 class Encoder_26AA_Mod_LSTM(torch.nn.Module):
     """
     Two LSTM layers on AA (26 AA letters) and modifications.
@@ -958,7 +959,7 @@ class Encoder_26AA_Mod_Charge_CNN_LSTM_AttnSum(torch.nn.Module):
 Input_AA_CNN_LSTM_cat_Charge_Encoder = Encoder_26AA_Mod_Charge_CNN_LSTM_AttnSum
 
 
-# %% ../../nbdev_nbs/model/building_block.ipynb 34
+# %% ../../nbdev_nbs/model/building_block.ipynb 35
 class Decoder_LSTM(torch.nn.Module):
     """
     Decode with LSTM
@@ -1011,7 +1012,7 @@ class Decoder_GRU(torch.nn.Module):
 #legacy
 SeqGRUDecoder = Decoder_GRU
 
-# %% ../../nbdev_nbs/model/building_block.ipynb 35
+# %% ../../nbdev_nbs/model/building_block.ipynb 36
 class Decoder_Linear(torch.nn.Module):
     """
     Decode w linear NN

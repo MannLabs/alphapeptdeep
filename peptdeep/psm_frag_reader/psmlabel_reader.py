@@ -151,7 +151,7 @@ psm_w_frag_reader_provider.register_reader(
     'psmlabel', PSMLabelReader
 )
 
-# %% ../../nbdev_nbs/psm_frag_reader/psmlabel_reader.ipynb 6
+# %% ../../nbdev_nbs/psm_frag_reader/psmlabel_reader.ipynb 7
 def load_psmlabel_list(
     psmlabel_list,
     nce_list,

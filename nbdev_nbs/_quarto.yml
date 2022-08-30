@@ -2,7 +2,7 @@ ipynb-filters: [nbdev_filter]
 
 project:
   type: website
-  output-dir: _docs
+  output-dir: /Users/zengwenfeng/Workspace/alphapeptdeep/_docs
   preview:
     port: 3000
     browser: false
@@ -20,7 +20,6 @@ website:
   description: "Deep Learning in Proteomics"
   twitter-card: true
   open-graph: true
-  reader-mode: true
   repo-branch: main
   repo-url: "https://github.com/MannLabs/alphapeptdeep/tree/main/"
   repo-actions: [issue]

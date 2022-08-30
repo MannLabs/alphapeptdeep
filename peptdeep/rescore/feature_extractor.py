@@ -8,9 +8,9 @@ __all__ = ['perc_settings', 'match_one_raw', 'get_psm_scores', 'get_ms2_features
 import pandas as pd
 import numpy as np
 
-from ..pretrained_models import ModelManager
-from ..model.ms2 import calc_ms2_similarity
-from ..mass_spec.match import PepSpecMatch
+import torch
+import torch.multiprocessing as mp
+
 from alphabase.peptide.fragment import get_charged_frag_types
 from alphabase.peptide.precursor import (
     refine_precursor_df
@@ -18,6 +18,10 @@ from alphabase.peptide.precursor import (
 from alphabase.peptide.fragment import (
     concat_precursor_fragment_dataframes
 )
+
+from ..pretrained_models import ModelManager
+from ..model.ms2 import calc_ms2_similarity
+from ..mass_spec.match import PepSpecMatch
 
 from .fdr import calc_fdr_for_df
 from ..utils import process_bar, logging
@@ -28,6 +32,7 @@ from peptdeep.mass_spec.mass_calibration import (
     MassCalibratorForRT_KNN
 )
 
+# %% ../../nbdev_nbs/rescore/feature_extractor.ipynb 3
 def match_one_raw(
     psm_df_one_raw,
     ms2_file,
@@ -465,7 +470,7 @@ def get_ms2_features_mp(args):
     return get_ms2_features(*args)
 
 
-# %% ../../nbdev_nbs/rescore/feature_extractor.ipynb 4
+# %% ../../nbdev_nbs/rescore/feature_extractor.ipynb 5
 class ScoreFeatureExtractor:
     def __init__(self, 
         model_mgr:ModelManager
@@ -830,11 +835,7 @@ class ScoreFeatureExtractor:
         return self.psm_df
         
 
-# %% ../../nbdev_nbs/rescore/feature_extractor.ipynb 6
-import torch
-import torch.multiprocessing as mp
-            
-
+# %% ../../nbdev_nbs/rescore/feature_extractor.ipynb 7
 class ScoreFeatureExtractorMP(ScoreFeatureExtractor):
     def __init__(self, 
         model_mgr:ModelManager

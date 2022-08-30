@@ -13,14 +13,16 @@ __all__ = ['ASCII_NUM', 'Model_for_Generic_AASeq_Regression_LSTM', 'Model_for_Ge
 
 # %% ../../nbdev_nbs/model/generic_property_prediction.ipynb 5
 import torch
-import peptdeep.model.building_block as building_block
-from .model_interface import ModelInterface
 import pandas as pd
 import numpy as np
 
+import peptdeep.model.building_block as building_block
+from .model_interface import ModelInterface
+
+# %% ../../nbdev_nbs/model/generic_property_prediction.ipynb 6
 ASCII_NUM=128
 
-# %% ../../nbdev_nbs/model/generic_property_prediction.ipynb 7
+# %% ../../nbdev_nbs/model/generic_property_prediction.ipynb 8
 class Model_for_Generic_AASeq_Regression_LSTM(torch.nn.Module):
     def __init__(self, 
         *,
@@ -123,7 +125,7 @@ class ModelInterface_for_Generic_AASeq_Regression(ModelInterface):
         self.target_column_to_predict = 'predicted_property'
         self.target_column_to_train = 'detected_property'
 
-# %% ../../nbdev_nbs/model/generic_property_prediction.ipynb 16
+# %% ../../nbdev_nbs/model/generic_property_prediction.ipynb 17
 class Model_for_Generic_ModAASeq_Regression_LSTM(torch.nn.Module):
     def __init__(self, 
         *,
@@ -231,7 +233,7 @@ class ModelInterface_for_Generic_ModAASeq_Regression(ModelInterface):
     ):
         return self._get_aa_mod_features(batch_df)
 
-# %% ../../nbdev_nbs/model/generic_property_prediction.ipynb 22
+# %% ../../nbdev_nbs/model/generic_property_prediction.ipynb 23
 class Model_for_Generic_AASeq_BinaryClassification_LSTM(
     Model_for_Generic_AASeq_Regression_LSTM
 ):
@@ -299,7 +301,7 @@ class ModelInterface_for_Generic_AASeq_BinaryClassification(ModelInterface):
         self.target_column_to_predict = 'predicted_prob'
         self.target_column_to_train = 'detected_prob'
 
-# %% ../../nbdev_nbs/model/generic_property_prediction.ipynb 30
+# %% ../../nbdev_nbs/model/generic_property_prediction.ipynb 31
 class Model_for_Generic_ModAASeq_BinaryClassification_LSTM(
     Model_for_Generic_ModAASeq_Regression_LSTM
 ):

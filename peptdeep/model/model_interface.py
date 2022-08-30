@@ -14,6 +14,8 @@ from tqdm import tqdm
 import torch.multiprocessing as mp
 import functools
 
+from torch.optim.lr_scheduler import LambdaLR
+
 from zipfile import ZipFile
 from typing import IO, Tuple, List, Union
 from alphabase.yaml_utils import save_yaml, load_yaml
@@ -30,8 +32,6 @@ from peptdeep.model.featurize import (
 
 
 # %% ../../nbdev_nbs/model/model_interface.ipynb 6
-from torch.optim.lr_scheduler import LambdaLR
-
 # copied from huggingface
 def get_cosine_schedule_with_warmup(
     optimizer, num_warmup_steps, 

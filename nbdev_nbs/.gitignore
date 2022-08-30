@@ -1,2 +1,3 @@
 /.quarto/
-*_docs*
+_docs*
+sidebar.yml

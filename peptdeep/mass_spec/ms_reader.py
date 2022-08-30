@@ -11,6 +11,7 @@ import numpy as np
 import pandas as pd
 from alphabase.io.hdf import HDF_File
 
+# %% ../../nbdev_nbs/mass_spec/ms_reader.ipynb 3
 class MSReaderBase:
     def __init__(self):
         self.spectrum_df:pd.DataFrame = pd.DataFrame()
@@ -223,7 +224,7 @@ ms1_reader_provider = MSReaderProvider()
 ms1_reader_provider.register_reader('alphapept', AlphaPept_HDF_MS1_Reader)
 ms1_reader_provider.register_reader('alphapept_hdf', AlphaPept_HDF_MS1_Reader)
 
-# %% ../../nbdev_nbs/mass_spec/ms_reader.ipynb 3
+# %% ../../nbdev_nbs/mass_spec/ms_reader.ipynb 4
 try:
     from alphapept.pyrawfilereader import RawFileReader
     class ThermoRawMS1Reader(MSReaderBase):

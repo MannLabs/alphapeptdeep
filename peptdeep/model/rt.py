@@ -18,9 +18,10 @@ from ..settings import model_const
 import peptdeep.model.model_interface as model_interface
 import peptdeep.model.building_block as building_block
 
+# %% ../../nbdev_nbs/model/rt.ipynb 5
 mod_feature_size = len(model_const['mod_elements'])
 
-# %% ../../nbdev_nbs/model/rt.ipynb 6
+# %% ../../nbdev_nbs/model/rt.ipynb 8
 IRT_PEPTIDE_DF = pd.DataFrame(
     [['LGGNEQVTR', 'RT-pep a', -24.92, '', ''],
     ['GAGSSEPVTGLDAK', 'RT-pep b', 0.00, '', ''],
@@ -42,7 +43,7 @@ IRT_PEPTIDE_DF['nAA'] = IRT_PEPTIDE_DF.sequence.str.len()
 irt_pep = IRT_PEPTIDE_DF
 
 
-# %% ../../nbdev_nbs/model/rt.ipynb 8
+# %% ../../nbdev_nbs/model/rt.ipynb 10
 class Model_RT_Bert(torch.nn.Module):
     def __init__(self,
         dropout = 0.1,
@@ -102,7 +103,7 @@ class Model_RT_Bert(torch.nn.Module):
         return self.output_nn(x).squeeze(1)
 
 
-# %% ../../nbdev_nbs/model/rt.ipynb 10
+# %% ../../nbdev_nbs/model/rt.ipynb 12
 class Model_RT_LSTM_CNN(torch.nn.Module):
     def __init__(self, 
         dropout=0.2,
@@ -135,7 +136,7 @@ class Model_RT_LSTM_CNN(torch.nn.Module):
 #legacy
 Model_RT_LSTM = Model_RT_LSTM_CNN
 
-# %% ../../nbdev_nbs/model/rt.ipynb 12
+# %% ../../nbdev_nbs/model/rt.ipynb 14
 class AlphaRTModel(model_interface.ModelInterface):
     def __init__(self, 
         dropout=0.1,

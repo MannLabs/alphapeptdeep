@@ -10,18 +10,47 @@ import os
 import pathlib
 import io
 import pandas as pd
-from zipfile import ZipFile
-from tarfile import TarFile
-from typing import Tuple
 import torch
 import urllib
 import socket
 import logging
 import shutil
+import ssl
 from pickle import UnpicklingError
+import torch.multiprocessing as mp
+from typing import Dict
+from zipfile import ZipFile
+from tarfile import TarFile
+from typing import Tuple
+
+from alphabase.peptide.fragment import (
+    create_fragment_mz_dataframe,
+    get_charged_frag_types,
+    concat_precursor_fragment_dataframes
+)
+from alphabase.peptide.precursor import (
+    refine_precursor_df,
+    update_precursor_mz
+)
+from alphabase.peptide.mobility import (
+    mobility_to_ccs_for_df,
+    ccs_to_mobility_for_df
+)
+
+from .settings import global_settings
+from .utils import logging, process_bar
+from .settings import global_settings
+
+from peptdeep.model.ms2 import (
+    pDeepModel, normalize_training_intensities
+)
+from .model.rt import AlphaRTModel
+from .model.ccs import AlphaCCSModel
+from .utils import uniform_sampling
 
 from .settings import global_settings
 
+# %% ../nbdev_nbs/pretrained_models.ipynb 5
 pretrain_dir = os.path.join(
     os.path.join(
         os.path.expanduser(
@@ -62,7 +91,6 @@ def download_models(
     if not os.path.isfile(url):
         logging.info(f'Downloading {model_zip_name} ...')
         try:
-            import ssl
             context = ssl._create_unverified_context()
             requests = urllib.request.urlopen(url, context=context, timeout=10)
             with open(model_zip, 'wb') as f:
@@ -85,19 +113,11 @@ def download_models(
         )
     logging.info(f'The pretrained models had been downloaded in {model_zip}')
 
-# %% ../nbdev_nbs/pretrained_models.ipynb 5
+# %% ../nbdev_nbs/pretrained_models.ipynb 6
 if not os.path.exists(model_zip):
     download_models()
 
-# %% ../nbdev_nbs/pretrained_models.ipynb 8
-from peptdeep.model.ms2 import (
-    pDeepModel, normalize_training_intensities
-)
-from .model.rt import AlphaRTModel
-from .model.ccs import AlphaCCSModel
-from .utils import uniform_sampling
-
-from .settings import global_settings
+# %% ../nbdev_nbs/pretrained_models.ipynb 9
 model_mgr_settings = global_settings['model_mgr']
 
 def count_mods(psm_df)->pd.DataFrame:
@@ -200,27 +220,7 @@ def load_models_by_model_type_in_zip(model_type_in_zip:str, mask_modloss=True):
     return ms2_model, rt_model, ccs_model
 
 
-# %% ../nbdev_nbs/pretrained_models.ipynb 10
-from alphabase.peptide.fragment import (
-    create_fragment_mz_dataframe,
-    get_charged_frag_types,
-    concat_precursor_fragment_dataframes
-)
-from alphabase.peptide.precursor import (
-    refine_precursor_df,
-    update_precursor_mz
-)
-from alphabase.peptide.mobility import (
-    mobility_to_ccs_for_df,
-    ccs_to_mobility_for_df
-)
-
-from .settings import global_settings
-
-import torch.multiprocessing as mp
-from typing import Dict
-from .utils import logging, process_bar
-
+# %% ../nbdev_nbs/pretrained_models.ipynb 11
 def clear_error_modloss_intensities(
     fragment_mz_df, fragment_intensity_df
 ):

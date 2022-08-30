@@ -5,17 +5,15 @@ __all__ = ['perc_settings', 'rescore_model_provider', 'LogisticRegressionTorch',
            'Percolator']
 
 # %% ../../nbdev_nbs/rescore/percolator.ipynb 2
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.linear_model import LogisticRegression
 import numpy as np
 import pandas as pd
-from tqdm import tqdm
 import torch
 import os
-
 import multiprocessing as mp
 
-from ..utils import logging
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.linear_model import LogisticRegression
+from tqdm import tqdm
 
 from alphabase.peptide.fragment import get_charged_frag_types
 from alphabase.io.psm_reader import psm_reader_provider
@@ -33,9 +31,12 @@ from ..pretrained_models import ModelManager
 
 from ..settings import global_settings
 
-perc_settings = global_settings['percolator']
+from ..utils import logging
 
 # %% ../../nbdev_nbs/rescore/percolator.ipynb 3
+perc_settings = global_settings['percolator']
+
+# %% ../../nbdev_nbs/rescore/percolator.ipynb 4
 class LogisticRegressionTorch(torch.nn.Module):
     def __init__(self, input_dim, **kwargs):
         super().__init__()
@@ -128,7 +129,7 @@ class NNRescore:
         return outputs
 
 
-# %% ../../nbdev_nbs/rescore/percolator.ipynb 5
+# %% ../../nbdev_nbs/rescore/percolator.ipynb 6
 class Percolator:
     def __init__(self,
         *,
@@ -460,6 +461,6 @@ class Percolator:
         )
         return self.re_score(df)
 
-# %% ../../nbdev_nbs/rescore/percolator.ipynb 7
+# %% ../../nbdev_nbs/rescore/percolator.ipynb 8
 #| export
 

@@ -8,7 +8,7 @@ __all__ = ['global_settings', 'model_const', 'update_settings', 'update_modifica
 # import os
 # __file__ = os.path.expanduser('~/Workspace/alphapeptdeep/peptdeep/settings.py')
 
-# %% ../nbdev_nbs/settings.ipynb 4
+# %% ../nbdev_nbs/settings.ipynb 3
 import os
 import collections
 
@@ -17,6 +17,7 @@ from alphabase.constants.modification import (
     load_mod_df, keep_modloss_by_importance
 )
 
+# %% ../nbdev_nbs/settings.ipynb 5
 _base_dir = os.path.dirname(__file__)
 
 global_settings = load_yaml(

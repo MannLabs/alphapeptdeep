@@ -22,7 +22,6 @@ website:
           - model/model_shop.ipynb
           - model/ms2.ipynb
           - model/rt.ipynb
-          - model/test_predict_mp.ipynb
       - section: protein
         contents:
           - protein/fasta.ipynb

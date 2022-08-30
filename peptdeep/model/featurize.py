@@ -9,9 +9,9 @@ __all__ = ['mod_elements', 'mod_feature_size', 'mod_elem_to_idx', 'MOD_TO_FEATUR
 import numpy as np
 import pandas as pd
 from typing import List, Union
+from alphabase.constants.modification import MOD_CHEM
 
 from ..settings import model_const
-from alphabase.constants.modification import MOD_CHEM
 
 # %% ../../nbdev_nbs/model/featurize.ipynb 3
 mod_elements = model_const['mod_elements']
