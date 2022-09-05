@@ -135,3 +135,5 @@ peptdeep/logs
 *installed_models*
 *.last_checked*
 *_docs*
+*_quarto.yml
+*sidebar.yml

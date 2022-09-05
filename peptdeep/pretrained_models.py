@@ -77,16 +77,22 @@ def is_model_zip(downloaded_zip):
 def download_models(
     url:str=model_url, overwrite=True
 ):
-    """[summary]
+    """
 
-    Args:
-        url (str, optional): remote or local path. 
-          Defaults to peptdeep.pretrained_models.model_url.
-        overwrite (bool, optional): overwirte old model files. 
-          Defaults to True.
+    Parameters
+    ----------
+    url : str, optional
+        Remote or local path. 
+        Defaults to `peptdeep.pretrained_models.model_url`
 
-    Raises:
-        FileNotFoundError: If remote url is not accessible.
+    overwrite : bool, optional
+        overwirte old model files. 
+        Defaults to True.
+
+    Raises
+    ------
+    FileNotFoundError
+        If remote url is not accessible.
     """
     if not os.path.isfile(url):
         logging.info(f'Downloading {model_zip_name} ...')

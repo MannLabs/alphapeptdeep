@@ -57,9 +57,9 @@ def import_psm_df(psm_files:list, psm_type:str)->pd.DataFrame:
 
     Parameters
     ----------
-    psm_files : list[str]
+    psm_files : list
 
-        PSM file paths
+        List[str]. PSM file paths
         
     psm_type : str
         PSM type or search engine name/type
@@ -105,9 +105,9 @@ def match_psms(settings_dict:dict=settings.global_settings)->tuple:
     
     Returns
     -------
-    tuple[pd.DataFrame]
+    tuple
 
-        The PSM DataFrame and the matched fragment intensity DataFrame
+        Tuple[pd.DataFrame]. The PSM DataFrame and the matched fragment intensity DataFrame
     """
     mgr_settings = settings_dict['model_mgr']
 
@@ -180,11 +180,13 @@ def transfer_learn(settings_dict:dict=settings.global_settings, verbose=True):
     ----------
     settings_dict : dict
 
-        The settings dict. Optional, by default `peptdeep.settings.global_settings`
+        The settings dict. 
+        Optional, by default `peptdeep.settings.global_settings`
     
     verbose : bool
 
-        Print the training details. Optional, default True
+        Print the training details. 
+        Optional, default True
 
     Raises
     ------
