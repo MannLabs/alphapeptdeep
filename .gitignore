@@ -134,6 +134,9 @@ peptdeep/logs
 *sandbox*
 *installed_models*
 *.last_checked*
+
+# nbdev2
 *_docs*
 *_quarto.yml
 *sidebar.yml
+*_proc
