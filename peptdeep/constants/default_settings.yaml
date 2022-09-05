@@ -14,6 +14,7 @@ local_model_zip_name: "pretrained_models.zip"
 # overwritable config
 model_url: "https://github.com/MannLabs/alphapeptdeep/releases/download/pre-trained-models/pretrained_models.zip"
 
+task_type: library
 thread_num: 8
 log_level: info
 log_level_choices:

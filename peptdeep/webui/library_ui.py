@@ -1,14 +1,20 @@
 import streamlit as st
 import pandas as pd
 import os
-from peptdeep.settings import global_settings
-from peptdeep.cli import generate_library
+
+from datetime import datetime
+
 from alphabase.constants.modification import MOD_DF
+from alphabase.yaml_utils import save_yaml
+
+from peptdeep.settings import global_settings
 
 from peptdeep.webui.ui_utils import (
     files_in_pandas, update_input_paths,
     get_posix
 )
+
+from peptdeep.webui.server import queue_folder
 
 def mod_options():
     with st.form("Select modifications"):
@@ -171,13 +177,30 @@ def show():
     global_settings['library']['output_folder'] = output_folder
 
     tsv_enabled = bool(st.checkbox('Output TSV (for DiaNN/Spectronaut)'))
+    st.write("Writings the TSV file for a big library is very slow")
     global_settings['library']['output_tsv']['enabled'] = tsv_enabled
     if tsv_enabled:
         output_tsv()
 
-    if st.button('Generate library'):
-        if len(global_settings['library']['input']['paths']) > 0:
-            generate_library()
-            st.write('Library generated!')
-        else:
-            st.warning(f'Please select the input {_input_type} files')
+    now = datetime.now()
+    current_time = now.strftime("%Y-%m-%d--%H-%M-%S.%f")
+    task_name = st.text_input("Task name", value=f"peptdeep_library_{current_time}")
+
+    if st.button('Save settings for library prediction'):
+        global_settings['task_type'] = 'library'
+
+        if not os.path.isdir(global_settings['library']['output_folder']):
+            os.makedirs(global_settings['library']['output_folder'])
+
+        yaml_path = f'{queue_folder}/{task_name}.yaml'
+        save_yaml(
+            yaml_path, global_settings
+        )
+        save_yaml(
+            os.path.join(
+                global_settings['library']['output_folder'], 
+                f'{task_name}.yaml'
+            ), 
+            global_settings
+        )
+        st.write(f'Task save into `{os.path.expanduser(yaml_path)}`')

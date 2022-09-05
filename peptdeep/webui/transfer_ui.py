@@ -2,12 +2,17 @@ import streamlit as st
 import pandas as pd
 import os
 import time
+from datetime import datetime
+
+from alphabase.yaml_utils import save_yaml
 
 from peptdeep.settings import global_settings
 from peptdeep.pipeline_api import transfer_learn
 from peptdeep.webui.ui_utils import (
     get_posix, select_files,
 )
+
+from peptdeep.webui.server import queue_folder
 
 def nce_search():
     grid_nce_first = st.number_input('Start NCE for grid NCE search',value = global_settings['model_mgr']['transfer']['grid_nce_first']*1.0,step = 1.0)
@@ -85,7 +90,27 @@ def show():
     global_settings['model_mgr']['transfer']['grid_nce_search'] = grid_nce_search
     if grid_nce_search is True:
         nce_search()
+
+    now = datetime.now()
+    current_time = now.strftime("%Y-%m-%d--%H-%M-%S.%f")
+    task_name = st.text_input("Task name", value=f"peptdeep_transfer_{current_time}")
     
-    if st.button('Run transfer model'):
-        transfer_learn()
-        st.write('Transfer learning done!')
+    if st.button('Save settings for transfer learning'):
+        global_settings['task_type'] = 'train'
+
+        if not os.path.isdir(global_settings['model_mgr']['transfer']['model_output_folder']):
+            os.makedirs(global_settings['model_mgr']['transfer']['model_output_folder'])
+
+        yaml_path = f'{queue_folder}/{task_name}.yaml'
+        save_yaml(
+            yaml_path, global_settings
+        )
+        save_yaml(
+            os.path.join(
+                global_settings['model_mgr']['transfer']['model_output_folder'], 
+                f'{task_name}.yaml'
+            ), 
+            global_settings
+        )
+        
+        st.write(f'Task saved as {os.path.expanduser(yaml_path)}')
