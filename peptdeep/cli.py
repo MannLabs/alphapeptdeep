@@ -6,7 +6,7 @@ import click
 import peptdeep
 from peptdeep import settings
 from peptdeep.pipeline_api import (
-    rescore_psms, generate_library, 
+    rescore, generate_library, 
     transfer_learn, load_settings
 )
 
@@ -42,16 +42,18 @@ r'''
         click.echo(run.get_help(ctx))
 
 @run.command("gui", help="Start graphical user interface.")
-@click.option("--port", default=8077, type=int,
+@click.option("--port", default=10077, type=int,
     show_default=True, help="The web server port."
 )
 def gui(port):
     import peptdeep.gui
+    from peptdeep.webui.server import _server
+    _server.start()
     peptdeep.gui.run(port)
 
 @run.command("install-models", help="Install peptdeep pretrained models.")
 @click.option("--model-file", default=None, type=str,
-    show_default=True, help="The model file (.zip or .tar) to install. "
+    show_default=True, help="The model file .zip to install. "
     "If not set, peptdeep will download the model file from GitHub."
 )
 @click.option("--overwrite", default=True, type=bool,
@@ -66,11 +68,11 @@ def install_model(model_file, overwrite):
     else:
         download_models(model_file, overwrite=overwrite)
 
-@run.command("rescore", help="Rescore DDA results.")
+@run.command("rescore", help="Rescore PSMs using Percolator.")
 @click.argument("settings_yaml", type=str)
-def rescore(settings_yaml):
+def rescore_psms(settings_yaml:str):
     load_settings(settings_yaml)
-    rescore_psms()
+    rescore()
 
 @run.command("library", help="Predict library for DIA search.")
 @click.argument("settings_yaml", type=str)

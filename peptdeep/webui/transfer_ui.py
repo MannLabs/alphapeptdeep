@@ -7,9 +7,8 @@ from datetime import datetime
 from alphabase.yaml_utils import save_yaml
 
 from peptdeep.settings import global_settings
-from peptdeep.pipeline_api import transfer_learn
 from peptdeep.webui.ui_utils import (
-    get_posix, select_files,
+    get_posix, select_files, file_type_selectbox
 )
 
 from peptdeep.webui.server import queue_folder
@@ -47,29 +46,69 @@ def fine_tune():
     global_settings['model_mgr']['transfer']['lr_rt_ccs'] = lr_rt_ccs
 
 def show():
-    st.write("# Transfer model setup")
+    st.write("# Transfer learning")
 
-    model_output_folder = st.text_input('Model output folder')
-    model_output_folder = get_posix(model_output_folder)
+    model_output_folder = st.text_input(
+        'Model output folder', 
+        value=global_settings['model_mgr']['transfer']['model_output_folder'].format(
+            PEPTDEEP_HOME=global_settings['PEPTDEEP_HOME']
+        )
+    )
+    model_output_folder = get_posix(
+        model_output_folder
+    )
     global_settings['model_mgr']['transfer']['model_output_folder'] = model_output_folder
 
-    psm_type = st.selectbox('PSM type choice',global_settings['model_mgr']['transfer']['psm_type_choices'], index = 0)
-    if psm_type == "speclib_tsv":
-        psm_type = "swath"
+    st.write("### PSM files for training")
+    psm_type = file_type_selectbox(
+        ui_label='PSM type',
+        st_key='select_psm_type',
+        default_type=global_settings['model_mgr']['transfer']['psm_type'],
+        monitor_files=global_settings['model_mgr']['transfer']['psm_files'],
+        choices=global_settings['model_mgr']['transfer']['psm_type_choices'],
+        index=global_settings['model_mgr']['transfer']['psm_type_choices'].index(
+            global_settings['model_mgr']['transfer']['psm_type']
+        )
+    )
+    psm_type_to_ext_dict = {
+        "alphapept": ".ms_data.hdf",
+        "pfind": ".spectra",
+        "maxquant": "msms.txt",
+        "diann": "tsv",
+        "speclib_tsv": "tsv",
+    }
     global_settings['model_mgr']['transfer']['psm_type'] = psm_type
-    select_files(global_settings['model_mgr']['transfer']['psm_files'], "PSM files")
-    
-    ms_file_type = st.selectbox('MS file type',global_settings['model_mgr']['transfer']['ms_file_type_choices'], index = 0)
+    select_files(
+        global_settings['model_mgr']['transfer']['psm_files'], 
+        psm_type_to_ext_dict[psm_type], 
+        "Input PSM files"
+    )
+
+    st.write("### MS files for training")
+    ms_file_type = file_type_selectbox(
+        ui_label='MS file type',
+        st_key='select_ms_file_type',
+        default_type=global_settings['model_mgr']['transfer']['ms_file_type'],
+        monitor_files=global_settings['model_mgr']['transfer']['ms_files'],
+        choices=global_settings['model_mgr']['transfer']['ms_file_type_choices'], 
+        index=global_settings['model_mgr']['transfer']['ms_file_type_choices'].index(
+            global_settings['model_mgr']['transfer']['ms_file_type']
+        )
+    )
+    ms_type_to_ext_dict = {
+        "alphapept_hdf": ".ms_data.hdf",
+        "thermo_raw": ".raw",
+        "mgf": ".mgf",
+        "mzml": ".mzml",
+    }
     global_settings['model_mgr']['transfer']['ms_file_type'] = ms_file_type
-    ms_files = st.text_input('MS file folder')
-    global_settings['model_mgr']['transfer']['ms_files'] = [ms_files]
+    select_files(
+        global_settings['model_mgr']['transfer']['ms_files'], 
+        ms_type_to_ext_dict[ms_file_type], 
+        "Input MS files"
+    )
 
-    ms2_ppm = st.checkbox('MS2 ppm (otherwise Da)', global_settings['peak_matching']['ms2_ppm'])
-    #ms2_ppm = st.selectbox('MS2 ppm',('True','False'))
-    global_settings['peak_matching']['ms2_ppm'] = ms2_ppm
-    ms2_tol_value = st.number_input('MS2 tolerance', value = global_settings['peak_matching']['ms2_tol_value'], step = 0.1)
-    global_settings['peak_matching']['ms2_tol_value'] = ms2_tol_value
-
+    st.write("### Training settings")
     fine_tune()
 
     psm_num_to_train_ms2 = st.number_input('PSM num to tune MS2 model', value = int(global_settings['model_mgr']['transfer']['psm_num_to_train_ms2']), step = 1)
@@ -84,8 +123,8 @@ def show():
     global_settings['model_mgr']['transfer']['top_n_mods_to_train'] = top_n_mods_to_train
 
 
-    st.write('### Grid NCE and instrument search')
-    st.write('If NCE and instrument are unknown, grid search will look for the best values)')
+    st.write('### Grid search for NCEs and instruments')
+    st.write('If NCE and instrument are unknown, grid search will look for the best NCE and instrument)')
     grid_nce_search = st.checkbox('Enabled', global_settings['model_mgr']['transfer']['grid_nce_search'])
     global_settings['model_mgr']['transfer']['grid_nce_search'] = grid_nce_search
     if grid_nce_search is True:
@@ -95,11 +134,11 @@ def show():
     current_time = now.strftime("%Y-%m-%d--%H-%M-%S.%f")
     task_name = st.text_input("Task name", value=f"peptdeep_transfer_{current_time}")
     
-    if st.button('Save settings for transfer learning'):
+    if st.button('Submit for transfer learning'):
         global_settings['task_type'] = 'train'
 
-        if not os.path.isdir(global_settings['model_mgr']['transfer']['model_output_folder']):
-            os.makedirs(global_settings['model_mgr']['transfer']['model_output_folder'])
+        if not os.path.exists(model_output_folder):
+            os.makedirs(model_output_folder)
 
         yaml_path = f'{queue_folder}/{task_name}.yaml'
         save_yaml(
@@ -107,10 +146,10 @@ def show():
         )
         save_yaml(
             os.path.join(
-                global_settings['model_mgr']['transfer']['model_output_folder'], 
+                model_output_folder, 
                 f'{task_name}.yaml'
             ), 
             global_settings
         )
         
-        st.write(f'Task saved as {os.path.expanduser(yaml_path)}')
+        st.write(f'`train` task saved as "{os.path.expanduser(yaml_path)}" in the task queue')

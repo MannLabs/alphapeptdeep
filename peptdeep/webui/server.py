@@ -6,8 +6,13 @@ import os
 import shutil
 import multiprocessing as mp
 
-from peptdeep.pipeline_api import generate_library, transfer_learn
+from peptdeep.pipeline_api import (
+    generate_library, 
+    transfer_learn, 
+    rescore
+)
 from peptdeep.settings import global_settings, update_settings
+from peptdeep.utils import logging
 
 def update_global_settings(yaml_file):
     _settings = load_yaml(yaml_file)
@@ -25,7 +30,9 @@ def _create_dir(dir):
     if not os.path.isdir(dir):
         os.makedirs(dir)
 
-home_folder = global_settings['PEPTDEEP_HOME']
+home_folder = os.path.expanduser(
+    global_settings['PEPTDEEP_HOME']
+)
 
 queue_folder = f'{home_folder}/tasks/queue'
 done_folder = f'{home_folder}/tasks/done'
@@ -53,10 +60,10 @@ def serve():
                     print("[PeptDeep] Predicting library ... ")
                     generate_library(global_settings)
                 elif global_settings['task_type'] == 'rescore':
-                    print("[PeptDeep] Rescoring DDA PSMs ... ")
-                    rescore_dda(global_settings)
+                    print("[PeptDeep] Rescoring PSMs ... ")
+                    rescore(global_settings)
                 else:
-                    print("[PeptDeep] Unknown task type, skip ... ")
+                    logging.warning(f"[PeptDeep] Unknown task type `{global_settings['task_type']}`, skip ... ")
                     continue
                 shutil.move(
                     yaml_file, 
@@ -91,6 +98,7 @@ class PeptDeepServer:
     def terminate(self):
         if self.process is not None:
             self.process.terminate()
+            self.process.kill()
             self.process = None
     
 _server = PeptDeepServer()

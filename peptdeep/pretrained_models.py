@@ -483,6 +483,8 @@ class ModelManager(object):
                 )
             else:
                 tr_df = psm_df
+
+            logging.info(f"{len(tr_df)} PSMs for RT training/fine-tuning")
             if len(tr_df) > 0:
                 self.rt_model.train(tr_df, 
                     batch_size=self.batch_size_to_train_rt_ccs,
@@ -524,6 +526,8 @@ class ModelManager(object):
                 )
             else:
                 tr_df = psm_df
+
+            logging.info(f"{len(tr_df)} PSMs for CCS training/fine-tuning")
             if len(tr_df) > 0:
                 self.ccs_model.train(tr_df, 
                     batch_size=self.batch_size_to_train_rt_ccs,
@@ -587,6 +591,7 @@ class ModelManager(object):
                 else:
                     self.set_default_nce_instrument(tr_df)
 
+                logging.info(f"{len(tr_df)} PSMs for MS2 training/fine-tuning")
                 self.ms2_model.train(tr_df, 
                     fragment_intensity_df=tr_inten_df,
                     batch_size=self.batch_size_to_train_ms2,

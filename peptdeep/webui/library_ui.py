@@ -10,8 +10,7 @@ from alphabase.yaml_utils import save_yaml
 from peptdeep.settings import global_settings
 
 from peptdeep.webui.ui_utils import (
-    files_in_pandas, update_input_paths,
-    get_posix
+    get_posix, select_files, file_type_selectbox
 )
 
 from peptdeep.webui.server import queue_folder
@@ -34,11 +33,6 @@ def mod_options():
         st.form_submit_button("Click to confirm the selected modifications")
         st.text("Selected modifications")
         st.dataframe(MOD_DF.loc[fixmod+varmod,['mod_name','classification','composition','mass','modloss_composition','modloss','modloss_importance']])
-
-        global_settings['common']['modloss_importance_level'] = st.number_input(
-            'Modification loss importance level (for a PTM, fragment modloss mz=0 if modloss_importance<modloss_importance_level)', 
-            value=global_settings['common']['modloss_importance_level']
-        )
 
 def varmod_range():
     min_varmod = st.number_input('Min number of variable modifications',min_value = 0, max_value = 1, value = global_settings['library']['input']['min_var_mod_num'], step = 1)
@@ -101,69 +95,51 @@ def output_tsv():
     global_settings['library']['output_tsv']['keep_higest_k_peaks'] = keep_higest_k_peaks
     global_settings['library']['output_tsv']['translate_mod_to_unimod_id']=bool(st.checkbox('Translate modifications to Unimod ids'))
 
-def select_files(_input_type):
-    path = st.text_input(f"File paths ({_input_type if _input_type=='fasta' else 'tsv/csv/txt'} files)")
-    path = get_posix(path)
-    col1, col2, col3 = st.columns([0.5,0.5,2])
-    with col1:
-        add = st.button('Add')
-    with col2:
-        remove = st.button('Remove')
-    with col3:
-        clear = st.button('Clear all files')
-    if add is True:
-        if path not in global_settings['library']['input']['paths']:
-            global_settings['library']['input']['paths'].append(path)
-    if remove is True:
-        if path in global_settings['library']['input']['paths']:
-            global_settings['library']['input']['paths'].remove(path)
-    if clear is True:
-        global_settings['library']['input']['paths'] = []
-    update_input_paths(global_settings['library']['input']['paths'])
-    st.table(files_in_pandas(global_settings['library']['input']['paths']))
-
-def input_files():
-    def on_input_change():
-        if len(global_settings['library']['input']['paths'])>0:
-            st.warning("Please clear all input files before changing the input file type")
-            st.session_state.input_type = global_settings['library']['input']['type']
-            
-    update_input_paths(global_settings['library']['input']['paths'])
-    input_type = st.selectbox(
-        'Input file type',
-        global_settings['library']['input']['type_choices'],
-        key='input_type',
-        on_change=on_input_change
-    )
-    global_settings['library']['input']['type'] = input_type
-
-    select_files(input_type)
-    return input_type
-
 def show():
     st.write("# Library Prediction")
 
     st.write('### Input')
 
-    _input_type = input_files()
+    infile_type = file_type_selectbox(
+        ui_label='Input file type',
+        st_key='lib_input_type',
+        default_type=global_settings['library']['input']['infile_type'],
+        monitor_files=global_settings['library']['input']['infiles'],
+        choices=global_settings['library']['input']['infile_type_choices'], 
+        index=global_settings['library']['input']['infile_type_choices'].index(
+            global_settings['library']['input']['infile_type']
+        )
+    )
+    infile_ext_dict = {
+        'fasta': ['.fasta','.fa'],
+        'sequence_table': ['tsv','txt'],
+        'peptide_table': ['tsv','txt'],
+        'precursor_table': ['tsv','txt'],
+    }
+    select_files(
+        global_settings['library']['input']['infiles'],
+        infile_ext_dict[infile_type],
+        'Input sequence files',
+    )
 
+    st.write('### Library settings')
     add_decoy()
 
     choose_precursor_mz()
 
-    if _input_type == 'fasta':
+    if infile_type == 'fasta':
         choose_protease()
         mod_options()
         varmod_range()
         choose_precursor_charge()
         choose_peptide_len()
 
-    elif _input_type == 'sequence_table':
+    elif infile_type == 'sequence_table':
         mod_options()
         varmod_range()
         choose_precursor_charge()
 
-    elif _input_type == 'peptide_table':
+    elif infile_type == 'peptide_table':
         choose_precursor_charge()
 
     choose_frag_types()
@@ -171,13 +147,18 @@ def show():
 
     st.write("### Output")
 
-    output_folder = st.text_input("Output folder", value=global_settings['library']['output_folder'])
-    output_folder = os.path.abspath(os.path.expanduser(os.path.expandvars(output_folder)))
+    output_folder = st.text_input(
+        "Output folder", 
+        value=global_settings['library']['output_folder'].format(
+            PEPTDEEP_HOME=global_settings['PEPTDEEP_HOME']
+        )
+    )
+    output_folder = os.path.expanduser(output_folder)
     output_folder = get_posix(output_folder)
     global_settings['library']['output_folder'] = output_folder
 
     tsv_enabled = bool(st.checkbox('Output TSV (for DiaNN/Spectronaut)'))
-    st.write("Writings the TSV file for a big library is very slow")
+    st.warning("Writing the TSV file for a big library is very slow")
     global_settings['library']['output_tsv']['enabled'] = tsv_enabled
     if tsv_enabled:
         output_tsv()
@@ -186,11 +167,11 @@ def show():
     current_time = now.strftime("%Y-%m-%d--%H-%M-%S.%f")
     task_name = st.text_input("Task name", value=f"peptdeep_library_{current_time}")
 
-    if st.button('Save settings for library prediction'):
+    if st.button('Submit for library prediction'):
         global_settings['task_type'] = 'library'
 
-        if not os.path.isdir(global_settings['library']['output_folder']):
-            os.makedirs(global_settings['library']['output_folder'])
+        if not os.path.exists(output_folder):
+            os.makedirs(output_folder)
 
         yaml_path = f'{queue_folder}/{task_name}.yaml'
         save_yaml(
@@ -198,9 +179,9 @@ def show():
         )
         save_yaml(
             os.path.join(
-                global_settings['library']['output_folder'], 
+                output_folder, 
                 f'{task_name}.yaml'
             ), 
             global_settings
         )
-        st.write(f'Task save into `{os.path.expanduser(yaml_path)}`')
+        st.write(f'`library` task saved as `{os.path.expanduser(yaml_path)}`')

@@ -3,12 +3,7 @@
 # %% auto 0
 __all__ = ['global_settings', 'model_const', 'update_settings', 'update_modifications']
 
-# %% ../nbdev_nbs/settings.ipynb 1
-# for nbdev_build_docs
-# import os
-# __file__ = os.path.expanduser('~/Workspace/alphapeptdeep/peptdeep/settings.py')
-
-# %% ../nbdev_nbs/settings.ipynb 3
+# %% ../nbdev_nbs/settings.ipynb 2
 import os
 import collections
 
@@ -17,12 +12,17 @@ from alphabase.constants.modification import (
     load_mod_df, keep_modloss_by_importance
 )
 
-# %% ../nbdev_nbs/settings.ipynb 5
+# %% ../nbdev_nbs/settings.ipynb 4
 _base_dir = os.path.dirname(__file__)
 
 global_settings = load_yaml(
     os.path.join(_base_dir, 'constants/default_settings.yaml')
 )
+
+global_settings['PEPTDEEP_HOME'] = os.path.expanduser(
+    global_settings['PEPTDEEP_HOME']
+)
+
 for key, val in list(global_settings['model_mgr'][
     'instrument_group'
 ].items()):
