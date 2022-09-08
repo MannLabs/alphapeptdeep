@@ -16,6 +16,9 @@ model_url: "https://github.com/MannLabs/alphapeptdeep/releases/download/pre-trai
 
 task_type: library
 thread_num: 8
+torch_device:
+  name: gpu
+  ids: []
 log_level: info
 log_level_choices:
   - debug

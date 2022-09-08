@@ -245,36 +245,57 @@ class ModelManager(object):
     ):
         """ The manager class to access MS2/RT/CCS models.
 
-        Args:
-            mask_modloss (bool, optional): If modloss ions are masked to zeros
-                in the ms2 model. `modloss` ions are mostly useful for phospho 
-                MS2 prediciton model. 
-                Defaults to :py:data:`global_settings`['model_mgr']['mask_modloss'].
-            device (str, optional): Device for DL models, could be 'gpu' ('cuda') or 'cpu'.
-                if device=='gpu' but no GPUs are detected, it will automatically switch to 'cpu'.
-                Defaults to 'gpu'.
+        Parameters
+        ----------
+        mask_modloss : bool, optional
+            If modloss ions are masked to zeros in the ms2 model. `modloss` 
+            ions are mostly useful for phospho MS2 prediciton model. 
+            Defaults to global_settings['model_mgr']['mask_modloss']
+
+        device : str, optional
+            Device for DL models, could be 'gpu' ('cuda') or 'cpu'.
+            if device=='gpu' but no GPUs are detected, it will automatically switch to 'cpu'.
+            Defaults to 'gpu'
                 
-        Attributes:
-            ms2_model (:py:class:`peptdeep.model.ms2.pDeepModel`): The MS2 
-                prediction model.
-            rt_model (:py:class:`peptdeep.model.rt.AlphaRTModel`): The RT prediction model.
-            ccs_model (:py:class:`peptdeep.model.ccs.AlphaCCSModel`): The CCS prediciton model.
-            psm_num_to_train_ms2 (int): Number of PSMs to train the MS2 model. 
-                Defaults to global_settings['model_mgr']['transfer']['psm_num_to_train_ms2'].
-            epoch_to_train_ms2 (int): Number of epoches to train the MS2 model. 
-                Defaults to global_settings['model_mgr']['transfer']['epoch_ms2'].
-            psm_num_to_train_rt_ccs (int): Number of PSMs to train RT/CCS model. 
-                Defaults to global_settings['model_mgr']['transfer']['psm_num_to_train_rt_ccs'].
-            epoch_to_train_rt_ccs (int): Number of epoches to train RT/CCS model. 
-                Defaults to global_settings['model_mgr']['transfer']['epoch_rt_ccs'].
-            nce (float): Default NCE value for a precursor_df without the 'nce' column.
-                Defaults to global_settings['model_mgr']['default_nce'].
-            instrument (str): Default instrument type for a precursor_df without the 'instrument' column.
-                Defaults to global_settings['model_mgr']['default_instrument'].
-            use_grid_nce_search (bool): If self.ms2_model uses 
-                :py:meth:`peptdeep.model.ms2.pDeepModel.grid_nce_search` to determine optimal
-                NCE and instrument type. This will change `self.nce` and `self.instrument` values.
-                Defaults to global_settings['model_mgr']['transfer']['grid_nce_search'].
+        Attributes
+        ----------
+        ms2_model : peptdeep.model.ms2.pDeepModel
+            The MS2 prediction model.
+
+        rt_model : peptdeep.model.rt.AlphaRTModel
+            The RT prediction model.
+
+        ccs_model : peptdeep.model.ccs.AlphaCCSModel
+            The CCS prediciton model.
+
+        psm_num_to_train_ms2 : int
+            Number of PSMs to train the MS2 model. 
+            Defaults to global_settings['model_mgr']['transfer']['psm_num_to_train_ms2'].
+
+        epoch_to_train_ms2 : int
+            Number of epoches to train the MS2 model. 
+            Defaults to global_settings['model_mgr']['transfer']['epoch_ms2'].
+
+        psm_num_to_train_rt_ccs : int
+            Number of PSMs to train RT/CCS model. 
+            Defaults to global_settings['model_mgr']['transfer']['psm_num_to_train_rt_ccs'].
+
+        epoch_to_train_rt_ccs : int
+            Number of epoches to train RT/CCS model. 
+            Defaults to global_settings['model_mgr']['transfer']['epoch_rt_ccs'].
+
+        nce : float
+            Default NCE value for a precursor_df without the 'nce' column.
+            Defaults to global_settings['model_mgr']['default_nce'].
+
+        instrument : str
+            Default instrument type for a precursor_df without the 'instrument' column.
+            Defaults to global_settings['model_mgr']['default_instrument'].
+
+        use_grid_nce_search : bool
+            If self.ms2_model uses `peptdeep.model.ms2.pDeepModel.grid_nce_search()` to determine optimal
+            NCE and instrument type. This will change `self.nce` and `self.instrument` values.
+            Defaults to global_settings['model_mgr']['transfer']['grid_nce_search'].
         """
         self.mgr_settings = mgr_settings
 
@@ -376,10 +397,13 @@ class ModelManager(object):
         model_type:str=model_mgr_settings['model_type']
     ):
         """ Load built-in MS2/CCS/RT models.
-        Args:
-            model_type (str, optional): To load the installed MS2/RT/CCS models 
-                or phos MS2/RT/CCS models. It could be 'digly', 'phospho', 'HLA', or 'generic'.
-                Defaults to `global_settings['model_mgr']['model_type']` ('generic').
+        
+        Parameters
+        ----------
+        model_type : str, optional
+            To load the installed MS2/RT/CCS models or phos MS2/RT/CCS models. 
+            It could be 'digly', 'phospho', 'HLA', or 'generic'.
+            Defaults to `global_settings['model_mgr']['model_type']` ('generic').
         """
         if model_type.lower() in [
             'phospho','phos','phosphorylation'
@@ -440,13 +464,19 @@ class ModelManager(object):
     ):
         """Load external MS2/RT/CCS models.
 
-        Args:
-            ms2_model_file (Tuple[str, io.BytesIO], optional): ms2 model file or stream.
-                Do nothing if the value is ''. Defaults to global_settings['model_mgr']['external_ms2_model'].
-            rt_model_file (Tuple[str, io.BytesIO], optional): rt model file or stream.
-                Do nothing if the value is ''. Defaults to global_settings['model_mgr']['external_rt_model'].
-            ccs_model_file (Tuple[str, io.BytesIO], optional): ccs model or stream.
-                Do nothing if the value is ''. Defaults to global_settings['model_mgr']['external_ccs_model'].
+        Parameters
+        ----------
+        ms2_model_file : Tuple[str, io.BytesIO], optional
+            MS2 model file or stream. Do nothing if the value is '' or None. 
+            Defaults to global_settings['model_mgr']['external_ms2_model'].
+
+        rt_model_file : Tuple[str, io.BytesIO], optional
+            RT model file or stream. Do nothing if the value is '' or None.
+            Defaults to global_settings['model_mgr']['external_rt_model'].
+
+        ccs_model_file : Tuple[str, io.BytesIO], optional
+            CCS model or stream. Do nothing if the value is '' or None. 
+            Defaults to global_settings['model_mgr']['external_ccs_model'].
         """
 
         def _load_file(model, model_file):
@@ -457,7 +487,7 @@ class ModelManager(object):
                     else:
                         return
                 model.load(model_file)
-            except UnpicklingError as e:
+            except (UnpicklingError, TypeError, ValueError, KeyError) as e:
                 logging.info(f"Cannot load {model_file} as {model.__class__} model, peptdeep will use the pretrained model instead.")
 
         _load_file(self.ms2_model, ms2_model_file)
@@ -470,8 +500,10 @@ class ModelManager(object):
         """ Train/fine-tune the RT model. The fine-tuning will be skipped 
             if `self.psm_num_to_train_rt_ccs` is zero.
 
-        Args:
-            psm_df (pd.DataFrame): training psm_df which contains 'rt_norm' column.
+        Parameters
+        ----------
+        psm_df : pd.DataFrame
+            Training psm_df which contains 'rt_norm' column.
         """
         if self.psm_num_to_train_rt_ccs > 0:
             if self.psm_num_per_mod_to_train_rt_ccs < len(psm_df):
@@ -500,9 +532,10 @@ class ModelManager(object):
         """ Train/fine-tune the CCS model. The fine-tuning will be skipped
             if `self.psm_num_to_train_rt_ccs` is zero.
 
-        Args:
-            psm_df (pd.DataFrame): training psm_df which contains 
-            'ccs' or 'mobility' column.
+        Parameters
+        ----------
+        psm_df : pd.DataFrame
+            Training psm_df which contains 'ccs' or 'mobility' column.
         """
 
         if 'mobility' not in psm_df.columns or 'ccs' not in psm_df.columns:
@@ -546,9 +579,13 @@ class ModelManager(object):
         2. This method will also consider some important PTMs (`n=self.top_n_mods_to_train`) into `tr_df` for fine-tuning. 
         3. If `self.use_grid_nce_search==True`, this method will call `self.ms2_model.grid_nce_search` to find the best NCE and instrument.
 
-        Args:
-            psm_df (pd.DataFrame): PSM dataframe for fine-tuning.
-            matched_intensity_df (pd.DataFrame): The matched fragment intensities for `psm_df`.
+        Parameters
+        ----------
+        psm_df : pd.DataFrame
+            PSM dataframe for fine-tuning
+
+        matched_intensity_df : pd.DataFrame
+            The matched fragment intensities for `psm_df`.
         """
         if self.psm_num_to_train_ms2 > 0:
             if self.psm_num_to_train_ms2 < len(psm_df):
@@ -610,19 +647,26 @@ class ModelManager(object):
     )->pd.DataFrame:
         """Predict MS2 for the given precursor_df
 
-        Args:
-            precursor_df (pd.DataFrame): precursor dataframe for MS2 prediction.
-            batch_size (int, optional): Batch size for prediction. 
-              Defaults to mgr_settings[ 'predict' ]['batch_size_ms2'].
-            reference_frag_df (pd.DataFrame, optional): 
-              If precursor_df has 'frag_start_idx' pointing to reference_frag_df. 
-              Defaults to None.
+        Parameters
+        ----------
+        precursor_df : pd.DataFrame
+            Precursor dataframe for MS2 prediction
 
-        Returns:
-            pd.DataFrame: predicted fragment intensity dataframe. 
-              If there are no such two columns in precursor_df, 
-              it will insert 'frag_start_idx' and `frag_end_idx` in 
-              precursor_df pointing to this predicted fragment dataframe.
+        batch_size : int, optional
+            Batch size for prediction. 
+            Defaults to mgr_settings[ 'predict' ]['batch_size_ms2']
+
+        reference_frag_df : pd.DataFrame, optional
+            If precursor_df has 'frag_start_idx' pointing to reference_frag_df. 
+            Defaults to None
+
+        Returns
+        -------
+        pd.DataFrame
+            Predicted fragment intensity dataframe. 
+            If there are no such two columns in precursor_df, 
+            it will insert 'frag_start_idx' and `frag_end_idx` in 
+            precursor_df pointing to this predicted fragment dataframe.
         """
         self.set_default_nce_instrument(precursor_df)
         if self.verbose:
@@ -641,14 +685,20 @@ class ModelManager(object):
     )->pd.DataFrame:
         """ Predict RT ('rt_pred') inplace into `precursor_df`.
 
-        Args:
-            precursor_df (pd.DataFrame): precursor_df for RT prediction
-            batch_size (int, optional): Batch size for prediction. 
-              Defaults to mgr_settings[ 'predict' ]['batch_size_rt_ccs']. 
-              mgr_settings=peptdeep.settings.global_settings['model_mgr'].
+        Parameters
+        ----------
+        precursor_df : pd.DataFrame
+            precursor_df for RT prediction
 
-        Returns:
-            pd.DataFrame: df with 'rt_pred' and 'rt_norm_pred' columns.
+        batch_size : int, optional
+            Batch size for prediction. 
+            Defaults to mgr_settings[ 'predict' ]['batch_size_rt_ccs']. 
+            mgr_settings=peptdeep.settings.global_settings['model_mgr'].
+
+        Returns
+        -------
+        pd.DataFrame
+            df with 'rt_pred' and 'rt_norm_pred' columns.
         """
         if self.verbose:
             logging.info("Predicting RT ...")
@@ -664,16 +714,22 @@ class ModelManager(object):
             'predict'
         ]['batch_size_rt_ccs']
     )->pd.DataFrame:
-        """ Predict mobility ('ccs_pred' and `mobility_pred`) inplace into `precursor_df`.
+        """ Predict mobility (`ccs_pred` and `mobility_pred`) inplace into `precursor_df`.
 
-        Args:
-            precursor_df (pd.DataFrame): precursor_df for CCS/mobility prediction
-            batch_size (int, optional): Batch size for prediction. 
-              Defaults to mgr_settings[ 'predict' ]['batch_size_rt_ccs']. 
-              mgr_settings=peptdeep.settings.global_settings['model_mgr'].
+        Parameters
+        ----------
+        precursor_df : pd.DataFrame
+            Precursor_df for CCS/mobility prediction
 
-        Returns:
-            pd.DataFrame: df with 'ccs_pred' and 'mobility_pred' columns.
+        batch_size : int, optional
+            Batch size for prediction. 
+            Defaults to mgr_settings[ 'predict' ]['batch_size_rt_ccs'],
+            where mgr_settings=peptdeep.settings.global_settings['model_mgr'].
+
+        Returns
+        -------
+        pd.DataFrame
+            df with 'ccs_pred' and 'mobility_pred' columns.
         """
         if self.verbose:
             logging.info("Predicting mobility ...")
@@ -705,32 +761,46 @@ class ModelManager(object):
         which may include rt, mobility, fragment_mz 
         and fragment_intensity.
 
-        Args:
-            precursor_df (pd.DataFrame): precursor dataframe contains 
-              `sequence`, `mods`, `mod_sites`, `charge` ... columns. 
-            predict_items (list, optional): items ('rt', 'mobility', 
-              'ms2') to predict.
-              Defaults to ['rt' ,'mobility' ,'ms2'].
-            frag_types (list, optional): fragment types to predict. If it is None,
-            it then depends on `self.ms2_model.charged_frag_types` and 
+        Parameters
+        ----------
+        precursor_df : pd.DataFrame
+            Precursor dataframe contains `sequence`, `mods`, `mod_sites`, `charge` ... columns. 
+
+        predict_items : list, optional
+            items ('rt', 'mobility', 'ms2') to predict.
+            Defaults to ['rt' ,'mobility' ,'ms2'].
+
+        frag_types : list, optional
+            Fragment types to predict. 
+            If it is None, it then depends on `self.ms2_model.charged_frag_types` and 
             `self.ms2_model.model._mask_modloss`.
-              Defaults to None.
-            multiprocessing (bool, optional): if use multiprocessing.
-              Defaults to True.
-            process_num (int, optional): Defaults to global_settings['thread_num']
-            min_required_precursor_num_for_mp (int, optional): It will not use 
-              multiprocessing when the number of precursors in precursor_df 
-              is lower than this value. Defaults to 3000.
-            mp_batch_size (int, optional): Splitting data into batches 
-                for multiprocessing. Defaults to 100000.
+            Defaults to None.
+
+        multiprocessing : bool, optional
+            If use multiprocessing is gpu is not available
+            Defaults to True.
+
+        process_num : int, optional
+            Defaults to global_settings['thread_num']
+
+        min_required_precursor_num_for_mp : int, optional
+            It will not use multiprocessing when the number of precursors in precursor_df 
+            is lower than this value. 
+            Defaults to 3000.
+
+        mp_batch_size : int, optional
+            Splitting data into batches for multiprocessing. 
+            Defaults to 100000.
               
-        Returns:
-            Dict[str, pd.DataFrame]: {'precursor_df': precursor_df}
-              if 'ms2' in predict_items, it also contains:
-              {
-                  'fragment_mz_df': fragment_mz_df,
-                  'fragment_intensity_df': fragment_intensity_df
-              }
+        Returns
+        -------
+        Dict[str, pd.DataFrame]
+            {'precursor_df': precursor_df} and
+            if 'ms2' in predict_items, it also contains:
+            {
+                'fragment_mz_df': fragment_mz_df,
+                'fragment_intensity_df': fragment_intensity_df
+            }
         """
         def refine_df(df):
             if 'ms2' in predict_items:

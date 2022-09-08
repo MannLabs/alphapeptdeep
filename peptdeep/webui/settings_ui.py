@@ -46,7 +46,7 @@ def show():
         ['mod_name','classification','mass','modloss','modloss_original','modloss_importance']
     ])
 
-def update_st_session_state_after_loading_settings(
+def _update_st_session_state_after_loading_settings(
     state_dict:dict={
         'select_psm_type': global_settings['model_mgr']['transfer']['psm_type'],
         'select_ms_file_type': global_settings['model_mgr']['transfer']['ms_file_type'],
@@ -63,7 +63,6 @@ def load_settings_gui():
         f = StringIO(uploaded_file.getvalue().decode("utf-8"))
         uploaded_settings = yaml.load(f, Loader=yaml.FullLoader)
         update_settings(global_settings, uploaded_settings)
-        # update_st_session_state_after_loading_settings()
         st.write("Global settings have been updated")
 
 def save_settings_gui():

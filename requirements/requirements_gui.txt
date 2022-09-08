@@ -2,9 +2,6 @@ click
 pandas
 numpy
 torch
-statsmodels
-seaborn
-matplotlib
 regex
 tqdm
 numba

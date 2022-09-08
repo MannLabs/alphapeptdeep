@@ -157,7 +157,7 @@ def show():
     output_folder = get_posix(output_folder)
     global_settings['library']['output_folder'] = output_folder
 
-    tsv_enabled = bool(st.checkbox('Output TSV (for DiaNN/Spectronaut)'))
+    tsv_enabled = bool(st.checkbox('Output TSV (for DiaNN/Spectronaut)', value=global_settings['library']['output_tsv']['enabled']))
     st.warning("Writing the TSV file for a big library is very slow")
     global_settings['library']['output_tsv']['enabled'] = tsv_enabled
     if tsv_enabled:

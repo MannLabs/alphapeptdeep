@@ -38,14 +38,36 @@ import peptdeep.model.building_block as building_block
 # %% ../../nbdev_nbs/model/ms2.ipynb 4
 class ModelMS2Transformer(torch.nn.Module):
     def __init__(self,
-        num_frag_types,
-        num_modloss_types=0,
-        mask_modloss=True,
-        dropout=0.1,
-        nlayers=4,
-        hidden=256,
+        num_frag_types:int,
+        num_modloss_types:int=0,
+        mask_modloss:bool=True,
+        dropout:float=0.1,
+        nlayers:int=4,
+        hidden:int=256,
         **kwargs,
     ):
+        """Transformer model for MS2 prediction
+
+        Parameters
+        ----------
+        num_frag_types : int
+            Total number of fragment types of a fragmentation position to predict
+
+        num_modloss_types : int, optional
+            Number of fragment types of a fragmentation position to predict, by default 0
+
+        mask_modloss : bool, optional
+            If True, the modloss layer will be disabled, by default True
+
+        dropout : float, optional
+            Dropout, by default 0.1
+
+        nlayers : int, optional
+            Number of transformer layer, by default 4
+
+        hidden : int, optional
+            Hidden layer size, by default 256
+        """
         super().__init__()
 
         self.dropout = torch.nn.Dropout(dropout)
