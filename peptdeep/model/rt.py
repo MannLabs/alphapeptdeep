@@ -45,6 +45,7 @@ irt_pep = IRT_PEPTIDE_DF
 
 # %% ../../nbdev_nbs/model/rt.ipynb 10
 class Model_RT_Bert(torch.nn.Module):
+    """Transformer model for RT prediction"""
     def __init__(self,
         dropout = 0.1,
         nlayers = 4,
@@ -52,10 +53,6 @@ class Model_RT_Bert(torch.nn.Module):
         output_attentions=False,
         **kwargs,
     ):
-        """
-        Model based on a transformer Architecture from 
-        Huggingface's BertEncoder class.
-        """
         super().__init__()
 
         self.dropout = torch.nn.Dropout(dropout)
@@ -105,12 +102,10 @@ class Model_RT_Bert(torch.nn.Module):
 
 # %% ../../nbdev_nbs/model/rt.ipynb 12
 class Model_RT_LSTM_CNN(torch.nn.Module):
+    """CNN+LSTM model for RT prediction"""
     def __init__(self, 
         dropout=0.2,
     ):
-        """
-        Model based on a combined CNN/LSTM architecture
-        """
         super().__init__()
         
         self.dropout = torch.nn.Dropout(dropout)
@@ -138,15 +133,15 @@ Model_RT_LSTM = Model_RT_LSTM_CNN
 
 # %% ../../nbdev_nbs/model/rt.ipynb 14
 class AlphaRTModel(model_interface.ModelInterface):
+    """
+    `ModelInterface` for RT models
+    """
     def __init__(self, 
         dropout=0.1,
         model_class:torch.nn.Module=Model_RT_LSTM_CNN, #model defined above
         device:str='gpu',
         **kwargs,
     ):
-        """
-        Class to predict retention times from precursor dataframes.
-        """
         super().__init__(device=device)
         self.build(
             model_class,

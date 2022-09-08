@@ -28,14 +28,23 @@ def match_centroid_mz(
     Matching query masses against sorted MS2/spec centroid masses, 
     only closest (minimal mass error) peaks are matched.
     
-    Args:
-        spec_mzs (np.ndarray): MS2 or spec mz values, 1-D float array
-        query_mzs (np.ndarray): query mz values, n-D float array
-        spec_mz_tols (np.ndarray): Da tolerance array, same shape as spec_mzs
+    Parameters
+    ----------
+    spec_mzs : np.ndarray
+        MS2 or spec mz values, 1-D float array
 
-    Returns:
-        np.ndarray: np.ndarray of int32, the shape is the same as query_mzs.
-          -1 means no peaks are matched for the query mz
+    query_mzs : np.ndarray
+        query mz values, n-D float array
+
+    spec_mz_tols : np.ndarray
+        Da tolerance array, same shape as spec_mzs
+
+    Returns
+    -------
+    np.ndarray
+        np.ndarray of int32, the shape is the same as query_mzs.
+        -1 means no peaks are matched for the query mz
+
     """
     idxes = np.searchsorted(spec_mzs, query_mzs)
     ret_indices = np.empty_like(query_mzs, dtype=np.int32)
@@ -64,14 +73,23 @@ def match_profile_mz(
     Matching query masses against sorted MS2/spec profile masses,
     only highest peaks are matched.
 
-    Args:
-        spec_mzs (np.ndarray): MS2 or spec mz values, 1-D float array
-        query_mzs (np.ndarray): query mz values, n-D float array
-        spec_mz_tols (np.ndarray): Da tolerance array, same shape as spec_mzs
+    Parameters
+    ----------
+    spec_mzs : np.ndarray
+        MS2 or spec mz values, 1-D float array
 
-    Returns:
-        np.ndarray: np.ndarray of int32, the shape is the same as query_mzs.
-          -1 means no peaks are matched for the query mz
+    query_mzs : np.ndarray
+        query mz values, n-D float array
+
+    spec_mz_tols : np.ndarray
+        Da tolerance array, same shape as spec_mzs
+
+    Returns
+    -------
+    np.ndarray
+        np.ndarray of int32, the shape is the same as query_mzs.
+        -1 means no peaks are matched for the query mz
+
     """
     idxes = np.searchsorted(spec_mzs, query_mzs)
     ret_indices = np.empty_like(query_mzs, dtype=np.int32)
@@ -150,6 +168,7 @@ def match_one_raw_with_numba(
 
 # %% ../../nbdev_nbs/mass_spec/match.ipynb 9
 class PepSpecMatch(object):
+    """Main entry for peptide-spectrum matching"""
     def __init__(self,
         charged_frag_types = get_charged_frag_types(
             ['b','y','b_modloss','y_modloss'],
@@ -170,26 +189,41 @@ class PepSpecMatch(object):
         psm_df_one_raw: pd.DataFrame,
         ms2_file:str,
         ms2_file_type:str='alphapept',
-        ppm=True, tol=20.0,
+        ppm:bool=True, tol:float=20.0,
     )->tuple:
         """Matching psm_df_one_raw against ms2_file
 
-        Args:
-            psm_df_one_raw (pd.DataFrame): psm dataframe 
-                that contains only one raw file
-            ms2_file (str): ms2 file path
-            ms2_file_type (str, optional): ms2 file type, 
-                could be ["thermo","alphapept","mgf"].
-                Default to 'alphapept'
-            ppm (bool, optional): ppm tolerance. Defaults to True.
-            tol (int, optional): tolerance. Defaults to 20.
+        Parameters
+        ----------
+        psm_df_one_raw : pd.DataFrame
+            psm dataframe 
+            that contains only one raw file
 
-        Returns:
+        ms2_file : str
+            ms2 file path
+
+        ms2_file_type : str, optional
+            ms2 file type, could be ["thermo","alphapept","mgf"].
+            Default to 'alphapept'
+
+        ppm : bool, optional
+            if use ppm tolerance. Defaults to True.
+
+        tol : float, optional
+            tolerance value. Defaults to 20.0.
+
+        Returns
+        -------
+        tuple:
             pd.DataFrame: psm dataframe with fragment index information.
+            
             pd.DataFrame: fragment mz dataframe.
+            
             pd.DataFrame: matched intensity dataframe.
+            
             pd.DataFrame: matched mass error dataframe. 
-                np.inf if a fragment is not matched.
+            np.inf if a fragment is not matched.
+            
         """
         self._preprocess_psms(psm_df_one_raw)
         psm_df = psm_df_one_raw
@@ -325,14 +359,30 @@ class PepSpecMatch(object):
         ppm=True, tol=20.0,
     ):
         """Matching PSM dataframe against the ms2 files in ms2_file_dict
+        This method will store matched values as attributes:
+        - self.psm_df
+        - self.fragment_mz_df
+        - self.matched_intensity_df
+        - self.matched_mz_err_df
 
-        Args:
-            psm_df (pd.DataFrame): PSM dataframe
-            ms2_file_dict (dict): {raw_name: ms2 path}
-            ms2_file_type (str, optional): Could be 'alphapept', 'mgf' or 'thermo'. 
-                Defaults to 'alphapept'.
-            ppm (bool, optional): Defaults to True.
-            tol (float, optional): PPM units, defaults to 20.0.
+        Parameters
+        ----------
+        psm_df : pd.DataFrame
+            PSM dataframe
+
+        ms2_file_dict : dict
+            {raw_name: ms2 path}
+
+        ms2_file_type : str, optional
+            Could be 'alphapept', 'mgf' or 'thermo'. 
+            Defaults to 'alphapept'.
+
+        ppm : bool, optional
+            Defaults to True.
+
+        tol : float, optional
+            PPM units, defaults to 20.0.
+            
         """
         self._preprocess_psms(psm_df)
         self.psm_df = psm_df

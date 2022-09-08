@@ -72,13 +72,32 @@ def match_one_raw(
         matched_intensity_df, matched_mz_err_df
     )
 
-
 def get_psm_scores(
     psm_df:pd.DataFrame,
     predict_intensity_df:pd.DataFrame, 
     matched_intensity_df:pd.DataFrame,
     matched_mass_err_df:pd.DataFrame,
-):
+)->pd.DataFrame:
+    """
+    AlphaPeptDeep has a built-in score for PSMs,
+    it works much better than other scores such as X!Tandem
+
+    Parameters
+    ----------
+    psm_df : pd.DataFrame
+        PSM DataFrame
+    predict_intensity_df : pd.DataFrame
+        Predict intensity DataFrame
+    matched_intensity_df : pd.DataFrame
+        Matched intensity DataFrame
+    matched_mass_err_df : pd.DataFrame
+        Matched mass error DataFrame
+
+    Returns
+    -------
+    DataFrame
+        `psm_df` with "*_score" columns appended inplace
+    """
     matched_norm_intensity_df = pd.DataFrame(
         np.log(matched_intensity_df.values+1), 
         columns=matched_intensity_df.columns.values
@@ -123,22 +142,23 @@ def get_ms2_features(
 )->pd.DataFrame:
     """ Extract ms2 features from the given 
     predict_intensity_df and matched_intensity_df. It will add columns into psm_df:
-      cos: cosine similarity between predicted and matched fragments
-      pcc: pearson correlation between predicted and matched fragments
-      sa: spectral angle between predicted and matched fragments
-      spc: Spearman's rank correlation between predicted and matched fragments.
-      cos_bion: ...
-      cos_yion: ...
-      pcc_bion: ...
-      pcc_yion: ...
-      sa_bion: ...
-      sa_yion: ...
-      spc_bion: ...
-      spc_yion: ...
-      matched_frag_ratio: # matched fragments / # total b+y fragments
-      matched_bion_ratio: # matched b fragments / # total b fragments
-      matched_yion_ratio: # matched y fragments / # total y fragments
-      and more ...
+    
+    - cos: cosine similarity between predicted and matched fragments
+    - pcc: pearson correlation between predicted and matched fragments
+    - sa: spectral angle between predicted and matched fragments
+    - spc: Spearman's rank correlation between predicted and matched fragments.
+    - cos_bion: ...
+    - cos_yion: ...
+    - pcc_bion: ...
+    - pcc_yion: ...
+    - sa_bion: ...
+    - sa_yion: ...
+    - spc_bion: ...
+    - spc_yion: ...
+    - matched_frag_ratio: # matched fragments / # total b+y fragments
+    - matched_bion_ratio: # matched b fragments / # total b fragments
+    - matched_yion_ratio: # matched y fragments / # total y fragments
+    - and more ...
     """
     used_frag_types = frag_types
     predict_intensity_df = predict_intensity_df[
@@ -472,15 +492,17 @@ def get_ms2_features_mp(args):
 
 # %% ../../nbdev_nbs/rescore/feature_extractor.ipynb 5
 class ScoreFeatureExtractor:
+    """ ScoreFeatureExtractor: Feature extractor for percolator 
+            with a single process.
+
+    Parameters
+    ----------
+    model_mgr : ModelManager
+        The ModelManager in peptdeep.pretrained_models.
+    """
     def __init__(self, 
         model_mgr:ModelManager
     ):
-        """ ScoreFeatureExtractor: Feature extractor for percolator 
-              with a single process.
-
-        Args:
-            model_mgr (ModelManager): The ModelManager in peptdeep.pretrained_models.
-        """
         self.model_mgr = model_mgr
         self.model_mgr.verbose = False
 
@@ -552,12 +574,19 @@ class ScoreFeatureExtractor:
         to tune the models. If # raw files is less than `self.raw_num_to_tune`,
         all raw files will be used to tune the model.
 
-        Args:
-            psm_df (pd.DataFrame): dataframe contains PSMs of all raw files.
+        Parameters
+        ----------
+        psm_df : pd.DataFrame
+            dataframe contains PSMs of all raw files.
 
-        Returns:
-            df_groupby_raw: psm_df.groupby('raw_name')
-            list: selected raw_name list
+        Returns
+        -------
+        df_groupby_raw
+            psm_df.groupby('raw_name')
+
+        list
+            selected raw_name list
+            
         """
         if 'fdr' not in psm_df.columns:
             psm_df = calc_fdr_for_df(psm_df, 'score')
@@ -578,23 +607,37 @@ class ScoreFeatureExtractor:
 
         return df_groupby_raw, raw_list
 
-    def fine_train_models(self,
+    def fine_tune_models(self,
         psm_df:pd.DataFrame,
         ms2_file_dict:dict,
         ms2_file_type:str,
         frag_types_to_match:str,
         ms2_ppm:bool, ms2_tol:float,
     ):
-        """ Extract information from the ms2 files,
-        and then fine-tune the models
+        """ Sample some (n=`self.raw_num_to_tune`)
+        from ms2 files, and extract spectrum/peak information,
+        and then fine-tune the models.
 
-        Args:
-            psm_df (pd.DataFrame): psm_df
-            ms2_file_dict (dict): {raw_name: ms2_file_path}
-            ms2_file_type (str): ms2_file_type, could be 'alphapept', 'mgf', 'thermo_raw'
-            frag_types_to_match (str): ['b_z1','b_z2','y_z1'...]
-            ms2_ppm (bool): is ppm tolerance for ms2 matching
-            ms2_tol (float): tolerance value for ms2 matching
+        Parameters
+        ----------
+        psm_df : pd.DataFrame
+            psm_df
+
+        ms2_file_dict : dict
+            {raw_name: ms2_file_path}
+
+        ms2_file_type : str
+            ms2_file_type, could be 'alphapept', 'mgf', 'thermo_raw'
+
+        frag_types_to_match : str
+            ['b_z1','b_z2','y_z1'...]
+
+        ms2_ppm : bool
+            is ppm tolerance for ms2 matching
+
+        ms2_tol : float
+            tolerance value for ms2 matching
+            
         """
         logging.info('Preparing for fine-tuning ...')
 
@@ -769,29 +812,44 @@ class ScoreFeatureExtractor:
         ms2_ppm=global_settings['peak_matching']['ms2_ppm'], 
         ms2_tol=global_settings['peak_matching']['ms2_tol_value'],
     )->pd.DataFrame:
-        """ Extract features and add columns (self.score_feature_list) into psm_df
+        """ Extract features and add columns (`self.score_feature_list`) into psm_df
 
-        Args:
-            psm_df (pd.DataFrame): psm dataframe to extract features
-            ms2_file_dict ([type]): MS2 file path dict: {raw_name: ms2_path}
-            ms2_file_type (str, optional): MS2 file type, coult be 
-              'alphapept', 'mgf', or 'raw'.
-            frag_types (list, optional): fragment types. 
-              Defaults to `alphabase.fragment.get_charged_frag_types(['b','y'], 2)`.
-            ms2_ppm (bool, optional): Matching MS2 mass tolerance unit. 
-              Defaults to True.
-            ms2_tol (int, optional): Matching mass tolerance. 
-              Defaults to 20.
+        Parameters
+        ----------
+        psm_df : pd.DataFrame
+            psm dataframe to extract features
 
-        Returns:
-            pd.DataFrame: psm_df with feature columns added
+        ms2_file_dict : [type]
+            MS2 file path dict: {raw_name: ms2_path}
+
+        ms2_file_type : str, optional
+            MS2 file type, coult be 
+            'alphapept', 'mgf', or 'raw'.
+
+        frag_types : list, optional
+            fragment types. 
+            Defaults to `alphabase.fragment.get_charged_frag_types(['b','y'], 2)`.
+
+        ms2_ppm : bool, optional
+            Matching MS2 mass tolerance unit. 
+            Defaults to True.
+
+        ms2_tol : int, optional
+            Matching mass tolerance. 
+            Defaults to 20.
+
+        Returns
+        -------
+        pd.DataFrame
+            psm_df with feature columns added
+
         """
         
         frag_types = self._get_model_frag_types(frag_types)
 
         if self.require_model_tuning:
             logging.info('Fine-tuning models ...')
-            self.fine_train_models(
+            self.fine_tune_models(
                 psm_df, 
                 ms2_file_dict, ms2_file_type,
                 frag_types, ms2_ppm, ms2_tol
@@ -835,7 +893,7 @@ class ScoreFeatureExtractor:
         return self.psm_df
         
 
-# %% ../../nbdev_nbs/rescore/feature_extractor.ipynb 7
+# %% ../../nbdev_nbs/rescore/feature_extractor.ipynb 10
 class ScoreFeatureExtractorMP(ScoreFeatureExtractor):
     def __init__(self, 
         model_mgr:ModelManager
@@ -843,8 +901,11 @@ class ScoreFeatureExtractorMP(ScoreFeatureExtractor):
         """ ScoreFeatureExtractorMP: Feature extractor for percolator 
               with multiprocessing.
 
-        Args:
-            model_mgr (ModelManager): The ModelManager in peptdeep.pretrained_models.
+        Parameters
+        ----------
+        model_mgr : ModelManager
+            The ModelManager in peptdeep.pretrained_models.
+
         """
         super().__init__(model_mgr=model_mgr)
 
@@ -854,23 +915,36 @@ class ScoreFeatureExtractorMP(ScoreFeatureExtractor):
         self.model_mgr.ccs_model.model.share_memory()
 
 
-    def fine_train_models(self,
+    def fine_tune_models(self,
         psm_df,
         ms2_file_dict,
         ms2_file_type,
         frag_types_to_match,
         ms2_ppm, ms2_tol,
     ):
-        """ Extract information from the ms2 files,
-        and then fine-tune the models
+        """ Sample some (n=`self.raw_num_to_tune`)
+        from ms2 files, and extract (MP) spectrum/peak information,
+        and then fine-tune the models.
 
-        Args:
-            psm_df (pd.DataFrame): psm_df
-            ms2_file_dict (dict): {raw_name: ms2_file_path}
-            ms2_file_type (str): ms2_file_type, could be 'alphapept', 'mgf', 'thermo_raw'
-            frag_types_to_match (str): ['b_z1','b_z2','y_z1'...]
-            ms2_ppm (bool): is ppm tolerance for ms2 matching
-            ms2_tol (float): tolerance value for ms2 matching
+        Parameters
+        ----------
+        psm_df : pd.DataFrame
+            psm_df
+
+        ms2_file_dict : dict
+            {raw_name: ms2_file_path}
+
+        ms2_file_type : str
+            ms2_file_type, could be 'alphapept', 'mgf', 'thermo_raw'
+
+        frag_types_to_match : str
+            ['b_z1','b_z2','y_z1'...]
+
+        ms2_ppm : bool
+            is ppm tolerance for ms2 matching
+
+        ms2_tol : float
+            tolerance value for ms2 matching
         """
         (
             df_groupby_raw, raw_list
@@ -952,31 +1026,44 @@ class ScoreFeatureExtractorMP(ScoreFeatureExtractor):
         ms2_ppm=global_settings['peak_matching']['ms2_ppm'], 
         ms2_tol=global_settings['peak_matching']['ms2_tol_value'],
     )->pd.DataFrame:
+        """ Extract (multiprocessing) features and 
+        add columns (self.score_feature_list) into psm_df.
 
-        """ MPExtract features and add columns (self.score_feature_list) into psm_df.
-        Main entry of ScoreFeatureExtractor.
+        Parameters
+        ----------
+        psm_df : pd.DataFrame
+            psm dataframe to extract features
 
-        Args:
-            psm_df (pd.DataFrame): psm dataframe to extract features
-            ms2_file_dict ([type]): MS2 file path dict: {raw_name: ms2_path}
-            ms2_file_type (str, optional): MS2 file type, coult be 
-              'alphapept', 'mgf', or 'thermo'.
-            frag_types (list, optional): fragment types. 
-              Defaults to `alphabase.fragment.get_charged_frag_types(['b','y'], 2)`.
-            ms2_ppm (bool, optional): Matching MS2 mass tolerance unit. 
-              Defaults to True.
-            ms2_tol (int, optional): Matching mass tolerance. 
-              Defaults to 20.
+        ms2_file_dict : [type]
+            MS2 file path dict: {raw_name: ms2_path}
 
-        Returns:
-            pd.DataFrame: psm_df with feature columns added
+        ms2_file_type : str, optional
+            MS2 file type, coult be 
+            'alphapept', 'mgf', or 'thermo'.
+
+        frag_types : list, optional
+            fragment types. 
+            Defaults to `alphabase.fragment.get_charged_frag_types(['b','y'], 2)`.
+
+        ms2_ppm : bool, optional
+            Matching MS2 mass tolerance unit. 
+            Defaults to True.
+
+        ms2_tol : int, optional
+            Matching mass tolerance. 
+            Defaults to 20.
+
+        Returns
+        -------
+        pd.DataFrame
+            psm_df with feature columns added
         """
 
         used_frag_types = self._get_model_frag_types(frag_types)
 
         if self.require_model_tuning:
             logging.info('Fine-tuning models ...')
-            self.fine_train_models(
+            self.fine_tune_models(
                 psm_df, 
                 ms2_file_dict, ms2_file_type,
                 used_frag_types, ms2_ppm, ms2_tol

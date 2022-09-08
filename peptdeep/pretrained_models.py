@@ -78,7 +78,6 @@ def download_models(
     url:str=model_url, overwrite=True
 ):
     """
-
     Parameters
     ----------
     url : str, optional

@@ -29,6 +29,9 @@ import peptdeep.model.base as model_base
 
 # %% ../../nbdev_nbs/model/ccs.ipynb 4
 class Model_CCS_Bert(torch.nn.Module):
+    """
+    Transformer model for CCS prediction
+    """
     def __init__(self,
         dropout = 0.1,
         nlayers = 4,
@@ -87,6 +90,7 @@ class Model_CCS_Bert(torch.nn.Module):
 
 # %% ../../nbdev_nbs/model/ccs.ipynb 6
 class Model_CCS_LSTM(torch.nn.Module):
+    """LSTM model for CCS prediction"""
     def __init__(self,
         dropout=0.1
     ):
@@ -141,6 +145,9 @@ def mobility_to_ccs_df_(
 
 # %% ../../nbdev_nbs/model/ccs.ipynb 8
 class AlphaCCSModel(model_base.ModelInterface):
+    """
+    `ModelInterface` for `Model_CCS_LSTM` or `Model_CCS_Bert`
+    """
     def __init__(self, 
         dropout=0.1,
         model_class:torch.nn.Module=Model_CCS_LSTM,

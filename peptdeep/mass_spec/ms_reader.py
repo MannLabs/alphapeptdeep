@@ -30,12 +30,21 @@ class MSReaderBase:
     ):
         """Build spectrum_df by the given information
 
-        Args:
-            scan_list (list): scan number list
-            scan_indices (np.array): starts and end positions of ms2
-                peaks for each scan
-            rt_list (list): retention time (minutes) for each scan 
-            mobility_list (list, optional): mobility for each scan. Defaults to None.
+        Parameters
+        ----------
+        scan_list : list
+            scan number list
+
+        scan_indices : np.array
+            starts and end positions of ms2
+            peaks for each scan
+
+        rt_list : list
+            retention time (minutes) for each scan 
+
+        mobility_list : list, optional
+            mobility for each scan. Defaults to None.
+            
         """
         def set_col(col, indexes, values, dtype, na_value):
             self.spectrum_df.loc[indexes, col] = values
@@ -58,13 +67,20 @@ class MSReaderBase:
     def get_peaks(self, spec_idx:int):
         """Get peak (mz and intensity) values by `spec_idx`
 
-        Args:
-            spec_idx (int): indicator for a spectrum, 
-                could be scan_num-1 for thermo data.
+        Parameters
+        ----------
+        spec_idx : int
+            indicator for a spectrum, 
+            could be scan_num-1 for thermo data.
 
-        Returns:
-            np.array: mz values for the given spec_idx
-            np.array: intensity values for the given spec_idx
+        Returns
+        -------
+        np.array
+            mz values for the given spec_idx
+
+        np.array
+            intensity values for the given spec_idx
+
         """
         if spec_idx not in self.spectrum_df.index:
             return None, None
@@ -79,16 +95,24 @@ class MSReaderBase:
     def get_peaks_by_scan_num(self, scan_num:int):
         """Get peak (mz and intensity) values by `spec_idx`
 
-        Args:
-            scan_num (int): scan_num of thermodata
+        Parameters
+        ----------
+        scan_num : int
+            scan_num of thermodata
 
-        Returns:
-            np.array: mz values for the given spec_idx (scan)
-            np.array: intensity values for the given spec_idx
+        Returns
+        -------
+        np.array
+            mz values for the given spec_idx (scan)
+
+        np.array
+            intensity values for the given spec_idx
+            
         """
         return self.get_peaks(scan_num-1)
 
 class AlphaPept_HDF_MS1_Reader(MSReaderBase):
+    """MS1 from AlphaPept HDF"""
     def load(self, file_path):
         hdf = HDF_File(file_path)
         self.peak_df['mz'] = hdf.Raw.MS1_scans.mass_list_ms1.values
@@ -102,6 +126,7 @@ class AlphaPept_HDF_MS1_Reader(MSReaderBase):
         )
 
 class AlphaPept_HDF_MS2_Reader(MSReaderBase):
+    """MS2 from AlphaPept HDF"""
     def load(self, file_path):
         hdf = HDF_File(file_path)
         self.peak_df['mz'] = hdf.Raw.MS2_scans.mass_list_ms2.values
@@ -144,11 +169,16 @@ def is_pfind_mgf(mgf):
 def index_ragged_list(ragged_list: list)  -> np.ndarray:
     """Create lookup indices for a list of arrays for concatenation.
 
-    Args:
-        value (list): Input list of arrays.
+    Parameters
+    ----------
+    value : list
+        Input list of arrays.
 
-    Returns:
-        indices: A numpy array with indices.
+    Returns
+    -------
+    indices
+        A numpy array with indices.
+        
     """
     indices = np.zeros(len(ragged_list) + 1, np.int64)
     indices[1:] = [len(i) for i in ragged_list]
@@ -157,7 +187,7 @@ def index_ragged_list(ragged_list: list)  -> np.ndarray:
     return indices
 
 class MGFReader(MSReaderBase):
-
+    """MGF Reader (MS2)"""
     def load(self, mgf):
         if isinstance(mgf, str):
             f = open(mgf)
@@ -206,6 +236,7 @@ class MGFReader(MSReaderBase):
         self.peak_df['intensity'] = np.concatenate(intens_list)
 
 class MSReaderProvider:
+    """Factory class to register and get MS Readers"""
     def __init__(self):
         self.reader_dict = {}
     def register_reader(self, ms2_type, reader_class):
@@ -241,6 +272,7 @@ if RawFileReader is None:
             raise NotImplementedError("RawFileReader is not available")
 else:
     class ThermoRawMS1Reader(MSReaderBase):
+        """Thermo Raw MS1 Reader"""
         def __init__(self):
             super().__init__()
             self.profile_mode = False
@@ -286,6 +318,7 @@ else:
             rawfile.Close()
 
     class ThermoRawMS2Reader(MSReaderBase):
+        """Thermo RAW MS2 Reader"""
         def __init__(self):
             super().__init__()
             self.profile_mode = False

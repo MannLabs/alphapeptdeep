@@ -20,6 +20,8 @@ def calibrate_one(start_end_shift, frag_df):
     frag_df.values[int(start_idx):int(end_idx)] -= mass_shift
 
 class MassCalibratorForRT_KNN:
+    """Using KNN to calibrate measured m/z across RT.
+    """
     def __init__(self, n_neighbors=5):
         self._n_neighbors = n_neighbors
         self.model = KNeighborsRegressor(n_neighbors)

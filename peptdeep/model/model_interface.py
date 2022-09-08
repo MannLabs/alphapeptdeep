@@ -68,15 +68,15 @@ def append_nAA_column_if_missing(precursor_df):
 
 # %% ../../nbdev_nbs/model/model_interface.ipynb 8
 class ModelInterface(object):
+    """
+    Provides standardized methods to interact
+    with ml models. Inherit into new class and override
+    the abstract (i.e. not implemented) methods.
+    """
     def __init__(self,
         device:str=global_settings['torch_device']['name'],
         **kwargs
     ):
-        """
-        Provides standardized methods to interact
-        with ml models. Inherit into new class and override
-        the abstract (i.e. not implemented) methods.
-        """
         self.model:torch.nn.Module = None
         self.optimizer = None
         self.model_params:dict = {}
@@ -126,7 +126,7 @@ class ModelInterface(object):
             if torch_devices[self.device_type]['is_available']():
                 self.device_type = torch_devices[self.device_type]['device']
             else:
-                logging.info(f"Device `{self.device_type}` is not available, set to `cpu`")
+                print(f"Device `{self.device_type}` is not available, set to `cpu`")
                 self.device_type = 'cpu'
                 
         if self.device_type == 'cuda' and self.device_ids:

@@ -73,11 +73,16 @@ class SeqCNN_MultiKernel(torch.nn.Module):
     """
     def __init__(self, out_features:int):
         """
-        Args:
-            out_features (int): Must be divided by 4.
+        Parameters
+        ----------
+        out_features : int
+            Must be divided by 4.
 
-        Raises:
-            ValueError: "out_features must be divided by 4"
+        Raises
+        ------
+        ValueError
+            "out_features must be divided by 4"
+            
         """
         super().__init__()
 
@@ -238,24 +243,38 @@ class Hidden_HFace_Transformer(torch.nn.Module):
 HiddenBert = Hidden_HFace_Transformer
 
 class HFace_Transformer_with_PositionalEncoder(torch.nn.Module):
+    """
+    HuggingFace transformer with a positional encoder in front.
+
+    Parameters
+    ----------
+    hidden_dim : int
+        Input and output feature dimension.
+
+    hidden_expand : int, optional
+        FFN hidden size = hidden*hidden_expand. Defaults to 4.
+
+    nhead : int, optional
+        Multi-head attention number. Defaults to 8.
+
+    nlayers : int, optional
+        Number of transformer layers. Defaults to 4.
+
+    dropout : float, optional
+        Dropout rate. Defaults to 0.1.
+
+    output_attentions : bool, optional
+        If output attention values. Defaults to False.
+
+    max_len : int, optional
+        Max input sequence length. Defaults to 200.
+    """
     def __init__(self,
         hidden_dim:int, hidden_expand=4,
         nheads=8, nlayers=4, dropout=0.1,
         output_attentions=False,
         max_len=200,
     ):
-        """
-        HuggingFace transformer with a positional encoder in front.
-
-        Args:
-            hidden_dim (int): Input and output feature dimension.
-            hidden_expand (int, optional): FFN hidden size = hidden*hidden_expand. Defaults to 4.
-            nhead (int, optional): Multi-head attention number. Defaults to 8.
-            nlayers (int, optional): Number of transformer layers. Defaults to 4.
-            dropout (float, optional): Dropout rate. Defaults to 0.1.
-            output_attentions (bool, optional): If output attention values. Defaults to False.
-            max_len (int, optional): Max input sequence length. Defaults to 200.
-        """
         super().__init__()
         self.pos_encoder = PositionalEncoding(hidden_dim, max_len=max_len)
         self.bert = Hidden_HFace_Transformer(
@@ -266,10 +285,14 @@ class HFace_Transformer_with_PositionalEncoder(torch.nn.Module):
     def forward(self, x:torch.Tensor)->tuple:
         """
 
-        Args:
-            x (torch.Tensor): Input tensor
+        Parameters
+        ----------
+        x : torch.Tensor
+            Input tensor
 
-        Returns:
+        Returns
+        -------
+        tuple
             Tensor: Output tensor.
             [Tensor]: Attention tensor, returned only if output_attentions is True.
         """
@@ -278,12 +301,12 @@ class HFace_Transformer_with_PositionalEncoder(torch.nn.Module):
 
 # %% ../../nbdev_nbs/model/building_block.ipynb 18
 class SeqLSTM(torch.nn.Module):
+    """
+    returns LSTM applied on sequence input
+    """
     def __init__(self, in_features, out_features, 
                  rnn_layer=2, bidirectional=True
         ):
-        """
-        returns LSTM applied on sequence input
-        """
         super().__init__()
 
         if bidirectional:
@@ -317,12 +340,12 @@ class SeqLSTM(torch.nn.Module):
 
 # %% ../../nbdev_nbs/model/building_block.ipynb 19
 class SeqGRU(torch.nn.Module):
+    """
+    returns GRU applied on sequence input
+    """
     def __init__(self, in_features, out_features, 
                  rnn_layer=2, bidirectional=True
         ):
-        """
-        returns GRU applied on sequence input
-        """
         super().__init__()
 
         if bidirectional:
@@ -405,9 +428,8 @@ class PositionalEmbedding(torch.nn.Module):
             x.size(1), dtype=torch.long, device=x.device
         ).unsqueeze(0))
 
-# %% ../../nbdev_nbs/model/building_block.ipynb 27
+# %% ../../nbdev_nbs/model/building_block.ipynb 26
 class Meta_Embedding(torch.nn.Module):
-    # Meta = Charge, NCE and Instrument
     """Encodes Charge state, Normalized Collision Energy (NCE) and Instrument for a given spectrum 
     into a 'meta' single layer network
     """
@@ -569,7 +591,7 @@ class Input_AA_Mod_Charge_PositionalEncoding(torch.nn.Module):
         )
         return self.pos_encoder(torch.cat((x, mod_x,charge_x), 2))
 
-# %% ../../nbdev_nbs/model/building_block.ipynb 29
+# %% ../../nbdev_nbs/model/building_block.ipynb 28
 class Input_26AA_Mod_LSTM(torch.nn.Module):
     """
     Applies an LSTM network to a AA (26 AA letters) sequence & modifications
@@ -658,10 +680,10 @@ class Input_26AA_Mod_Charge_LSTM(torch.nn.Module):
 InputAALSTM_cat_Charge = Input_26AA_Mod_Charge_LSTM
 
 
-# %% ../../nbdev_nbs/model/building_block.ipynb 31
+# %% ../../nbdev_nbs/model/building_block.ipynb 30
 class Seq_Meta_LSTM(torch.nn.Module):
     """
-    takes a hidden layer which processes the hidden tensor 
+    Takes a hidden layer which processes the hidden tensor 
     as well as the 'meta' information of NCE, Instrument, Charge
     """
     def __init__(self,
@@ -710,7 +732,7 @@ class Seq_Meta_Linear(torch.nn.Module):
 #legacy
 OutputLinear_cat_Meta = Seq_Meta_Linear
 
-# %% ../../nbdev_nbs/model/building_block.ipynb 33
+# %% ../../nbdev_nbs/model/building_block.ipynb 32
 class Encoder_26AA_Mod_LSTM(torch.nn.Module):
     """
     Two LSTM layers on AA (26 AA letters) and modifications.
@@ -959,7 +981,7 @@ class Encoder_26AA_Mod_Charge_CNN_LSTM_AttnSum(torch.nn.Module):
 Input_AA_CNN_LSTM_cat_Charge_Encoder = Encoder_26AA_Mod_Charge_CNN_LSTM_AttnSum
 
 
-# %% ../../nbdev_nbs/model/building_block.ipynb 35
+# %% ../../nbdev_nbs/model/building_block.ipynb 34
 class Decoder_LSTM(torch.nn.Module):
     """
     Decode with LSTM
@@ -1012,7 +1034,7 @@ class Decoder_GRU(torch.nn.Module):
 #legacy
 SeqGRUDecoder = Decoder_GRU
 
-# %% ../../nbdev_nbs/model/building_block.ipynb 36
+# %% ../../nbdev_nbs/model/building_block.ipynb 35
 class Decoder_Linear(torch.nn.Module):
     """
     Decode w linear NN

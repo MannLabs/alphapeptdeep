@@ -15,13 +15,25 @@ from ..settings import global_settings
 from ..protein.fasta import PredictFastaSpecLib
 from peptdeep.spec_lib.translate import (
     speclib_to_single_df, mod_to_unimod_dict,
-    translate_to_tsv
+    translate_to_tsv, mod_to_modname_dict
 )
+
 from ..pretrained_models import ModelManager
 from ..utils import logging
 
 # %% ../../nbdev_nbs/spec_lib/library_factory.ipynb 3
 class PredictLibraryMakerBase(object):
+    """
+    Base class to predict libraries
+
+    Parameters
+    ----------
+    settings : dict, optional
+        By default `global_settings`
+
+    model_manager : ModelManager, optional
+        By default None
+    """
     def __init__(self, 
         settings:dict = global_settings,
         model_manager:ModelManager = None,
@@ -54,6 +66,7 @@ class PredictLibraryMakerBase(object):
         pass
 
     def _input(self, _input):
+        """Virtual method to be re-implemented by sub-classes"""
         raise NotImplementedError("All sub-classes must re-implement '_input()' method")
 
     def _predict(self):
@@ -65,6 +78,24 @@ class PredictLibraryMakerBase(object):
         self.fragment_intensity_df = self.spec_lib.fragment_intensity_df
 
     def make_library(self, _input):
+        """Predict a library for the `_input`, 
+        this function runs the following methods.
+
+        - self._input(_input)
+        - self._check_df()
+        - self._predict()
+        - self._set_df()
+
+        Parameters
+        ----------
+        _input
+            _input file or source
+
+        Raises
+        ------
+        ValueError
+            ValueError for some reasons
+        """
         logging.info("Generating the library...")
         try:
             self._input(_input)
@@ -76,8 +107,10 @@ class PredictLibraryMakerBase(object):
     
     def translate_to_tsv(self, 
         tsv_path:str, 
-        translate_mod_dict=mod_to_unimod_dict
-    )->pd.DataFrame:
+        translate_mod_dict:dict=mod_to_modname_dict
+    ):
+        """Translate the predicted DataFrames into a TSV file
+        """
         logging.info(f"Translating to {tsv_path} for DiaNN/Spectronaut...")
         lib_settings = self._settings['library']
 
@@ -106,8 +139,11 @@ class PredictLibraryMakerBase(object):
         )
     
     def translate_library(self, 
-        translate_mod_dict=mod_to_unimod_dict
+        translate_mod_dict:dict=mod_to_modname_dict
     )->pd.DataFrame:
+        """Translate predicted DataFrames into 
+        a single DataFrame in SWATH library format
+        """
         logging.info("Translating library for DiaNN/Spectronaut...")
         lib_settings = self._settings['library']
 
@@ -131,7 +167,7 @@ class PredictLibraryMakerBase(object):
             ],
         )
 
-# %% ../../nbdev_nbs/spec_lib/library_factory.ipynb 4
+# %% ../../nbdev_nbs/spec_lib/library_factory.ipynb 7
 class PrecursorLibraryMaker(PredictLibraryMakerBase):
     """For input dataframe of charged modified sequences"""
     def _input(self, precursor_df:pd.DataFrame):
@@ -169,7 +205,7 @@ class PeptideLibraryMaker(PrecursorLibraryMaker):
         self.spec_lib.add_charge()
 
 class SequenceLibraryMaker(PeptideLibraryMaker):
-    """For input dataframe of sequences"""
+    """For input dataframe of AA sequences"""
     def _input(self, sequence_df:pd.DataFrame):
         self.spec_lib._precursor_df = sequence_df
         self.spec_lib.append_decoy_sequence()
@@ -184,12 +220,17 @@ class FastaLibraryMaker(PredictLibraryMakerBase):
         self.spec_lib.add_modifications()
         self.spec_lib.add_charge()
 
-# %% ../../nbdev_nbs/spec_lib/library_factory.ipynb 5
+# %% ../../nbdev_nbs/spec_lib/library_factory.ipynb 8
 class LibraryMakerProvider:
+    """
+    Factory class for library makers
+    """
     def __init__(self):
         self.library_maker_dict = {}
+
     def register_maker(self, maker_name:str, maker_class):
         self.library_maker_dict[maker_name.lower()] = maker_class
+
     def get_maker(self, maker_name:str, *, 
         settings:dict = global_settings,
         model_manager = None,
@@ -199,11 +240,12 @@ class LibraryMakerProvider:
             return self.library_maker_dict[maker_name](settings, model_manager)
         else:
             raise ValueError(f'library maker "{maker_name}" is not registered.')
+
 library_maker_provider = LibraryMakerProvider()
 library_maker_provider.register_maker('precursor_table', PrecursorLibraryMaker)
 library_maker_provider.register_maker('precursor_library', PrecursorLibraryMaker)
 library_maker_provider.register_maker('peptide_table', PeptideLibraryMaker)
-library_maker_provider.register_maker('precursor_library', PeptideLibraryMaker)
+library_maker_provider.register_maker('peptide_library', PeptideLibraryMaker)
 library_maker_provider.register_maker('sequence_table', SequenceLibraryMaker)
 library_maker_provider.register_maker('sequence_library', SequenceLibraryMaker)
 library_maker_provider.register_maker('fasta', FastaLibraryMaker)
