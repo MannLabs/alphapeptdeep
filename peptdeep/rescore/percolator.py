@@ -165,17 +165,7 @@ class Percolator:
               Defaults to perc_settings['ms2_tol'].
             model_mgr (ModelManager, optional): 
               peptdeep.pretrained_model.ModelManager.
-              If None, self.model_mgr will be init by:
-              ```
-              self.model_mgr = ModelManager(
-                  mask_modloss=perc_settings[
-                      'mask_modloss'
-                  ]
-              )
-              self.model_mgr.load_installed_models(
-                  perc_settings['peptdeep_model_type'],
-              )
-              ```
+              If None, self.model_mgr will be init by default (see `peptdeep.pretrained_models.ModelManager`).
               Defaults to None.
         """
         if model_mgr is None:
