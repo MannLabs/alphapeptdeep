@@ -9,10 +9,13 @@ import numpy as np
 import pandas as pd
 import torch
 import yaml
+import inspect
 from tqdm import tqdm
 
 import torch.multiprocessing as mp
 import functools
+
+from types import ModuleType
 
 from torch.optim.lr_scheduler import LambdaLR
 
@@ -22,7 +25,7 @@ from alphabase.yaml_utils import save_yaml, load_yaml
 from alphabase.peptide.precursor import is_precursor_sorted
 
 from ..settings import model_const
-from ..utils import logging, torch_devices
+from ..utils import logging, torch_devices, process_bar
 from ..settings import global_settings
 
 from peptdeep.model.featurize import (
@@ -291,8 +294,6 @@ class ModelInterface(object):
             batch_size=batch_size, verbose=False, **kwargs
         )
 
-        from peptdeep.utils import process_bar
-
         def batch_df_gen(precursor_df, mp_batch_size):
             for i in range(0, len(precursor_df), mp_batch_size):
                 yield precursor_df.iloc[i:i+mp_batch_size]
@@ -388,7 +389,6 @@ class ModelInterface(object):
             filename='model_file_py',
             mode='exec'
         )
-        from types import ModuleType
         _module = ModuleType('_apd_nn_codes')
         #codes must contains torch model codes 'class Model(...'
         exec(compiled_codes, _module.__dict__)
@@ -456,7 +456,6 @@ class ModelInterface(object):
 
     def _save_codes(self, save_as):
         try:
-            import inspect
             code = '''import torch\n'''
             code += '''import peptdeep.model.building_block as building_block\n'''
             code += '''from peptdeep.model.model_shop import *\n'''

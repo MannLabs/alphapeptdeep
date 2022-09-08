@@ -227,6 +227,19 @@ ms1_reader_provider.register_reader('alphapept_hdf', AlphaPept_HDF_MS1_Reader)
 # %% ../../nbdev_nbs/mass_spec/ms_reader.ipynb 4
 try:
     from alphapept.pyrawfilereader import RawFileReader
+except ImportError:
+    RawFileReader = None
+
+# %% ../../nbdev_nbs/mass_spec/ms_reader.ipynb 5
+if RawFileReader is None:
+    class ThermoRawMS1Reader:
+        def __init__(self):
+            raise NotImplementedError("RawFileReader is not available")
+    
+    class ThermoRawMS2Reader:
+        def __init__(self):
+            raise NotImplementedError("RawFileReader is not available")
+else:
     class ThermoRawMS1Reader(MSReaderBase):
         def __init__(self):
             super().__init__()
@@ -321,7 +334,3 @@ try:
     ms2_reader_provider.register_reader('thermo_raw', ThermoRawMS2Reader)
     ms1_reader_provider.register_reader('thermo', ThermoRawMS1Reader)
     ms1_reader_provider.register_reader('thermo_raw', ThermoRawMS1Reader)
-except Exception as e:
-    # alphapept or RawFileReader is not installed
-    print('alphapept or RawFileReader is not installed')
-    print(e)

@@ -125,7 +125,7 @@ class ModelInterface_for_Generic_AASeq_Regression(ModelInterface):
         self.target_column_to_predict = 'predicted_property'
         self.target_column_to_train = 'detected_property'
 
-# %% ../../nbdev_nbs/model/generic_property_prediction.ipynb 17
+# %% ../../nbdev_nbs/model/generic_property_prediction.ipynb 18
 class Model_for_Generic_ModAASeq_Regression_LSTM(torch.nn.Module):
     def __init__(self, 
         *,
@@ -233,7 +233,7 @@ class ModelInterface_for_Generic_ModAASeq_Regression(ModelInterface):
     ):
         return self._get_aa_mod_features(batch_df)
 
-# %% ../../nbdev_nbs/model/generic_property_prediction.ipynb 23
+# %% ../../nbdev_nbs/model/generic_property_prediction.ipynb 24
 class Model_for_Generic_AASeq_BinaryClassification_LSTM(
     Model_for_Generic_AASeq_Regression_LSTM
 ):
@@ -301,7 +301,7 @@ class ModelInterface_for_Generic_AASeq_BinaryClassification(ModelInterface):
         self.target_column_to_predict = 'predicted_prob'
         self.target_column_to_train = 'detected_prob'
 
-# %% ../../nbdev_nbs/model/generic_property_prediction.ipynb 31
+# %% ../../nbdev_nbs/model/generic_property_prediction.ipynb 32
 class Model_for_Generic_ModAASeq_BinaryClassification_LSTM(
     Model_for_Generic_ModAASeq_Regression_LSTM
 ):

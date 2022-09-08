@@ -6,6 +6,16 @@ __all__ = ['match_centroid_mz', 'match_profile_mz', 'match_one_raw_with_numba', 
 # %% ../../nbdev_nbs/mass_spec/match.ipynb 2
 import numpy as np
 import numba
+import pandas as pd
+import tqdm
+
+from alphabase.peptide.fragment import (
+    create_fragment_mz_dataframe, 
+    get_charged_frag_types
+)
+from peptdeep.mass_spec.ms_reader import (
+    ms2_reader_provider, MSReaderBase
+)
 
 # %% ../../nbdev_nbs/mass_spec/match.ipynb 3
 @numba.njit
@@ -86,18 +96,6 @@ def match_profile_mz(
 
 
 # %% ../../nbdev_nbs/mass_spec/match.ipynb 8
-import pandas as pd
-import numpy as np
-import tqdm
-
-from peptdeep.mass_spec.ms_reader import (
-    ms2_reader_provider, MSReaderBase
-)
-from alphabase.peptide.fragment import (
-    create_fragment_mz_dataframe, 
-    get_charged_frag_types
-)
-
 @numba.njit
 def match_one_raw_with_numba(
     spec_idxes, frag_start_idxes, frag_end_idxes,

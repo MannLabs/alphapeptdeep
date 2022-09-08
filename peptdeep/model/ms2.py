@@ -10,6 +10,7 @@ __all__ = ['mod_feature_size', 'max_instrument_num', 'frag_types', 'max_frag_cha
 import torch
 import pandas as pd
 import numpy as np
+import warnings
 
 from typing import List, Tuple, IO
 
@@ -573,7 +574,6 @@ class pDeepModel(model_interface.ModelInterface):
     def predict_mp(self, 
         **kwargs
     ) -> pd.DataFrame:
-        import warnings
         warnings.warn(
             "Please use pretrained_models.ModelManager::predict_all() "
             "for MS2 prediction with multiprocessing"

@@ -18,6 +18,7 @@ from peptdeep.psm_frag_reader.psm_frag_reader import (
     psm_w_frag_reader_provider
 )
 
+# %% ../../nbdev_nbs/psm_frag_reader/library_frag_reader.ipynb 3
 class SpectronautMSMSReader(SpectronautReader, PSMReader_w_FragBase):
     def __init__(self,
         frag_types=['b','y','b_modloss','y_modloss'], 
