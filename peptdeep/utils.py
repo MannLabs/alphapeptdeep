@@ -268,6 +268,7 @@ def _is_mps_available()->bool:
     try:
         return torch.backends.mps.is_available()
     except AttributeError:
+        print("Mac M1 chip ('mps') is not supported yet in pytorch")
         return False
 
 torch_devices:dict = {

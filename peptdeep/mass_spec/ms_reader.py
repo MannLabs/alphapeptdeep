@@ -11,6 +11,12 @@ import numpy as np
 import pandas as pd
 from alphabase.io.hdf import HDF_File
 
+try:
+    # should be replaced by AlphaRaw in the near future
+    from peptdeep.legacy.thermo_raw import RawFileReader
+except (ImportError,AttributeError):
+    RawFileReader = None
+
 # %% ../../nbdev_nbs/mass_spec/ms_reader.ipynb 3
 class MSReaderBase:
     def __init__(self):
@@ -256,12 +262,6 @@ ms1_reader_provider.register_reader('alphapept', AlphaPept_HDF_MS1_Reader)
 ms1_reader_provider.register_reader('alphapept_hdf', AlphaPept_HDF_MS1_Reader)
 
 # %% ../../nbdev_nbs/mass_spec/ms_reader.ipynb 4
-try:
-    from alphapept.pyrawfilereader import RawFileReader
-except ImportError:
-    RawFileReader = None
-
-# %% ../../nbdev_nbs/mass_spec/ms_reader.ipynb 5
 if RawFileReader is None:
     class ThermoRawMS1Reader:
         def __init__(self):

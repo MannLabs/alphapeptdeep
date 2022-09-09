@@ -28,10 +28,26 @@ def show():
     ms1_tol_value = st.number_input('MS1 tolerance', value = global_settings['peak_matching']['ms1_tol_value'], step = 1.0)
     global_settings['peak_matching']['ms1_tol_value'] = ms1_tol_value
     
-    thread_num = st.number_input('Thread number', value = multiprocessing.cpu_count()-1)
+    thread_num = st.number_input('Thread number', 
+        value=global_settings['thread_num'], 
+        max_value=multiprocessing.cpu_count(), step=1
+    )
     global_settings['thread_num'] = thread_num
 
-    log_level = st.selectbox('Log level', global_settings['log_level_choices'], index = 1)
+    device_type = st.selectbox('Computing devices',
+        global_settings['torch_device']['device_type_choices'],
+        index = global_settings['torch_device']['device_type_choices'].index(
+            global_settings['torch_device']['device_type']
+        )
+    )
+    global_settings['torch_device']['device_type'] = device_type
+
+    log_level = st.selectbox('Log level', 
+        global_settings['log_level_choices'], 
+        index = global_settings['log_level_choices'].index(
+            global_settings['log_level']
+        )
+    )
     global_settings['log_level'] = log_level
 
     global_settings['common']['modloss_importance_level'] = st.number_input(
@@ -66,7 +82,8 @@ def load_settings_gui():
         st.write("Global settings have been updated")
 
 def save_settings_gui():
-    st.write("### Save current settings (as a template)")
+    st.write("### Save current settings")
+    st.write("(As a template for CLI commands)")
 
     f = StringIO()
     yaml.dump(global_settings, f)

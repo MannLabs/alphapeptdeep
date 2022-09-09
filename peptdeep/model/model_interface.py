@@ -74,7 +74,7 @@ class ModelInterface(object):
     the abstract (i.e. not implemented) methods.
     """
     def __init__(self,
-        device:str=global_settings['torch_device']['name'],
+        device:str=global_settings['torch_device']['device_type'],
         **kwargs
     ):
         self.model:torch.nn.Module = None
@@ -101,8 +101,8 @@ class ModelInterface(object):
         self._target_column_to_train = column
 
     def set_device(self, 
-        device_type:str = global_settings['torch_device']['name'], 
-        device_ids:list = global_settings['torch_device']['ids']
+        device_type:str = global_settings['torch_device']['device_type'], 
+        device_ids:list = global_settings['torch_device']['device_ids']
     ):
         """
         Set the device (e.g. gpu (cuda), mps, cpu, ...) to be used for the model.
@@ -111,11 +111,11 @@ class ModelInterface(object):
         ----------
         device_type : str, optional
             Device type, see `torch_device_dict`. 
-            By default global_settings['torch_device']['name']
+            By default global_settings['torch_device']['device_type']
 
         device_ids : list, optional
             List of int. Device ids for cuda/gpu (e.g. [1,3] for cuda:1,3). 
-            By default global_settings['torch_device']['ids']
+            By default global_settings['torch_device']['device_ids']
         """
         self.device_type = device_type.lower()
         self.device_ids = device_ids

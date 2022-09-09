@@ -15,10 +15,19 @@ local_model_zip_name: "pretrained_models.zip"
 model_url: "https://github.com/MannLabs/alphapeptdeep/releases/download/pre-trained-models/pretrained_models.zip"
 
 task_type: library
+task_type_choices:
+  - library
+  - train
+  - rescore
 thread_num: 8
 torch_device:
-  name: gpu
-  ids: []
+  device_type: gpu
+  device_type_choices:
+    - gpu
+    - cpu
+    - mps
+  device_ids: []
+
 log_level: info
 log_level_choices:
   - debug
@@ -97,7 +106,7 @@ model_mgr:
     ms_file_type: alphapept_hdf
     ms_file_type_choices:
       - alphapept_hdf
-      - thermo_raw # if alphapept is installed
+      - thermo_raw
       - mgf
       - mzml
     ms_files: []
@@ -195,6 +204,7 @@ library:
     fix_mods: 
     - Carbamidomethyl@C
     var_mods:
+    - Acetyl@Protein N-term
     - Oxidation@M
     min_var_mod_num: 0
     max_var_mod_num: 2

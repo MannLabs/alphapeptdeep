@@ -12,11 +12,11 @@ from alphabase.constants.modification import (
     load_mod_df, keep_modloss_by_importance
 )
 
-# %% ../nbdev_nbs/settings.ipynb 4
-_base_dir = os.path.dirname(__file__)
+from .constants._const import CONST_FOLDER
 
+# %% ../nbdev_nbs/settings.ipynb 3
 global_settings = load_yaml(
-    os.path.join(_base_dir, 'constants/default_settings.yaml')
+    os.path.join(CONST_FOLDER, 'default_settings.yaml')
 )
 
 global_settings['PEPTDEEP_HOME'] = os.path.expanduser(
@@ -31,7 +31,7 @@ for key, val in list(global_settings['model_mgr'][
     ][key.upper()] = val
 
 model_const = load_yaml(
-    os.path.join(_base_dir, 'constants/model_const.yaml')
+    os.path.join(CONST_FOLDER, 'model_const.yaml')
 )
 
 def update_settings(dict_, new_dict):
