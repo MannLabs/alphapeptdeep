@@ -7,9 +7,9 @@ Getting Started
 installation](https://github.com/MannLabs/alphapeptdeep/workflows/Default%20installation%20and%20tests/badge.svg)
 ![GUI and PyPi
 releases](https://github.com/MannLabs/alphapeptdeep/workflows/Publish%20on%20PyPi%20and%20release%20on%20GitHub/badge.svg)
-[![Downloads](https://pepy.tech/badge/peptdeep.png)](https://pepy.tech/project/peptdeep)
-[![Downloads](https://pepy.tech/badge/peptdeep/month.png)](https://pepy.tech/project/peptdeep)
-[![Downloads](https://pepy.tech/badge/peptdeep/week.png)](https://pepy.tech/project/peptdeep)
+[![Downloads](https://pepy.tech/badge/peptdeep)](https://pepy.tech/project/peptdeep)
+[![Downloads](https://pepy.tech/badge/peptdeep/month)](https://pepy.tech/project/peptdeep)
+[![Downloads](https://pepy.tech/badge/peptdeep/week)](https://pepy.tech/project/peptdeep)
 
 - [**About**](#about)
 - [**License**](#license)
