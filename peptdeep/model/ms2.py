@@ -3,13 +3,14 @@
 # %% auto 0
 __all__ = ['mod_feature_size', 'max_instrument_num', 'frag_types', 'max_frag_charge', 'num_ion_types', 'pearson', 'spearman',
            'ModelMS2Transformer', 'ModelMS2Bert', 'ModelMS2pDeep', 'IntenAwareLoss', 'pDeepModel',
-           'normalize_training_intensities', 'pearson_correlation', 'spectral_angle', 'spearman_correlation',
-           'add_cutoff_metric', 'calc_ms2_similarity']
+           'normalize_training_intensities', 'normalize_fragment_intensities_', 'pearson_correlation', 'spectral_angle',
+           'spearman_correlation', 'add_cutoff_metric', 'calc_ms2_similarity']
 
 # %% ../../nbdev_nbs/model/ms2.ipynb 3
 import torch
 import pandas as pd
 import numpy as np
+import warnings
 
 from typing import List, Tuple, IO
 
@@ -37,13 +38,35 @@ import peptdeep.model.building_block as building_block
 
 # %% ../../nbdev_nbs/model/ms2.ipynb 4
 class ModelMS2Transformer(torch.nn.Module):
+    """Transformer model for MS2 prediction
+
+    Parameters
+    ----------
+    num_frag_types : int
+        Total number of fragment types of a fragmentation position to predict
+
+    num_modloss_types : int, optional
+        Number of fragment types of a fragmentation position to predict, by default 0
+
+    mask_modloss : bool, optional
+        If True, the modloss layer will be disabled, by default True
+
+    dropout : float, optional
+        Dropout, by default 0.1
+
+    nlayers : int, optional
+        Number of transformer layer, by default 4
+
+    hidden : int, optional
+        Hidden layer size, by default 256
+    """
     def __init__(self,
-        num_frag_types,
-        num_modloss_types=0,
-        mask_modloss=True,
-        dropout=0.1,
-        nlayers=4,
-        hidden=256,
+        num_frag_types:int,
+        num_modloss_types:int=0,
+        mask_modloss:bool=True,
+        dropout:float=0.1,
+        nlayers:int=4,
+        hidden:int=256,
         **kwargs,
     ):
         super().__init__()
@@ -127,6 +150,7 @@ class ModelMS2Transformer(torch.nn.Module):
 
 # %% ../../nbdev_nbs/model/ms2.ipynb 7
 class ModelMS2Bert(torch.nn.Module):
+    """Using HuggingFace's BertEncoder for MS2 prediction"""
     def __init__(self,
         num_frag_types,
         num_modloss_types=0,
@@ -137,7 +161,6 @@ class ModelMS2Bert(torch.nn.Module):
         output_attentions=False,
         **kwargs,
     ):
-        """Using HuggingFace's BertEncoder"""
         super().__init__()
 
         self.dropout = torch.nn.Dropout(dropout)
@@ -240,6 +263,7 @@ class ModelMS2Bert(torch.nn.Module):
 
 # %% ../../nbdev_nbs/model/ms2.ipynb 9
 class ModelMS2pDeep(torch.nn.Module):
+    """LSTM model for MS2 prediction similar to pDeep series"""
     def __init__(self,
         num_frag_types,
         num_modloss_types=0,
@@ -332,6 +356,7 @@ class ModelMS2pDeep(torch.nn.Module):
 
 # %% ../../nbdev_nbs/model/ms2.ipynb 11
 class IntenAwareLoss(torch.nn.Module):
+    """Loss weighted by intensity for MS2 models"""
     def __init__(self, base_weight=0.2):
         super().__init__()
         self.w = base_weight
@@ -349,6 +374,9 @@ max_frag_charge = settings['model']['max_frag_charge']
 num_ion_types = len(frag_types)*max_frag_charge
 
 class pDeepModel(model_interface.ModelInterface):
+    """
+    `ModelInterface` for MS2 prediction models
+    """
     def __init__(self,
         charged_frag_types = get_charged_frag_types(
             frag_types, max_frag_charge
@@ -551,7 +579,6 @@ class pDeepModel(model_interface.ModelInterface):
     def predict_mp(self, 
         **kwargs
     ) -> pd.DataFrame:
-        import warnings
         warnings.warn(
             "Please use pretrained_models.ModelManager::predict_all() "
             "for MS2 prediction with multiprocessing"
@@ -633,14 +660,26 @@ def normalize_training_intensities(
     frag_intensity_df:pd.DataFrame
 )->Tuple[pd.DataFrame, pd.DataFrame]:
     """Normalize the intensities to 0-1 values for MS2 model training.
+    This will remove fragments not corresponded to the train_df (psm_df),
+    and generate a new psm_df.
 
-    Args:
-        train_df (pd.DataFrame): training psm dataframe
-        frag_intensity_df (pd.DataFrame): training intensity dataframe
+    Parameters
+    ----------
+    train_df : pd.DataFrame
+        training psm dataframe
+        
+    frag_intensity_df : pd.DataFrame
+        training intensity dataframe
 
-    Returns:
-        pd.DataFrame: normalized training psm dataframe
-        pd.DataFrame: normalized training intensity dataframe
+    Returns
+    -------
+    pd.DataFrame
+        normalized training psm dataframe 
+        which is different from train_df
+
+    pd.DataFrame
+        normalized training intensity dataframe
+
     """
     new_frag_intens_list = []
     new_frag_lens = []
@@ -664,14 +703,45 @@ def normalize_training_intensities(
         columns=frag_intensity_df.columns
     )
     return train_df, frag_df
-        
+
+def normalize_fragment_intensities_(
+    psm_df:pd.DataFrame, 
+    frag_intensity_df:pd.DataFrame
+):
+    """Normalize the intensities inplace
+
+    Parameters
+    ----------
+    psm_df : pd.DataFrame
+        PSM DataFrame
+
+    frag_intensity_df : pd.DataFrame
+        Fragment intensity DataFrame to be normalized. 
+        Intensities will be normalzied inplace.
+    """
+    for i, (frag_start_idx, frag_end_idx) in enumerate(
+        psm_df[['frag_start_idx','frag_end_idx']].values
+    ):
+        intens = frag_intensity_df.values[frag_start_idx:frag_end_idx]
+        max_inten = np.max(intens)
+        if max_inten > 0:
+            intens /= max_inten
+        frag_intensity_df.values[frag_start_idx:frag_end_idx,:] = intens
+
+
 
 # %% ../../nbdev_nbs/model/ms2.ipynb 14
-def pearson_correlation(x, y):
+def pearson_correlation(x:torch.Tensor, y:torch.Tensor):
     """Compute pearson correlation between 2 batches of 1-D tensors
-    Args:
-        x: Shape (Batch, n)
-        y: Shape (Batch, n)
+
+    Parameters
+    ----------
+    x : torch.Tensor
+        Shape (Batch, n)
+
+    y : torch.Tensor
+        Shape (Batch, n)
+
     """
     return torch.cosine_similarity(
         x-x.mean(dim=1, keepdim=True),
@@ -703,9 +773,15 @@ def _get_ranks(x: torch.Tensor, device) -> torch.Tensor:
 
 def spearman_correlation(x: torch.Tensor, y: torch.Tensor, device):
     """Compute spearman correlation between 2 batches of 1-D tensors
-    Args:
-        x: Shape (Batch, n)
-        y: Shape (Batch, n)
+
+    Parameters
+    ----------
+    x : torch.Tensor
+        Shape (Batch, n)
+
+    y : torch.Tensor
+        Shape (Batch, n)
+
     """
     x_rank = _get_ranks(x, device)
     y_rank = _get_ranks(y, device)

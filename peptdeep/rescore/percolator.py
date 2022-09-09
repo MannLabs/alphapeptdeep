@@ -38,6 +38,7 @@ perc_settings = global_settings['percolator']
 
 # %% ../../nbdev_nbs/rescore/percolator.ipynb 4
 class LogisticRegressionTorch(torch.nn.Module):
+    """Torch-based rescore model"""
     def __init__(self, input_dim, **kwargs):
         super().__init__()
         torch.manual_seed(1337)
@@ -53,7 +54,7 @@ class RescoreModelProvider:
         self.model_dict[model_name.lower()] = model_class
     def get_model(self, model_name, input_dim, **kwargs):
         if model_name.lower() not in self.model_dict:
-            logging.info(
+            print(
                 "[PERC] "
                 f"PyTorch rescoring model '{model_name}' is not "
                 "implemented, switch to 'linear' model."
@@ -131,6 +132,46 @@ class NNRescore:
 
 # %% ../../nbdev_nbs/rescore/percolator.ipynb 6
 class Percolator:
+    """Percolator model.
+    In parameter list, perc_settings is
+    ```
+    perc_settings = peptdeep.settings.global_settings['percolator']
+    ```
+
+    Parameters
+    ----------
+    percolator_model : str, optional
+        machine learning 
+        model type for rescoring, could be:
+        "linear": logistic regression
+        "random_forest": random forest
+        Defaults to perc_settings['percolator_model'].
+
+    percolator_backend : str, optional
+        `sklearn` or `pytorch`.
+        Defaults to perc_settings['percolator_backend']
+
+    cv_fold : int, optional
+        cross-validation fold. 
+        Defaults to perc_settings['cv_fold'].
+
+    iter_num : int, optional
+        percolator iteration number. 
+        Defaults to perc_settings['percolator_iter_num'].
+
+    ms2_ppm : bool, optional
+        is ms2 tolerance the ppm. 
+        Defaults to perc_settings['ms2_ppm'].
+
+    ms2_tol : float, optional
+        ms2 tolerance. 
+        Defaults to perc_settings['ms2_tol'].
+
+    model_mgr : ModelManager, optional
+        peptdeep.pretrained_model.ModelManager.
+        If None, self.model_mgr will be init by default (see `peptdeep.pretrained_models.ModelManager`).
+        Defaults to None.
+    """
     def __init__(self,
         *,
         percolator_model:str=perc_settings['percolator_model'],
@@ -141,43 +182,6 @@ class Percolator:
         ms2_tol:float = global_settings['peak_matching']['ms2_tol_value'],
         model_mgr:ModelManager = None
     ):
-        """Percolator model
-        Note that in the `Args` list,
-        ```
-          perc_settings = peptdeep.settings.global_settings['percolator']
-        ```
-
-        Args:
-            percolator_model (str, optional): machine learning 
-              model type for rescoring, could be:
-                "linear": logistic regression
-                "random_forest": random forest
-              Defaults to perc_settings['percolator_model'].
-            percolator_backend(str, optional): `sklearn` or `pytorch`.
-              Defaults to perc_settings['percolator_backend']
-            cv_fold (int, optional): cross-validation fold. 
-              Defaults to perc_settings['cv_fold'].
-            iter_num (int, optional): percolator iteration number. 
-              Defaults to perc_settings['percolator_iter_num'].
-            ms2_ppm (bool, optional): is ms2 tolerance the ppm. 
-              Defaults to perc_settings['ms2_ppm'].
-            ms2_tol (float, optional): ms2 tolerance. 
-              Defaults to perc_settings['ms2_tol'].
-            model_mgr (ModelManager, optional): 
-              peptdeep.pretrained_model.ModelManager.
-              If None, self.model_mgr will be init by:
-              ```
-              self.model_mgr = ModelManager(
-                  mask_modloss=perc_settings[
-                      'mask_modloss'
-                  ]
-              )
-              self.model_mgr.load_installed_models(
-                  perc_settings['peptdeep_model_type'],
-              )
-              ```
-              Defaults to None.
-        """
         if model_mgr is None:
             self.model_mgr = ModelManager()
         else:
@@ -258,6 +262,7 @@ class Percolator:
     def enable_model_fine_tuning(self, flag=True):
         self.feature_extractor.require_model_tuning = flag
         self.feature_extractor.require_raw_specific_rt_tuning = flag
+    
     def disable_model_fine_tuning(self):
         self.feature_extractor.require_model_tuning = False
         self.feature_extractor.require_raw_specific_rt_tuning = False
@@ -399,12 +404,18 @@ class Percolator:
     )->pd.DataFrame:
         """Load PSM dataframe from file path list.
 
-        Args:
-            psm_file_list (list): PSM file path list
-            psm_type (str): PSM type, could be alphapept, pfind, ...
+        Parameters
+        ----------
+        psm_file_list : list
+            PSM file path list
 
-        Returns:
-            pd.DataFrame: PSM dataframe with 100% FDR including decoys. 
+        psm_type : str
+            PSM type, could be alphapept, pfind, ...
+
+        Returns
+        -------
+        pd.DataFrame
+            PSM dataframe with 100% FDR including decoys. 
         """
         reader = psm_reader_provider.get_reader(
             psm_type, fdr=1, keep_decoy=True
@@ -419,7 +430,24 @@ class Percolator:
     def extract_features(self,
         psm_df:pd.DataFrame, ms2_file_dict:dict, ms2_file_type:str
     )->pd.DataFrame:
+        """Extract features for rescoring
 
+        Parameters
+        ----------
+        psm_df : pd.DataFrame
+            PSM DataFrame
+
+        ms2_file_dict : dict
+            {raw_name(str): ms2_file_path(str)}
+
+        ms2_file_type : str
+            MS2 file type
+
+        Returns
+        -------
+        pd.DataFrame
+            psm_df with feature columns appended inplace.
+        """
         psm_df['ml_score'] = psm_df.score
         psm_df = self._estimate_fdr(psm_df, 'psm')
         psm_df = self.feature_extractor.extract_features(
@@ -432,6 +460,18 @@ class Percolator:
         return psm_df
 
     def re_score(self, df:pd.DataFrame)->pd.DataFrame:
+        """Rescore
+
+        Parameters
+        ----------
+        df : pd.DataFrame
+            psm_df
+
+        Returns
+        -------
+        pd.DataFrame
+            psm_df with `ml_score` and `fdr` columns updated inplace
+        """
         logging.info(
             "[PERC] "
             f'{np.sum((df.fdr<=self.fdr) & (df.decoy==0))} '
@@ -456,11 +496,29 @@ class Percolator:
     def run(self,
         psm_df:pd.DataFrame, ms2_file_dict:dict, ms2_file_type:str
     )->pd.DataFrame:
+        """
+        Run percolator workflow:
+
+        - self.extract_features()
+        - self.re_score()
+
+        Parameters
+        ----------
+        psm_df : pd.DataFrame
+            PSM DataFrame
+
+        ms2_file_dict : dict
+            {raw_name(str): ms2_file_path(str)}
+
+        ms2_file_type : str
+            MS2 file type
+
+        Returns
+        -------
+        pd.DataFrame
+            psm_df with feature columns appended inplace.
+        """
         df = self.extract_features(
             psm_df, ms2_file_dict, ms2_file_type
         )
         return self.re_score(df)
-
-# %% ../../nbdev_nbs/rescore/percolator.ipynb 8
-#| export
-

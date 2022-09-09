@@ -3,12 +3,7 @@
 # %% auto 0
 __all__ = ['global_settings', 'model_const', 'update_settings', 'update_modifications']
 
-# %% ../nbdev_nbs/settings.ipynb 1
-# for nbdev_build_docs
-# import os
-# __file__ = os.path.expanduser('~/Workspace/alphapeptdeep/peptdeep/settings.py')
-
-# %% ../nbdev_nbs/settings.ipynb 3
+# %% ../nbdev_nbs/settings.ipynb 2
 import os
 import collections
 
@@ -17,12 +12,17 @@ from alphabase.constants.modification import (
     load_mod_df, keep_modloss_by_importance
 )
 
-# %% ../nbdev_nbs/settings.ipynb 5
-_base_dir = os.path.dirname(__file__)
+from .constants._const import CONST_FOLDER
 
+# %% ../nbdev_nbs/settings.ipynb 3
 global_settings = load_yaml(
-    os.path.join(_base_dir, 'constants/default_settings.yaml')
+    os.path.join(CONST_FOLDER, 'default_settings.yaml')
 )
+
+global_settings['PEPTDEEP_HOME'] = os.path.expanduser(
+    global_settings['PEPTDEEP_HOME']
+)
+
 for key, val in list(global_settings['model_mgr'][
     'instrument_group'
 ].items()):
@@ -31,7 +31,7 @@ for key, val in list(global_settings['model_mgr'][
     ][key.upper()] = val
 
 model_const = load_yaml(
-    os.path.join(_base_dir, 'constants/model_const.yaml')
+    os.path.join(CONST_FOLDER, 'model_const.yaml')
 )
 
 def update_settings(dict_, new_dict):

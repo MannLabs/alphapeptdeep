@@ -15,12 +15,17 @@ def fdr_to_q_values(
 )->np.ndarray:
     """convert FDR values to q_values.
 
-    Args:
-        fdr_values (np.ndarray): FDR values, they should be 
+    Parameters
+    ----------
+    fdr_values : np.ndarray
+        FDR values, they should be 
         sorted according to the descending order of the `score`
 
-    Returns:
-        np.ndarray: q_values
+    Returns
+    -------
+    np.ndarray
+        q_values
+
     """
     q_values = np.zeros_like(fdr_values)
     min_q_value = np.max(fdr_values)
@@ -38,14 +43,23 @@ def calc_fdr(
 )->pd.DataFrame:
     """Calculate FDR values (q_values in fact) for the given dataframe
 
-    Args:
-        df (pd.DataFrame): PSM dataframe to calculate FDRs
-        score_column (str): score column to sort in decending order
-        decoy_column (str, optional): decoy column in the dataframe. 
+    Parameters
+    ----------
+    df : pd.DataFrame
+        PSM dataframe to calculate FDRs
+
+    score_column : str
+        score column to sort in decending order
+
+    decoy_column : str, optional
+        decoy column in the dataframe. 
         1=target, 0=decoy. Defaults to 'decoy'.
 
-    Returns:
-        pd.DataFrame: PSM dataframe with 'fdr' column added
+    Returns
+    -------
+    pd.DataFrame
+        PSM dataframe with 'fdr' column added
+
     """
     df = df.reset_index(drop=True).sort_values(
         [score_column,decoy_column], ascending=False
@@ -70,15 +84,24 @@ def fdr_from_ref(
     It is used to extend peptide-level or sequence-level FDR (reference) 
     to each PSM, as PSMs are more useful for quantification.
 
-    Args:
-        sorted_scores (np.array): the scores to calculate FDRs, 
-          they must be sorted in decending order.
-        ref_scores (np.array): reference scores that used to 
-          calculate ref_fdr_values, also sorted in decending order.
-        ref_fdr_values (np.array): fdr values corresponding to ref_scores
+    Parameters
+    ----------
+    sorted_scores : np.array
+        the scores to calculate FDRs, 
+        they must be sorted in decending order.
 
-    Returns:
-        np.array: fdr values corresponding to sorted_scores.
+    ref_scores : np.array
+        reference scores that used to 
+        calculate ref_fdr_values, also sorted in decending order.
+
+    ref_fdr_values : np.array
+        fdr values corresponding to ref_scores
+
+    Returns
+    -------
+    np.array
+        fdr values corresponding to sorted_scores.
+
     """
     q_values = np.zeros_like(sorted_scores)
     i,j = 0,0
@@ -106,17 +129,30 @@ def calc_fdr_from_ref(
      for quantification.
     ``
 
-    Args:
-        df (pd.DataFrame): PSM dataframe
-        ref_scores (np.array): reference scores that used to 
-          calculate ref_fdr_values, also sorted in decending order.
-        ref_fdr_values (np.array): fdr values corresponding to ref_scores
-        score_column (str): score column in the dataframe
-        decoy_column (str, optional): decoy column in the dataframe. 
+    Parameters
+    ----------
+    df : pd.DataFrame
+        PSM dataframe
+
+    ref_scores : np.array
+        reference scores that used to 
+        calculate ref_fdr_values, also sorted in decending order.
+
+    ref_fdr_values : np.array
+        fdr values corresponding to ref_scores
+
+    score_column : str
+        score column in the dataframe
+
+    decoy_column : str, optional
+        decoy column in the dataframe. 
         1=target, 0=decoy. Defaults to 'decoy'.
 
-    Returns:
-        pd.DataFrame: dataframe with 'fdr' column added
+    Returns
+    -------
+    pd.DataFrame
+        dataframe with 'fdr' column added
+
     """
     df = df.reset_index(drop=True).sort_values(
         [score_column,decoy_column], ascending=False

@@ -22,10 +22,31 @@ from ..utils import process_bar
 lib_settings = global_settings['library']
 
 class PredictSpecLib(SpecLibBase):
+    """PredictSpecLib
+
+    Parameters
+    ----------
+    model_manager : ModelManager, optional
+        `ModelManager`, by default None
+
+    charged_frag_types : list, optional
+        Charged fragment types, by default ['b_z1','b_z2','y_z1','y_z2']
+
+    precursor_mz_min : float, optional
+        precursor_mz_min, by default 400.0
+
+    precursor_mz_max : float, optional
+        precursor_mz_max, by default 2000.0
+
+    decoy : str, optional
+        Decoy choice, see `alphabase.spec_lib.decoy_library`, 
+        by default 'pseudo_reverse'
+    """
     def __init__(self,
         model_manager: ModelManager = None,
-        charged_frag_types = ['b_z1','b_z2','y_z1','y_z2'],#['b_modloss_z1', ...]
-        precursor_mz_min = 400, precursor_mz_max = 2000,
+        charged_frag_types = ['b_z1','b_z2','y_z1','y_z2'],
+        precursor_mz_min:float = 400.0, 
+        precursor_mz_max:float = 2000.0,
         decoy:str = 'pseudo_reverse'
     ):
         super().__init__(

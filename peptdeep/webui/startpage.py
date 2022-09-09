@@ -12,7 +12,10 @@ def show():
     with st.expander("Navigation"):
         st.write("Use the sidebar on the left to navigate through the different menus.")
         st.write(
-            "- Model: Set the parameters of peptdeep models."
+            "- Server: Start/stop the server process to run `transfer learning`, `library prediction`, ... tasks."
+            " \n- Settings: Save settings or upload previous settings."
+            " \n- Model: Set the settings of peptdeep models."
+            " \n- Transfer: Transfer learning and save the refined models."
             " \n- Library: Predict spectral libraries."
             " \n- Rescore: Rescore DDA search results (the GUI is not finished yet)."
         )

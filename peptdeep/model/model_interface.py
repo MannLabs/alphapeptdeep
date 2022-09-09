@@ -9,10 +9,13 @@ import numpy as np
 import pandas as pd
 import torch
 import yaml
+import inspect
 from tqdm import tqdm
 
 import torch.multiprocessing as mp
 import functools
+
+from types import ModuleType
 
 from torch.optim.lr_scheduler import LambdaLR
 
@@ -22,14 +25,13 @@ from alphabase.yaml_utils import save_yaml, load_yaml
 from alphabase.peptide.precursor import is_precursor_sorted
 
 from ..settings import model_const
-from ..utils import logging
+from ..utils import logging, torch_devices, process_bar
 from ..settings import global_settings
 
 from peptdeep.model.featurize import (
     get_ascii_indices, get_batch_aa_indices,
     get_batch_mod_feature
 )
-
 
 # %% ../../nbdev_nbs/model/model_interface.ipynb 6
 # copied from huggingface
@@ -72,7 +74,7 @@ class ModelInterface(object):
     the abstract (i.e. not implemented) methods.
     """
     def __init__(self,
-        device:str='gpu',
+        device:str=global_settings['torch_device']['device_type'],
         **kwargs
     ):
         self.model:torch.nn.Module = None
@@ -98,14 +100,40 @@ class ModelInterface(object):
     def target_column_to_train(self, column:str):
         self._target_column_to_train = column
 
-    def set_device(self, device_type = 'gpu'):
+    def set_device(self, 
+        device_type:str = global_settings['torch_device']['device_type'], 
+        device_ids:list = global_settings['torch_device']['device_ids']
+    ):
         """
-        Sets the device (e.g. gpu (cuda), cpu) to be used in the model.
+        Set the device (e.g. gpu (cuda), mps, cpu, ...) to be used for the model.
+
+        Parameters
+        ----------
+        device_type : str, optional
+            Device type, see `torch_device_dict`. 
+            By default global_settings['torch_device']['device_type']
+
+        device_ids : list, optional
+            List of int. Device ids for cuda/gpu (e.g. [1,3] for cuda:1,3). 
+            By default global_settings['torch_device']['device_ids']
         """
-        self.device_type = device_type.lower().replace('gpu','cuda')
-        if not torch.cuda.is_available():
+        self.device_type = device_type.lower()
+        self.device_ids = device_ids
+
+        if self.device_type not in torch_devices:
             self.device_type = 'cpu'
-        self.device = torch.device(self.device_type)
+        else:
+            if torch_devices[self.device_type]['is_available']():
+                self.device_type = torch_devices[self.device_type]['device']
+            else:
+                print(f"Device `{self.device_type}` is not available, set to `cpu`")
+                self.device_type = 'cpu'
+                
+        if self.device_type == 'cuda' and self.device_ids:
+            self.device = torch.device(f"cuda:{','.join([str(_id) for _id in self.device_ids])}")
+        else:
+            self.device = torch.device(self.device_type)
+        
         if self.model is not None:
             self.model.to(self.device)
 
@@ -134,8 +162,8 @@ class ModelInterface(object):
         **kwargs
     ):
         """
-        Trains the model according to specifications. Includes a warumup 
-        phase with linear rate scheduling (cosine schedule).
+        Train the model according to specifications. Includes a warumup 
+        phase with linear increasing and cosine decreasing for lr scheduling).
         """
         self._prepare_training(precursor_df, lr, **kwargs)
 
@@ -168,7 +196,7 @@ class ModelInterface(object):
         **kwargs
     ):
         """
-        Trains the model according to specifications.
+        Train the model according to specifications.
         """
         if warmup_epoch > 0:
             self.train_with_warmup(
@@ -266,8 +294,6 @@ class ModelInterface(object):
             batch_size=batch_size, verbose=False, **kwargs
         )
 
-        from peptdeep.utils import process_bar
-
         def batch_df_gen(precursor_df, mp_batch_size):
             for i in range(0, len(precursor_df), mp_batch_size):
                 yield precursor_df.iloc[i:i+mp_batch_size]
@@ -291,7 +317,7 @@ class ModelInterface(object):
         
         return self.predict_df
 
-    def save(self, filename):
+    def save(self, filename:str):
         """
         Save the model state, the constants used, the code defining the model and the model parameters.
         """
@@ -363,7 +389,6 @@ class ModelInterface(object):
             filename='model_file_py',
             mode='exec'
         )
-        from types import ModuleType
         _module = ModuleType('_apd_nn_codes')
         #codes must contains torch model codes 'class Model(...'
         exec(compiled_codes, _module.__dict__)
@@ -392,13 +417,19 @@ class ModelInterface(object):
         """Convert numerical np.array to pytorch tensor.
         The tensor will be stored in self.device
 
-        Args:
-            data (np.array): numerical np.array
-            dtype (torch.dtype, optional): dtype. The dtype of the indices 
-                used for embedding should be `torch.long`. 
-                Defaults to `torch.float32`.
-        Returns:
-            torch.Tensor: the tensor stored in self.device
+        Parameters
+        ----------
+        data : np.ndarray
+            Numerical np.ndarray to be converted as a tensor
+            
+        dtype : torch.dtype, optional
+            The dtype of the indices used for embedding should be `torch.long`. 
+            Defaults to `torch.float32`
+
+        Returns
+        -------
+        torch.Tensor
+            The tensor stored in self.device
         """
         return torch.tensor(data, dtype=dtype, device=self.device)
 
@@ -425,7 +456,6 @@ class ModelInterface(object):
 
     def _save_codes(self, save_as):
         try:
-            import inspect
             code = '''import torch\n'''
             code += '''import peptdeep.model.building_block as building_block\n'''
             code += '''from peptdeep.model.model_shop import *\n'''
@@ -505,15 +535,15 @@ class ModelInterface(object):
            All sub-classes must re-implement this method.
            Use torch.tensor(np.array, dtype=..., device=self.device) to convert tensor.
 
-        Args:
-            batch_df (pd.DataFrame): Dataframe of each mini batch.
-            nAA (int, optional): Peptide length. Defaults to None.
+        Parameters
+        ----------
+        batch_df : pd.DataFrame
+            Dataframe of each mini batch.
 
-        Raises:
-            NotImplementedError: 'Must implement _get_targets_from_batch_df() method'
-
-        Returns:
-            torch.Tensor: Target value tensor
+        Returns
+        -------
+        torch.Tensor
+            Target value tensor
         """
         return self._as_tensor(
             batch_df[self.target_column_to_train].values, 
@@ -573,13 +603,16 @@ class ModelInterface(object):
         This will call `self._get_aa_indice_features(batch_df)` for sequence-level prediciton, 
         or `self._get_aa_mod_features(batch_df)` for modified sequence-level.
 
-        Args:
-            batch_df (pd.DataFrame): Batch of precursor dataframe.
+        Parameters
+        ----------
+        batch_df : pd.DataFrame
+            Batch of precursor dataframe.
 
-        Returns:
-            Union[torch.Tensor, Tuple[torch.Tensor]]: 
-                A feature tensor if call `self._get_aa_indice_features(batch_df)` (default).
-                Or a tuple of tensors if call `self._get_aa_mod_features(batch_df)`.
+        Returns
+        -------
+        Union[torch.Tensor, Tuple[torch.Tensor]]: 
+            A feature tensor if call `self._get_aa_indice_features(batch_df)` (default).
+            Or a tuple of tensors if call `self._get_aa_mod_features(batch_df)`.
         """
         return self._get_aa_indice_features(batch_df)
 
@@ -601,8 +634,10 @@ class ModelInterface(object):
     ):
         """Changes to the training dataframe can be implemented here.
 
-        Args:
-            precursor_df (pd.DataFrame): Dataframe containing the training data.
+        Parameters
+        ----------
+        precursor_df : pd.DataFrame
+            Dataframe containing the training data.
         """
         pass
 
@@ -613,9 +648,13 @@ class ModelInterface(object):
     ):
         """Set predicted values into `self.predict_df`.
 
-        Args:
-            batch_df (pd.DataFrame): Dataframe of mini batch when predicting
-            predict_values (np.array): Predicted values
+        Parameters
+        ----------
+        batch_df : pd.DataFrame
+            Dataframe of mini batch when predicting
+
+        predict_values : np.array
+            Predicted values
         """
         predict_values[predict_values<self._min_pred_value] = self._min_pred_value
         if self._predict_in_order:

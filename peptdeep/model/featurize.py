@@ -53,13 +53,24 @@ def parse_mod_feature(
     Note that `site=0` is for peptide N-term modification, 
     `site=1` is for peptide C-term modification, and 
     `1<=site<=nAA` is for residue modifications on the peptide.
-    Args:
-        nAA (int): the lenght of the peptide sequence
-        mod_names (List[str]): the modification names
-        mod_sites (List[str]): the modification sites corresponding
-            to `mod_names` on the peptide
-    Returns:
-        np.array: 2-D feature array with shape `(nAA+2,mod_feature_size)`
+
+    Parameters
+    ----------
+    nAA : int
+        the lenght of the peptide sequence
+
+    mod_names : List[str]
+        the modification names
+
+    mod_sites : List[str]
+        the modification sites corresponding
+        to `mod_names` on the peptide
+
+    Returns
+    -------
+    np.ndarray
+        2-D feature array with shape `(nAA+2,mod_feature_size)`
+
     '''
     mod_x = np.zeros((nAA+2,mod_feature_size))
     if len(mod_names) > 0:
@@ -71,11 +82,16 @@ def get_batch_mod_feature(
     batch_df: pd.DataFrame
 )->np.ndarray:
     '''
-    Args:
-        batch_df (pd.DataFrame): dataframe with 'sequence', 'mods', 'mod_sites' and 'nAA' columns.
-            All sequence lengths must be the same, meaning that nAA values must be equal.
-    Returns:
-        np.array: 3-D tensor with shape (batch_size, nAA+2, mod_feature_size)
+    Parameters
+    ----------
+    batch_df : pd.DataFrame
+        dataframe with 'sequence', 'mods', 'mod_sites' and 'nAA' columns.
+        All sequence lengths must be the same, meaning that nAA values must be equal.
+
+    Returns
+    -------
+    np.ndarray
+        3-D tensor with shape (batch_size, nAA+2, mod_feature_size)
     '''
     mod_x_batch = np.zeros((len(batch_df), batch_df.nAA.values[0]+2, mod_feature_size))
     mod_features_list = batch_df.mods.str.split(';').apply(
@@ -106,13 +122,18 @@ def get_batch_aa_indices(
     so ID of 'A' is 1, ID of 'B' is 2, ..., ID of 'Z' is 26 (maximum). 
     Zeros are padded into the N- and C-term for each sequence.
     
-    Args:
-        seq_array (Union[List,np.ndarray]):
-            list or 1-D array of sequences with the same length
-    Returns:
-        np.array: 2-D `np.int32` array with the shape
+    Parameters
+    ----------
+    seq_array : Union[List,np.ndarray]
+        list or 1-D array of sequences with the same length
+
+    Returns
+    -------
+    np.ndarray
+        2-D `np.int32` array with the shape
         `(len(seq_array), len(seq_array[0])+2)`. Zeros is padded into the
         N- and C-term of each sequence, so the 1st-D is `len(seq_array[0])+2`.
+
     '''
     x = np.array(seq_array).view(np.int32).reshape(
         len(seq_array), -1
@@ -128,14 +149,19 @@ def get_ascii_indices(
     The values are from 0 to 127. 
     Zeros are padded into the N- and C-term for each sequence.
 
-    Args:
-        seq_array (Union[List,np.ndarray]):
-            list or 1-D array of sequences.
-    Returns:
-        np.array: 2-D `np.int32` array with the shape
+    Parameters
+    ----------
+    seq_array : Union[List,np.ndarray]
+        list or 1-D array of sequences.
+
+    Returns
+    -------
+    np.ndarray
+        2-D `np.int32` array with the shape
         `(len(seq_array), max seq length+2)`. 
         For the the sequence whose length is shorter than max seq length,
         zeros are padded to the missing values.
+        
     '''
     
     x = np.array(seq_array).view(np.int32).reshape(

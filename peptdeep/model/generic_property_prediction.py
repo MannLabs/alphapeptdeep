@@ -24,6 +24,7 @@ ASCII_NUM=128
 
 # %% ../../nbdev_nbs/model/generic_property_prediction.ipynb 8
 class Model_for_Generic_AASeq_Regression_LSTM(torch.nn.Module):
+    """Generic LSTM regression model for AA sequence"""
     def __init__(self, 
         *,
         hidden_dim=256,
@@ -52,6 +53,7 @@ class Model_for_Generic_AASeq_Regression_LSTM(torch.nn.Module):
         return self.nn(aa_x).squeeze(-1)
 
 class Model_for_Generic_AASeq_Regression_Transformer(torch.nn.Module):
+    """Generic transformer regression model for AA sequence """
     def __init__(self,
         *,
         hidden_dim = 256,
@@ -60,10 +62,6 @@ class Model_for_Generic_AASeq_Regression_Transformer(torch.nn.Module):
         dropout = 0.1,
         **kwargs,
     ):
-        """
-        Model based on a transformer Architecture from 
-        Huggingface's BertEncoder class.
-        """
         super().__init__()
 
         self.dropout = torch.nn.Dropout(dropout)
@@ -108,6 +106,9 @@ class Model_for_Generic_AASeq_Regression_Transformer(torch.nn.Module):
 
 
 class ModelInterface_for_Generic_AASeq_Regression(ModelInterface):
+    """
+    `ModelInterface` for Generic_AASeq_Regression models
+    """
     def __init__(self, 
         dropout=0.1,
         model_class:torch.nn.Module=Model_for_Generic_AASeq_Regression_LSTM, 
@@ -125,8 +126,9 @@ class ModelInterface_for_Generic_AASeq_Regression(ModelInterface):
         self.target_column_to_predict = 'predicted_property'
         self.target_column_to_train = 'detected_property'
 
-# %% ../../nbdev_nbs/model/generic_property_prediction.ipynb 17
+# %% ../../nbdev_nbs/model/generic_property_prediction.ipynb 18
 class Model_for_Generic_ModAASeq_Regression_LSTM(torch.nn.Module):
+    """Generic LSTM regression model for modified sequence"""
     def __init__(self, 
         *,
         hidden_dim=256,
@@ -152,6 +154,7 @@ class Model_for_Generic_ModAASeq_Regression_LSTM(torch.nn.Module):
         return self.output_nn(x).squeeze(-1)
 
 class Model_for_Generic_ModAASeq_Regression_Transformer(torch.nn.Module):
+    """Generic transformer regression model for modified sequence"""
     def __init__(self,
         *,
         hidden_dim = 256,
@@ -160,10 +163,6 @@ class Model_for_Generic_ModAASeq_Regression_Transformer(torch.nn.Module):
         dropout = 0.1,
         **kwargs,
     ):
-        """
-        Model based on a transformer Architecture from 
-        Huggingface's BertEncoder class.
-        """
         super().__init__()
 
         self.dropout = torch.nn.Dropout(dropout)
@@ -210,6 +209,9 @@ class Model_for_Generic_ModAASeq_Regression_Transformer(torch.nn.Module):
         return self.output_nn(x).squeeze(1)
 
 class ModelInterface_for_Generic_ModAASeq_Regression(ModelInterface):
+    """
+    `ModelInterface` for all Generic_ModAASeq_Regression models
+    """
     def __init__(self, 
         dropout=0.1,
         model_class:torch.nn.Module=Model_for_Generic_ModAASeq_Regression_LSTM, #model defined above
@@ -233,10 +235,11 @@ class ModelInterface_for_Generic_ModAASeq_Regression(ModelInterface):
     ):
         return self._get_aa_mod_features(batch_df)
 
-# %% ../../nbdev_nbs/model/generic_property_prediction.ipynb 23
+# %% ../../nbdev_nbs/model/generic_property_prediction.ipynb 24
 class Model_for_Generic_AASeq_BinaryClassification_LSTM(
     Model_for_Generic_AASeq_Regression_LSTM
 ):
+    """Generic LSTM classification model for AA sequence"""
     def __init__(self, 
         *,
         hidden_dim=256,
@@ -257,6 +260,7 @@ class Model_for_Generic_AASeq_BinaryClassification_LSTM(
 class Model_for_Generic_AASeq_BinaryClassification_Transformer(
     Model_for_Generic_AASeq_Regression_Transformer
 ):
+    """Generic transformer classification model for AA sequence"""
     def __init__(self,
         *,
         hidden_dim = 256,
@@ -282,6 +286,9 @@ class Model_for_Generic_AASeq_BinaryClassification_Transformer(
         return torch.sigmoid(x)
 
 class ModelInterface_for_Generic_AASeq_BinaryClassification(ModelInterface):
+    """
+    `ModelInterface` for all Generic_AASeq_BinaryClassification models
+    """
     def __init__(self, 
         dropout=0.1,
         model_class:torch.nn.Module=Model_for_Generic_AASeq_BinaryClassification_LSTM, #model defined above
@@ -301,10 +308,11 @@ class ModelInterface_for_Generic_AASeq_BinaryClassification(ModelInterface):
         self.target_column_to_predict = 'predicted_prob'
         self.target_column_to_train = 'detected_prob'
 
-# %% ../../nbdev_nbs/model/generic_property_prediction.ipynb 31
+# %% ../../nbdev_nbs/model/generic_property_prediction.ipynb 32
 class Model_for_Generic_ModAASeq_BinaryClassification_LSTM(
     Model_for_Generic_ModAASeq_Regression_LSTM
 ):
+    """Generic LSTM classification model for modified sequence"""
     def __init__(self, 
         *,
         hidden_dim=256,
@@ -327,6 +335,7 @@ class Model_for_Generic_ModAASeq_BinaryClassification_LSTM(
 class Model_for_Generic_ModAASeq_BinaryClassification_Transformer(
     Model_for_Generic_ModAASeq_Regression_Transformer
 ):
+    """Generic transformer classification model for modified sequence"""
     def __init__(self,
         *,
         hidden_dim = 256,
@@ -335,10 +344,6 @@ class Model_for_Generic_ModAASeq_BinaryClassification_Transformer(
         dropout = 0.1,
         **kwargs,
     ):
-        """
-        Model based on a transformer Architecture from 
-        Huggingface's BertEncoder class.
-        """
         super().__init__(
             nlayers=nlayers,
             hidden_dim=hidden_dim,
@@ -364,6 +369,9 @@ class Model_for_Generic_ModAASeq_BinaryClassification_Transformer(
 
 
 class ModelInterface_for_Generic_ModAASeq_BinaryClassification(ModelInterface):
+    """
+    `ModelInterface` for Generic_ModAASeq_BinaryClassification
+    """
     def __init__(self, 
         dropout=0.1,
         model_class:torch.nn.Module=Model_for_Generic_ModAASeq_BinaryClassification_LSTM, #model defined above

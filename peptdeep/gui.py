@@ -1,7 +1,7 @@
 #!python
 import os
 
-def run(port=8077):
+def run(port=10077):
     print('Starting PeptDeep Web Server ...')
 
     _this_file = __file__
@@ -25,7 +25,7 @@ def run(port=8077):
 
 
     import sys
-    from streamlit import cli as stcli
+    from streamlit.web import cli as stcli
 
     theme = []
 

@@ -14,9 +14,9 @@ def show():
     #st.write('The current raw folder is', raw_folder)
     MS_type = st.selectbox(
      'MS file type',
-     ('Raw', 'MGF', 'hdf'))
+     ('Raw', 'MGF', 'ms_data.hdf'))
     #st.write('You selected:', MS_type)
-    if raw_folder:
+    if os.path.isdir(raw_folder):
         st.text(
             f"PeptDeep looks for MS files in {raw_folder}.\nThese can be selected in the new experiment tab.\nYou can add own files to this folder."
             )
@@ -38,8 +38,8 @@ def show():
         psm_type = 'spectra'
     elif PSM_type == 'MaxQuant':
         psm_type = 'msms.txt'
-    #st.write('You selected:', PSM_type)
-    if result_folder:
+
+    if os.path.isdir(result_folder):
         st.text(
             f"PeptDeep looks for PSM files in {result_folder}.\nThese can be selected in the new experiment tab.\nYou can add own files to this folder."
         )

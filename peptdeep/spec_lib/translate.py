@@ -29,10 +29,18 @@ def create_modified_sequence(
     '''
     Translate `(sequence, mods, mod_sites)` into a modified sequence. Used by `df.apply()`.
     For example, `('ABCDEFG','Mod1@A;Mod2@E','1;5')`->`_A[Mod1@A]BCDE[Mod2@E]FG_`.
-    Args:
-        df_items (List): must be `(sequence, mods, mod_sites)`
-        translate_mod_dict (dict): A dict to map alpha modification names to other software
-        mod_sep (str): '[]' or '()', default '()'
+
+    Parameters
+    ----------
+    df_items : List
+        must be `(sequence, mods, mod_sites)`
+
+    translate_mod_dict : dict
+        A dict to map alpha modification names to other software
+
+    mod_sep : str
+        '[]' or '()', default '()'
+
     '''
     nterm = '_'
     cterm = '_'
@@ -248,11 +256,20 @@ def speclib_to_single_df(
     Convert alphabase library to diann (or Spectronaut) library dataframe
     This method is not important, as it will be only 
     used by DiaNN, or spectronaut, or others
-    Args:
-        translate_mod_dict (dict): a dict map modifications from alphabase to other software. Default: build-in `alpha_to_other_mod_dict`
-        keep_k_highest_peaks (int): only keep highest fragments for each precursor. Default: 12
-    Returns:
-        pd.DataFrame: a single dataframe in the SWATH-like format
+
+    Parameters
+    ----------
+    translate_mod_dict : dict
+        a dict map modifications from alphabase to other software. Default: build-in `alpha_to_other_mod_dict`
+    
+    keep_k_highest_peaks : int
+        only keep highest fragments for each precursor. Default: 12
+
+    Returns
+    -------
+    pd.DataFrame
+        a single dataframe in the SWATH-like format
+
     '''
     df = pd.DataFrame()
     df['ModifiedPeptide'] = speclib._precursor_df[

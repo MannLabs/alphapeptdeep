@@ -13,7 +13,7 @@ import pathlib
 def get_posix(_path:str):
     return pathlib.PureWindowsPath(_path).as_posix()
 
-@st.cache
+# @st.cache
 def files_in_pandas(files:list) -> pd.DataFrame:
     """Reads a folder and returns a pandas dataframe containing the files and additional information.
     Args:
@@ -31,6 +31,26 @@ def files_in_pandas(files:list) -> pd.DataFrame:
 
     return df
 
+def file_type_selectbox( 
+    ui_label:str,
+    st_key:str, 
+    default_type:str,
+    monitor_files:list,
+    choices:list,
+    index=0,
+)->str:
+    def on_type_change():
+        if len(monitor_files)>0:
+            st.warning("Please clear all files before changing the file type")
+            st.session_state[st_key] = default_type
+
+    return st.selectbox(
+        ui_label,
+        choices, index=index,
+        key=st_key,
+        on_change=on_type_change
+    )
+
 def update_input_paths(file_list:list):
     _list = [
         _ for _ in file_list
@@ -39,18 +59,31 @@ def update_input_paths(file_list:list):
     file_list.clear()
     file_list.extend(_list)
 
-def select_files(file_list, ui_label="File"):
-    path = st.text_input(ui_label)
+def select_files(
+    file_list:list, 
+    file_exts:list, 
+    ui_label="File"
+):
+    if isinstance(file_exts, str):
+        file_exts = [file_exts.lower()]
+    else:
+        file_exts = [ext.lower() for ext in file_exts]
+    st.write('##### ' + ui_label)
+    path = st.text_input('Input a file or a folder path', key=ui_label+'text_input')
     path = get_posix(path)
     col1, col2, col3 = st.columns([0.5,0.5,2])
     with col1:
-        add = st.button('Add')
+        add = st.button('Add', key=ui_label+"Add")
     with col2:
-        remove = st.button('Remove')
+        remove = st.button('Remove', key=ui_label+"Remove")
     with col3:
-        clear = st.button('Clear all files')
+        clear = st.button('Clear all files', key=ui_label+"Clear")
     if add is True:
-        if path not in file_list:
+        if os.path.isdir(path):
+            for _file in os.listdir(path):
+                if any(_file.lower().endswith(file_ext) for file_ext in file_exts):
+                    file_list.append(os.path.join(path, _file))
+        elif path not in file_list:
             file_list.append(path)
     if remove is True:
         if path in file_list:
@@ -58,7 +91,8 @@ def select_files(file_list, ui_label="File"):
     if clear is True:
         file_list.clear()
     update_input_paths(file_list)
-    st.table(files_in_pandas(file_list))
+    st.write('##### Selected files')
+    st.dataframe(files_in_pandas(file_list))
 
 def escape_markdown(text: str) -> str:
     """Helper function to escape markdown in text.

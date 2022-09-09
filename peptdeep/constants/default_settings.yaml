@@ -14,7 +14,20 @@ local_model_zip_name: "pretrained_models.zip"
 # overwritable config
 model_url: "https://github.com/MannLabs/alphapeptdeep/releases/download/pre-trained-models/pretrained_models.zip"
 
+task_type: library
+task_type_choices:
+  - library
+  - train
+  - rescore
 thread_num: 8
+torch_device:
+  device_type: gpu
+  device_type_choices:
+    - gpu
+    - cpu
+    - mps
+  device_ids: []
+
 log_level: info
 log_level_choices:
   - debug
@@ -67,7 +80,7 @@ model_mgr:
     verbose: True
     multiprocessing: True
   transfer:
-    model_output_folder: ''
+    model_output_folder: "{PEPTDEEP_HOME}/refined_models"
     epoch_ms2: 20
     warmup_epoch_ms2: 10
     batch_size_ms2: 512
@@ -93,7 +106,7 @@ model_mgr:
     ms_file_type: alphapept_hdf
     ms_file_type_choices:
       - alphapept_hdf
-      - thermo_raw # if alphapept is installed
+      - thermo_raw
       - mgf
       - mzml
     ms_files: []
@@ -114,8 +127,6 @@ percolator:
   multiprocessing: True
 
   top_k_frags_to_calc_spc: 10
-  ms2_ppm: True
-  ms2_tol: 20
   calibrate_frag_mass_error: False
   max_perc_train_sample: 1000000
   min_perc_train_sample: 100
@@ -166,16 +177,16 @@ percolator:
         hyperscore: hyperscore
         nextscore: nextscore
       maxquant: {}
-  output_folder: C:/datasets/percolaotr
+  output_folder: "{PEPTDEEP_HOME}/rescore"
 library:
   input:
-    type: fasta
-    type_choices:
+    infile_type: fasta
+    infile_type_choices:
     - fasta
     - sequence_table
     - peptide_table # sequence with mods and mod_sites
     - precursor_table # peptide with charge state
-    paths: 
+    infiles: 
     - xxx.fasta
     fasta:
       protease: '([KR])'
@@ -193,6 +204,7 @@ library:
     fix_mods: 
     - Carbamidomethyl@C
     var_mods:
+    - Acetyl@Protein N-term
     - Oxidation@M
     min_var_mod_num: 0
     max_var_mod_num: 2
@@ -211,7 +223,7 @@ library:
     frag_types:
     - b
     - y
-  output_folder: ~/peptdeep_library
+  output_folder: "{PEPTDEEP_HOME}/spec_libs"
   output_tsv:
     enabled: False
     min_fragment_mz: 200

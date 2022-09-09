@@ -14,7 +14,7 @@ class PredictFastaSpecLib(FastaLib, PredictSpecLib):
     def __init__(self,
         model_manager:ModelManager = None,
         charged_frag_types:list = ['b_z1','b_z2','y_z1','y_z2'],
-        protease:str = 'trypsin',
+        protease:str = 'trypsin/P',
         max_missed_cleavages:int = 2,
         peptide_length_min:int = 7,
         peptide_length_max:int = 35,
