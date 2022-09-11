@@ -5,7 +5,7 @@ __all__ = ['mod_elements', 'mod_feature_size', 'mod_elem_to_idx', 'MOD_TO_FEATUR
            'get_all_mod_features', 'parse_mod_feature', 'get_batch_mod_feature', 'get_batch_aa_indices',
            'get_ascii_indices', 'parse_instrument_indices']
 
-# %% ../../nbdev_nbs/model/featurize.ipynb 2
+# %% ../../nbdev_nbs/model/featurize.ipynb 3
 import numpy as np
 import pandas as pd
 from typing import List, Union
@@ -13,7 +13,7 @@ from alphabase.constants.modification import MOD_CHEM
 
 from ..settings import model_const
 
-# %% ../../nbdev_nbs/model/featurize.ipynb 3
+# %% ../../nbdev_nbs/model/featurize.ipynb 4
 mod_elements = model_const['mod_elements']
 mod_feature_size = len(mod_elements)
 
@@ -42,7 +42,7 @@ def get_all_mod_features():
         MOD_TO_FEATURE[modname] = _parse_mod_formula(formula)
 get_all_mod_features()
 
-# %% ../../nbdev_nbs/model/featurize.ipynb 5
+# %% ../../nbdev_nbs/model/featurize.ipynb 6
 def parse_mod_feature(
     nAA:int, 
     mod_names:List[str], 
@@ -77,7 +77,7 @@ def parse_mod_feature(
         mod_x[mod_sites] = [MOD_TO_FEATURE[mod] for mod in mod_names]
     return mod_x
 
-# %% ../../nbdev_nbs/model/featurize.ipynb 8
+# %% ../../nbdev_nbs/model/featurize.ipynb 9
 def get_batch_mod_feature(
     batch_df: pd.DataFrame
 )->np.ndarray:
@@ -113,7 +113,7 @@ def get_batch_mod_feature(
             mod_x_batch[i,mod_sites,:] = mod_feas
     return mod_x_batch
 
-# %% ../../nbdev_nbs/model/featurize.ipynb 9
+# %% ../../nbdev_nbs/model/featurize.ipynb 10
 def get_batch_aa_indices(
     seq_array: Union[List, np.ndarray]
 )->np.ndarray:
@@ -169,7 +169,7 @@ def get_ascii_indices(
     )
     return np.pad(x, [(0,0)]*(len(x.shape)-1)+[(1,1)])
 
-# %% ../../nbdev_nbs/model/featurize.ipynb 13
+# %% ../../nbdev_nbs/model/featurize.ipynb 14
 instrument_dict = dict(
     zip(
         [inst.upper() for inst in model_const['instruments']], 
@@ -178,7 +178,7 @@ instrument_dict = dict(
 )
 unknown_inst_index = model_const['max_instrument_num']-1
 
-# %% ../../nbdev_nbs/model/featurize.ipynb 14
+# %% ../../nbdev_nbs/model/featurize.ipynb 15
 def parse_instrument_indices(instrument_list):
     instrument_list = [inst.upper() for inst in instrument_list]
     instrument_list = [inst for inst in instrument_list]

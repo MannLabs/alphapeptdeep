@@ -3,7 +3,7 @@
 # %% auto 0
 __all__ = ['SpectronautMSMSReader']
 
-# %% ../../nbdev_nbs/psm_frag_reader/library_frag_reader.ipynb 2
+# %% ../../nbdev_nbs/psm_frag_reader/library_frag_reader.ipynb 3
 import pandas as pd
 import numpy as np
 
@@ -18,7 +18,7 @@ from peptdeep.psm_frag_reader.psm_frag_reader import (
     psm_w_frag_reader_provider
 )
 
-# %% ../../nbdev_nbs/psm_frag_reader/library_frag_reader.ipynb 3
+# %% ../../nbdev_nbs/psm_frag_reader/library_frag_reader.ipynb 4
 class SpectronautMSMSReader(SpectronautReader, PSMReader_w_FragBase):
     def __init__(self,
         frag_types=['b','y','b_modloss','y_modloss'], 

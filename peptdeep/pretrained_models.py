@@ -5,7 +5,7 @@ __all__ = ['pretrain_dir', 'model_zip_name', 'model_url', 'model_zip', 'model_mg
            'count_mods', 'psm_sampling_with_important_mods', 'load_phos_models', 'load_models',
            'load_models_by_model_type_in_zip', 'clear_error_modloss_intensities', 'ModelManager']
 
-# %% ../nbdev_nbs/pretrained_models.ipynb 4
+# %% ../nbdev_nbs/pretrained_models.ipynb 5
 import os
 import pathlib
 import io
@@ -50,7 +50,7 @@ from .utils import uniform_sampling
 
 from .settings import global_settings
 
-# %% ../nbdev_nbs/pretrained_models.ipynb 5
+# %% ../nbdev_nbs/pretrained_models.ipynb 6
 pretrain_dir = os.path.join(
     os.path.join(
         os.path.expanduser(
@@ -118,11 +118,11 @@ def download_models(
         )
     logging.info(f'The pretrained models had been downloaded in {model_zip}')
 
-# %% ../nbdev_nbs/pretrained_models.ipynb 6
+# %% ../nbdev_nbs/pretrained_models.ipynb 7
 if not os.path.exists(model_zip):
     download_models()
 
-# %% ../nbdev_nbs/pretrained_models.ipynb 9
+# %% ../nbdev_nbs/pretrained_models.ipynb 10
 model_mgr_settings = global_settings['model_mgr']
 
 def count_mods(psm_df)->pd.DataFrame:
@@ -225,7 +225,7 @@ def load_models_by_model_type_in_zip(model_type_in_zip:str, mask_modloss=True):
     return ms2_model, rt_model, ccs_model
 
 
-# %% ../nbdev_nbs/pretrained_models.ipynb 11
+# %% ../nbdev_nbs/pretrained_models.ipynb 12
 def clear_error_modloss_intensities(
     fragment_mz_df, fragment_intensity_df
 ):

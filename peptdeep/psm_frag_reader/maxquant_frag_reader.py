@@ -3,7 +3,7 @@
 # %% auto 0
 __all__ = ['parse_phos_probs', 'filter_phos', 'MaxQuantMSMSReader']
 
-# %% ../../nbdev_nbs/psm_frag_reader/maxquant_frag_reader.ipynb 2
+# %% ../../nbdev_nbs/psm_frag_reader/maxquant_frag_reader.ipynb 3
 import pandas as pd
 import numpy as np
 import numba
@@ -20,7 +20,7 @@ from peptdeep.psm_frag_reader.psm_frag_reader import (
     psm_w_frag_reader_provider
 )
 
-# %% ../../nbdev_nbs/psm_frag_reader/maxquant_frag_reader.ipynb 3
+# %% ../../nbdev_nbs/psm_frag_reader/maxquant_frag_reader.ipynb 4
 def parse_phos_probs(mods, prob_seq, prob):
     if mods == 'Unmodified': return '', ''
     idx = mods.find('Phospho')

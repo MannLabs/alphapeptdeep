@@ -3,7 +3,7 @@
 # %% auto 0
 __all__ = ['PSMLabelReader', 'load_psmlabel_list']
 
-# %% ../../nbdev_nbs/psm_frag_reader/psmlabel_reader.ipynb 3
+# %% ../../nbdev_nbs/psm_frag_reader/psmlabel_reader.ipynb 4
 import pandas as pd
 import numpy as np
 import typing
@@ -24,7 +24,7 @@ from peptdeep.psm_frag_reader.psm_frag_reader import (
 )
 
 
-# %% ../../nbdev_nbs/psm_frag_reader/psmlabel_reader.ipynb 4
+# %% ../../nbdev_nbs/psm_frag_reader/psmlabel_reader.ipynb 5
 class PSMLabelReader(pFindReader,PSMReader_w_FragBase):
     def __init__(self, 
         frag_types=['b','y','b_modloss','y_modloss'], 
@@ -151,7 +151,7 @@ psm_w_frag_reader_provider.register_reader(
     'psmlabel', PSMLabelReader
 )
 
-# %% ../../nbdev_nbs/psm_frag_reader/psmlabel_reader.ipynb 7
+# %% ../../nbdev_nbs/psm_frag_reader/psmlabel_reader.ipynb 8
 def load_psmlabel_list(
     psmlabel_list,
     nce_list,

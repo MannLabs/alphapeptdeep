@@ -5,7 +5,7 @@ __all__ = ['mod_to_unimod_dict', 'mod_to_modname_dict', 'create_modified_sequenc
            'is_nterm_frag', 'mask_fragment_intensity_by_mz_', 'mask_fragment_intensity_by_frag_nAA',
            'speclib_to_single_df', 'speclib_to_swath_df', 'WritingProcess', 'translate_to_tsv']
 
-# %% ../../nbdev_nbs/spec_lib/translate.ipynb 2
+# %% ../../nbdev_nbs/spec_lib/translate.ipynb 3
 import pandas as pd
 import numpy as np
 import tqdm
@@ -19,7 +19,7 @@ from alphabase.spectral_library.library_base import SpecLibBase
 
 from ..utils import explode_multiple_columns
 
-# %% ../../nbdev_nbs/spec_lib/translate.ipynb 3
+# %% ../../nbdev_nbs/spec_lib/translate.ipynb 4
 #@numba.njit #(cannot use numba for pd.Series)
 def create_modified_sequence(
     df_items:typing.Tuple, # must be ('sequence','mods','mod_sites')
@@ -64,7 +64,7 @@ def create_modified_sequence(
                 mod_seq = mod_seq[:_site] + mod_sep[0]+mod+mod_sep[1] + mod_seq[_site:]
     return nterm + mod_seq + cterm
 
-# %% ../../nbdev_nbs/spec_lib/translate.ipynb 7
+# %% ../../nbdev_nbs/spec_lib/translate.ipynb 8
 @numba.njit
 def _get_frag_info_from_column_name(column:str):
     '''

@@ -3,7 +3,7 @@
 # %% auto 0
 __all__ = ['load_settings', 'import_psm_df', 'match_psms', 'transfer_learn', 'generate_library', 'rescore']
 
-# %% ../nbdev_nbs/pipeline_api.ipynb 2
+# %% ../nbdev_nbs/pipeline_api.ipynb 3
 import os
 import pandas as pd
 import traceback
@@ -35,7 +35,7 @@ from .utils import parse_ms_file_names_to_dict
 
 from .utils import process_bar
 
-# %% ../nbdev_nbs/pipeline_api.ipynb 3
+# %% ../nbdev_nbs/pipeline_api.ipynb 4
 def load_settings(settings_yaml:str):
     """Load settings yaml file into 
     `peptdeep.settings.global_settings` (dict).
@@ -50,7 +50,7 @@ def load_settings(settings_yaml:str):
         settings.global_settings, settings_dict
     )
 
-# %% ../nbdev_nbs/pipeline_api.ipynb 5
+# %% ../nbdev_nbs/pipeline_api.ipynb 6
 def import_psm_df(psm_files:list, psm_type:str)->pd.DataFrame:
     """Import PSM files of a search engine as a pd.DataFrame
 
@@ -250,7 +250,7 @@ def transfer_learn(settings_dict:dict=settings.global_settings, verbose=True):
         logging.error(traceback.format_exc())
         raise e
 
-# %% ../nbdev_nbs/pipeline_api.ipynb 7
+# %% ../nbdev_nbs/pipeline_api.ipynb 8
 def _get_delimiter(csv_file, bytes=4096):
     with open(csv_file, "r") as f:
         return csv.Sniffer().sniff(f.read(bytes)).delimiter
@@ -334,7 +334,7 @@ def generate_library(settings_dict:dict=settings.global_settings):
         logging.error(traceback.format_exc())
         raise e
 
-# %% ../nbdev_nbs/pipeline_api.ipynb 9
+# %% ../nbdev_nbs/pipeline_api.ipynb 10
 def rescore(settings_dict:dict=settings.global_settings):
     """Generate/predict a spectral library.
     

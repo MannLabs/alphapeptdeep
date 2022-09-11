@@ -4,7 +4,7 @@
 __all__ = ['perc_settings', 'rescore_model_provider', 'LogisticRegressionTorch', 'RescoreModelProvider', 'NNRescore',
            'Percolator']
 
-# %% ../../nbdev_nbs/rescore/percolator.ipynb 2
+# %% ../../nbdev_nbs/rescore/percolator.ipynb 3
 import numpy as np
 import pandas as pd
 import torch
@@ -33,10 +33,10 @@ from ..settings import global_settings
 
 from ..utils import logging
 
-# %% ../../nbdev_nbs/rescore/percolator.ipynb 3
+# %% ../../nbdev_nbs/rescore/percolator.ipynb 4
 perc_settings = global_settings['percolator']
 
-# %% ../../nbdev_nbs/rescore/percolator.ipynb 4
+# %% ../../nbdev_nbs/rescore/percolator.ipynb 5
 class LogisticRegressionTorch(torch.nn.Module):
     """Torch-based rescore model"""
     def __init__(self, input_dim, **kwargs):
@@ -130,7 +130,7 @@ class NNRescore:
         return outputs
 
 
-# %% ../../nbdev_nbs/rescore/percolator.ipynb 6
+# %% ../../nbdev_nbs/rescore/percolator.ipynb 7
 class Percolator:
     """Percolator model.
     In parameter list, perc_settings is

@@ -3,7 +3,7 @@
 # %% auto 0
 __all__ = ['lib_settings', 'PredictSpecLib']
 
-# %% ../../nbdev_nbs/spec_lib/predict_lib.ipynb 3
+# %% ../../nbdev_nbs/spec_lib/predict_lib.ipynb 4
 import pandas as pd
 import numpy as np
 import torch
@@ -18,7 +18,7 @@ from ..settings import global_settings
 from ..utils import logging
 from ..utils import process_bar
 
-# %% ../../nbdev_nbs/spec_lib/predict_lib.ipynb 4
+# %% ../../nbdev_nbs/spec_lib/predict_lib.ipynb 5
 lib_settings = global_settings['library']
 
 class PredictSpecLib(SpecLibBase):

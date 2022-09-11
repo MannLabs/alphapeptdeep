@@ -3,7 +3,7 @@
 # %% auto 0
 __all__ = ['psm_w_frag_reader_provider', 'PSMReader_w_FragBase', 'PSM_w_FragReaderProvider']
 
-# %% ../../nbdev_nbs/psm_frag_reader/psm_frag_reader.ipynb 3
+# %% ../../nbdev_nbs/psm_frag_reader/psm_frag_reader.ipynb 4
 import typing
 import numpy as np
 import pandas as pd
@@ -11,7 +11,7 @@ import pandas as pd
 from alphabase.peptide.fragment import get_charged_frag_types
 from alphabase.io.psm_reader.psm_reader import PSMReaderBase
 
-# %% ../../nbdev_nbs/psm_frag_reader/psm_frag_reader.ipynb 4
+# %% ../../nbdev_nbs/psm_frag_reader/psm_frag_reader.ipynb 5
 class PSMReader_w_FragBase:
     '''
     Read PSMs and fragments
@@ -35,7 +35,7 @@ class PSMReader_w_FragBase:
         return self._fragment_intensity_df
 
 
-# %% ../../nbdev_nbs/psm_frag_reader/psm_frag_reader.ipynb 5
+# %% ../../nbdev_nbs/psm_frag_reader/psm_frag_reader.ipynb 6
 class PSM_w_FragReaderProvider:
     def __init__(self):
         self.reader_dict = {}

@@ -4,7 +4,7 @@
 __all__ = ['library_maker_provider', 'PredictLibraryMakerBase', 'PrecursorLibraryMaker', 'PeptideLibraryMaker',
            'SequenceLibraryMaker', 'FastaLibraryMaker', 'LibraryMakerProvider']
 
-# %% ../../nbdev_nbs/spec_lib/library_factory.ipynb 2
+# %% ../../nbdev_nbs/spec_lib/library_factory.ipynb 3
 import pandas as pd
 import numpy as np
 from typing import Union
@@ -21,7 +21,7 @@ from peptdeep.spec_lib.translate import (
 from ..pretrained_models import ModelManager
 from ..utils import logging
 
-# %% ../../nbdev_nbs/spec_lib/library_factory.ipynb 3
+# %% ../../nbdev_nbs/spec_lib/library_factory.ipynb 4
 class PredictLibraryMakerBase(object):
     """
     Base class to predict libraries
@@ -167,7 +167,7 @@ class PredictLibraryMakerBase(object):
             ],
         )
 
-# %% ../../nbdev_nbs/spec_lib/library_factory.ipynb 7
+# %% ../../nbdev_nbs/spec_lib/library_factory.ipynb 8
 class PrecursorLibraryMaker(PredictLibraryMakerBase):
     """For input dataframe of charged modified sequences"""
     def _input(self, precursor_df:pd.DataFrame):
@@ -220,7 +220,7 @@ class FastaLibraryMaker(PredictLibraryMakerBase):
         self.spec_lib.add_modifications()
         self.spec_lib.add_charge()
 
-# %% ../../nbdev_nbs/spec_lib/library_factory.ipynb 8
+# %% ../../nbdev_nbs/spec_lib/library_factory.ipynb 9
 class LibraryMakerProvider:
     """
     Factory class for library makers

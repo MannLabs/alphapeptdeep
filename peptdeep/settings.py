@@ -3,7 +3,7 @@
 # %% auto 0
 __all__ = ['global_settings', 'model_const', 'update_settings', 'update_modifications']
 
-# %% ../nbdev_nbs/settings.ipynb 2
+# %% ../nbdev_nbs/settings.ipynb 3
 import os
 import collections
 
@@ -14,7 +14,7 @@ from alphabase.constants.modification import (
 
 from .constants._const import CONST_FOLDER
 
-# %% ../nbdev_nbs/settings.ipynb 3
+# %% ../nbdev_nbs/settings.ipynb 4
 global_settings = load_yaml(
     os.path.join(CONST_FOLDER, 'default_settings.yaml')
 )

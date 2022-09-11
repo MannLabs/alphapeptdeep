@@ -5,7 +5,7 @@ __all__ = ['ms2_reader_provider', 'ms1_reader_provider', 'MSReaderBase', 'AlphaP
            'read_until', 'find_line', 'parse_pfind_scan_from_TITLE', 'is_pfind_mgf', 'index_ragged_list', 'MGFReader',
            'MSReaderProvider']
 
-# %% ../../nbdev_nbs/mass_spec/ms_reader.ipynb 2
+# %% ../../nbdev_nbs/mass_spec/ms_reader.ipynb 3
 import os
 import numpy as np
 import pandas as pd
@@ -17,7 +17,7 @@ try:
 except (ImportError,AttributeError):
     RawFileReader = None
 
-# %% ../../nbdev_nbs/mass_spec/ms_reader.ipynb 3
+# %% ../../nbdev_nbs/mass_spec/ms_reader.ipynb 4
 class MSReaderBase:
     def __init__(self):
         self.spectrum_df:pd.DataFrame = pd.DataFrame()
@@ -261,7 +261,7 @@ ms1_reader_provider = MSReaderProvider()
 ms1_reader_provider.register_reader('alphapept', AlphaPept_HDF_MS1_Reader)
 ms1_reader_provider.register_reader('alphapept_hdf', AlphaPept_HDF_MS1_Reader)
 
-# %% ../../nbdev_nbs/mass_spec/ms_reader.ipynb 4
+# %% ../../nbdev_nbs/mass_spec/ms_reader.ipynb 5
 if RawFileReader is None:
     class ThermoRawMS1Reader:
         def __init__(self):
