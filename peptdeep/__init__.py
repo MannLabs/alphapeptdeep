@@ -1,5 +1,11 @@
 #!python
 
+from . import (
+    model, rescore, spec_lib, legacy,
+    psm_frag_reader
+)
+
+from . import protein # rely on spec_lib, import after
 
 __project__ = "peptdeep"
 __version__ = "0.1.5"

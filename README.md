@@ -136,7 +136,14 @@ To enable GPU, GPU version of PyTorch is required, it can be installed
 with:
 
 ``` bash
-pip install torch --extra-index-url https://download.pytorch.org/whl/cu116
+pip install torch --extra-index-url https://download.pytorch.org/whl/cu116 --upgrade
+```
+
+Note that this may depend on your NVIDIA driver version. Run the command
+to check your NVIDIA driver:
+
+``` bash
+nvidia-smi
 ```
 
 See [pytorch.org](https://pytorch.org/get-started/locally/) for details.
@@ -151,8 +158,8 @@ location of your choice. While optional, it is advised to first (create
 and) navigate to e.g. a general software folder:
 
 ``` bash
-mkdir ~/folder/where/to/install/software
-cd ~/folder/where/to/install/software
+mkdir ~/alphapeptdeep/project/folder
+cd ~/alphapeptdeep/project/folder
 ```
 
 ***The following commands assume you do not perform any additional `cd`
@@ -196,6 +203,20 @@ peptdeep. Note that the peptdeep folder cannot be moved and/or renamed
 if an editable version is installed. In case of confusion, you can
 always retrieve the location of any Python module with e.g. the command
 `import module` followed by `module.__file__`.***
+
+We used [nbdev v2](https://nbdev.fast.ai/) for developers to build
+Python source code and docs smoothly from Python notebooks, so please do
+not edit .py files directly, edit .ipynb in `nbdev_nbs` folder instead.
+After installing nbdev, cd to alphapeptdeep project folder and run:
+
+``` bash
+nbdev_install_hooks
+```
+
+to init gitconfig for nbdev. After editing the source code in .ipynb
+files, using `nbdev_export` to build python source code and `nbdev_test`
+to run all .ipynb files in `nbdev_nbs` for testing. Check [nbdev
+docs](https://nbdev.fast.ai/) for more information.
 
 ------------------------------------------------------------------------
 
@@ -419,16 +440,80 @@ and `library:input:infiles` for library prediction.
 `library:input:infile_type_choices`:
 
 - fasta: Protein fasta files.
-- sequence_table: Tab/comma-separated txt/tsv/csv (text) files which
-  contain the column `sequence`
-- peptide_table: Tab/comma-separated txt/tsv/csv (text) files which
+- sequence_table: Tab/comma-delimited txt/tsv/csv (text) files which
+  contain the column `sequence`.
+- peptide_table: Tab/comma-delimited txt/tsv/csv (text) files which
   contain the columns `sequence`, `mods`, and `mod_sites`. peptdeep will
   not add modifications for this file type.
-- precursor_table: Tab/comma-separated txt/tsv/csv (text) files which
+- precursor_table: Tab/comma-delimited txt/tsv/csv (text) files which
   contain the columns `sequence`, `mods`, `mod_sites`, and `charge`.
   peptdeep will not add modifications and charge states for this file
-  type. \>Columns of `proteins` and `genes` are optional for these
-  txt/tsv/csv files.
+  type.
+
+> Columns of `proteins` and `genes` are optional for these txt/tsv/csv
+> files.
+
+For example, a precursor DataFrame looks like this:
+
+``` python
+import pandas as pd
+pd.DataFrame({
+    'sequence': ['ACDEFGHIK','LMNPQRSTVK','WYVSTR'],
+    'mods': ['Carbamidomethyl@C','Acetyl@Protein N-term;Phospho@S',''],
+    'mod_sites': ['2','0;7',''],
+    'charge': [2,3,1],
+})
+```
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>sequence</th>
+      <th>mods</th>
+      <th>mod_sites</th>
+      <th>charge</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>ACDEFGHIK</td>
+      <td>Carbamidomethyl@C</td>
+      <td>2</td>
+      <td>2</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>LMNPQRSTVK</td>
+      <td>Acetyl@Protein N-term;Phospho@S</td>
+      <td>0;7</td>
+      <td>3</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>WYVSTR</td>
+      <td></td>
+      <td></td>
+      <td>1</td>
+    </tr>
+  </tbody>
+</table>
+</div>
 
 peptdeep supports multiple files for library prediction, for example (in
 the yaml file):
@@ -652,7 +737,9 @@ Most of the default parameters and attributes peptdeep functions and
 classes are controlled by `peptdeep.settings.global_settings` which is a
 `dict`.
 
-    from peptdeep.settings import global_settings
+``` python
+from peptdeep.settings import global_settings
+```
 
 The default values of `global_settings` is defined in
 [default_settings.yaml](https://github.com/MannLabs/alphapeptdeep/blob/main/peptdeep/constants/default_settings.yaml).
@@ -673,10 +760,10 @@ from peptdeep.pipeline_api import (
 
 All these functionalities take a `settings_dict` as the inputs, the dict
 structure is the same as the settings yaml file. See the documatation of
-[`generate_library`](https://MannLabs.github.io/alphapeptdeep/pipeline_api.html#generate_library),
-[`transfer_learn`](https://MannLabs.github.io/alphapeptdeep/pipeline_api.html#transfer_learn),
+[`generate_library`](https://MannLabs.github.io/alphapeptdeep/pipeline_api.html/pipeline_api.html#generate_library),
+[`transfer_learn`](https://MannLabs.github.io/alphapeptdeep/pipeline_api.html/pipeline_api.html#transfer_learn),
 and
-[`rescore`](https://MannLabs.github.io/alphapeptdeep/pipeline_api.html#rescore).
+[`rescore`](https://MannLabs.github.io/alphapeptdeep/pipeline_api.html/pipeline_api.html#rescore).
 
 #### ModelManager
 
@@ -684,7 +771,7 @@ and
 from peptdeep.pretrained_models import ModelManager
 ```
 
-[`ModelManager`](https://MannLabs.github.io/alphapeptdeep/pretrained_models.html#modelmanager)
+[`ModelManager`](https://MannLabs.github.io/alphapeptdeep/pretrained_models.html/pretrained_models.html#modelmanager)
 class is the main entry to access MS2/RT/CCS models. It provides
 functionalities to train/refine the models and then use the new models
 to predict the data.
@@ -699,7 +786,7 @@ for details.
 from peptdeep.protein.fasta import PredictFastaSpecLib
 ```
 
-[`PredictFastaSpecLib`](https://MannLabs.github.io/alphapeptdeep/protein/fasta.html#predictfastaspeclib)
+[`PredictFastaSpecLib`](https://MannLabs.github.io/alphapeptdeep/protein/protein.fasta.html#predictfastaspeclib)
 class provides functionalities to deal with fasta files or protein
 sequences and spectral libraries.
 
@@ -713,7 +800,7 @@ for details.
 from peptdeep.rescore.percolator import Percolator
 ```
 
-[`Percolator`](https://MannLabs.github.io/alphapeptdeep/rescore/percolator.html#percolator)
+[`Percolator`](https://MannLabs.github.io/alphapeptdeep/rescore/rescore.percolator.html#percolator)
 class provides functionalities to rescore DDA PSMs search by `pFind` and
 `AlphaPept`, (and `MaxQuant` if output FDR=100%), …
 
@@ -730,7 +817,7 @@ import peptdeep.model.generic_property_prediction # model shop
 
 Building new DL models for peptide property prediction is one of the key
 features of AlphaPeptDeep. The key functionalities are
-[`ModelInterface`](https://MannLabs.github.io/alphapeptdeep/model/model_interface.html#modelinterface)
+[`ModelInterface`](https://MannLabs.github.io/alphapeptdeep/model/model.model_interface.html#modelinterface)
 and the pre-designed models and model interfaces in the model shop
 (module `peptdeep.model.generic_property_prediction`).
 
