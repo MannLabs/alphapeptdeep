@@ -1,11 +1,15 @@
 #!python
 
-from . import (
-    model, rescore, spec_lib, legacy,
-    psm_frag_reader
-)
+try:
+    from . import (
+        model, rescore, spec_lib, legacy,
+        psm_frag_reader
+    )
 
-from . import protein # rely on spec_lib, import after
+    from . import protein # rely on spec_lib, import after
+except (ModuleNotFoundError, ImportError):
+    # happends when installation
+    pass
 
 __project__ = "peptdeep"
 __version__ = "0.1.6"
