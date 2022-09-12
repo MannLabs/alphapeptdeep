@@ -7,7 +7,7 @@ try:
     )
 
     from . import protein # rely on spec_lib, import after
-except (ModuleNotFoundError, ImportError):
+except ImportError:
     # happends when installation
     pass
 
@@ -45,9 +45,10 @@ __urls__ = {
     "Mann Labs at MPIB": "https://www.biochem.mpg.de/mann",
     "Mann Labs at CPR": "https://www.cpr.ku.dk/research/proteomics/mann/",
     "GitHub": __github__,
-    # "ReadTheDocs": None,
-    # "PyPi": None,
-    # "Scientific paper": None,
+    "Docs": "https://mannlabs.github.io/alphapeptdeep/",
+    "PyPi": "https://pypi.org/project/peptdeep/",
+    "Preprint Paper": "https://www.biorxiv.org/content/10.1101/2022.07.14.499992v1",
+    # "Peer Reviewed Paper": None
 }
 __extra_requirements__ = {
     "development": "requirements_development.txt",
