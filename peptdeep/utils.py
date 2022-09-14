@@ -3,7 +3,8 @@
 # %% auto 0
 __all__ = ['BASE_PATH', 'LOG_PATH', 'log_level_dict', 'torch_devices', 'uniform_sampling', 'process_bar', 'set_logger',
            'show_platform_info', 'show_python_info', 'parse_ms_file_names_to_dict', 'explode_multiple_columns',
-           'regional_sampling', 'evaluate_linear_regression', 'evaluate_linear_regression_plot']
+           'get_device', 'get_available_device', 'regional_sampling', 'evaluate_linear_regression',
+           'evaluate_linear_regression_plot']
 
 # %% ../nbdev_nbs/utils.ipynb 2
 import logging
@@ -268,7 +269,6 @@ def _is_mps_available()->bool:
     try:
         return torch.backends.mps.is_available()
     except AttributeError:
-        print("Mac M1 chip ('mps') is not supported yet in pytorch")
         return False
 
 torch_devices:dict = {
@@ -285,6 +285,22 @@ torch_devices:dict = {
         'device': 'mps',
     }
 }
+
+def get_device(device:str)->tuple:
+    device = device.lower()
+    if device in torch_devices:
+        if torch_devices[device]['is_available']():
+            return (
+                torch.device(torch_devices[device]['device']), 
+                device
+            )
+    return torch.device('cpu'), 'cpu'
+
+def get_available_device()->tuple:
+    for name, item in torch_devices.items():
+        if item['is_available']():
+            return torch.device(item['device'])
+    return torch.device('cpu'), 'cpu'
 
 # %% ../nbdev_nbs/utils.ipynb 10
 def regional_sampling(psm_df:pd.DataFrame,
