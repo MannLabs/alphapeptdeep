@@ -683,9 +683,13 @@ class ScoreFeatureExtractor:
     ):
         self.model_mgr.train_ccs_model(psm_df)
         self.model_mgr.train_rt_model(psm_df)
+        _grid_nce = self.model_mgr.use_grid_nce_search
+        if self.model_mgr.ms2_model.device_type == 'cpu':
+            self.model_mgr.use_grid_nce_search = False
         self.model_mgr.train_ms2_model(
             psm_df, matched_intensity_df
         )
+        self.model_mgr.use_grid_nce_search = _grid_nce
 
     def extract_rt_features(self, psm_df):
         if (
