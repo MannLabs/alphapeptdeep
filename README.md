@@ -13,6 +13,8 @@ AlphaPeptDeep
 <img src="https://img.shields.io/github/v/release/mannlabs/alphapeptdeep?display_name=tag" /></a>
 <a href="https://github.com/MannLabs/alphapeptdeep/releases" alt="release">
 <img src="https://img.shields.io/github/downloads/mannlabs/alphapeptdeep/total?label=github%20downloads" /></a>
+<a href="https://github.com/MannLabs/alphapeptdeep/releases/tag/pre-trained-models" alt="release">
+<img src="https://img.shields.io/github/downloads/mannlabs/alphapeptdeep/pre-trained-models/total" /></a>
 <a href="https://pypi.org/project/peptdeep" alt="release">
 <img src="https://img.shields.io/pypi/dm/peptdeep?color=blue&label=pip%20downloads"/></a>
 <img src="https://img.shields.io/pypi/pyversions/peptdeep"/>
