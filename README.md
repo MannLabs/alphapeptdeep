@@ -38,8 +38,7 @@ cross section (CCS), and tandem mass spectrum (MS2) prediction for given
 peptides. With these models, one can easily generate a predicted library
 from fasta files.
 
-For details, check out our
-[publication](https://www.biorxiv.org/content/10.1101/2022.07.14.499992v1).
+For details, check out our [publications](#citations).
 
 For documentation, see [GitHub
 pages](https://mannlabs.github.io/alphapeptdeep/).

@@ -381,6 +381,10 @@ class ModelManager(object):
             self._instrument = 'Lumos'
 
     def set_default_nce_instrument(self, df):
+        """
+        Append 'nce' and 'instrument' columns into df 
+        with self.nce and self.instrument
+        """
         if 'nce' not in df.columns and 'instrument' not in df.columns:
             df['nce'] = self.nce
             df['instrument'] = self.instrument
@@ -390,7 +394,24 @@ class ModelManager(object):
             df['instrument'] = self.instrument
 
     def set_default_nce(self, df):
+        """Alias for `set_default_nce_instrument`"""
         self.set_default_nce_instrument(df)
+
+    def save_models(self, folder:str):
+        """Save MS2/RT/CCS models into a folder
+
+        Parameters
+        ----------
+        folder : str
+            folder to save
+        """
+        if os.path.isdir(folder):
+            self.ms2_model.save(os.path.join(folder, 'ms2.pth'))
+            self.rt_model.save(os.path.join(folder, 'rt.pth'))
+            self.ccs_model.save(os.path.join(folder, 'ccs.pth'))
+        elif not os.path.exists(folder):
+            os.makedirs(folder)
+            self.save_models(folder)
 
     def load_installed_models(self, 
         model_type:str=model_mgr_settings['model_type']
