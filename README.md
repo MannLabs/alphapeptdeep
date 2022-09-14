@@ -108,6 +108,37 @@ Note that these installers do not have GPU supported.
 
 ### Pip
 
+> *Legacy, should be replaced by AlphaRaw in the near future.*
+>
+> PythonNET must be installed to access Thermo or Sciex raw data.
+>
+> #### PythonNET in Windows
+>
+> Install PythonNET with `pip install pythonnet`.
+>
+> #### PythonNET in Linux
+>
+> 1.  Install Mono from mono-project website [Mono
+>     Linux](https://www.mono-project.com/download/stable/#download-lin).
+>     NOTE, the installed mono version should be at least 6.10, which
+>     requires you to add the ppa to your trusted sources!
+> 2.  Install PythonNET with `pip install pythonnet`.
+>
+> #### PythonNET in MacOS
+>
+> 1.  Install [brew](https://brew.sh) and pkg-config:
+>     `brew install pkg-config` 3. Install Mono from mono-project
+>     website [Mono Mac](https://www.mono-project.com/download/stable/)
+> 2.  Register the Mono-Path to your system: For macOS Catalina, open
+>     the configuration of zsh via the terminal:
+>
+> - Type `nano ~/.zshrc` to open the configuration of the terminal
+> - Append the mono path to your `PKG_CONFIG_PATH`:
+>   `export PKG_CONFIG_PATH=/usr/local/lib/pkgconfig:/usr/lib/pkgconfig:/Library/Frameworks/Mono.framework/Versions/Current/lib/pkgconfig:$PKG_CONFIG_PATH`.
+> - Save everything and execute `. ~/.zshrc`
+>
+> 3.  Install PythonNET with `pip install pythonnet`.
+
 peptdeep can be installed in an existing Python 3.8 environment with a
 single `bash` command. *This `bash` command can also be run directly
 from within a Jupyter notebook by prepending it with a `!`*:
