@@ -688,7 +688,10 @@ class ScoreFeatureExtractor:
         )
 
     def extract_rt_features(self, psm_df):
-        if self.require_raw_specific_tuning:
+        if (
+            self.require_raw_specific_tuning and
+            self.model_mgr.ms2_model.device_type!='cpu'
+        ):
             (
                 psm_num_to_train_rt_ccs,
                 psm_num_per_mod_to_train_rt_ccs,
@@ -1004,7 +1007,6 @@ class ScoreFeatureExtractorMP(ScoreFeatureExtractor):
             ms2_ppm, ms2_tol,
             calibrate_frag_mass_error,
         )
-        
 
         self.extract_rt_features(df)
         self.extract_mobility_features(df)
@@ -1062,12 +1064,14 @@ class ScoreFeatureExtractorMP(ScoreFeatureExtractor):
         used_frag_types = self._get_model_frag_types(frag_types)
 
         if self.require_model_tuning:
-            logging.info('Fine-tuning models ...')
+            logging.info('Require fine-tuning models ...')
             self.fine_tune_models(
                 psm_df, 
                 ms2_file_dict, ms2_file_type,
                 used_frag_types, ms2_ppm, ms2_tol
             )
+
+        self.model_mgr._train_psm_logging = False
 
         def one_raw_param_generator(df_groupby_raw):
             for raw_name, df in df_groupby_raw:
@@ -1087,20 +1091,12 @@ class ScoreFeatureExtractorMP(ScoreFeatureExtractor):
         )
         df_groupby_raw = psm_df.groupby('raw_name')
         result_psm_list = []
-        if (
-            not torch.cuda.is_available() and 
-            not self.require_raw_specific_tuning
-        ):
-            # use multiprocessing for prediction 
-            # only when no GPUs are available
-            with mp.Pool(global_settings['thread_num']) as p:
-                for _df in process_bar(p.imap_unordered(
-                    self.extract_features_one_raw, 
-                    one_raw_param_generator(df_groupby_raw)
-                ), df_groupby_raw.ngroups):
-                    result_psm_list.append(_df)
 
-        else:
+        if (
+            self.require_raw_specific_tuning or
+            self.model_mgr.ms2_model.device_type!='cpu'
+            
+        ):
             # multiprocessing is only used for ms2 matching
             def prediction_gen(df_groupby_raw):
                 with mp.Pool(global_settings['thread_num']) as _p:
@@ -1174,9 +1170,20 @@ class ScoreFeatureExtractorMP(ScoreFeatureExtractor):
                     prediction_gen(df_groupby_raw)
                 ), df_groupby_raw.ngroups):
                     result_psm_list.append(df)
-                    
+
+        else:
+            # use multiprocessing for prediction 
+            # only when no GPUs are available
+            with mp.Pool(global_settings['thread_num']) as p:
+                for _df in process_bar(p.imap_unordered(
+                    self.extract_features_one_raw, 
+                    one_raw_param_generator(df_groupby_raw)
+                ), df_groupby_raw.ngroups):
+                    result_psm_list.append(_df)
+
         self.psm_df = pd.concat(
             result_psm_list, ignore_index=True
         )
         logging.info('Finished feature extraction with multiprocessing')
+        self.model_mgr._train_psm_logging = True
         return self.psm_df

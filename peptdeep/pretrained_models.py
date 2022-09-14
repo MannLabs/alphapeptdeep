@@ -364,6 +364,7 @@ class ModelManager(object):
         self.instrument = mgr_settings['default_instrument']
         self.verbose = mgr_settings['predict']['verbose']
         self.train_verbose = mgr_settings['transfer']['verbose']
+        self._train_psm_logging = True
 
 
     @property
@@ -537,7 +538,7 @@ class ModelManager(object):
             else:
                 tr_df = psm_df
 
-            if self.train_verbose:
+            if self._train_psm_logging:
                 logging.info(f"{len(tr_df)} PSMs for RT model training/transfer learning")
             if len(tr_df) > 0:
                 self.rt_model.train(tr_df, 
@@ -581,7 +582,7 @@ class ModelManager(object):
                 )
             else:
                 tr_df = psm_df
-            if self.train_verbose:
+            if self._train_psm_logging:
                 logging.info(f"{len(tr_df)} PSMs for CCS model training/transfer learning")
             if len(tr_df) > 0:
                 self.ccs_model.train(tr_df, 
@@ -649,7 +650,7 @@ class ModelManager(object):
                     tr_df['instrument'] = self.instrument
                 else:
                     self.set_default_nce_instrument(tr_df)
-                if self.train_verbose:
+                if self._train_psm_logging:
                     logging.info(f"{len(tr_df)} PSMs for MS2 model training/transfer learning")
                 self.ms2_model.train(tr_df, 
                     fragment_intensity_df=tr_inten_df,
