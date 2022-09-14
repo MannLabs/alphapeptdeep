@@ -71,19 +71,33 @@ def _install_model(model_file, overwrite):
     else:
         download_models(model_file, overwrite=overwrite)
 
-@run.command("rescore", help="Rescore PSMs using Percolator.")
+_help_str = (
+    "\n\nTo get the settings_yaml file,"
+    " you can either export from the GUI,"
+    " or use `peptdeep export-settings`."
+    " Visit https://mannlabs.github.io/alphapeptdeep/#cli" 
+    " for detailed usages."
+)
+
+@run.command("rescore", help=
+    "Rescore PSMs using Percolator."+_help_str
+)
 @click.argument("settings_yaml", type=str)
 def _rescore(settings_yaml:str):
     load_settings(settings_yaml)
     rescore()
 
-@run.command("library", help="Predict library for DIA search.")
+@run.command("library", help=
+    "Predict library for DIA search."+_help_str
+)
 @click.argument("settings_yaml", type=str)
 def _library(settings_yaml:str):
     load_settings(settings_yaml)
     generate_library()
 
-@run.command("transfer", help="Transfer learning for different data types.")
+@run.command("transfer", help=
+    "Transfer learning for different data types."+_help_str
+)
 @click.argument("settings_yaml", type=str)
 def _transfer(settings_yaml:str):
     load_settings(settings_yaml)

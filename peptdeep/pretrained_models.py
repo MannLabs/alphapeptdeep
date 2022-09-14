@@ -173,6 +173,7 @@ def psm_sampling_with_important_mods(
                 return psm_df.copy()
     else:
         def _sample(psm_df, n):
+            if len(psm_df) == 0: return psm_df
             return uniform_sampling(
                 psm_df, target=uniform_sampling_column,
                 n_train = n, random_state=random_state
@@ -381,6 +382,10 @@ class ModelManager(object):
             self._instrument = 'Lumos'
 
     def set_default_nce_instrument(self, df):
+        """
+        Append 'nce' and 'instrument' columns into df 
+        with self.nce and self.instrument
+        """
         if 'nce' not in df.columns and 'instrument' not in df.columns:
             df['nce'] = self.nce
             df['instrument'] = self.instrument
@@ -390,7 +395,24 @@ class ModelManager(object):
             df['instrument'] = self.instrument
 
     def set_default_nce(self, df):
+        """Alias for `set_default_nce_instrument`"""
         self.set_default_nce_instrument(df)
+
+    def save_models(self, folder:str):
+        """Save MS2/RT/CCS models into a folder
+
+        Parameters
+        ----------
+        folder : str
+            folder to save
+        """
+        if os.path.isdir(folder):
+            self.ms2_model.save(os.path.join(folder, 'ms2.pth'))
+            self.rt_model.save(os.path.join(folder, 'rt.pth'))
+            self.ccs_model.save(os.path.join(folder, 'ccs.pth'))
+        elif not os.path.exists(folder):
+            os.makedirs(folder)
+            self.save_models(folder)
 
     def load_installed_models(self, 
         model_type:str=model_mgr_settings['model_type']
@@ -505,7 +527,7 @@ class ModelManager(object):
             Training psm_df which contains 'rt_norm' column.
         """
         if self.psm_num_to_train_rt_ccs > 0:
-            if self.psm_num_per_mod_to_train_rt_ccs < len(psm_df):
+            if self.psm_num_to_train_rt_ccs < len(psm_df):
                 tr_df = psm_sampling_with_important_mods(
                     psm_df, self.psm_num_to_train_rt_ccs,
                     self.top_n_mods_to_train,
@@ -549,7 +571,7 @@ class ModelManager(object):
             )
 
         if self.psm_num_to_train_rt_ccs > 0:
-            if self.psm_num_per_mod_to_train_rt_ccs < len(psm_df):
+            if self.psm_num_to_train_rt_ccs < len(psm_df):
                 tr_df = psm_sampling_with_important_mods(
                     psm_df, self.psm_num_to_train_rt_ccs,
                     self.top_n_mods_to_train,
