@@ -173,6 +173,7 @@ def psm_sampling_with_important_mods(
                 return psm_df.copy()
     else:
         def _sample(psm_df, n):
+            if len(psm_df) == 0: return psm_df
             return uniform_sampling(
                 psm_df, target=uniform_sampling_column,
                 n_train = n, random_state=random_state
@@ -526,7 +527,7 @@ class ModelManager(object):
             Training psm_df which contains 'rt_norm' column.
         """
         if self.psm_num_to_train_rt_ccs > 0:
-            if self.psm_num_per_mod_to_train_rt_ccs < len(psm_df):
+            if self.psm_num_to_train_rt_ccs < len(psm_df):
                 tr_df = psm_sampling_with_important_mods(
                     psm_df, self.psm_num_to_train_rt_ccs,
                     self.top_n_mods_to_train,
@@ -570,7 +571,7 @@ class ModelManager(object):
             )
 
         if self.psm_num_to_train_rt_ccs > 0:
-            if self.psm_num_per_mod_to_train_rt_ccs < len(psm_df):
+            if self.psm_num_to_train_rt_ccs < len(psm_df):
                 tr_df = psm_sampling_with_important_mods(
                     psm_df, self.psm_num_to_train_rt_ccs,
                     self.top_n_mods_to_train,
