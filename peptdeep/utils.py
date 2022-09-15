@@ -299,7 +299,7 @@ def get_device(device:str)->tuple:
 def get_available_device()->tuple:
     for name, item in torch_devices.items():
         if item['is_available']():
-            return torch.device(item['device'])
+            return torch.device(item['device']), name
     return torch.device('cpu'), 'cpu'
 
 # %% ../nbdev_nbs/utils.ipynb 10
