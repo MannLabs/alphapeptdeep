@@ -26,7 +26,6 @@ streamlit
 transformers
 scikit-learn
 lxml
-pythonnet; sys_platform=='win32'
 
 #torch --extra-index-url https://download.pytorch.org/whl/cu116
 torch

@@ -11,6 +11,5 @@ transformers
 scikit-learn
 streamlit
 lxml
-pythonnet; sys_platform=='win32'
 
 alphabase
