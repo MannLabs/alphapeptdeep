@@ -997,7 +997,7 @@ class ScoreFeatureExtractorMP(ScoreFeatureExtractor):
         )
 
     def extract_features_one_raw_mp(self,args):
-        self.extract_features_one_raw(*args)
+        return self.extract_features_one_raw(*args)
 
     def extract_features_one_raw(self,
         df_one_raw: pd.DataFrame,
