@@ -64,7 +64,7 @@ def create_modified_sequence(
                 mod_seq = mod_seq[:_site] + mod_sep[0]+mod+mod_sep[1] + mod_seq[_site:]
     return nterm + mod_seq + cterm
 
-# %% ../../nbdev_nbs/spec_lib/translate.ipynb 8
+# %% ../../nbdev_nbs/spec_lib/translate.ipynb 9
 @numba.njit
 def _get_frag_info_from_column_name(column:str):
     '''
