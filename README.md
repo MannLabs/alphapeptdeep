@@ -54,6 +54,21 @@ For details, check out our [publications](#citations).
 For documentation, see [GitHub
 pages](https://mannlabs.github.io/alphapeptdeep/).
 
+### Alpha-MS repositories:
+
+- [**alphabase**](https://github.com/MannLabs/alphabase): Base data
+  structures for Alpha-MS-Ecosystem
+- [**alphapept**](https://github.com/MannLabs/alphapept): DDA search
+  engine
+- [**alphapeptdeep**](https://github.com/MannLabs/alphapeptdeep): Deep
+  learning for proteomics
+- [**alpharaw**](https://github.com/MannLabs/alpharaw): Raw data
+  accessing
+- [**alphaviz**](https://github.com/MannLabs/alphaviz): MS data and
+  results visualization
+- [**alphatims**](https://github.com/MannLabs/alphatims): timsTOF data
+  accessing
+
 ------------------------------------------------------------------------
 
 ## License
