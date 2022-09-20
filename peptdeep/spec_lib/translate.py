@@ -24,7 +24,9 @@ from ..utils import explode_multiple_columns
 def create_modified_sequence(
     df_items:typing.Tuple, # must be ('sequence','mods','mod_sites')
     translate_mod_dict:dict=None,
-    mod_sep='()'
+    mod_sep='()',
+    nterm = '_',
+    cterm = '_'
 ):
     '''
     Translate `(sequence, mods, mod_sites)` into a modified sequence. Used by `df.apply()`.
@@ -42,8 +44,6 @@ def create_modified_sequence(
         '[]' or '()', default '()'
 
     '''
-    nterm = '_'
-    cterm = '_'
     mod_seq = df_items[0]
     if df_items[1]:
         mods = df_items[1].split(';')
