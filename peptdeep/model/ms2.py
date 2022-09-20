@@ -23,6 +23,8 @@ from alphabase.peptide.fragment import (
     get_charged_frag_types
 )
 
+from ..utils import get_available_device
+
 from peptdeep.model.featurize import (
     get_batch_aa_indices, parse_instrument_indices, 
     get_batch_mod_feature
@@ -814,9 +816,8 @@ def calc_ms2_similarity(
     verbose=False,
     spc_top_k=0,
 )->Tuple[pd.DataFrame, pd.DataFrame]:
-
-    if torch.cuda.is_available() and GPU:
-        device = torch.device('cuda')
+    if GPU:
+        device, _ = get_available_device()
     else:
         device = torch.device('cpu')
 

@@ -13,7 +13,7 @@ from alphabase.io.hdf import HDF_File
 
 try:
     # should be replaced by AlphaRaw in the near future
-    from peptdeep.legacy.thermo_raw import RawFileReader
+    from peptdeep.legacy.thermo_raw.pyrawfilereader import RawFileReader
 except (ImportError,AttributeError):
     RawFileReader = None
 

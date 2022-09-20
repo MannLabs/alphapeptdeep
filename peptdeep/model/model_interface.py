@@ -126,7 +126,6 @@ class ModelInterface(object):
             if torch_devices[self.device_type]['is_available']():
                 self.device_type = torch_devices[self.device_type]['device']
             else:
-                print(f"Device `{self.device_type}` is not available, set to `cpu`")
                 self.device_type = 'cpu'
                 
         if self.device_type == 'cuda' and self.device_ids:

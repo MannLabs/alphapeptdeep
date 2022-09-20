@@ -24,8 +24,8 @@ torch_device:
   device_type: gpu
   device_type_choices:
     - gpu
-    - cpu
     - mps
+    - cpu
   device_ids: []
 
 log_level: info

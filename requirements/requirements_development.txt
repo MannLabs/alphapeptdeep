@@ -27,7 +27,7 @@ transformers
 scikit-learn
 lxml
 
-alphabase
-
 #torch --extra-index-url https://download.pytorch.org/whl/cu116
 torch
+
+alphabase
