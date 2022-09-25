@@ -1,3 +1,6 @@
+pywin32; sys_platform=='win32'
+pythonnet; sys_platform=='win32'
+
 jupyter
 jupyter_contrib_nbextensions
 autodocsumm
