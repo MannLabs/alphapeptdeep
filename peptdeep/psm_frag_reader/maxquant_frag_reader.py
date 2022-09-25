@@ -66,6 +66,7 @@ class MaxQuantMSMSReader(MaxQuantReader, PSMReader_w_FragBase):
         frag_types=['b','y','b_modloss','y_modloss'], 
         max_frag_charge=2,
         score_threshold=100,
+        rt_unit='minute',
         **kwargs
     ):
         PSMReader_w_FragBase.__init__(self,
@@ -74,7 +75,7 @@ class MaxQuantMSMSReader(MaxQuantReader, PSMReader_w_FragBase):
             **kwargs
         )
 
-        MaxQuantReader.__init__(self)
+        MaxQuantReader.__init__(self, rt_unit=rt_unit)
 
         self.column_mapping['phos_probs'] = 'PhosProbs'
         self.column_mapping['phos_sites'] = 'PhosSites'
