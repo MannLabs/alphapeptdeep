@@ -37,8 +37,11 @@ def get_requirements():
             extra_requirements[extra] = []
             for line in requirements_file:
                 extra_requirements[extra_stable].append(line)
+                # conditional requirements like: pywin32; sys_platform=='win32'
+                line, *conditions = line.split(';')
                 requirement, *comparison = re.split("[><=~!]", line)
                 requirement == requirement.strip()
+                requirement = ";".join([requirement] + conditions)
                 extra_requirements[extra].append(requirement)
     requirements = extra_requirements.pop("")
     return requirements, extra_requirements
@@ -65,11 +68,7 @@ def create_pip_wheel():
             "console_scripts": package2install.__console_scripts__,
             'nbdev': [f'{nbdev_cfg.get("lib_path")}={nbdev_cfg.get("lib_path")}._modidx:d'],
         },
-        install_requires=requirements + [
-            # TODO Remove hardcoded requirement?
-            "pywin32; sys_platform=='win32'",
-            "pythonnet; sys_platform=='win32'",
-        ],
+        install_requires=requirements,
         extras_require=extra_requirements,
         python_requires=package2install.__python_version__,
     )

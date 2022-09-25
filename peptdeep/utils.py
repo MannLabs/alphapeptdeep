@@ -15,6 +15,7 @@ import torch
 import time
 import platform
 import psutil
+import warnings
 
 import importlib.metadata
 
@@ -294,6 +295,7 @@ def get_device(device:str)->tuple:
                 torch.device(torch_devices[device]['device']), 
                 device
             )
+    warnings.warn(f'Device "{device}" is not available, switch to "cpu".')
     return torch.device('cpu'), 'cpu'
 
 def get_available_device()->tuple:
