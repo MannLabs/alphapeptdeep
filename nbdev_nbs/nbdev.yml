@@ -1,5 +1,5 @@
 project:
-  output-dir: _docs
+  output-dir: docs
 
 website:
   title: "alphapeptdeep"

@@ -1,0 +1,1058 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.1.189">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>alphapeptdeep - pipeline API</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1.6em;
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<script src="site_libs/quarto-html/quarto.js"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit"
+  }
+}</script>
+
+
+<link rel="stylesheet" href="styles.css">
+<meta property="og:title" content="alphapeptdeep - pipeline API">
+<meta property="og:description" content="This module provides high-level APIs for different pipelines such as transfer learning, library geneartion, and rescoring (percolator).">
+<meta property="og:site-name" content="alphapeptdeep">
+<meta name="twitter:title" content="alphapeptdeep - pipeline API">
+<meta name="twitter:description" content="This module provides high-level APIs for different pipelines such as transfer learning, library geneartion, and rescoring (percolator).">
+<meta name="twitter:card" content="summary">
+</head>
+
+<body class="nav-sidebar floating nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container">
+    <a class="navbar-brand" href="./index.html">
+    <span class="navbar-title">alphapeptdeep</span>
+    </a>
+  </div>
+          <div id="quarto-search" class="" title="Search"></div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+    <div class="container-fluid d-flex justify-content-between">
+      <h1 class="quarto-secondary-nav-title">pipeline API</h1>
+      <button type="button" class="quarto-btn-toggle btn" aria-label="Show secondary navigation">
+        <i class="bi bi-chevron-right"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse sidebar-navigation floating overflow-auto">
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">AlphaPeptDeep</a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./pipeline_api.html" class="sidebar-item-text sidebar-link active">pipeline API</a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./pretrained_models.html" class="sidebar-item-text sidebar-link">Pretrained Models</a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./settings.html" class="sidebar-item-text sidebar-link">Settings</a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./test_ui.html" class="sidebar-item-text sidebar-link">Testing GUI</a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./utils.html" class="sidebar-item-text sidebar-link">Utils</a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true">mass_spec</a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./mass_spec/mass_calibration.html" class="sidebar-item-text sidebar-link">Mass calibration</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./mass_spec/match.html" class="sidebar-item-text sidebar-link">Match</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./mass_spec/ms_reader.html" class="sidebar-item-text sidebar-link">MS Reader</a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" aria-expanded="true">model</a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" aria-expanded="true">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./model/building_block.html" class="sidebar-item-text sidebar-link">NN Building Block</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./model/ccs.html" class="sidebar-item-text sidebar-link">CCS model and interface</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./model/featurize.html" class="sidebar-item-text sidebar-link">Featurize</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./model/generic_property_prediction.html" class="sidebar-item-text sidebar-link">Generic Property Prediction</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./model/model_interface.html" class="sidebar-item-text sidebar-link">Model Interface</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./model/model_shop.html" class="sidebar-item-text sidebar-link">Model shop</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./model/ms2.html" class="sidebar-item-text sidebar-link">MS2 prediction</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./model/rt.html" class="sidebar-item-text sidebar-link">Retention Time Prediction</a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" aria-expanded="true">protein</a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" aria-expanded="true">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./protein/fasta.html" class="sidebar-item-text sidebar-link">Spectral Library from fasta</a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" aria-expanded="true">psm_frag_reader</a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" aria-expanded="true">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./psm_frag_reader/library_frag_reader.html" class="sidebar-item-text sidebar-link">TSV Fragment Reader</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./psm_frag_reader/maxquant_frag_reader.html" class="sidebar-item-text sidebar-link">MaxQuant Fragment Reader</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./psm_frag_reader/psm_frag_reader.html" class="sidebar-item-text sidebar-link">Base PSM Fragment Reader</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./psm_frag_reader/psmlabel_reader.html" class="sidebar-item-text sidebar-link">.psmlabel Fragment Reader</a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" aria-expanded="true">rescore</a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" aria-expanded="true">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./rescore/fdr.html" class="sidebar-item-text sidebar-link">FDR</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./rescore/feature_extractor.html" class="sidebar-item-text sidebar-link">Feature Extractor</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./rescore/percolator.html" class="sidebar-item-text sidebar-link">Percolator</a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" aria-expanded="true">spec_lib</a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" aria-expanded="true">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./spec_lib/library_factory.html" class="sidebar-item-text sidebar-link">Library Factory</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./spec_lib/predict_lib.html" class="sidebar-item-text sidebar-link">Predict Spectral Library</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./spec_lib/test_translate_tsv.html" class="sidebar-item-text sidebar-link">test_translate_tsv.html</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./spec_lib/translate.html" class="sidebar-item-text sidebar-link">Translate Spectral Library</a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#load_settings" id="toc-load_settings" class="nav-link active" data-scroll-target="#load_settings">load_settings</a></li>
+  <li><a href="#transfer-learning-pipeline" id="toc-transfer-learning-pipeline" class="nav-link" data-scroll-target="#transfer-learning-pipeline">Transfer learning pipeline</a>
+  <ul class="collapse">
+  <li><a href="#transfer_learn" id="toc-transfer_learn" class="nav-link" data-scroll-target="#transfer_learn">transfer_learn</a></li>
+  <li><a href="#match_psms" id="toc-match_psms" class="nav-link" data-scroll-target="#match_psms">match_psms</a></li>
+  <li><a href="#import_psm_df" id="toc-import_psm_df" class="nav-link" data-scroll-target="#import_psm_df">import_psm_df</a></li>
+  </ul></li>
+  <li><a href="#library-generation-pipeline" id="toc-library-generation-pipeline" class="nav-link" data-scroll-target="#library-generation-pipeline">Library generation pipeline</a>
+  <ul class="collapse">
+  <li><a href="#generate_library" id="toc-generate_library" class="nav-link" data-scroll-target="#generate_library">generate_library</a></li>
+  </ul></li>
+  <li><a href="#rescoring-percolator-pipeline" id="toc-rescoring-percolator-pipeline" class="nav-link" data-scroll-target="#rescoring-percolator-pipeline">Rescoring (percolator) pipeline</a>
+  <ul class="collapse">
+  <li><a href="#rescore" id="toc-rescore" class="nav-link" data-scroll-target="#rescore">rescore</a></li>
+  </ul></li>
+  </ul>
+<div class="toc-actions"><div><i class="bi bi-github"></i></div><div class="action-links"><p><a href="https://github.com/MannLabs/alphapeptdeep/issues/new" class="toc-action">Report an issue</a></p></div></div></nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title d-none d-lg-block">pipeline API</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+    
+  </div>
+  
+
+</header>
+
+<!-- WARNING: THIS FILE WAS AUTOGENERATED! DO NOT EDIT! -->
+<p>This module provides high-level APIs for different pipelines such as transfer learning, library geneartion, and rescoring (percolator).</p>
+<hr>
+<p><a href="https://github.com/MannLabs/alphapeptdeep/blob/main/peptdeep/pipeline_api.py#L39" target="_blank" style="float:right; font-size:smaller">source</a></p>
+<section id="load_settings" class="level3">
+<h3 class="anchored" data-anchor-id="load_settings">load_settings</h3>
+<blockquote class="blockquote">
+<pre><code> load_settings (settings_yaml:str)</code></pre>
+</blockquote>
+<p>Load settings yaml file into <code>peptdeep.settings.global_settings</code> (dict).</p>
+<table class="table">
+<thead>
+<tr class="header">
+<th></th>
+<th><strong>Type</strong></th>
+<th><strong>Details</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>settings_yaml</td>
+<td>str</td>
+<td>The settings yaml file.</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="transfer-learning-pipeline" class="level2">
+<h2 class="anchored" data-anchor-id="transfer-learning-pipeline">Transfer learning pipeline</h2>
+<p>Transfer learning pipeline includes: 1. Loading PSM files of the search engine results. 2. Matching PSMs against the MS files. 3. Loading pre-trained models and refining RT/CCS(/MS2) models.</p>
+<p>The refined models will be saved in the path pointed by “PEPTDEEP_HOME” in <code>peptdeep.settings.global_settings</code>.</p>
+<pre><code>/Users/zengwenfeng/opt/anaconda3/lib/python3.8/site-packages/fastcore/docscrape.py:225: UserWarning: Unknown section Raises
+  else: warn(msg)</code></pre>
+<hr>
+<p><a href="https://github.com/MannLabs/alphapeptdeep/blob/main/peptdeep/pipeline_api.py#L153" target="_blank" style="float:right; font-size:smaller">source</a></p>
+<section id="transfer_learn" class="level3">
+<h3 class="anchored" data-anchor-id="transfer_learn">transfer_learn</h3>
+<blockquote class="blockquote">
+<pre><code> transfer_learn (settings_dict:dict={'model': {'frag_types': ['b', 'y',
+                 'b_modloss', 'y_modloss'], 'max_frag_charge': 2},
+                 'PEPTDEEP_HOME': '/Users/zengwenfeng/peptdeep',
+                 'local_model_zip_name': 'pretrained_models.zip',
+                 'model_url': 'https://github.com/MannLabs/alphapeptdeep/r
+                 eleases/download/pre-trained-
+                 models/pretrained_models.zip', 'task_type': 'library',
+                 'task_type_choices': ['library', 'train', 'rescore'],
+                 'thread_num': 8, 'torch_device': {'device_type': 'gpu',
+                 'device_type_choices': ['gpu', 'mps', 'cpu'],
+                 'device_ids': []}, 'log_level': 'info',
+                 'log_level_choices': ['debug', 'info', 'warning',
+                 'error', 'critical'], 'common':
+                 {'modloss_importance_level': 1.0}, 'peak_matching':
+                 {'ms2_ppm': True, 'ms2_tol_value': 20.0, 'ms1_ppm': True,
+                 'ms1_tol_value': 20.0}, 'model_mgr': {'default_nce':
+                 30.0, 'default_instrument': 'Lumos', 'mask_modloss':
+                 True, 'model_type': 'generic', 'model_choices':
+                 ['generic', 'phos', 'hla', 'digly'],
+                 'external_ms2_model': '', 'external_rt_model': '',
+                 'external_ccs_model': '', 'instrument_group': {'Lumos':
+                 'Lumos', 'QE': 'QE', 'timsTOF': 'timsTOF', 'SciexTOF':
+                 'SciexTOF', 'Fusion': 'Lumos', 'Eclipse': 'Lumos',
+                 'Velos': 'Lumos', 'Elite': 'Lumos', 'OrbitrapTribrid':
+                 'Lumos', 'ThermoTribrid': 'Lumos', 'QE+': 'QE', 'QEHF':
+                 'QE', 'QEHFX': 'QE', 'Exploris': 'QE', 'Exploris480':
+                 'QE', 'LUMOS': 'Lumos', 'TIMSTOF': 'timsTOF', 'SCIEXTOF':
+                 'SciexTOF', 'FUSION': 'Lumos', 'ECLIPSE': 'Lumos',
+                 'VELOS': 'Lumos', 'ELITE': 'Lumos', 'ORBITRAPTRIBRID':
+                 'Lumos', 'THERMOTRIBRID': 'Lumos', 'EXPLORIS': 'QE',
+                 'EXPLORIS480': 'QE'}, 'predict': {'batch_size_ms2': 512,
+                 'batch_size_rt_ccs': 1024, 'verbose': True,
+                 'multiprocessing': True}, 'transfer':
+                 {'model_output_folder': '{PEPTDEEP_HOME}/refined_models',
+                 'epoch_ms2': 20, 'warmup_epoch_ms2': 10,
+                 'batch_size_ms2': 512, 'lr_ms2': 0.0001, 'epoch_rt_ccs':
+                 40, 'warmup_epoch_rt_ccs': 10, 'batch_size_rt_ccs': 1024,
+                 'lr_rt_ccs': 0.0001, 'verbose': False, 'grid_nce_search':
+                 True, 'grid_nce_first': 15.0, 'grid_nce_last': 45.0,
+                 'grid_nce_step': 3.0, 'grid_instrument': ['Lumos'],
+                 'psm_type': 'alphapept', 'psm_type_choices':
+                 ['alphapept', 'pfind', 'maxquant', 'diann',
+                 'speclib_tsv'], 'psm_files': [], 'ms_file_type':
+                 'alphapept_hdf', 'ms_file_type_choices':
+                 ['alphapept_hdf', 'thermo_raw', 'mgf', 'mzml'],
+                 'ms_files': [], 'psm_num_to_train_ms2': 100000000,
+                 'psm_num_per_mod_to_train_ms2': 50,
+                 'psm_num_to_train_rt_ccs': 100000000,
+                 'psm_num_per_mod_to_train_rt_ccs': 50,
+                 'top_n_mods_to_train': 10}}, 'percolator':
+                 {'require_model_tuning': True, 'raw_num_to_tune': 8,
+                 'require_raw_specific_tuning': True,
+                 'raw_specific_ms2_tuning': False,
+                 'psm_num_per_raw_to_tune': 200, 'epoch_per_raw_to_tune':
+                 5, 'multiprocessing': True, 'top_k_frags_to_calc_spc':
+                 10, 'calibrate_frag_mass_error': False,
+                 'max_perc_train_sample': 1000000,
+                 'min_perc_train_sample': 100, 'percolator_backend':
+                 'sklearn', 'percolator_backend_choices': ['sklearn',
+                 'pytorch'], 'percolator_model': 'linear',
+                 'percolator_model_choices': {'pytorch_as_backend':
+                 ['linear', 'mlp'], 'sklearn_as_backend': ['linear',
+                 'random_forest']}, 'lr_percolator_torch_model': 0.1,
+                 'percolator_iter_num': 5, 'cv_fold': 1, 'fdr': 0.01,
+                 'fdr_level': 'psm', 'fdr_level_choices': ['psm',
+                 'precursor', 'peptide', 'sequence'],
+                 'use_fdr_for_each_raw': False, 'frag_types': ['b_z1',
+                 'b_z2', 'y_z1', 'y_z2'], 'input_files': {'psm_type':
+                 'alphapept', 'psm_type_choices': ['alphapept', 'pfind',
+                 'maxquant'], 'psm_files': [], 'ms_file_type':
+                 'alphapept_hdf', 'ms_file_type_choices': ['hdf',
+                 'thermo_raw', 'mgf', 'mzml'], 'ms_files': [],
+                 'other_score_column_mapping': {'alphapept': {}, 'pfind':
+                 {'raw_score': 'Raw_Score'}, 'msfragger': {'hyperscore':
+                 'hyperscore', 'nextscore': 'nextscore'}, 'maxquant':
+                 {}}}, 'output_folder': '{PEPTDEEP_HOME}/rescore'},
+                 'library': {'input': {'infile_type': 'fasta',
+                 'infile_type_choices': ['fasta', 'sequence_table',
+                 'peptide_table', 'precursor_table'], 'infiles':
+                 ['xxx.fasta'], 'fasta': {'protease': '([KR])',
+                 'protease_choices': ['trypsin/P', '([KR])', 'trypsin',
+                 '([KR](?=[^P]))', 'lys-c', 'K', 'lys-n', '\\w(?=K)',
+                 'chymotrypsin'], 'max_miss_cleave': 2}, 'fix_mods':
+                 ['Carbamidomethyl@C'], 'var_mods': ['Acetyl@Protein
+                 N-term', 'Oxidation@M'], 'min_var_mod_num': 0,
+                 'max_var_mod_num': 2, 'min_precursor_charge': 2,
+                 'max_precursor_charge': 4, 'min_peptide_len': 7,
+                 'max_peptide_len': 35, 'min_precursor_mz': 200.0,
+                 'max_precursor_mz': 2000.0, 'decoy': 'pseudo_reverse',
+                 'decoy_choices': ['pseudo_reverse', 'diann', 'None'],
+                 'max_frag_charge': 2, 'frag_types': ['b', 'y']},
+                 'output_folder': '{PEPTDEEP_HOME}/spec_libs',
+                 'output_tsv': {'enabled': False, 'min_fragment_mz': 200,
+                 'max_fragment_mz': 2000, 'min_relative_intensity': 0.01,
+                 'keep_higest_k_peaks': 12, 'translate_batch_size':
+                 1000000, 'translate_mod_to_unimod_id': False}}},
+                 verbose=True)</code></pre>
+</blockquote>
+<p>Transfer learn / refine the RT/CCS(/MS2) models.</p>
+<p>All required information in settings_dict:</p>
+<pre><code>mgr_settings = settings_dict['model_mgr']
+mgr_settings['transfer']['verbose'] = verbose # bool
+settings_dict['PEPTDEEP_HOME'] # str. The folder to store all refined models. By default "~/peptdeep".</code></pre>
+<p>For transfer learning of MS2 model, the required information:</p>
+<pre><code>mgr_settings['transfer']['psm_files'] # list. PSM file paths
+mgr_settings['transfer']['psm_type'] # str. PSM type or earch engine type
+mgr_settings['transfer']['ms_files'] # list. MS files or RAW files
+mgr_settings['transfer']['ms_file_type'] # str. MS file type
+settings_dict['model']['frag_types'] # list. Fragment types to be considered, e.g. b_z1, y_modloss_z2 ...
+settings_dict['model']['max_frag_charge'] # int. Max fragment charge to be considered
+settings_dict['peak_matching']['ms2_ppm'] # bool. If use ppm as MS2 tolerance
+settings_dict['peak_matching']['ms2_tol_value'] # float. MS2 tolerance value</code></pre>
+<table class="table">
+<thead>
+<tr class="header">
+<th></th>
+<th><strong>Type</strong></th>
+<th><strong>Default</strong></th>
+<th><strong>Details</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>settings_dict</td>
+<td>dict</td>
+<td>{‘model’: {‘frag_types’: [‘b’, ‘y’, ‘b_modloss’, ‘y_modloss’], ‘max_frag_charge’: 2}, ‘PEPTDEEP_HOME’: ‘/Users/zengwenfeng/peptdeep’, ‘local_model_zip_name’: ‘pretrained_models.zip’, ‘model_url’: ‘https://github.com/MannLabs/alphapeptdeep/releases/download/pre-trained-models/pretrained_models.zip’, ‘task_type’: ‘library’, ‘task_type_choices’: [‘library’, ‘train’, ‘rescore’], ‘thread_num’: 8, ‘torch_device’: {‘device_type’: ‘gpu’, ‘device_type_choices’: [‘gpu’, ‘mps’, ‘cpu’], ‘device_ids’: []}, ‘log_level’: ‘info’, ‘log_level_choices’: [‘debug’, ‘info’, ‘warning’, ‘error’, ‘critical’], ‘common’: {‘modloss_importance_level’: 1.0}, ‘peak_matching’: {‘ms2_ppm’: True, ‘ms2_tol_value’: 20.0, ‘ms1_ppm’: True, ‘ms1_tol_value’: 20.0}, ‘model_mgr’: {‘default_nce’: 30.0, ‘default_instrument’: ‘Lumos’, ‘mask_modloss’: True, ‘model_type’: ‘generic’, ‘model_choices’: [‘generic’, ‘phos’, ‘hla’, ‘digly’], ‘external_ms2_model’: ’‘, ’external_rt_model’: ’‘, ’external_ccs_model’: ’‘, ’instrument_group’: {‘Lumos’: ‘Lumos’, ‘QE’: ‘QE’, ‘timsTOF’: ‘timsTOF’, ‘SciexTOF’: ‘SciexTOF’, ‘Fusion’: ‘Lumos’, ‘Eclipse’: ‘Lumos’, ‘Velos’: ‘Lumos’, ‘Elite’: ‘Lumos’, ‘OrbitrapTribrid’: ‘Lumos’, ‘ThermoTribrid’: ‘Lumos’, ‘QE+’: ‘QE’, ‘QEHF’: ‘QE’, ‘QEHFX’: ‘QE’, ‘Exploris’: ‘QE’, ‘Exploris480’: ‘QE’, ‘LUMOS’: ‘Lumos’, ‘TIMSTOF’: ‘timsTOF’, ‘SCIEXTOF’: ‘SciexTOF’, ‘FUSION’: ‘Lumos’, ‘ECLIPSE’: ‘Lumos’, ‘VELOS’: ‘Lumos’, ‘ELITE’: ‘Lumos’, ‘ORBITRAPTRIBRID’: ‘Lumos’, ‘THERMOTRIBRID’: ‘Lumos’, ‘EXPLORIS’: ‘QE’, ‘EXPLORIS480’: ‘QE’}, ‘predict’: {‘batch_size_ms2’: 512, ‘batch_size_rt_ccs’: 1024, ‘verbose’: True, ‘multiprocessing’: True}, ‘transfer’: {‘model_output_folder’: ‘{PEPTDEEP_HOME}/refined_models’, ‘epoch_ms2’: 20, ‘warmup_epoch_ms2’: 10, ‘batch_size_ms2’: 512, ‘lr_ms2’: 0.0001, ‘epoch_rt_ccs’: 40, ‘warmup_epoch_rt_ccs’: 10, ‘batch_size_rt_ccs’: 1024, ‘lr_rt_ccs’: 0.0001, ‘verbose’: False, ‘grid_nce_search’: True, ‘grid_nce_first’: 15.0, ‘grid_nce_last’: 45.0, ‘grid_nce_step’: 3.0, ‘grid_instrument’: [‘Lumos’], ‘psm_type’: ‘alphapept’, ‘psm_type_choices’: [‘alphapept’, ‘pfind’, ‘maxquant’, ‘diann’, ‘speclib_tsv’], ‘psm_files’: [], ‘ms_file_type’: ‘alphapept_hdf’, ‘ms_file_type_choices’: [‘alphapept_hdf’, ‘thermo_raw’, ‘mgf’, ‘mzml’], ‘ms_files’: [], ‘psm_num_to_train_ms2’: 100000000, ‘psm_num_per_mod_to_train_ms2’: 50, ‘psm_num_to_train_rt_ccs’: 100000000, ‘psm_num_per_mod_to_train_rt_ccs’: 50, ‘top_n_mods_to_train’: 10}}, ‘percolator’: {‘require_model_tuning’: True, ‘raw_num_to_tune’: 8, ‘require_raw_specific_tuning’: True, ‘raw_specific_ms2_tuning’: False, ‘psm_num_per_raw_to_tune’: 200, ‘epoch_per_raw_to_tune’: 5, ‘multiprocessing’: True, ‘top_k_frags_to_calc_spc’: 10, ‘calibrate_frag_mass_error’: False, ‘max_perc_train_sample’: 1000000, ‘min_perc_train_sample’: 100, ‘percolator_backend’: ‘sklearn’, ‘percolator_backend_choices’: [‘sklearn’, ‘pytorch’], ‘percolator_model’: ‘linear’, ‘percolator_model_choices’: {‘pytorch_as_backend’: [‘linear’, ‘mlp’], ‘sklearn_as_backend’: [‘linear’, ‘random_forest’]}, ‘lr_percolator_torch_model’: 0.1, ‘percolator_iter_num’: 5, ‘cv_fold’: 1, ‘fdr’: 0.01, ‘fdr_level’: ‘psm’, ‘fdr_level_choices’: [‘psm’, ‘precursor’, ‘peptide’, ‘sequence’], ‘use_fdr_for_each_raw’: False, ‘frag_types’: [‘b_z1’, ‘b_z2’, ‘y_z1’, ‘y_z2’], ‘input_files’: {‘psm_type’: ‘alphapept’, ‘psm_type_choices’: [‘alphapept’, ‘pfind’, ‘maxquant’], ‘psm_files’: [], ‘ms_file_type’: ‘alphapept_hdf’, ‘ms_file_type_choices’: [‘hdf’, ‘thermo_raw’, ‘mgf’, ‘mzml’], ‘ms_files’: [], ‘other_score_column_mapping’: {‘alphapept’: {}, ‘pfind’: {‘raw_score’: ‘Raw_Score’}, ‘msfragger’: {‘hyperscore’: ‘hyperscore’, ‘nextscore’: ‘nextscore’}, ‘maxquant’: {}}}, ‘output_folder’: ‘{PEPTDEEP_HOME}/rescore’}, ‘library’: {‘input’: {‘infile_type’: ‘fasta’, ‘infile_type_choices’: [‘fasta’, ‘sequence_table’, ‘peptide_table’, ‘precursor_table’], ‘infiles’: [‘xxx.fasta’], ‘fasta’: {‘protease’: ‘([KR])’, ‘protease_choices’: [‘trypsin/P’, ‘([KR])’, ‘trypsin’, ‘(<a href="?=%5B%5EP%5D">KR</a>)’, ‘lys-c’, ‘K’, ‘lys-n’, ‘\w(?=K)’, ‘chymotrypsin’], ‘max_miss_cleave’: 2}, ‘fix_mods’: [‘Carbamidomethyl@C’], ‘var_mods’: [‘Acetyl@Protein N-term’, ‘Oxidation@M’], ‘min_var_mod_num’: 0, ‘max_var_mod_num’: 2, ‘min_precursor_charge’: 2, ‘max_precursor_charge’: 4, ‘min_peptide_len’: 7, ‘max_peptide_len’: 35, ‘min_precursor_mz’: 200.0, ‘max_precursor_mz’: 2000.0, ‘decoy’: ‘pseudo_reverse’, ‘decoy_choices’: [‘pseudo_reverse’, ‘diann’, ‘None’], ‘max_frag_charge’: 2, ‘frag_types’: [‘b’, ‘y’]}, ‘output_folder’: ‘{PEPTDEEP_HOME}/spec_libs’, ‘output_tsv’: {‘enabled’: False, ‘min_fragment_mz’: 200, ‘max_fragment_mz’: 2000, ‘min_relative_intensity’: 0.01, ‘keep_higest_k_peaks’: 12, ‘translate_batch_size’: 1000000, ‘translate_mod_to_unimod_id’: False}}}</td>
+<td>The settings dict. <br>Optional, by default <code>peptdeep.settings.global_settings</code></td>
+</tr>
+<tr class="even">
+<td>verbose</td>
+<td>bool</td>
+<td>True</td>
+<td>Print the training details. <br>Optional, default True</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<p><a href="https://github.com/MannLabs/alphapeptdeep/blob/main/peptdeep/pipeline_api.py#L81" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="match_psms" class="level3">
+<h3 class="anchored" data-anchor-id="match_psms">match_psms</h3>
+<blockquote class="blockquote">
+<pre><code> match_psms (settings_dict:dict={'model': {'frag_types': ['b', 'y',
+             'b_modloss', 'y_modloss'], 'max_frag_charge': 2},
+             'PEPTDEEP_HOME': '/Users/zengwenfeng/peptdeep',
+             'local_model_zip_name': 'pretrained_models.zip', 'model_url':
+             'https://github.com/MannLabs/alphapeptdeep/releases/download/
+             pre-trained-models/pretrained_models.zip', 'task_type':
+             'library', 'task_type_choices': ['library', 'train',
+             'rescore'], 'thread_num': 8, 'torch_device': {'device_type':
+             'gpu', 'device_type_choices': ['gpu', 'mps', 'cpu'],
+             'device_ids': []}, 'log_level': 'info', 'log_level_choices':
+             ['debug', 'info', 'warning', 'error', 'critical'], 'common':
+             {'modloss_importance_level': 1.0}, 'peak_matching':
+             {'ms2_ppm': True, 'ms2_tol_value': 20.0, 'ms1_ppm': True,
+             'ms1_tol_value': 20.0}, 'model_mgr': {'default_nce': 30.0,
+             'default_instrument': 'Lumos', 'mask_modloss': True,
+             'model_type': 'generic', 'model_choices': ['generic', 'phos',
+             'hla', 'digly'], 'external_ms2_model': '',
+             'external_rt_model': '', 'external_ccs_model': '',
+             'instrument_group': {'Lumos': 'Lumos', 'QE': 'QE', 'timsTOF':
+             'timsTOF', 'SciexTOF': 'SciexTOF', 'Fusion': 'Lumos',
+             'Eclipse': 'Lumos', 'Velos': 'Lumos', 'Elite': 'Lumos',
+             'OrbitrapTribrid': 'Lumos', 'ThermoTribrid': 'Lumos', 'QE+':
+             'QE', 'QEHF': 'QE', 'QEHFX': 'QE', 'Exploris': 'QE',
+             'Exploris480': 'QE', 'LUMOS': 'Lumos', 'TIMSTOF': 'timsTOF',
+             'SCIEXTOF': 'SciexTOF', 'FUSION': 'Lumos', 'ECLIPSE':
+             'Lumos', 'VELOS': 'Lumos', 'ELITE': 'Lumos',
+             'ORBITRAPTRIBRID': 'Lumos', 'THERMOTRIBRID': 'Lumos',
+             'EXPLORIS': 'QE', 'EXPLORIS480': 'QE'}, 'predict':
+             {'batch_size_ms2': 512, 'batch_size_rt_ccs': 1024, 'verbose':
+             True, 'multiprocessing': True}, 'transfer':
+             {'model_output_folder': '{PEPTDEEP_HOME}/refined_models',
+             'epoch_ms2': 20, 'warmup_epoch_ms2': 10, 'batch_size_ms2':
+             512, 'lr_ms2': 0.0001, 'epoch_rt_ccs': 40,
+             'warmup_epoch_rt_ccs': 10, 'batch_size_rt_ccs': 1024,
+             'lr_rt_ccs': 0.0001, 'verbose': False, 'grid_nce_search':
+             True, 'grid_nce_first': 15.0, 'grid_nce_last': 45.0,
+             'grid_nce_step': 3.0, 'grid_instrument': ['Lumos'],
+             'psm_type': 'alphapept', 'psm_type_choices': ['alphapept',
+             'pfind', 'maxquant', 'diann', 'speclib_tsv'], 'psm_files':
+             [], 'ms_file_type': 'alphapept_hdf', 'ms_file_type_choices':
+             ['alphapept_hdf', 'thermo_raw', 'mgf', 'mzml'], 'ms_files':
+             [], 'psm_num_to_train_ms2': 100000000,
+             'psm_num_per_mod_to_train_ms2': 50,
+             'psm_num_to_train_rt_ccs': 100000000,
+             'psm_num_per_mod_to_train_rt_ccs': 50, 'top_n_mods_to_train':
+             10}}, 'percolator': {'require_model_tuning': True,
+             'raw_num_to_tune': 8, 'require_raw_specific_tuning': True,
+             'raw_specific_ms2_tuning': False, 'psm_num_per_raw_to_tune':
+             200, 'epoch_per_raw_to_tune': 5, 'multiprocessing': True,
+             'top_k_frags_to_calc_spc': 10, 'calibrate_frag_mass_error':
+             False, 'max_perc_train_sample': 1000000,
+             'min_perc_train_sample': 100, 'percolator_backend':
+             'sklearn', 'percolator_backend_choices': ['sklearn',
+             'pytorch'], 'percolator_model': 'linear',
+             'percolator_model_choices': {'pytorch_as_backend': ['linear',
+             'mlp'], 'sklearn_as_backend': ['linear', 'random_forest']},
+             'lr_percolator_torch_model': 0.1, 'percolator_iter_num': 5,
+             'cv_fold': 1, 'fdr': 0.01, 'fdr_level': 'psm',
+             'fdr_level_choices': ['psm', 'precursor', 'peptide',
+             'sequence'], 'use_fdr_for_each_raw': False, 'frag_types':
+             ['b_z1', 'b_z2', 'y_z1', 'y_z2'], 'input_files': {'psm_type':
+             'alphapept', 'psm_type_choices': ['alphapept', 'pfind',
+             'maxquant'], 'psm_files': [], 'ms_file_type':
+             'alphapept_hdf', 'ms_file_type_choices': ['hdf',
+             'thermo_raw', 'mgf', 'mzml'], 'ms_files': [],
+             'other_score_column_mapping': {'alphapept': {}, 'pfind':
+             {'raw_score': 'Raw_Score'}, 'msfragger': {'hyperscore':
+             'hyperscore', 'nextscore': 'nextscore'}, 'maxquant': {}}},
+             'output_folder': '{PEPTDEEP_HOME}/rescore'}, 'library':
+             {'input': {'infile_type': 'fasta', 'infile_type_choices':
+             ['fasta', 'sequence_table', 'peptide_table',
+             'precursor_table'], 'infiles': ['xxx.fasta'], 'fasta':
+             {'protease': '([KR])', 'protease_choices': ['trypsin/P',
+             '([KR])', 'trypsin', '([KR](?=[^P]))', 'lys-c', 'K', 'lys-n',
+             '\\w(?=K)', 'chymotrypsin'], 'max_miss_cleave': 2},
+             'fix_mods': ['Carbamidomethyl@C'], 'var_mods':
+             ['Acetyl@Protein N-term', 'Oxidation@M'], 'min_var_mod_num':
+             0, 'max_var_mod_num': 2, 'min_precursor_charge': 2,
+             'max_precursor_charge': 4, 'min_peptide_len': 7,
+             'max_peptide_len': 35, 'min_precursor_mz': 200.0,
+             'max_precursor_mz': 2000.0, 'decoy': 'pseudo_reverse',
+             'decoy_choices': ['pseudo_reverse', 'diann', 'None'],
+             'max_frag_charge': 2, 'frag_types': ['b', 'y']},
+             'output_folder': '{PEPTDEEP_HOME}/spec_libs', 'output_tsv':
+             {'enabled': False, 'min_fragment_mz': 200, 'max_fragment_mz':
+             2000, 'min_relative_intensity': 0.01, 'keep_higest_k_peaks':
+             12, 'translate_batch_size': 1000000,
+             'translate_mod_to_unimod_id': False}}})</code></pre>
+</blockquote>
+<p>Match the PSMs against the MS files.</p>
+<p>All required information is in settings_dict:</p>
+<pre><code>mgr_settings = settings_dict['model_mgr']
+mgr_settings['transfer']['psm_files'] # list. PSM file paths
+mgr_settings['transfer']['psm_type'] # str. PSM type or earch engine type
+mgr_settings['transfer']['ms_files'] # list. MS files or RAW files
+mgr_settings['transfer']['ms_file_type'] # str. MS file type
+settings_dict['model']['frag_types'] # list. Fragment types to be considered, e.g. b_z1, y_modloss_z2 ...
+settings_dict['model']['max_frag_charge'] # int. Max fragment charge to be considered
+settings_dict['peak_matching']['ms2_ppm'] # bool. If use ppm as MS2 tolerance
+settings_dict['peak_matching']['ms2_tol_value'] # float. MS2 tolerance value</code></pre>
+<table class="table">
+<thead>
+<tr class="header">
+<th></th>
+<th><strong>Type</strong></th>
+<th><strong>Default</strong></th>
+<th><strong>Details</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>settings_dict</td>
+<td>dict</td>
+<td>{‘model’: {‘frag_types’: [‘b’, ‘y’, ‘b_modloss’, ‘y_modloss’], ‘max_frag_charge’: 2}, ‘PEPTDEEP_HOME’: ‘/Users/zengwenfeng/peptdeep’, ‘local_model_zip_name’: ‘pretrained_models.zip’, ‘model_url’: ‘https://github.com/MannLabs/alphapeptdeep/releases/download/pre-trained-models/pretrained_models.zip’, ‘task_type’: ‘library’, ‘task_type_choices’: [‘library’, ‘train’, ‘rescore’], ‘thread_num’: 8, ‘torch_device’: {‘device_type’: ‘gpu’, ‘device_type_choices’: [‘gpu’, ‘mps’, ‘cpu’], ‘device_ids’: []}, ‘log_level’: ‘info’, ‘log_level_choices’: [‘debug’, ‘info’, ‘warning’, ‘error’, ‘critical’], ‘common’: {‘modloss_importance_level’: 1.0}, ‘peak_matching’: {‘ms2_ppm’: True, ‘ms2_tol_value’: 20.0, ‘ms1_ppm’: True, ‘ms1_tol_value’: 20.0}, ‘model_mgr’: {‘default_nce’: 30.0, ‘default_instrument’: ‘Lumos’, ‘mask_modloss’: True, ‘model_type’: ‘generic’, ‘model_choices’: [‘generic’, ‘phos’, ‘hla’, ‘digly’], ‘external_ms2_model’: ’‘, ’external_rt_model’: ’‘, ’external_ccs_model’: ’‘, ’instrument_group’: {‘Lumos’: ‘Lumos’, ‘QE’: ‘QE’, ‘timsTOF’: ‘timsTOF’, ‘SciexTOF’: ‘SciexTOF’, ‘Fusion’: ‘Lumos’, ‘Eclipse’: ‘Lumos’, ‘Velos’: ‘Lumos’, ‘Elite’: ‘Lumos’, ‘OrbitrapTribrid’: ‘Lumos’, ‘ThermoTribrid’: ‘Lumos’, ‘QE+’: ‘QE’, ‘QEHF’: ‘QE’, ‘QEHFX’: ‘QE’, ‘Exploris’: ‘QE’, ‘Exploris480’: ‘QE’, ‘LUMOS’: ‘Lumos’, ‘TIMSTOF’: ‘timsTOF’, ‘SCIEXTOF’: ‘SciexTOF’, ‘FUSION’: ‘Lumos’, ‘ECLIPSE’: ‘Lumos’, ‘VELOS’: ‘Lumos’, ‘ELITE’: ‘Lumos’, ‘ORBITRAPTRIBRID’: ‘Lumos’, ‘THERMOTRIBRID’: ‘Lumos’, ‘EXPLORIS’: ‘QE’, ‘EXPLORIS480’: ‘QE’}, ‘predict’: {‘batch_size_ms2’: 512, ‘batch_size_rt_ccs’: 1024, ‘verbose’: True, ‘multiprocessing’: True}, ‘transfer’: {‘model_output_folder’: ‘{PEPTDEEP_HOME}/refined_models’, ‘epoch_ms2’: 20, ‘warmup_epoch_ms2’: 10, ‘batch_size_ms2’: 512, ‘lr_ms2’: 0.0001, ‘epoch_rt_ccs’: 40, ‘warmup_epoch_rt_ccs’: 10, ‘batch_size_rt_ccs’: 1024, ‘lr_rt_ccs’: 0.0001, ‘verbose’: False, ‘grid_nce_search’: True, ‘grid_nce_first’: 15.0, ‘grid_nce_last’: 45.0, ‘grid_nce_step’: 3.0, ‘grid_instrument’: [‘Lumos’], ‘psm_type’: ‘alphapept’, ‘psm_type_choices’: [‘alphapept’, ‘pfind’, ‘maxquant’, ‘diann’, ‘speclib_tsv’], ‘psm_files’: [], ‘ms_file_type’: ‘alphapept_hdf’, ‘ms_file_type_choices’: [‘alphapept_hdf’, ‘thermo_raw’, ‘mgf’, ‘mzml’], ‘ms_files’: [], ‘psm_num_to_train_ms2’: 100000000, ‘psm_num_per_mod_to_train_ms2’: 50, ‘psm_num_to_train_rt_ccs’: 100000000, ‘psm_num_per_mod_to_train_rt_ccs’: 50, ‘top_n_mods_to_train’: 10}}, ‘percolator’: {‘require_model_tuning’: True, ‘raw_num_to_tune’: 8, ‘require_raw_specific_tuning’: True, ‘raw_specific_ms2_tuning’: False, ‘psm_num_per_raw_to_tune’: 200, ‘epoch_per_raw_to_tune’: 5, ‘multiprocessing’: True, ‘top_k_frags_to_calc_spc’: 10, ‘calibrate_frag_mass_error’: False, ‘max_perc_train_sample’: 1000000, ‘min_perc_train_sample’: 100, ‘percolator_backend’: ‘sklearn’, ‘percolator_backend_choices’: [‘sklearn’, ‘pytorch’], ‘percolator_model’: ‘linear’, ‘percolator_model_choices’: {‘pytorch_as_backend’: [‘linear’, ‘mlp’], ‘sklearn_as_backend’: [‘linear’, ‘random_forest’]}, ‘lr_percolator_torch_model’: 0.1, ‘percolator_iter_num’: 5, ‘cv_fold’: 1, ‘fdr’: 0.01, ‘fdr_level’: ‘psm’, ‘fdr_level_choices’: [‘psm’, ‘precursor’, ‘peptide’, ‘sequence’], ‘use_fdr_for_each_raw’: False, ‘frag_types’: [‘b_z1’, ‘b_z2’, ‘y_z1’, ‘y_z2’], ‘input_files’: {‘psm_type’: ‘alphapept’, ‘psm_type_choices’: [‘alphapept’, ‘pfind’, ‘maxquant’], ‘psm_files’: [], ‘ms_file_type’: ‘alphapept_hdf’, ‘ms_file_type_choices’: [‘hdf’, ‘thermo_raw’, ‘mgf’, ‘mzml’], ‘ms_files’: [], ‘other_score_column_mapping’: {‘alphapept’: {}, ‘pfind’: {‘raw_score’: ‘Raw_Score’}, ‘msfragger’: {‘hyperscore’: ‘hyperscore’, ‘nextscore’: ‘nextscore’}, ‘maxquant’: {}}}, ‘output_folder’: ‘{PEPTDEEP_HOME}/rescore’}, ‘library’: {‘input’: {‘infile_type’: ‘fasta’, ‘infile_type_choices’: [‘fasta’, ‘sequence_table’, ‘peptide_table’, ‘precursor_table’], ‘infiles’: [‘xxx.fasta’], ‘fasta’: {‘protease’: ‘([KR])’, ‘protease_choices’: [‘trypsin/P’, ‘([KR])’, ‘trypsin’, ‘(<a href="?=%5B%5EP%5D">KR</a>)’, ‘lys-c’, ‘K’, ‘lys-n’, ‘\w(?=K)’, ‘chymotrypsin’], ‘max_miss_cleave’: 2}, ‘fix_mods’: [‘Carbamidomethyl@C’], ‘var_mods’: [‘Acetyl@Protein N-term’, ‘Oxidation@M’], ‘min_var_mod_num’: 0, ‘max_var_mod_num’: 2, ‘min_precursor_charge’: 2, ‘max_precursor_charge’: 4, ‘min_peptide_len’: 7, ‘max_peptide_len’: 35, ‘min_precursor_mz’: 200.0, ‘max_precursor_mz’: 2000.0, ‘decoy’: ‘pseudo_reverse’, ‘decoy_choices’: [‘pseudo_reverse’, ‘diann’, ‘None’], ‘max_frag_charge’: 2, ‘frag_types’: [‘b’, ‘y’]}, ‘output_folder’: ‘{PEPTDEEP_HOME}/spec_libs’, ‘output_tsv’: {‘enabled’: False, ‘min_fragment_mz’: 200, ‘max_fragment_mz’: 2000, ‘min_relative_intensity’: 0.01, ‘keep_higest_k_peaks’: 12, ‘translate_batch_size’: 1000000, ‘translate_mod_to_unimod_id’: False}}}</td>
+<td>The settings dict. Optional, by default <code>peptdeep.settings.global_settings</code>.</td>
+</tr>
+<tr class="even">
+<td><strong>Returns</strong></td>
+<td><strong>tuple</strong></td>
+<td></td>
+<td><strong>Tuple[pd.DataFrame]. The PSM DataFrame and the matched fragment intensity DataFrame</strong></td>
+</tr>
+</tbody>
+</table>
+<hr>
+<p><a href="https://github.com/MannLabs/alphapeptdeep/blob/main/peptdeep/pipeline_api.py#L54" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="import_psm_df" class="level3">
+<h3 class="anchored" data-anchor-id="import_psm_df">import_psm_df</h3>
+<blockquote class="blockquote">
+<pre><code> import_psm_df (psm_files:list, psm_type:str)</code></pre>
+</blockquote>
+<p>Import PSM files of a search engine as a pd.DataFrame</p>
+<table class="table">
+<colgroup>
+<col style="width: 9%">
+<col style="width: 38%">
+<col style="width: 52%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th><strong>Type</strong></th>
+<th><strong>Details</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>psm_files</td>
+<td>list</td>
+<td>List[str]. PSM file paths</td>
+</tr>
+<tr class="even">
+<td>psm_type</td>
+<td>str</td>
+<td>PSM type or search engine name/type</td>
+</tr>
+<tr class="odd">
+<td><strong>Returns</strong></td>
+<td><strong>DataFrame</strong></td>
+<td><strong>DataFrame that contains all PSM information</strong></td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+<section id="library-generation-pipeline" class="level2">
+<h2 class="anchored" data-anchor-id="library-generation-pipeline">Library generation pipeline</h2>
+<hr>
+<p><a href="https://github.com/MannLabs/alphapeptdeep/blob/main/peptdeep/pipeline_api.py#L258" target="_blank" style="float:right; font-size:smaller">source</a></p>
+<section id="generate_library" class="level3">
+<h3 class="anchored" data-anchor-id="generate_library">generate_library</h3>
+<blockquote class="blockquote">
+<pre><code> generate_library (settings_dict:dict={'model': {'frag_types': ['b', 'y',
+                   'b_modloss', 'y_modloss'], 'max_frag_charge': 2},
+                   'PEPTDEEP_HOME': '/Users/zengwenfeng/peptdeep',
+                   'local_model_zip_name': 'pretrained_models.zip',
+                   'model_url': 'https://github.com/MannLabs/alphapeptdeep
+                   /releases/download/pre-trained-
+                   models/pretrained_models.zip', 'task_type': 'library',
+                   'task_type_choices': ['library', 'train', 'rescore'],
+                   'thread_num': 8, 'torch_device': {'device_type': 'gpu',
+                   'device_type_choices': ['gpu', 'mps', 'cpu'],
+                   'device_ids': []}, 'log_level': 'info',
+                   'log_level_choices': ['debug', 'info', 'warning',
+                   'error', 'critical'], 'common':
+                   {'modloss_importance_level': 1.0}, 'peak_matching':
+                   {'ms2_ppm': True, 'ms2_tol_value': 20.0, 'ms1_ppm':
+                   True, 'ms1_tol_value': 20.0}, 'model_mgr':
+                   {'default_nce': 30.0, 'default_instrument': 'Lumos',
+                   'mask_modloss': True, 'model_type': 'generic',
+                   'model_choices': ['generic', 'phos', 'hla', 'digly'],
+                   'external_ms2_model': '', 'external_rt_model': '',
+                   'external_ccs_model': '', 'instrument_group': {'Lumos':
+                   'Lumos', 'QE': 'QE', 'timsTOF': 'timsTOF', 'SciexTOF':
+                   'SciexTOF', 'Fusion': 'Lumos', 'Eclipse': 'Lumos',
+                   'Velos': 'Lumos', 'Elite': 'Lumos', 'OrbitrapTribrid':
+                   'Lumos', 'ThermoTribrid': 'Lumos', 'QE+': 'QE', 'QEHF':
+                   'QE', 'QEHFX': 'QE', 'Exploris': 'QE', 'Exploris480':
+                   'QE', 'LUMOS': 'Lumos', 'TIMSTOF': 'timsTOF',
+                   'SCIEXTOF': 'SciexTOF', 'FUSION': 'Lumos', 'ECLIPSE':
+                   'Lumos', 'VELOS': 'Lumos', 'ELITE': 'Lumos',
+                   'ORBITRAPTRIBRID': 'Lumos', 'THERMOTRIBRID': 'Lumos',
+                   'EXPLORIS': 'QE', 'EXPLORIS480': 'QE'}, 'predict':
+                   {'batch_size_ms2': 512, 'batch_size_rt_ccs': 1024,
+                   'verbose': True, 'multiprocessing': True}, 'transfer':
+                   {'model_output_folder':
+                   '{PEPTDEEP_HOME}/refined_models', 'epoch_ms2': 20,
+                   'warmup_epoch_ms2': 10, 'batch_size_ms2': 512,
+                   'lr_ms2': 0.0001, 'epoch_rt_ccs': 40,
+                   'warmup_epoch_rt_ccs': 10, 'batch_size_rt_ccs': 1024,
+                   'lr_rt_ccs': 0.0001, 'verbose': False,
+                   'grid_nce_search': True, 'grid_nce_first': 15.0,
+                   'grid_nce_last': 45.0, 'grid_nce_step': 3.0,
+                   'grid_instrument': ['Lumos'], 'psm_type': 'alphapept',
+                   'psm_type_choices': ['alphapept', 'pfind', 'maxquant',
+                   'diann', 'speclib_tsv'], 'psm_files': [],
+                   'ms_file_type': 'alphapept_hdf',
+                   'ms_file_type_choices': ['alphapept_hdf', 'thermo_raw',
+                   'mgf', 'mzml'], 'ms_files': [], 'psm_num_to_train_ms2':
+                   100000000, 'psm_num_per_mod_to_train_ms2': 50,
+                   'psm_num_to_train_rt_ccs': 100000000,
+                   'psm_num_per_mod_to_train_rt_ccs': 50,
+                   'top_n_mods_to_train': 10}}, 'percolator':
+                   {'require_model_tuning': True, 'raw_num_to_tune': 8,
+                   'require_raw_specific_tuning': True,
+                   'raw_specific_ms2_tuning': False,
+                   'psm_num_per_raw_to_tune': 200,
+                   'epoch_per_raw_to_tune': 5, 'multiprocessing': True,
+                   'top_k_frags_to_calc_spc': 10,
+                   'calibrate_frag_mass_error': False,
+                   'max_perc_train_sample': 1000000,
+                   'min_perc_train_sample': 100, 'percolator_backend':
+                   'sklearn', 'percolator_backend_choices': ['sklearn',
+                   'pytorch'], 'percolator_model': 'linear',
+                   'percolator_model_choices': {'pytorch_as_backend':
+                   ['linear', 'mlp'], 'sklearn_as_backend': ['linear',
+                   'random_forest']}, 'lr_percolator_torch_model': 0.1,
+                   'percolator_iter_num': 5, 'cv_fold': 1, 'fdr': 0.01,
+                   'fdr_level': 'psm', 'fdr_level_choices': ['psm',
+                   'precursor', 'peptide', 'sequence'],
+                   'use_fdr_for_each_raw': False, 'frag_types': ['b_z1',
+                   'b_z2', 'y_z1', 'y_z2'], 'input_files': {'psm_type':
+                   'alphapept', 'psm_type_choices': ['alphapept', 'pfind',
+                   'maxquant'], 'psm_files': [], 'ms_file_type':
+                   'alphapept_hdf', 'ms_file_type_choices': ['hdf',
+                   'thermo_raw', 'mgf', 'mzml'], 'ms_files': [],
+                   'other_score_column_mapping': {'alphapept': {},
+                   'pfind': {'raw_score': 'Raw_Score'}, 'msfragger':
+                   {'hyperscore': 'hyperscore', 'nextscore': 'nextscore'},
+                   'maxquant': {}}}, 'output_folder':
+                   '{PEPTDEEP_HOME}/rescore'}, 'library': {'input':
+                   {'infile_type': 'fasta', 'infile_type_choices':
+                   ['fasta', 'sequence_table', 'peptide_table',
+                   'precursor_table'], 'infiles': ['xxx.fasta'], 'fasta':
+                   {'protease': '([KR])', 'protease_choices':
+                   ['trypsin/P', '([KR])', 'trypsin', '([KR](?=[^P]))',
+                   'lys-c', 'K', 'lys-n', '\\w(?=K)', 'chymotrypsin'],
+                   'max_miss_cleave': 2}, 'fix_mods':
+                   ['Carbamidomethyl@C'], 'var_mods': ['Acetyl@Protein
+                   N-term', 'Oxidation@M'], 'min_var_mod_num': 0,
+                   'max_var_mod_num': 2, 'min_precursor_charge': 2,
+                   'max_precursor_charge': 4, 'min_peptide_len': 7,
+                   'max_peptide_len': 35, 'min_precursor_mz': 200.0,
+                   'max_precursor_mz': 2000.0, 'decoy': 'pseudo_reverse',
+                   'decoy_choices': ['pseudo_reverse', 'diann', 'None'],
+                   'max_frag_charge': 2, 'frag_types': ['b', 'y']},
+                   'output_folder': '{PEPTDEEP_HOME}/spec_libs',
+                   'output_tsv': {'enabled': False, 'min_fragment_mz':
+                   200, 'max_fragment_mz': 2000, 'min_relative_intensity':
+                   0.01, 'keep_higest_k_peaks': 12,
+                   'translate_batch_size': 1000000,
+                   'translate_mod_to_unimod_id': False}}})</code></pre>
+</blockquote>
+<p>Generate/predict a spectral library.</p>
+<p>All required information in settings_dict:</p>
+<pre><code>lib_settings = settings_dict['library']
+output_folder = lib_settings['output_folder'] # str. Output folder of the library
+lib_settings['input']['infile_type'] # str. Input type for the library, could be 'fasta', 'sequence', 'peptide', or 'precursor'
+lib_settings['input']['infiles'] # list of str. Input files to generate librarys
+lib_settings['output_tsv']['enabled'] # bool. If output tsv for diann/spectronaut</code></pre>
+<table class="table">
+<thead>
+<tr class="header">
+<th></th>
+<th><strong>Type</strong></th>
+<th><strong>Default</strong></th>
+<th><strong>Details</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>settings_dict</td>
+<td>dict</td>
+<td>{‘model’: {‘frag_types’: [‘b’, ‘y’, ‘b_modloss’, ‘y_modloss’], ‘max_frag_charge’: 2}, ‘PEPTDEEP_HOME’: ‘/Users/zengwenfeng/peptdeep’, ‘local_model_zip_name’: ‘pretrained_models.zip’, ‘model_url’: ‘https://github.com/MannLabs/alphapeptdeep/releases/download/pre-trained-models/pretrained_models.zip’, ‘task_type’: ‘library’, ‘task_type_choices’: [‘library’, ‘train’, ‘rescore’], ‘thread_num’: 8, ‘torch_device’: {‘device_type’: ‘gpu’, ‘device_type_choices’: [‘gpu’, ‘mps’, ‘cpu’], ‘device_ids’: []}, ‘log_level’: ‘info’, ‘log_level_choices’: [‘debug’, ‘info’, ‘warning’, ‘error’, ‘critical’], ‘common’: {‘modloss_importance_level’: 1.0}, ‘peak_matching’: {‘ms2_ppm’: True, ‘ms2_tol_value’: 20.0, ‘ms1_ppm’: True, ‘ms1_tol_value’: 20.0}, ‘model_mgr’: {‘default_nce’: 30.0, ‘default_instrument’: ‘Lumos’, ‘mask_modloss’: True, ‘model_type’: ‘generic’, ‘model_choices’: [‘generic’, ‘phos’, ‘hla’, ‘digly’], ‘external_ms2_model’: ’‘, ’external_rt_model’: ’‘, ’external_ccs_model’: ’‘, ’instrument_group’: {‘Lumos’: ‘Lumos’, ‘QE’: ‘QE’, ‘timsTOF’: ‘timsTOF’, ‘SciexTOF’: ‘SciexTOF’, ‘Fusion’: ‘Lumos’, ‘Eclipse’: ‘Lumos’, ‘Velos’: ‘Lumos’, ‘Elite’: ‘Lumos’, ‘OrbitrapTribrid’: ‘Lumos’, ‘ThermoTribrid’: ‘Lumos’, ‘QE+’: ‘QE’, ‘QEHF’: ‘QE’, ‘QEHFX’: ‘QE’, ‘Exploris’: ‘QE’, ‘Exploris480’: ‘QE’, ‘LUMOS’: ‘Lumos’, ‘TIMSTOF’: ‘timsTOF’, ‘SCIEXTOF’: ‘SciexTOF’, ‘FUSION’: ‘Lumos’, ‘ECLIPSE’: ‘Lumos’, ‘VELOS’: ‘Lumos’, ‘ELITE’: ‘Lumos’, ‘ORBITRAPTRIBRID’: ‘Lumos’, ‘THERMOTRIBRID’: ‘Lumos’, ‘EXPLORIS’: ‘QE’, ‘EXPLORIS480’: ‘QE’}, ‘predict’: {‘batch_size_ms2’: 512, ‘batch_size_rt_ccs’: 1024, ‘verbose’: True, ‘multiprocessing’: True}, ‘transfer’: {‘model_output_folder’: ‘{PEPTDEEP_HOME}/refined_models’, ‘epoch_ms2’: 20, ‘warmup_epoch_ms2’: 10, ‘batch_size_ms2’: 512, ‘lr_ms2’: 0.0001, ‘epoch_rt_ccs’: 40, ‘warmup_epoch_rt_ccs’: 10, ‘batch_size_rt_ccs’: 1024, ‘lr_rt_ccs’: 0.0001, ‘verbose’: False, ‘grid_nce_search’: True, ‘grid_nce_first’: 15.0, ‘grid_nce_last’: 45.0, ‘grid_nce_step’: 3.0, ‘grid_instrument’: [‘Lumos’], ‘psm_type’: ‘alphapept’, ‘psm_type_choices’: [‘alphapept’, ‘pfind’, ‘maxquant’, ‘diann’, ‘speclib_tsv’], ‘psm_files’: [], ‘ms_file_type’: ‘alphapept_hdf’, ‘ms_file_type_choices’: [‘alphapept_hdf’, ‘thermo_raw’, ‘mgf’, ‘mzml’], ‘ms_files’: [], ‘psm_num_to_train_ms2’: 100000000, ‘psm_num_per_mod_to_train_ms2’: 50, ‘psm_num_to_train_rt_ccs’: 100000000, ‘psm_num_per_mod_to_train_rt_ccs’: 50, ‘top_n_mods_to_train’: 10}}, ‘percolator’: {‘require_model_tuning’: True, ‘raw_num_to_tune’: 8, ‘require_raw_specific_tuning’: True, ‘raw_specific_ms2_tuning’: False, ‘psm_num_per_raw_to_tune’: 200, ‘epoch_per_raw_to_tune’: 5, ‘multiprocessing’: True, ‘top_k_frags_to_calc_spc’: 10, ‘calibrate_frag_mass_error’: False, ‘max_perc_train_sample’: 1000000, ‘min_perc_train_sample’: 100, ‘percolator_backend’: ‘sklearn’, ‘percolator_backend_choices’: [‘sklearn’, ‘pytorch’], ‘percolator_model’: ‘linear’, ‘percolator_model_choices’: {‘pytorch_as_backend’: [‘linear’, ‘mlp’], ‘sklearn_as_backend’: [‘linear’, ‘random_forest’]}, ‘lr_percolator_torch_model’: 0.1, ‘percolator_iter_num’: 5, ‘cv_fold’: 1, ‘fdr’: 0.01, ‘fdr_level’: ‘psm’, ‘fdr_level_choices’: [‘psm’, ‘precursor’, ‘peptide’, ‘sequence’], ‘use_fdr_for_each_raw’: False, ‘frag_types’: [‘b_z1’, ‘b_z2’, ‘y_z1’, ‘y_z2’], ‘input_files’: {‘psm_type’: ‘alphapept’, ‘psm_type_choices’: [‘alphapept’, ‘pfind’, ‘maxquant’], ‘psm_files’: [], ‘ms_file_type’: ‘alphapept_hdf’, ‘ms_file_type_choices’: [‘hdf’, ‘thermo_raw’, ‘mgf’, ‘mzml’], ‘ms_files’: [], ‘other_score_column_mapping’: {‘alphapept’: {}, ‘pfind’: {‘raw_score’: ‘Raw_Score’}, ‘msfragger’: {‘hyperscore’: ‘hyperscore’, ‘nextscore’: ‘nextscore’}, ‘maxquant’: {}}}, ‘output_folder’: ‘{PEPTDEEP_HOME}/rescore’}, ‘library’: {‘input’: {‘infile_type’: ‘fasta’, ‘infile_type_choices’: [‘fasta’, ‘sequence_table’, ‘peptide_table’, ‘precursor_table’], ‘infiles’: [‘xxx.fasta’], ‘fasta’: {‘protease’: ‘([KR])’, ‘protease_choices’: [‘trypsin/P’, ‘([KR])’, ‘trypsin’, ‘(<a href="?=%5B%5EP%5D">KR</a>)’, ‘lys-c’, ‘K’, ‘lys-n’, ‘\w(?=K)’, ‘chymotrypsin’], ‘max_miss_cleave’: 2}, ‘fix_mods’: [‘Carbamidomethyl@C’], ‘var_mods’: [‘Acetyl@Protein N-term’, ‘Oxidation@M’], ‘min_var_mod_num’: 0, ‘max_var_mod_num’: 2, ‘min_precursor_charge’: 2, ‘max_precursor_charge’: 4, ‘min_peptide_len’: 7, ‘max_peptide_len’: 35, ‘min_precursor_mz’: 200.0, ‘max_precursor_mz’: 2000.0, ‘decoy’: ‘pseudo_reverse’, ‘decoy_choices’: [‘pseudo_reverse’, ‘diann’, ‘None’], ‘max_frag_charge’: 2, ‘frag_types’: [‘b’, ‘y’]}, ‘output_folder’: ‘{PEPTDEEP_HOME}/spec_libs’, ‘output_tsv’: {‘enabled’: False, ‘min_fragment_mz’: 200, ‘max_fragment_mz’: 2000, ‘min_relative_intensity’: 0.01, ‘keep_higest_k_peaks’: 12, ‘translate_batch_size’: 1000000, ‘translate_mod_to_unimod_id’: False}}}</td>
+<td>The settings dict. Optional, by default <code>peptdeep.settings.global_settings</code>.</td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+<section id="rescoring-percolator-pipeline" class="level2">
+<h2 class="anchored" data-anchor-id="rescoring-percolator-pipeline">Rescoring (percolator) pipeline</h2>
+<hr>
+<p><a href="https://github.com/MannLabs/alphapeptdeep/blob/main/peptdeep/pipeline_api.py#L338" target="_blank" style="float:right; font-size:smaller">source</a></p>
+<section id="rescore" class="level3">
+<h3 class="anchored" data-anchor-id="rescore">rescore</h3>
+<blockquote class="blockquote">
+<pre><code> rescore (settings_dict:dict={'model': {'frag_types': ['b', 'y',
+          'b_modloss', 'y_modloss'], 'max_frag_charge': 2},
+          'PEPTDEEP_HOME': '/Users/zengwenfeng/peptdeep',
+          'local_model_zip_name': 'pretrained_models.zip', 'model_url': 'h
+          ttps://github.com/MannLabs/alphapeptdeep/releases/download/pre-
+          trained-models/pretrained_models.zip', 'task_type': 'library',
+          'task_type_choices': ['library', 'train', 'rescore'],
+          'thread_num': 8, 'torch_device': {'device_type': 'gpu',
+          'device_type_choices': ['gpu', 'mps', 'cpu'], 'device_ids': []},
+          'log_level': 'info', 'log_level_choices': ['debug', 'info',
+          'warning', 'error', 'critical'], 'common':
+          {'modloss_importance_level': 1.0}, 'peak_matching': {'ms2_ppm':
+          True, 'ms2_tol_value': 20.0, 'ms1_ppm': True, 'ms1_tol_value':
+          20.0}, 'model_mgr': {'default_nce': 30.0, 'default_instrument':
+          'Lumos', 'mask_modloss': True, 'model_type': 'generic',
+          'model_choices': ['generic', 'phos', 'hla', 'digly'],
+          'external_ms2_model': '', 'external_rt_model': '',
+          'external_ccs_model': '', 'instrument_group': {'Lumos': 'Lumos',
+          'QE': 'QE', 'timsTOF': 'timsTOF', 'SciexTOF': 'SciexTOF',
+          'Fusion': 'Lumos', 'Eclipse': 'Lumos', 'Velos': 'Lumos',
+          'Elite': 'Lumos', 'OrbitrapTribrid': 'Lumos', 'ThermoTribrid':
+          'Lumos', 'QE+': 'QE', 'QEHF': 'QE', 'QEHFX': 'QE', 'Exploris':
+          'QE', 'Exploris480': 'QE', 'LUMOS': 'Lumos', 'TIMSTOF':
+          'timsTOF', 'SCIEXTOF': 'SciexTOF', 'FUSION': 'Lumos', 'ECLIPSE':
+          'Lumos', 'VELOS': 'Lumos', 'ELITE': 'Lumos', 'ORBITRAPTRIBRID':
+          'Lumos', 'THERMOTRIBRID': 'Lumos', 'EXPLORIS': 'QE',
+          'EXPLORIS480': 'QE'}, 'predict': {'batch_size_ms2': 512,
+          'batch_size_rt_ccs': 1024, 'verbose': True, 'multiprocessing':
+          True}, 'transfer': {'model_output_folder':
+          '{PEPTDEEP_HOME}/refined_models', 'epoch_ms2': 20,
+          'warmup_epoch_ms2': 10, 'batch_size_ms2': 512, 'lr_ms2': 0.0001,
+          'epoch_rt_ccs': 40, 'warmup_epoch_rt_ccs': 10,
+          'batch_size_rt_ccs': 1024, 'lr_rt_ccs': 0.0001, 'verbose':
+          False, 'grid_nce_search': True, 'grid_nce_first': 15.0,
+          'grid_nce_last': 45.0, 'grid_nce_step': 3.0, 'grid_instrument':
+          ['Lumos'], 'psm_type': 'alphapept', 'psm_type_choices':
+          ['alphapept', 'pfind', 'maxquant', 'diann', 'speclib_tsv'],
+          'psm_files': [], 'ms_file_type': 'alphapept_hdf',
+          'ms_file_type_choices': ['alphapept_hdf', 'thermo_raw', 'mgf',
+          'mzml'], 'ms_files': [], 'psm_num_to_train_ms2': 100000000,
+          'psm_num_per_mod_to_train_ms2': 50, 'psm_num_to_train_rt_ccs':
+          100000000, 'psm_num_per_mod_to_train_rt_ccs': 50,
+          'top_n_mods_to_train': 10}}, 'percolator':
+          {'require_model_tuning': True, 'raw_num_to_tune': 8,
+          'require_raw_specific_tuning': True, 'raw_specific_ms2_tuning':
+          False, 'psm_num_per_raw_to_tune': 200, 'epoch_per_raw_to_tune':
+          5, 'multiprocessing': True, 'top_k_frags_to_calc_spc': 10,
+          'calibrate_frag_mass_error': False, 'max_perc_train_sample':
+          1000000, 'min_perc_train_sample': 100, 'percolator_backend':
+          'sklearn', 'percolator_backend_choices': ['sklearn', 'pytorch'],
+          'percolator_model': 'linear', 'percolator_model_choices':
+          {'pytorch_as_backend': ['linear', 'mlp'], 'sklearn_as_backend':
+          ['linear', 'random_forest']}, 'lr_percolator_torch_model': 0.1,
+          'percolator_iter_num': 5, 'cv_fold': 1, 'fdr': 0.01,
+          'fdr_level': 'psm', 'fdr_level_choices': ['psm', 'precursor',
+          'peptide', 'sequence'], 'use_fdr_for_each_raw': False,
+          'frag_types': ['b_z1', 'b_z2', 'y_z1', 'y_z2'], 'input_files':
+          {'psm_type': 'alphapept', 'psm_type_choices': ['alphapept',
+          'pfind', 'maxquant'], 'psm_files': [], 'ms_file_type':
+          'alphapept_hdf', 'ms_file_type_choices': ['hdf', 'thermo_raw',
+          'mgf', 'mzml'], 'ms_files': [], 'other_score_column_mapping':
+          {'alphapept': {}, 'pfind': {'raw_score': 'Raw_Score'},
+          'msfragger': {'hyperscore': 'hyperscore', 'nextscore':
+          'nextscore'}, 'maxquant': {}}}, 'output_folder':
+          '{PEPTDEEP_HOME}/rescore'}, 'library': {'input': {'infile_type':
+          'fasta', 'infile_type_choices': ['fasta', 'sequence_table',
+          'peptide_table', 'precursor_table'], 'infiles': ['xxx.fasta'],
+          'fasta': {'protease': '([KR])', 'protease_choices':
+          ['trypsin/P', '([KR])', 'trypsin', '([KR](?=[^P]))', 'lys-c',
+          'K', 'lys-n', '\\w(?=K)', 'chymotrypsin'], 'max_miss_cleave':
+          2}, 'fix_mods': ['Carbamidomethyl@C'], 'var_mods':
+          ['Acetyl@Protein N-term', 'Oxidation@M'], 'min_var_mod_num': 0,
+          'max_var_mod_num': 2, 'min_precursor_charge': 2,
+          'max_precursor_charge': 4, 'min_peptide_len': 7,
+          'max_peptide_len': 35, 'min_precursor_mz': 200.0,
+          'max_precursor_mz': 2000.0, 'decoy': 'pseudo_reverse',
+          'decoy_choices': ['pseudo_reverse', 'diann', 'None'],
+          'max_frag_charge': 2, 'frag_types': ['b', 'y']},
+          'output_folder': '{PEPTDEEP_HOME}/spec_libs', 'output_tsv':
+          {'enabled': False, 'min_fragment_mz': 200, 'max_fragment_mz':
+          2000, 'min_relative_intensity': 0.01, 'keep_higest_k_peaks': 12,
+          'translate_batch_size': 1000000, 'translate_mod_to_unimod_id':
+          False}}})</code></pre>
+</blockquote>
+<p>Generate/predict a spectral library.</p>
+<p>All required information in settings_dict:</p>
+<pre><code>perc_settings = settings_dict['percolator']
+output_folder = perc_settings['output_folder'] # str. Output folder of the rescored results
+perc_settings['input_files']['psm_files'] # list of str. all PSM files (at 100% FDR and including decoys) from the search engines
+perc_settings['input_files']['psm_type'] # str. PSM or search engine type, e.g. pfind, alphapept, maxquant
+perc_settings['input_files']['ms_file_type'] # str. Could be alphapept_hdf, thermo, ...
+perc_settings['input_files']['ms_files'] # list of str. MS file list to match MS2 peaks</code></pre>
+<table class="table">
+<thead>
+<tr class="header">
+<th></th>
+<th><strong>Type</strong></th>
+<th><strong>Default</strong></th>
+<th><strong>Details</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>settings_dict</td>
+<td>dict</td>
+<td>{‘model’: {‘frag_types’: [‘b’, ‘y’, ‘b_modloss’, ‘y_modloss’], ‘max_frag_charge’: 2}, ‘PEPTDEEP_HOME’: ‘/Users/zengwenfeng/peptdeep’, ‘local_model_zip_name’: ‘pretrained_models.zip’, ‘model_url’: ‘https://github.com/MannLabs/alphapeptdeep/releases/download/pre-trained-models/pretrained_models.zip’, ‘task_type’: ‘library’, ‘task_type_choices’: [‘library’, ‘train’, ‘rescore’], ‘thread_num’: 8, ‘torch_device’: {‘device_type’: ‘gpu’, ‘device_type_choices’: [‘gpu’, ‘mps’, ‘cpu’], ‘device_ids’: []}, ‘log_level’: ‘info’, ‘log_level_choices’: [‘debug’, ‘info’, ‘warning’, ‘error’, ‘critical’], ‘common’: {‘modloss_importance_level’: 1.0}, ‘peak_matching’: {‘ms2_ppm’: True, ‘ms2_tol_value’: 20.0, ‘ms1_ppm’: True, ‘ms1_tol_value’: 20.0}, ‘model_mgr’: {‘default_nce’: 30.0, ‘default_instrument’: ‘Lumos’, ‘mask_modloss’: True, ‘model_type’: ‘generic’, ‘model_choices’: [‘generic’, ‘phos’, ‘hla’, ‘digly’], ‘external_ms2_model’: ’‘, ’external_rt_model’: ’‘, ’external_ccs_model’: ’‘, ’instrument_group’: {‘Lumos’: ‘Lumos’, ‘QE’: ‘QE’, ‘timsTOF’: ‘timsTOF’, ‘SciexTOF’: ‘SciexTOF’, ‘Fusion’: ‘Lumos’, ‘Eclipse’: ‘Lumos’, ‘Velos’: ‘Lumos’, ‘Elite’: ‘Lumos’, ‘OrbitrapTribrid’: ‘Lumos’, ‘ThermoTribrid’: ‘Lumos’, ‘QE+’: ‘QE’, ‘QEHF’: ‘QE’, ‘QEHFX’: ‘QE’, ‘Exploris’: ‘QE’, ‘Exploris480’: ‘QE’, ‘LUMOS’: ‘Lumos’, ‘TIMSTOF’: ‘timsTOF’, ‘SCIEXTOF’: ‘SciexTOF’, ‘FUSION’: ‘Lumos’, ‘ECLIPSE’: ‘Lumos’, ‘VELOS’: ‘Lumos’, ‘ELITE’: ‘Lumos’, ‘ORBITRAPTRIBRID’: ‘Lumos’, ‘THERMOTRIBRID’: ‘Lumos’, ‘EXPLORIS’: ‘QE’, ‘EXPLORIS480’: ‘QE’}, ‘predict’: {‘batch_size_ms2’: 512, ‘batch_size_rt_ccs’: 1024, ‘verbose’: True, ‘multiprocessing’: True}, ‘transfer’: {‘model_output_folder’: ‘{PEPTDEEP_HOME}/refined_models’, ‘epoch_ms2’: 20, ‘warmup_epoch_ms2’: 10, ‘batch_size_ms2’: 512, ‘lr_ms2’: 0.0001, ‘epoch_rt_ccs’: 40, ‘warmup_epoch_rt_ccs’: 10, ‘batch_size_rt_ccs’: 1024, ‘lr_rt_ccs’: 0.0001, ‘verbose’: False, ‘grid_nce_search’: True, ‘grid_nce_first’: 15.0, ‘grid_nce_last’: 45.0, ‘grid_nce_step’: 3.0, ‘grid_instrument’: [‘Lumos’], ‘psm_type’: ‘alphapept’, ‘psm_type_choices’: [‘alphapept’, ‘pfind’, ‘maxquant’, ‘diann’, ‘speclib_tsv’], ‘psm_files’: [], ‘ms_file_type’: ‘alphapept_hdf’, ‘ms_file_type_choices’: [‘alphapept_hdf’, ‘thermo_raw’, ‘mgf’, ‘mzml’], ‘ms_files’: [], ‘psm_num_to_train_ms2’: 100000000, ‘psm_num_per_mod_to_train_ms2’: 50, ‘psm_num_to_train_rt_ccs’: 100000000, ‘psm_num_per_mod_to_train_rt_ccs’: 50, ‘top_n_mods_to_train’: 10}}, ‘percolator’: {‘require_model_tuning’: True, ‘raw_num_to_tune’: 8, ‘require_raw_specific_tuning’: True, ‘raw_specific_ms2_tuning’: False, ‘psm_num_per_raw_to_tune’: 200, ‘epoch_per_raw_to_tune’: 5, ‘multiprocessing’: True, ‘top_k_frags_to_calc_spc’: 10, ‘calibrate_frag_mass_error’: False, ‘max_perc_train_sample’: 1000000, ‘min_perc_train_sample’: 100, ‘percolator_backend’: ‘sklearn’, ‘percolator_backend_choices’: [‘sklearn’, ‘pytorch’], ‘percolator_model’: ‘linear’, ‘percolator_model_choices’: {‘pytorch_as_backend’: [‘linear’, ‘mlp’], ‘sklearn_as_backend’: [‘linear’, ‘random_forest’]}, ‘lr_percolator_torch_model’: 0.1, ‘percolator_iter_num’: 5, ‘cv_fold’: 1, ‘fdr’: 0.01, ‘fdr_level’: ‘psm’, ‘fdr_level_choices’: [‘psm’, ‘precursor’, ‘peptide’, ‘sequence’], ‘use_fdr_for_each_raw’: False, ‘frag_types’: [‘b_z1’, ‘b_z2’, ‘y_z1’, ‘y_z2’], ‘input_files’: {‘psm_type’: ‘alphapept’, ‘psm_type_choices’: [‘alphapept’, ‘pfind’, ‘maxquant’], ‘psm_files’: [], ‘ms_file_type’: ‘alphapept_hdf’, ‘ms_file_type_choices’: [‘hdf’, ‘thermo_raw’, ‘mgf’, ‘mzml’], ‘ms_files’: [], ‘other_score_column_mapping’: {‘alphapept’: {}, ‘pfind’: {‘raw_score’: ‘Raw_Score’}, ‘msfragger’: {‘hyperscore’: ‘hyperscore’, ‘nextscore’: ‘nextscore’}, ‘maxquant’: {}}}, ‘output_folder’: ‘{PEPTDEEP_HOME}/rescore’}, ‘library’: {‘input’: {‘infile_type’: ‘fasta’, ‘infile_type_choices’: [‘fasta’, ‘sequence_table’, ‘peptide_table’, ‘precursor_table’], ‘infiles’: [‘xxx.fasta’], ‘fasta’: {‘protease’: ‘([KR])’, ‘protease_choices’: [‘trypsin/P’, ‘([KR])’, ‘trypsin’, ‘(<a href="?=%5B%5EP%5D">KR</a>)’, ‘lys-c’, ‘K’, ‘lys-n’, ‘\w(?=K)’, ‘chymotrypsin’], ‘max_miss_cleave’: 2}, ‘fix_mods’: [‘Carbamidomethyl@C’], ‘var_mods’: [‘Acetyl@Protein N-term’, ‘Oxidation@M’], ‘min_var_mod_num’: 0, ‘max_var_mod_num’: 2, ‘min_precursor_charge’: 2, ‘max_precursor_charge’: 4, ‘min_peptide_len’: 7, ‘max_peptide_len’: 35, ‘min_precursor_mz’: 200.0, ‘max_precursor_mz’: 2000.0, ‘decoy’: ‘pseudo_reverse’, ‘decoy_choices’: [‘pseudo_reverse’, ‘diann’, ‘None’], ‘max_frag_charge’: 2, ‘frag_types’: [‘b’, ‘y’]}, ‘output_folder’: ‘{PEPTDEEP_HOME}/spec_libs’, ‘output_tsv’: {‘enabled’: False, ‘min_fragment_mz’: 200, ‘max_fragment_mz’: 2000, ‘min_relative_intensity’: 0.01, ‘keep_higest_k_peaks’: 12, ‘translate_batch_size’: 1000000, ‘translate_mod_to_unimod_id’: False}}}</td>
+<td>The settings dict. Optional, by default <code>peptdeep.settings.global_settings</code>.</td>
+</tr>
+</tbody>
+</table>
+
+
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    target: function(trigger) {
+      return trigger.previousElementSibling;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    setTimeout(function() {
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const cites = ref.parentNode.getAttribute('data-cites').split(' ');
+    tippyHover(ref, function() {
+      var popup = window.document.createElement('div');
+      cites.forEach(function(cite) {
+        var citeDiv = window.document.createElement('div');
+        citeDiv.classList.add('hanging-indent');
+        citeDiv.classList.add('csl-entry');
+        var biblioDiv = window.document.getElementById('ref-' + cite);
+        if (biblioDiv) {
+          citeDiv.innerHTML = biblioDiv.innerHTML;
+        }
+        popup.appendChild(citeDiv);
+      });
+      return popup.innerHTML;
+    });
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>

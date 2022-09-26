@@ -23,6 +23,7 @@ class SpectronautMSMSReader(SpectronautReader, PSMReader_w_FragBase):
     def __init__(self,
         frag_types=['b','y','b_modloss','y_modloss'], 
         max_frag_charge=2,
+        rt_unit='irt',
         **kwargs
     ):
         PSMReader_w_FragBase.__init__(self,
@@ -31,7 +32,7 @@ class SpectronautMSMSReader(SpectronautReader, PSMReader_w_FragBase):
             **kwargs
         )
 
-        SpectronautReader.__init__(self)
+        SpectronautReader.__init__(self, rt_unit=rt_unit)
 
         self.min_allow_frag_num = 6
         self.groupby_raw_name = False
