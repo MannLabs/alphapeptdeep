@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.1.189">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>alphapeptdeep - Percolator</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1.6em;
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit"
+  }
+}</script>
+
+
+<link rel="stylesheet" href="../styles.css">
+<meta property="og:title" content="alphapeptdeep - Percolator">
+<meta property="og:description" content="Recoring (Percolator) algorithms and the functionalities. Check the original Percolator paper: https://www.nature.com/articles/nmeth1113">
+<meta property="og:site-name" content="alphapeptdeep">
+<meta name="twitter:title" content="alphapeptdeep - Percolator">
+<meta name="twitter:description" content="Recoring (Percolator) algorithms and the functionalities. Check the original Percolator paper: https://www.nature.com/articles/nmeth1113">
+<meta name="twitter:card" content="summary">
+</head>
+
+<body class="nav-sidebar floating nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container">
+    <a class="navbar-brand" href="../index.html">
+    <span class="navbar-title">alphapeptdeep</span>
+    </a>
+  </div>
+          <div id="quarto-search" class="" title="Search"></div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+    <div class="container-fluid d-flex justify-content-between">
+      <h1 class="quarto-secondary-nav-title">Percolator</h1>
+      <button type="button" class="quarto-btn-toggle btn" aria-label="Show secondary navigation">
+        <i class="bi bi-chevron-right"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse sidebar-navigation floating overflow-auto">
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../index.html" class="sidebar-item-text sidebar-link">AlphaPeptDeep</a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pipeline_api.html" class="sidebar-item-text sidebar-link">pipeline API</a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pretrained_models.html" class="sidebar-item-text sidebar-link">Pretrained Models</a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../settings.html" class="sidebar-item-text sidebar-link">Settings</a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../test_ui.html" class="sidebar-item-text sidebar-link">Testing GUI</a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../utils.html" class="sidebar-item-text sidebar-link">Utils</a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true">mass_spec</a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../mass_spec/mass_calibration.html" class="sidebar-item-text sidebar-link">Mass calibration</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../mass_spec/match.html" class="sidebar-item-text sidebar-link">Match</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../mass_spec/ms_reader.html" class="sidebar-item-text sidebar-link">MS Reader</a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" aria-expanded="true">model</a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" aria-expanded="true">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../model/building_block.html" class="sidebar-item-text sidebar-link">NN Building Block</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../model/ccs.html" class="sidebar-item-text sidebar-link">CCS model and interface</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../model/featurize.html" class="sidebar-item-text sidebar-link">Featurize</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../model/generic_property_prediction.html" class="sidebar-item-text sidebar-link">Generic Property Prediction</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../model/model_interface.html" class="sidebar-item-text sidebar-link">Model Interface</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../model/model_shop.html" class="sidebar-item-text sidebar-link">Model shop</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../model/ms2.html" class="sidebar-item-text sidebar-link">MS2 prediction</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../model/rt.html" class="sidebar-item-text sidebar-link">Retention Time Prediction</a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" aria-expanded="true">protein</a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" aria-expanded="true">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../protein/fasta.html" class="sidebar-item-text sidebar-link">Spectral Library from fasta</a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" aria-expanded="true">psm_frag_reader</a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" aria-expanded="true">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../psm_frag_reader/library_frag_reader.html" class="sidebar-item-text sidebar-link">TSV Fragment Reader</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../psm_frag_reader/maxquant_frag_reader.html" class="sidebar-item-text sidebar-link">MaxQuant Fragment Reader</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../psm_frag_reader/psm_frag_reader.html" class="sidebar-item-text sidebar-link">Base PSM Fragment Reader</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../psm_frag_reader/psmlabel_reader.html" class="sidebar-item-text sidebar-link">.psmlabel Fragment Reader</a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" aria-expanded="true">rescore</a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" aria-expanded="true">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../rescore/fdr.html" class="sidebar-item-text sidebar-link">FDR</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../rescore/feature_extractor.html" class="sidebar-item-text sidebar-link">Feature Extractor</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../rescore/percolator.html" class="sidebar-item-text sidebar-link active">Percolator</a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" aria-expanded="true">spec_lib</a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" aria-expanded="true">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../spec_lib/library_factory.html" class="sidebar-item-text sidebar-link">Library Factory</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../spec_lib/predict_lib.html" class="sidebar-item-text sidebar-link">Predict Spectral Library</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../spec_lib/test_translate_tsv.html" class="sidebar-item-text sidebar-link">test_translate_tsv.html</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../spec_lib/translate.html" class="sidebar-item-text sidebar-link">Translate Spectral Library</a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#nnrescore" id="toc-nnrescore" class="nav-link active" data-scroll-target="#nnrescore">NNRescore</a></li>
+  <li><a href="#rescoremodelprovider" id="toc-rescoremodelprovider" class="nav-link" data-scroll-target="#rescoremodelprovider">RescoreModelProvider</a></li>
+  <li><a href="#logisticregressiontorch" id="toc-logisticregressiontorch" class="nav-link" data-scroll-target="#logisticregressiontorch">LogisticRegressionTorch</a></li>
+  <li><a href="#build-in-percolator-algorithm" id="toc-build-in-percolator-algorithm" class="nav-link" data-scroll-target="#build-in-percolator-algorithm">Build-in percolator algorithm</a></li>
+  <li><a href="#percolator" id="toc-percolator" class="nav-link" data-scroll-target="#percolator">Percolator</a></li>
+  <li><a href="#percolator.load_psms" id="toc-percolator.load_psms" class="nav-link" data-scroll-target="#percolator.load_psms">Percolator.load_psms</a></li>
+  <li><a href="#percolator.extract_features" id="toc-percolator.extract_features" class="nav-link" data-scroll-target="#percolator.extract_features">Percolator.extract_features</a></li>
+  <li><a href="#percolator.re_score" id="toc-percolator.re_score" class="nav-link" data-scroll-target="#percolator.re_score">Percolator.re_score</a></li>
+  <li><a href="#percolator.run" id="toc-percolator.run" class="nav-link" data-scroll-target="#percolator.run">Percolator.run</a></li>
+  </ul>
+<div class="toc-actions"><div><i class="bi bi-github"></i></div><div class="action-links"><p><a href="https://github.com/MannLabs/alphapeptdeep/issues/new" class="toc-action">Report an issue</a></p></div></div></nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title d-none d-lg-block">Percolator</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+    
+  </div>
+  
+
+</header>
+
+<!-- WARNING: THIS FILE WAS AUTOGENERATED! DO NOT EDIT! -->
+<p>Recoring (Percolator) algorithms and the functionalities. Check the original Percolator paper: https://www.nature.com/articles/nmeth1113</p>
+<hr>
+<p><a href="https://github.com/MannLabs/alphapeptdeep/blob/main/peptdeep/rescore/percolator.py#L72" target="_blank" style="float:right; font-size:smaller">source</a></p>
+<section id="nnrescore" class="level3">
+<h3 class="anchored" data-anchor-id="nnrescore">NNRescore</h3>
+<blockquote class="blockquote">
+<pre><code> NNRescore (num_features, nn_model_type='linear')</code></pre>
+</blockquote>
+<p>Initialize self. See help(type(self)) for accurate signature.</p>
+<hr>
+<p><a href="https://github.com/MannLabs/alphapeptdeep/blob/main/peptdeep/rescore/percolator.py#L49" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="rescoremodelprovider" class="level3">
+<h3 class="anchored" data-anchor-id="rescoremodelprovider">RescoreModelProvider</h3>
+<blockquote class="blockquote">
+<pre><code> RescoreModelProvider ()</code></pre>
+</blockquote>
+<p>Initialize self. See help(type(self)) for accurate signature.</p>
+<hr>
+<p><a href="https://github.com/MannLabs/alphapeptdeep/blob/main/peptdeep/rescore/percolator.py#L40" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="logisticregressiontorch" class="level3">
+<h3 class="anchored" data-anchor-id="logisticregressiontorch">LogisticRegressionTorch</h3>
+<blockquote class="blockquote">
+<pre><code> LogisticRegressionTorch (input_dim, **kwargs)</code></pre>
+</blockquote>
+<p>Torch-based rescore model</p>
+</section>
+<section id="build-in-percolator-algorithm" class="level3">
+<h3 class="anchored" data-anchor-id="build-in-percolator-algorithm">Build-in percolator algorithm</h3>
+<hr>
+<p><a href="https://github.com/MannLabs/alphapeptdeep/blob/main/peptdeep/rescore/percolator.py#L134" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="percolator" class="level3">
+<h3 class="anchored" data-anchor-id="percolator">Percolator</h3>
+<blockquote class="blockquote">
+<pre><code> Percolator (percolator_model:str='linear',
+             percolator_backend:str='sklearn', cv_fold:int=1,
+             iter_num:int=5, ms2_ppm:bool=True, ms2_tol:float=20.0,
+             model_mgr:peptdeep.pretrained_models.ModelManager=None)</code></pre>
+</blockquote>
+<p>Percolator model. In parameter list, perc_settings is</p>
+<pre><code>perc_settings = peptdeep.settings.global_settings['percolator']</code></pre>
+<table class="table">
+<colgroup>
+<col style="width: 6%">
+<col style="width: 25%">
+<col style="width: 34%">
+<col style="width: 34%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th><strong>Type</strong></th>
+<th><strong>Default</strong></th>
+<th><strong>Details</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>percolator_model</td>
+<td>str</td>
+<td>linear</td>
+<td>machine learning <br>model type for rescoring, could be:<br>“linear”: logistic regression<br>“random_forest”: random forest<br>Defaults to perc_settings[‘percolator_model’].</td>
+</tr>
+<tr class="even">
+<td>percolator_backend</td>
+<td>str</td>
+<td>sklearn</td>
+<td><code>sklearn</code> or <code>pytorch</code>.<br>Defaults to perc_settings[‘percolator_backend’]</td>
+</tr>
+<tr class="odd">
+<td>cv_fold</td>
+<td>int</td>
+<td>1</td>
+<td>cross-validation fold. <br>Defaults to perc_settings[‘cv_fold’].</td>
+</tr>
+<tr class="even">
+<td>iter_num</td>
+<td>int</td>
+<td>5</td>
+<td>percolator iteration number. <br>Defaults to perc_settings[‘percolator_iter_num’].</td>
+</tr>
+<tr class="odd">
+<td>ms2_ppm</td>
+<td>bool</td>
+<td>True</td>
+<td>is ms2 tolerance the ppm. <br>Defaults to perc_settings[‘ms2_ppm’].</td>
+</tr>
+<tr class="even">
+<td>ms2_tol</td>
+<td>float</td>
+<td>20.0</td>
+<td>ms2 tolerance. <br>Defaults to perc_settings[‘ms2_tol’].</td>
+</tr>
+<tr class="odd">
+<td>model_mgr</td>
+<td>ModelManager</td>
+<td>None</td>
+<td>peptdeep.pretrained_model.ModelManager.<br>If None, self.model_mgr will be init by default (see <code>peptdeep.pretrained_models.ModelManager</code>).<br>Defaults to None.</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<p><a href="https://github.com/MannLabs/alphapeptdeep/blob/main/peptdeep/rescore/percolator.py#L402" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="percolator.load_psms" class="level3">
+<h3 class="anchored" data-anchor-id="percolator.load_psms">Percolator.load_psms</h3>
+<blockquote class="blockquote">
+<pre><code> Percolator.load_psms (psm_file_list:list, psm_type:str)</code></pre>
+</blockquote>
+<p>Load PSM dataframe from file path list.</p>
+<table class="table">
+<colgroup>
+<col style="width: 9%">
+<col style="width: 38%">
+<col style="width: 52%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th><strong>Type</strong></th>
+<th><strong>Details</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>psm_file_list</td>
+<td>list</td>
+<td>PSM file path list</td>
+</tr>
+<tr class="even">
+<td>psm_type</td>
+<td>str</td>
+<td>PSM type, could be alphapept, pfind, …</td>
+</tr>
+<tr class="odd">
+<td><strong>Returns</strong></td>
+<td><strong>DataFrame</strong></td>
+<td><strong>PSM dataframe with 100% FDR including decoys. </strong></td>
+</tr>
+</tbody>
+</table>
+<hr>
+<p><a href="https://github.com/MannLabs/alphapeptdeep/blob/main/peptdeep/rescore/percolator.py#L430" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="percolator.extract_features" class="level3">
+<h3 class="anchored" data-anchor-id="percolator.extract_features">Percolator.extract_features</h3>
+<blockquote class="blockquote">
+<pre><code> Percolator.extract_features (psm_df:pandas.core.frame.DataFrame,
+                              ms2_file_dict:dict, ms2_file_type:str)</code></pre>
+</blockquote>
+<p>Extract features for rescoring</p>
+<table class="table">
+<colgroup>
+<col style="width: 9%">
+<col style="width: 38%">
+<col style="width: 52%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th><strong>Type</strong></th>
+<th><strong>Details</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>psm_df</td>
+<td>DataFrame</td>
+<td>PSM DataFrame</td>
+</tr>
+<tr class="even">
+<td>ms2_file_dict</td>
+<td>dict</td>
+<td>{raw_name(str): ms2_file_path(str)}</td>
+</tr>
+<tr class="odd">
+<td>ms2_file_type</td>
+<td>str</td>
+<td>MS2 file type</td>
+</tr>
+<tr class="even">
+<td><strong>Returns</strong></td>
+<td><strong>DataFrame</strong></td>
+<td><strong>psm_df with feature columns appended inplace.</strong></td>
+</tr>
+</tbody>
+</table>
+<hr>
+<p><a href="https://github.com/MannLabs/alphapeptdeep/blob/main/peptdeep/rescore/percolator.py#L462" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="percolator.re_score" class="level3">
+<h3 class="anchored" data-anchor-id="percolator.re_score">Percolator.re_score</h3>
+<blockquote class="blockquote">
+<pre><code> Percolator.re_score (df:pandas.core.frame.DataFrame)</code></pre>
+</blockquote>
+<p>Rescore</p>
+<table class="table">
+<colgroup>
+<col style="width: 9%">
+<col style="width: 38%">
+<col style="width: 52%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th><strong>Type</strong></th>
+<th><strong>Details</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>df</td>
+<td>DataFrame</td>
+<td>psm_df</td>
+</tr>
+<tr class="even">
+<td><strong>Returns</strong></td>
+<td><strong>DataFrame</strong></td>
+<td><strong>psm_df with <code>ml_score</code> and <code>fdr</code> columns updated inplace</strong></td>
+</tr>
+</tbody>
+</table>
+<hr>
+<p><a href="https://github.com/MannLabs/alphapeptdeep/blob/main/peptdeep/rescore/percolator.py#L496" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="percolator.run" class="level3">
+<h3 class="anchored" data-anchor-id="percolator.run">Percolator.run</h3>
+<blockquote class="blockquote">
+<pre><code> Percolator.run (psm_df:pandas.core.frame.DataFrame, ms2_file_dict:dict,
+                 ms2_file_type:str)</code></pre>
+</blockquote>
+<p>Run percolator workflow:</p>
+<ul>
+<li>self.extract_features()</li>
+<li>self.re_score()</li>
+</ul>
+<table class="table">
+<colgroup>
+<col style="width: 9%">
+<col style="width: 38%">
+<col style="width: 52%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th><strong>Type</strong></th>
+<th><strong>Details</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>psm_df</td>
+<td>DataFrame</td>
+<td>PSM DataFrame</td>
+</tr>
+<tr class="even">
+<td>ms2_file_dict</td>
+<td>dict</td>
+<td>{raw_name(str): ms2_file_path(str)}</td>
+</tr>
+<tr class="odd">
+<td>ms2_file_type</td>
+<td>str</td>
+<td>MS2 file type</td>
+</tr>
+<tr class="even">
+<td><strong>Returns</strong></td>
+<td><strong>DataFrame</strong></td>
+<td><strong>psm_df with feature columns appended inplace.</strong></td>
+</tr>
+</tbody>
+</table>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    target: function(trigger) {
+      return trigger.previousElementSibling;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    setTimeout(function() {
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const cites = ref.parentNode.getAttribute('data-cites').split(' ');
+    tippyHover(ref, function() {
+      var popup = window.document.createElement('div');
+      cites.forEach(function(cite) {
+        var citeDiv = window.document.createElement('div');
+        citeDiv.classList.add('hanging-indent');
+        citeDiv.classList.add('csl-entry');
+        var biblioDiv = window.document.getElementById('ref-' + cite);
+        if (biblioDiv) {
+          citeDiv.innerHTML = biblioDiv.innerHTML;
+        }
+        popup.appendChild(citeDiv);
+      });
+      return popup.innerHTML;
+    });
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>
