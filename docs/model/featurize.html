@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.1.189">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>alphapeptdeep - Featurize</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1.6em;
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit"
+  }
+}</script>
+
+
+<link rel="stylesheet" href="../styles.css">
+<meta property="og:title" content="alphapeptdeep - Featurize">
+<meta property="og:description" content="Functionalities for featurization/tensorization of peptides and modifications">
+<meta property="og:site-name" content="alphapeptdeep">
+<meta name="twitter:title" content="alphapeptdeep - Featurize">
+<meta name="twitter:description" content="Functionalities for featurization/tensorization of peptides and modifications">
+<meta name="twitter:card" content="summary">
+</head>
+
+<body class="nav-sidebar floating nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container">
+    <a class="navbar-brand" href="../index.html">
+    <span class="navbar-title">alphapeptdeep</span>
+    </a>
+  </div>
+          <div id="quarto-search" class="" title="Search"></div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+    <div class="container-fluid d-flex justify-content-between">
+      <h1 class="quarto-secondary-nav-title">Featurize</h1>
+      <button type="button" class="quarto-btn-toggle btn" aria-label="Show secondary navigation">
+        <i class="bi bi-chevron-right"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse sidebar-navigation floating overflow-auto">
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../index.html" class="sidebar-item-text sidebar-link">AlphaPeptDeep</a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pipeline_api.html" class="sidebar-item-text sidebar-link">pipeline API</a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pretrained_models.html" class="sidebar-item-text sidebar-link">Pretrained Models</a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../settings.html" class="sidebar-item-text sidebar-link">Settings</a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../test_ui.html" class="sidebar-item-text sidebar-link">Testing GUI</a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../utils.html" class="sidebar-item-text sidebar-link">Utils</a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true">mass_spec</a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../mass_spec/mass_calibration.html" class="sidebar-item-text sidebar-link">Mass calibration</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../mass_spec/match.html" class="sidebar-item-text sidebar-link">Match</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../mass_spec/ms_reader.html" class="sidebar-item-text sidebar-link">MS Reader</a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" aria-expanded="true">model</a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" aria-expanded="true">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../model/building_block.html" class="sidebar-item-text sidebar-link">NN Building Block</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../model/ccs.html" class="sidebar-item-text sidebar-link">CCS model and interface</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../model/featurize.html" class="sidebar-item-text sidebar-link active">Featurize</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../model/generic_property_prediction.html" class="sidebar-item-text sidebar-link">Generic Property Prediction</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../model/model_interface.html" class="sidebar-item-text sidebar-link">Model Interface</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../model/model_shop.html" class="sidebar-item-text sidebar-link">Model shop</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../model/ms2.html" class="sidebar-item-text sidebar-link">MS2 prediction</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../model/rt.html" class="sidebar-item-text sidebar-link">Retention Time Prediction</a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" aria-expanded="true">protein</a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" aria-expanded="true">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../protein/fasta.html" class="sidebar-item-text sidebar-link">Spectral Library from fasta</a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" aria-expanded="true">psm_frag_reader</a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" aria-expanded="true">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../psm_frag_reader/library_frag_reader.html" class="sidebar-item-text sidebar-link">TSV Fragment Reader</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../psm_frag_reader/maxquant_frag_reader.html" class="sidebar-item-text sidebar-link">MaxQuant Fragment Reader</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../psm_frag_reader/psm_frag_reader.html" class="sidebar-item-text sidebar-link">Base PSM Fragment Reader</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../psm_frag_reader/psmlabel_reader.html" class="sidebar-item-text sidebar-link">.psmlabel Fragment Reader</a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" aria-expanded="true">rescore</a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" aria-expanded="true">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../rescore/fdr.html" class="sidebar-item-text sidebar-link">FDR</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../rescore/feature_extractor.html" class="sidebar-item-text sidebar-link">Feature Extractor</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../rescore/percolator.html" class="sidebar-item-text sidebar-link">Percolator</a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" aria-expanded="true">spec_lib</a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" aria-expanded="true">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../spec_lib/library_factory.html" class="sidebar-item-text sidebar-link">Library Factory</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../spec_lib/predict_lib.html" class="sidebar-item-text sidebar-link">Predict Spectral Library</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../spec_lib/test_translate_tsv.html" class="sidebar-item-text sidebar-link">test_translate_tsv.html</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../spec_lib/translate.html" class="sidebar-item-text sidebar-link">Translate Spectral Library</a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#get_all_mod_features" id="toc-get_all_mod_features" class="nav-link active" data-scroll-target="#get_all_mod_features">get_all_mod_features</a></li>
+  <li><a href="#parse_mod_feature" id="toc-parse_mod_feature" class="nav-link" data-scroll-target="#parse_mod_feature">parse_mod_feature</a></li>
+  <li><a href="#get_batch_mod_feature" id="toc-get_batch_mod_feature" class="nav-link" data-scroll-target="#get_batch_mod_feature">get_batch_mod_feature</a></li>
+  <li><a href="#get_ascii_indices" id="toc-get_ascii_indices" class="nav-link" data-scroll-target="#get_ascii_indices">get_ascii_indices</a></li>
+  <li><a href="#get_batch_aa_indices" id="toc-get_batch_aa_indices" class="nav-link" data-scroll-target="#get_batch_aa_indices">get_batch_aa_indices</a></li>
+  <li><a href="#parse_instrument_indices" id="toc-parse_instrument_indices" class="nav-link" data-scroll-target="#parse_instrument_indices">parse_instrument_indices</a></li>
+  </ul>
+<div class="toc-actions"><div><i class="bi bi-github"></i></div><div class="action-links"><p><a href="https://github.com/MannLabs/alphapeptdeep/issues/new" class="toc-action">Report an issue</a></p></div></div></nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title d-none d-lg-block">Featurize</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+    
+  </div>
+  
+
+</header>
+
+<!-- WARNING: THIS FILE WAS AUTOGENERATED! DO NOT EDIT! -->
+<p>Functionalities for featurization/tensorization of peptides and modifications</p>
+<hr>
+<p><a href="https://github.com/MannLabs/alphapeptdeep/blob/main/peptdeep/model/featurize.py#L38" target="_blank" style="float:right; font-size:smaller">source</a></p>
+<section id="get_all_mod_features" class="level3">
+<h3 class="anchored" data-anchor-id="get_all_mod_features">get_all_mod_features</h3>
+<blockquote class="blockquote">
+<pre><code> get_all_mod_features ()</code></pre>
+</blockquote>
+<hr>
+<p><a href="https://github.com/MannLabs/alphapeptdeep/blob/main/peptdeep/model/featurize.py#L46" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="parse_mod_feature" class="level3">
+<h3 class="anchored" data-anchor-id="parse_mod_feature">parse_mod_feature</h3>
+<blockquote class="blockquote">
+<pre><code> parse_mod_feature (nAA:int, mod_names:List[str], mod_sites:List[int])</code></pre>
+</blockquote>
+<p>Get modification feature of a given peptide (len=nAA). Note that <code>site=0</code> is for peptide N-term modification, <code>site=1</code> is for peptide C-term modification, and <code>1&lt;=site&lt;=nAA</code> is for residue modifications on the peptide.</p>
+<table class="table">
+<colgroup>
+<col style="width: 9%">
+<col style="width: 38%">
+<col style="width: 52%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th><strong>Type</strong></th>
+<th><strong>Details</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>nAA</td>
+<td>int</td>
+<td>the lenght of the peptide sequence</td>
+</tr>
+<tr class="even">
+<td>mod_names</td>
+<td>typing.List[str]</td>
+<td>the modification names</td>
+</tr>
+<tr class="odd">
+<td>mod_sites</td>
+<td>typing.List[int]</td>
+<td>the modification sites corresponding<br>to <code>mod_names</code> on the peptide</td>
+</tr>
+<tr class="even">
+<td><strong>Returns</strong></td>
+<td><strong>ndarray</strong></td>
+<td><strong>2-D feature array with shape <code>(nAA+2,mod_feature_size)</code></strong></td>
+</tr>
+</tbody>
+</table>
+<hr>
+<p><a href="https://github.com/MannLabs/alphapeptdeep/blob/main/peptdeep/model/featurize.py#L81" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="get_batch_mod_feature" class="level3">
+<h3 class="anchored" data-anchor-id="get_batch_mod_feature">get_batch_mod_feature</h3>
+<blockquote class="blockquote">
+<pre><code> get_batch_mod_feature (batch_df:pandas.core.frame.DataFrame)</code></pre>
+</blockquote>
+<table class="table">
+<colgroup>
+<col style="width: 9%">
+<col style="width: 38%">
+<col style="width: 52%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th><strong>Type</strong></th>
+<th><strong>Details</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>batch_df</td>
+<td>DataFrame</td>
+<td>dataframe with ‘sequence’, ‘mods’, ‘mod_sites’ and ‘nAA’ columns.<br>All sequence lengths must be the same, meaning that nAA values must be equal.</td>
+</tr>
+<tr class="even">
+<td><strong>Returns</strong></td>
+<td><strong>ndarray</strong></td>
+<td><strong>3-D tensor with shape (batch_size, nAA+2, mod_feature_size)</strong></td>
+</tr>
+</tbody>
+</table>
+<hr>
+<p><a href="https://github.com/MannLabs/alphapeptdeep/blob/main/peptdeep/model/featurize.py#L144" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="get_ascii_indices" class="level3">
+<h3 class="anchored" data-anchor-id="get_ascii_indices">get_ascii_indices</h3>
+<blockquote class="blockquote">
+<pre><code> get_ascii_indices (seq_array:Union[List,numpy.ndarray])</code></pre>
+</blockquote>
+<p>Convert peptide sequences into ASCII code array. The values are from 0 to 127. Zeros are padded into the N- and C-term for each sequence.</p>
+<table class="table">
+<colgroup>
+<col style="width: 9%">
+<col style="width: 38%">
+<col style="width: 52%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th><strong>Type</strong></th>
+<th><strong>Details</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>seq_array</td>
+<td>typing.Union[typing.List, numpy.ndarray]</td>
+<td>list or 1-D array of sequences.</td>
+</tr>
+<tr class="even">
+<td><strong>Returns</strong></td>
+<td><strong>ndarray</strong></td>
+<td><strong>2-D <code>np.int32</code> array with the shape<br><code>(len(seq_array), max seq length+2)</code>. <br>For the the sequence whose length is shorter than max seq length,<br>zeros are padded to the missing values.</strong></td>
+</tr>
+</tbody>
+</table>
+<hr>
+<p><a href="https://github.com/MannLabs/alphapeptdeep/blob/main/peptdeep/model/featurize.py#L117" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="get_batch_aa_indices" class="level3">
+<h3 class="anchored" data-anchor-id="get_batch_aa_indices">get_batch_aa_indices</h3>
+<blockquote class="blockquote">
+<pre><code> get_batch_aa_indices (seq_array:Union[List,numpy.ndarray])</code></pre>
+</blockquote>
+<p>Convert peptide sequences into AA ID array. ID=0 is reserved for masking, so ID of ‘A’ is 1, ID of ‘B’ is 2, …, ID of ‘Z’ is 26 (maximum). Zeros are padded into the N- and C-term for each sequence.</p>
+<table class="table">
+<colgroup>
+<col style="width: 9%">
+<col style="width: 38%">
+<col style="width: 52%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th><strong>Type</strong></th>
+<th><strong>Details</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>seq_array</td>
+<td>typing.Union[typing.List, numpy.ndarray]</td>
+<td>list or 1-D array of sequences with the same length</td>
+</tr>
+<tr class="even">
+<td><strong>Returns</strong></td>
+<td><strong>ndarray</strong></td>
+<td><strong>2-D <code>np.int32</code> array with the shape<br><code>(len(seq_array), len(seq_array[0])+2)</code>. Zeros is padded into the<br>N- and C-term of each sequence, so the 1st-D is <code>len(seq_array[0])+2</code>.</strong></td>
+</tr>
+</tbody>
+</table>
+<hr>
+<p><a href="https://github.com/MannLabs/alphapeptdeep/blob/main/peptdeep/model/featurize.py#L182" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="parse_instrument_indices" class="level3">
+<h3 class="anchored" data-anchor-id="parse_instrument_indices">parse_instrument_indices</h3>
+<blockquote class="blockquote">
+<pre><code> parse_instrument_indices (instrument_list)</code></pre>
+</blockquote>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    target: function(trigger) {
+      return trigger.previousElementSibling;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    setTimeout(function() {
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const cites = ref.parentNode.getAttribute('data-cites').split(' ');
+    tippyHover(ref, function() {
+      var popup = window.document.createElement('div');
+      cites.forEach(function(cite) {
+        var citeDiv = window.document.createElement('div');
+        citeDiv.classList.add('hanging-indent');
+        citeDiv.classList.add('csl-entry');
+        var biblioDiv = window.document.getElementById('ref-' + cite);
+        if (biblioDiv) {
+          citeDiv.innerHTML = biblioDiv.innerHTML;
+        }
+        popup.appendChild(citeDiv);
+      });
+      return popup.innerHTML;
+    });
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>
