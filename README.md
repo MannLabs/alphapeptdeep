@@ -123,13 +123,13 @@ Note that these installers do not have GPU supported.
 
 ### Pip
 
-> *Legacy, should be replaced by AlphaRaw in the near future.*
->
 > PythonNET must be installed to access Thermo or Sciex raw data.
+>
+> *Legacy, should be replaced by AlphaRaw in the near future.*
 >
 > #### PythonNET in Windows
 >
-> Install PythonNET with `pip install pythonnet`.
+> Automatically installed for Windows.
 >
 > #### PythonNET in Linux
 >

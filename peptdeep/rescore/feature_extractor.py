@@ -7,6 +7,7 @@ __all__ = ['perc_settings', 'match_one_raw', 'get_psm_scores', 'get_ms2_features
 # %% ../../nbdev_nbs/rescore/feature_extractor.ipynb 3
 import pandas as pd
 import numpy as np
+import os
 
 import torch
 import torch.multiprocessing as mp
@@ -677,6 +678,20 @@ class ScoreFeatureExtractor:
         )
         logging.info('Fine-tuning done')
 
+    def _save_models(self):
+        # save the model for future uses
+        model_folder = os.path.join(
+            perc_settings['output_folder'], 
+            "tuned_models"
+        )
+        self.model_mgr.save_models(model_folder)
+        with open(os.path.join(
+            model_folder, 'grid_instrument_nce_search.txt'
+        ), 'w') as f:
+            f.write(f"# The ms2 model is tuned for following instrument and nce, after grid instrument and nce search.\n")
+            f.write(f"instrument={self.model_mgr.instrument}\n")
+            f.write(f"nce={self.model_mgr.nce}\n")
+
     def _tune(self,
         psm_df, 
         matched_intensity_df
@@ -690,6 +705,8 @@ class ScoreFeatureExtractor:
             psm_df, matched_intensity_df
         )
         self.model_mgr.use_grid_nce_search = _grid_nce
+
+        self._save_models()
 
     def extract_rt_features(self, psm_df):
         if (
