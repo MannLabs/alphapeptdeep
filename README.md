@@ -18,7 +18,6 @@ AlphaPeptDeep
 <a href="https://pypi.org/project/peptdeep" alt="release">
 <img src="https://img.shields.io/pypi/dm/peptdeep?color=blue&label=pip%20downloads"/></a>
 <img src="https://img.shields.io/pypi/pyversions/peptdeep"/>
-<img src="https://img.shields.io/github/languages/code-size/mannlabs/alphapeptdeep"/>
 
 - [**About**](#about)
 - [**License**](#license)
