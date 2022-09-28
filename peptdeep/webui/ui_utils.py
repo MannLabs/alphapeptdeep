@@ -45,8 +45,8 @@ def file_type_selectbox(
             st.session_state[st_key] = default_type
 
     return st.selectbox(
-        ui_label,
-        choices, index=index,
+        label=ui_label,
+        options=choices, index=index,
         key=st_key,
         on_change=on_type_change
     )
@@ -69,15 +69,15 @@ def select_files(
     else:
         file_exts = [ext.lower() for ext in file_exts]
     st.write('##### ' + ui_label)
-    path = st.text_input('Input a file or a folder path', key=ui_label+'text_input')
+    path = st.text_input(label='Input a file or a folder path', key=ui_label+'text_input')
     path = get_posix(path)
     col1, col2, col3 = st.columns([0.5,0.5,2])
     with col1:
-        add = st.button('Add', key=ui_label+"Add")
+        add = st.button(label='Add', key=ui_label+"Add")
     with col2:
-        remove = st.button('Remove', key=ui_label+"Remove")
+        remove = st.button(label='Remove', key=ui_label+"Remove")
     with col3:
-        clear = st.button('Clear all files', key=ui_label+"Clear")
+        clear = st.button(label='Clear all files', key=ui_label+"Clear")
     if add is True:
         if os.path.isdir(path):
             for _file in os.listdir(path):

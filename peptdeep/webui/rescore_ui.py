@@ -10,11 +10,11 @@ def show():
     """Streamlit page that displays information on how to rescore."""
     st.write("# DDA Rescoring")
 
-    raw_folder = st.text_input('Raw folder')
+    raw_folder = st.text_input(label='Raw folder')
     #st.write('The current raw folder is', raw_folder)
     MS_type = st.selectbox(
-     'MS file type',
-     ('Raw', 'MGF', 'ms_data.hdf'))
+     label='MS file type',
+     options=('Raw', 'MGF', 'ms_data.hdf'))
     #st.write('You selected:', MS_type)
     if os.path.isdir(raw_folder):
         st.text(
@@ -27,11 +27,10 @@ def show():
 
         st.table(raw_files)
 
-    result_folder = st.text_input('Result folder')
+    result_folder = st.text_input(label='Result folder')
     #st.write('The current result folder is', result_folder)
-    PSM_type = st.selectbox(
-     'PSM file type',
-     ('AlphaPept', 'pFind', 'MaxQuant'))
+    PSM_type = st.selectbox(label='PSM file type',
+     options=('AlphaPept', 'pFind', 'MaxQuant'))
     if PSM_type == 'AlphaPept':
         psm_type = 'ms_data.hdf'
     elif PSM_type == 'pFind':
@@ -49,3 +48,5 @@ def show():
         result_files = files_in_folder_pandas(result_folder,psm_type)
 
         st.table(result_files)
+
+    st.warning("We are still working on Rescore GUI panel, please use command line (`peptdeep rescore`) for rescoring.")

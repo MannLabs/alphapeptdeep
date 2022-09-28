@@ -14,42 +14,42 @@ from peptdeep.webui.ui_utils import (
 from peptdeep.webui.server import queue_folder
 
 def nce_search():
-    grid_nce_first = st.number_input('Start NCE for grid NCE search',value = global_settings['model_mgr']['transfer']['grid_nce_first']*1.0,step = 1.0)
+    grid_nce_first = st.number_input(label='Start NCE for grid NCE search',value = global_settings['model_mgr']['transfer']['grid_nce_first']*1.0,step = 1.0)
     global_settings['model_mgr']['transfer']['grid_nce_first'] = grid_nce_first
-    grid_nce_last = st.number_input('End NCE for grid NCE search',min_value = grid_nce_first, value = global_settings['model_mgr']['transfer']['grid_nce_last']*1.0,step = 1.0)
+    grid_nce_last = st.number_input(label='End NCE for grid NCE search',min_value = grid_nce_first, value = global_settings['model_mgr']['transfer']['grid_nce_last']*1.0,step = 1.0)
     global_settings['model_mgr']['transfer']['grid_nce_last'] = grid_nce_last
-    grid_nce_step = st.number_input('Step NCE for grid NCE search', value = global_settings['model_mgr']['transfer']['grid_nce_step']*1.0,step = 1.0)
+    grid_nce_step = st.number_input(label='Step NCE for grid NCE search', value = global_settings['model_mgr']['transfer']['grid_nce_step']*1.0,step = 1.0)
     global_settings['model_mgr']['transfer']['grid_nce_step'] = grid_nce_step
 
-    grid_instrument = st.multiselect('Instruments for grid NCE search', (
-        global_settings['model_mgr']['instrument_group']
-    ),default = global_settings['model_mgr']['transfer']['grid_instrument']) 
+    grid_instrument = st.multiselect(label='Instruments for grid NCE search',
+        options=global_settings['model_mgr']['instrument_group'],
+        default = global_settings['model_mgr']['transfer']['grid_instrument']) 
     global_settings['model_mgr']['transfer']['grid_instrument'] = grid_instrument
 
 def fine_tune():
-    epoch_ms2 = st.number_input('Epoch to train MS2 model', value = global_settings['model_mgr']['transfer']['epoch_ms2'])
+    epoch_ms2 = st.number_input(label='Epoch to train MS2 model', value = global_settings['model_mgr']['transfer']['epoch_ms2'])
     global_settings['model_mgr']['transfer']['epoch_ms2'] = epoch_ms2
-    warmup_epoch_ms2 = st.number_input('Warmup epoch to train MS2 model', value = global_settings['model_mgr']['transfer']['warmup_epoch_ms2'], max_value=epoch_ms2)
+    warmup_epoch_ms2 = st.number_input(label='Warmup epoch to train MS2 model', value = global_settings['model_mgr']['transfer']['warmup_epoch_ms2'], max_value=epoch_ms2)
     global_settings['model_mgr']['transfer']['warmup_epoch_ms2'] = warmup_epoch_ms2
-    batch_size_ms2 = st.number_input('Mini-batch size to train MS2 model', value = global_settings['model_mgr']['transfer']['batch_size_ms2'])
+    batch_size_ms2 = st.number_input(label='Mini-batch size to train MS2 model', value = global_settings['model_mgr']['transfer']['batch_size_ms2'])
     global_settings['model_mgr']['transfer']['batch_size_ms2'] = batch_size_ms2
-    lr_ms2 = st.number_input('Learning rate to train MS2 model', value = global_settings['model_mgr']['transfer']['lr_ms2'], format='%e', step=1e-5)
+    lr_ms2 = st.number_input(label='Learning rate to train MS2 model', value = global_settings['model_mgr']['transfer']['lr_ms2'], format='%e', step=1e-5)
     global_settings['model_mgr']['transfer']['lr_ms2'] = lr_ms2
     
-    epoch_rt_ccs = st.number_input('Epoch to train RT and CCS models', value = global_settings['model_mgr']['transfer']['epoch_rt_ccs'])
+    epoch_rt_ccs = st.number_input(label='Epoch to train RT and CCS models', value = global_settings['model_mgr']['transfer']['epoch_rt_ccs'])
     global_settings['model_mgr']['transfer']['epoch_rt_ccs'] = epoch_rt_ccs
-    warmup_epoch_rt_ccs = st.number_input('Warmup epoch to train RT and CCS model', value = global_settings['model_mgr']['transfer']['warmup_epoch_rt_ccs'], max_value=epoch_rt_ccs)
+    warmup_epoch_rt_ccs = st.number_input(label='Warmup epoch to train RT and CCS model', value = global_settings['model_mgr']['transfer']['warmup_epoch_rt_ccs'], max_value=epoch_rt_ccs)
     global_settings['model_mgr']['transfer']['warmup_epoch_rt_ccs'] = warmup_epoch_rt_ccs
-    batch_size_rt_ccs = st.number_input('Mini-batch size to train RT and CCS model', value = global_settings['model_mgr']['transfer']['batch_size_rt_ccs'])
+    batch_size_rt_ccs = st.number_input(label='Mini-batch size to train RT and CCS model', value = global_settings['model_mgr']['transfer']['batch_size_rt_ccs'])
     global_settings['model_mgr']['transfer']['batch_size_rt_ccs'] = batch_size_rt_ccs
-    lr_rt_ccs = st.number_input('Learning rate to train RT and CCS model', value = global_settings['model_mgr']['transfer']['lr_rt_ccs'], format='%e', step=1e-5)
+    lr_rt_ccs = st.number_input(label='Learning rate to train RT and CCS model', value = global_settings['model_mgr']['transfer']['lr_rt_ccs'], format='%e', step=1e-5)
     global_settings['model_mgr']['transfer']['lr_rt_ccs'] = lr_rt_ccs
 
 def show():
     st.write("# Transfer learning")
 
     model_output_folder = st.text_input(
-        'Model output folder', 
+        label='Model output folder', 
         value=global_settings['model_mgr']['transfer']['model_output_folder'].format(
             PEPTDEEP_HOME=global_settings['PEPTDEEP_HOME']
         )
@@ -111,30 +111,30 @@ def show():
     st.write("### Training settings")
     fine_tune()
 
-    psm_num_to_train_ms2 = st.number_input('PSM num to tune MS2 model', value = int(global_settings['model_mgr']['transfer']['psm_num_to_train_ms2']), step = 1)
+    psm_num_to_train_ms2 = st.number_input(label='PSM num to tune MS2 model', value = int(global_settings['model_mgr']['transfer']['psm_num_to_train_ms2']), step = 1)
     global_settings['model_mgr']['transfer']['psm_num_to_train_ms2'] = psm_num_to_train_ms2
-    psm_num_per_mod_to_train_ms2 = st.number_input('PSM num per mod to tune MS2 model', value = int(global_settings['model_mgr']['transfer']['psm_num_per_mod_to_train_ms2']), step = 1)
+    psm_num_per_mod_to_train_ms2 = st.number_input(label='PSM num per mod to tune MS2 model', value = int(global_settings['model_mgr']['transfer']['psm_num_per_mod_to_train_ms2']), step = 1)
     global_settings['model_mgr']['transfer']['psm_num_per_mod_to_train_ms2'] = psm_num_per_mod_to_train_ms2
-    psm_num_to_train_rt_ccs = st.number_input('PSM num to tune RT and CCS model', value = int(global_settings['model_mgr']['transfer']['psm_num_to_train_rt_ccs']), step = 1)
+    psm_num_to_train_rt_ccs = st.number_input(label='PSM num to tune RT and CCS model', value = int(global_settings['model_mgr']['transfer']['psm_num_to_train_rt_ccs']), step = 1)
     global_settings['model_mgr']['transfer']['psm_num_to_train_rt_ccs'] = psm_num_to_train_rt_ccs
-    psm_num_per_mod_to_train_rt_ccs = st.number_input('PSM num per mod to tune RT and CCS model', value = int(global_settings['model_mgr']['transfer']['psm_num_per_mod_to_train_rt_ccs']), step = 1)
+    psm_num_per_mod_to_train_rt_ccs = st.number_input(label='PSM num per mod to tune RT and CCS model', value = int(global_settings['model_mgr']['transfer']['psm_num_per_mod_to_train_rt_ccs']), step = 1)
     global_settings['model_mgr']['transfer']['psm_num_per_mod_to_train_rt_ccs'] = psm_num_per_mod_to_train_rt_ccs
-    top_n_mods_to_train = st.number_input('Top n mods to tune', value = int(global_settings['model_mgr']['transfer']['top_n_mods_to_train']), step = 1)
+    top_n_mods_to_train = st.number_input(label='Top n mods to tune', value = int(global_settings['model_mgr']['transfer']['top_n_mods_to_train']), step = 1)
     global_settings['model_mgr']['transfer']['top_n_mods_to_train'] = top_n_mods_to_train
 
 
     st.write('### Grid search for NCEs and instruments')
     st.write('If NCE and instrument are unknown, grid search will look for the best NCE and instrument)')
-    grid_nce_search = st.checkbox('Enabled', global_settings['model_mgr']['transfer']['grid_nce_search'])
+    grid_nce_search = st.checkbox(label='Enabled', value=global_settings['model_mgr']['transfer']['grid_nce_search'])
     global_settings['model_mgr']['transfer']['grid_nce_search'] = grid_nce_search
     if grid_nce_search is True:
         nce_search()
 
     now = datetime.now()
     current_time = now.strftime("%Y-%m-%d--%H-%M-%S.%f")
-    task_name = st.text_input("Task name", value=f"peptdeep_transfer_{current_time}")
+    task_name = st.text_input(label="Task name", value=f"peptdeep_transfer_{current_time}")
     
-    if st.button('Submit for transfer learning'):
+    if st.button(label='Submit for transfer learning'):
         global_settings['task_type'] = 'train'
 
         if not os.path.exists(model_output_folder):

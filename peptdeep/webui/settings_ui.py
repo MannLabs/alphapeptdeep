@@ -18,32 +18,32 @@ def show():
 
     st.write("### Common settings")
 
-    ms2_ppm = st.checkbox('MS2 ppm (otherwise Da)', global_settings['peak_matching']['ms2_ppm'])
+    ms2_ppm = st.checkbox(label='MS2 ppm (otherwise Da)', value=global_settings['peak_matching']['ms2_ppm'])
     global_settings['peak_matching']['ms2_ppm'] = ms2_ppm
-    ms2_tol_value = st.number_input('MS2 tolerance', value = global_settings['peak_matching']['ms2_tol_value'], step = 1.0)
+    ms2_tol_value = st.number_input(label='MS2 tolerance', value = global_settings['peak_matching']['ms2_tol_value'], step = 1.0)
     global_settings['peak_matching']['ms2_tol_value'] = ms2_tol_value
 
-    ms1_ppm = st.checkbox('MS1 ppm (otherwise Da)', global_settings['peak_matching']['ms1_ppm'])
+    ms1_ppm = st.checkbox(label='MS1 ppm (otherwise Da)', value=global_settings['peak_matching']['ms1_ppm'])
     global_settings['peak_matching']['ms1_ppm'] = ms1_ppm
-    ms1_tol_value = st.number_input('MS1 tolerance', value = global_settings['peak_matching']['ms1_tol_value'], step = 1.0)
+    ms1_tol_value = st.number_input(label='MS1 tolerance', value = global_settings['peak_matching']['ms1_tol_value'], step = 1.0)
     global_settings['peak_matching']['ms1_tol_value'] = ms1_tol_value
     
-    thread_num = st.number_input('Thread number', 
+    thread_num = st.number_input(label='Thread number', 
         value=global_settings['thread_num'], 
         max_value=multiprocessing.cpu_count(), step=1
     )
     global_settings['thread_num'] = thread_num
 
-    device_type = st.selectbox('Computing devices',
-        global_settings['torch_device']['device_type_choices'],
+    device_type = st.selectbox(label='Computing devices',
+        options=global_settings['torch_device']['device_type_choices'],
         index = global_settings['torch_device']['device_type_choices'].index(
             global_settings['torch_device']['device_type']
         )
     )
     global_settings['torch_device']['device_type'] = device_type
 
-    log_level = st.selectbox('Log level', 
-        global_settings['log_level_choices'], 
+    log_level = st.selectbox(label='Log level', 
+        options=global_settings['log_level_choices'], 
         index = global_settings['log_level_choices'].index(
             global_settings['log_level']
         )
@@ -83,7 +83,7 @@ def load_settings_gui():
 
 def save_settings_gui():
     st.write("### Save current settings")
-    st.write("(As a template for CLI commands)")
+    st.write("The saved yaml file can be used as a template for CLI commands)")
 
     f = StringIO()
     yaml.dump(global_settings, f)

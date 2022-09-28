@@ -291,7 +291,7 @@ lot faster.
 ### GUI
 
 If the GUI was not installed through a one-click GUI installer, it can
-be activate with the following `bash` command:
+be launched with the following `bash` command:
 
 ``` bash
 peptdeep gui
@@ -301,12 +301,14 @@ This command will start a web server and automatically open the default
 browser:
 ![](https://user-images.githubusercontent.com/4646029/189301730-ac1f92cc-0e9d-4ba3-be1d-07c4d66032cd.jpg)
 
-There are several options in the GUI (left panel): \* Server: Start/stop
-the task server, check tasks in the task queue \* Settings: Configure
-common settings, load/save current settings \* Model: Configure DL
-models for prediction or transfer learning \* Transfer: Refine the model
-\* Library: Predict a library \* Rescore: Perform ML feature extraction
-and Percolator
+There are several options in the GUI (left panel):
+
+- Server: Start/stop the task server, check tasks in the task queue
+- Settings: Configure common settings, load/save current settings
+- Model: Configure DL models for prediction or transfer learning
+- Transfer: Refine the models
+- Library: Predict a library
+- Rescore: Perform ML feature extraction and Percolator
 
 ------------------------------------------------------------------------
 
@@ -352,7 +354,8 @@ peptdeep export-settings yaml_file
 This command will export the default settings into the `yaml_file` as a
 template, users can edit the yaml file to run other commands.
 
-The common settings in the yaml file are:
+Here is a section of the yaml file which controls global parameters for
+different tasks:
 
     model_url: "https://github.com/MannLabs/alphapeptdeep/releases/download/pre-trained-models/pretrained_models.zip"
 
@@ -494,30 +497,132 @@ and `library:input:infiles` for library prediction.
 `library:input:infile_type` defined in
 `library:input:infile_type_choices`:
 
-- fasta: Protein fasta files.
-- sequence_table: Tab/comma-delimited txt/tsv/csv (text) files which
-  contain the column `sequence`.
-- peptide_table: Tab/comma-delimited txt/tsv/csv (text) files which
-  contain the columns `sequence`, `mods`, and `mod_sites`. peptdeep will
-  not add modifications for this file type.
-- precursor_table: Tab/comma-delimited txt/tsv/csv (text) files which
-  contain the columns `sequence`, `mods`, `mod_sites`, and `charge`.
-  peptdeep will not add modifications and charge states for this file
-  type.
+- fasta: Protein fasta files, peptdeep will digest the protein sequences
+  in to proteins.
+- [sequence_table](#sequence_table): Tab/comma-delimited txt/tsv/csv
+  (text) files which contain the column `sequence` for peptide
+  sequences.
+- [peptide_table](#peptide_table): Tab/comma-delimited txt/tsv/csv
+  (text) files which contain the columns `sequence`, `mods`, and
+  `mod_sites`. peptdeep will not add modifications for peptides of this
+  file type.
+- [precursor_table](#precursor_table): Tab/comma-delimited txt/tsv/csv
+  (text) files which contain the columns `sequence`, `mods`,
+  `mod_sites`, and `charge`. peptdeep will not add modifications and
+  charge states for peptides of this file type.
 
-> Columns of `proteins` and `genes` are optional for these txt/tsv/csv
-> files.
-
-For example, a precursor DataFrame looks like this:
+See examples:
 
 ``` python
 import pandas as pd
-pd.DataFrame({
+df = pd.DataFrame({
     'sequence': ['ACDEFGHIK','LMNPQRSTVK','WYVSTR'],
     'mods': ['Carbamidomethyl@C','Acetyl@Protein N-term;Phospho@S',''],
     'mod_sites': ['2','0;7',''],
     'charge': [2,3,1],
 })
+```
+
+##### sequence_table
+
+``` python
+df[['sequence']]
+```
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>sequence</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>ACDEFGHIK</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>LMNPQRSTVK</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>WYVSTR</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+##### peptide_table
+
+``` python
+df[['sequence','mods','mod_sites']]
+```
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>sequence</th>
+      <th>mods</th>
+      <th>mod_sites</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>ACDEFGHIK</td>
+      <td>Carbamidomethyl@C</td>
+      <td>2</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>LMNPQRSTVK</td>
+      <td>Acetyl@Protein N-term;Phospho@S</td>
+      <td>0;7</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>WYVSTR</td>
+      <td></td>
+      <td></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+##### precursor_table
+
+``` python
+df
 ```
 
 <div>
@@ -569,6 +674,9 @@ pd.DataFrame({
   </tbody>
 </table>
 </div>
+
+> Columns of `proteins` and `genes` are optional for these txt/tsv/csv
+> files.
 
 peptdeep supports multiple files for library prediction, for example (in
 the yaml file):
