@@ -498,7 +498,7 @@ and `library:input:infiles` for library prediction.
 `library:input:infile_type_choices`:
 
 - fasta: Protein fasta files, peptdeep will digest the protein sequences
-  in to proteins.
+  into peptide sequences.
 - [sequence_table](#sequence_table): Tab/comma-delimited txt/tsv/csv
   (text) files which contain the column `sequence` for peptide
   sequences.
