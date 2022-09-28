@@ -324,7 +324,7 @@ peptdeep -h
 
 It is possible to get help about each function and their (required)
 parameters by using the `-h` flag. AlphaPeptDeep provides several
-commands for CLI uses:
+commands for different tasks:
 
 - [**export-settings**](#export-settings)
 - [**library**](#library)
@@ -348,11 +348,11 @@ peptdeep library -h
 #### export-settings
 
 ``` bash
-peptdeep export-settings yaml_file
+peptdeep export-settings C:/path/to/settings.yaml
 ```
 
-This command will export the default settings into the `yaml_file` as a
-template, users can edit the yaml file to run other commands.
+This command will export the default settings into the `settings.yaml`
+as a template, users can edit the yaml file to run other commands.
 
 Here is a section of the yaml file which controls global parameters for
 different tasks:
