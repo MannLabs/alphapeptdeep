@@ -110,6 +110,7 @@ def show():
             global_settings['library']['input']['infile_type']
         )
     )
+    global_settings['library']['input']['infile_type'] = infile_type
 
     if infile_type != 'fasta':
         st.write("For tabular input `sequence_table`, `peptide_table` and `precursor_table`, check the format via https://github.com/MannLabs/alphapeptdeep#sequence_table")

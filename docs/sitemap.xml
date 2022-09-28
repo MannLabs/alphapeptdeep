@@ -2,118 +2,118 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://MannLabs.github.io/alphapeptdeep/mass_spec/mass_calibration.html</loc>
-    <lastmod>2022-09-28T12:48:36.006Z</lastmod>
+    <lastmod>2022-09-28T13:36:07.584Z</lastmod>
   </url>
   <url>
     <loc>https://MannLabs.github.io/alphapeptdeep/mass_spec/match.html</loc>
-    <lastmod>2022-09-28T12:48:36.523Z</lastmod>
+    <lastmod>2022-09-28T13:36:08.117Z</lastmod>
   </url>
   <url>
     <loc>https://MannLabs.github.io/alphapeptdeep/mass_spec/ms_reader.html</loc>
-    <lastmod>2022-09-28T12:48:36.908Z</lastmod>
+    <lastmod>2022-09-28T13:36:08.490Z</lastmod>
   </url>
   <url>
     <loc>https://MannLabs.github.io/alphapeptdeep/utils.html</loc>
-    <lastmod>2022-09-28T12:48:37.412Z</lastmod>
+    <lastmod>2022-09-28T13:36:08.919Z</lastmod>
   </url>
   <url>
     <loc>https://MannLabs.github.io/alphapeptdeep/psm_frag_reader/maxquant_frag_reader.html</loc>
-    <lastmod>2022-09-28T12:48:37.755Z</lastmod>
+    <lastmod>2022-09-28T13:36:09.280Z</lastmod>
   </url>
   <url>
     <loc>https://MannLabs.github.io/alphapeptdeep/psm_frag_reader/psm_frag_reader.html</loc>
-    <lastmod>2022-09-28T12:48:38.087Z</lastmod>
+    <lastmod>2022-09-28T13:36:09.608Z</lastmod>
   </url>
   <url>
     <loc>https://MannLabs.github.io/alphapeptdeep/psm_frag_reader/psmlabel_reader.html</loc>
-    <lastmod>2022-09-28T12:48:38.434Z</lastmod>
+    <lastmod>2022-09-28T13:36:09.919Z</lastmod>
   </url>
   <url>
     <loc>https://MannLabs.github.io/alphapeptdeep/psm_frag_reader/library_frag_reader.html</loc>
-    <lastmod>2022-09-28T12:48:38.738Z</lastmod>
+    <lastmod>2022-09-28T13:36:10.309Z</lastmod>
   </url>
   <url>
     <loc>https://MannLabs.github.io/alphapeptdeep/protein/fasta.html</loc>
-    <lastmod>2022-09-28T12:48:39.212Z</lastmod>
+    <lastmod>2022-09-28T13:36:10.796Z</lastmod>
   </url>
   <url>
     <loc>https://MannLabs.github.io/alphapeptdeep/spec_lib/translate.html</loc>
-    <lastmod>2022-09-28T12:48:39.758Z</lastmod>
+    <lastmod>2022-09-28T13:36:11.317Z</lastmod>
   </url>
   <url>
     <loc>https://MannLabs.github.io/alphapeptdeep/spec_lib/predict_lib.html</loc>
-    <lastmod>2022-09-28T12:48:40.074Z</lastmod>
+    <lastmod>2022-09-28T13:36:11.640Z</lastmod>
   </url>
   <url>
     <loc>https://MannLabs.github.io/alphapeptdeep/spec_lib/library_factory.html</loc>
-    <lastmod>2022-09-28T12:48:40.555Z</lastmod>
+    <lastmod>2022-09-28T13:36:12.138Z</lastmod>
   </url>
   <url>
     <loc>https://MannLabs.github.io/alphapeptdeep/spec_lib/test_translate_tsv.html</loc>
-    <lastmod>2022-09-28T12:48:40.890Z</lastmod>
+    <lastmod>2022-09-28T13:36:12.460Z</lastmod>
   </url>
   <url>
     <loc>https://MannLabs.github.io/alphapeptdeep/settings.html</loc>
-    <lastmod>2022-09-28T12:48:41.194Z</lastmod>
+    <lastmod>2022-09-28T13:36:12.756Z</lastmod>
   </url>
   <url>
     <loc>https://MannLabs.github.io/alphapeptdeep/rescore/fdr.html</loc>
-    <lastmod>2022-09-28T12:48:41.572Z</lastmod>
+    <lastmod>2022-09-28T13:36:13.142Z</lastmod>
   </url>
   <url>
     <loc>https://MannLabs.github.io/alphapeptdeep/rescore/percolator.html</loc>
-    <lastmod>2022-09-28T12:48:41.921Z</lastmod>
+    <lastmod>2022-09-28T13:36:13.509Z</lastmod>
   </url>
   <url>
     <loc>https://MannLabs.github.io/alphapeptdeep/rescore/feature_extractor.html</loc>
-    <lastmod>2022-09-28T12:48:42.333Z</lastmod>
+    <lastmod>2022-09-28T13:36:13.927Z</lastmod>
   </url>
   <url>
     <loc>https://MannLabs.github.io/alphapeptdeep/pipeline_api.html</loc>
-    <lastmod>2022-09-28T12:48:42.976Z</lastmod>
+    <lastmod>2022-09-28T13:36:14.645Z</lastmod>
   </url>
   <url>
     <loc>https://MannLabs.github.io/alphapeptdeep/test_ui.html</loc>
-    <lastmod>2022-09-28T12:48:43.297Z</lastmod>
+    <lastmod>2022-09-28T13:36:14.986Z</lastmod>
   </url>
   <url>
     <loc>https://MannLabs.github.io/alphapeptdeep/model/generic_property_prediction.html</loc>
-    <lastmod>2022-09-28T12:48:43.821Z</lastmod>
+    <lastmod>2022-09-28T13:36:15.522Z</lastmod>
   </url>
   <url>
     <loc>https://MannLabs.github.io/alphapeptdeep/model/featurize.html</loc>
-    <lastmod>2022-09-28T12:48:44.158Z</lastmod>
+    <lastmod>2022-09-28T13:36:15.912Z</lastmod>
   </url>
   <url>
     <loc>https://MannLabs.github.io/alphapeptdeep/model/ms2.html</loc>
-    <lastmod>2022-09-28T12:48:44.642Z</lastmod>
+    <lastmod>2022-09-28T13:36:16.418Z</lastmod>
   </url>
   <url>
     <loc>https://MannLabs.github.io/alphapeptdeep/model/building_block.html</loc>
-    <lastmod>2022-09-28T12:48:45.105Z</lastmod>
+    <lastmod>2022-09-28T13:36:16.907Z</lastmod>
   </url>
   <url>
     <loc>https://MannLabs.github.io/alphapeptdeep/model/model_shop.html</loc>
-    <lastmod>2022-09-28T12:48:45.394Z</lastmod>
+    <lastmod>2022-09-28T13:36:17.209Z</lastmod>
   </url>
   <url>
     <loc>https://MannLabs.github.io/alphapeptdeep/model/model_interface.html</loc>
-    <lastmod>2022-09-28T12:48:45.826Z</lastmod>
+    <lastmod>2022-09-28T13:36:17.759Z</lastmod>
   </url>
   <url>
     <loc>https://MannLabs.github.io/alphapeptdeep/model/rt.html</loc>
-    <lastmod>2022-09-28T12:48:46.128Z</lastmod>
+    <lastmod>2022-09-28T13:36:18.131Z</lastmod>
   </url>
   <url>
     <loc>https://MannLabs.github.io/alphapeptdeep/model/ccs.html</loc>
-    <lastmod>2022-09-28T12:48:46.472Z</lastmod>
+    <lastmod>2022-09-28T13:36:18.499Z</lastmod>
   </url>
   <url>
     <loc>https://MannLabs.github.io/alphapeptdeep/pretrained_models.html</loc>
-    <lastmod>2022-09-28T12:48:47.001Z</lastmod>
+    <lastmod>2022-09-28T13:36:19.135Z</lastmod>
   </url>
   <url>
     <loc>https://MannLabs.github.io/alphapeptdeep/index.html</loc>
-    <lastmod>2022-09-28T12:48:47.607Z</lastmod>
+    <lastmod>2022-09-28T13:36:19.846Z</lastmod>
   </url>
 </urlset>

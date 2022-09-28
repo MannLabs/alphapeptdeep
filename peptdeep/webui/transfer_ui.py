@@ -70,6 +70,8 @@ def show():
             global_settings['model_mgr']['transfer']['psm_type']
         )
     )
+    global_settings['model_mgr']['transfer']['psm_type'] = psm_type
+
     psm_type_to_ext_dict = {
         "alphapept": ".ms_data.hdf",
         "pfind": ".spectra",
