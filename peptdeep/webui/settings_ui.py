@@ -28,9 +28,12 @@ def show():
     ms1_tol_value = st.number_input(label='MS1 tolerance', value = global_settings['peak_matching']['ms1_tol_value'], step = 1.0)
     global_settings['peak_matching']['ms1_tol_value'] = ms1_tol_value
     
+    cpu_count = multiprocessing.cpu_count()
     thread_num = st.number_input(label='Thread number', 
-        value=global_settings['thread_num'], 
-        max_value=multiprocessing.cpu_count(), step=1
+        value=global_settings['thread_num'] 
+          if global_settings['thread_num']<cpu_count 
+          else cpu_count, 
+        max_value=cpu_count, step=1
     )
     global_settings['thread_num'] = thread_num
 
