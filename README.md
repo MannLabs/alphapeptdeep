@@ -56,7 +56,7 @@ pages](https://mannlabs.github.io/alphapeptdeep/).
 ### Alpha-MS repositories:
 
 - [**alphabase**](https://github.com/MannLabs/alphabase): Base data
-  structures for Alpha-MS-Ecosystem
+  structures for Alpha-MS Ecosystem
 - [**alphapept**](https://github.com/MannLabs/alphapept): DDA search
   engine
 - [**alphapeptdeep**](https://github.com/MannLabs/alphapeptdeep): Deep
@@ -64,9 +64,14 @@ pages](https://mannlabs.github.io/alphapeptdeep/).
 - [**alpharaw**](https://github.com/MannLabs/alpharaw): Raw data
   accessing
 - [**alphaviz**](https://github.com/MannLabs/alphaviz): MS data and
-  results visualization
+  result visualization
 - [**alphatims**](https://github.com/MannLabs/alphatims): timsTOF data
   accessing
+
+### Subsequent projects of AlphaPeptDeep
+
+- [**peptdeep_hla**](https://github.com/MannLabs/PeptDeep-HLA): DL
+  models that predict if a HLA peptide is present or not.
 
 ------------------------------------------------------------------------
 

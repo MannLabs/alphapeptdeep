@@ -394,6 +394,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
   <li><a href="#about" id="toc-about" class="nav-link active" data-scroll-target="#about">About</a>
   <ul class="collapse">
   <li><a href="#alpha-ms-repositories" id="toc-alpha-ms-repositories" class="nav-link" data-scroll-target="#alpha-ms-repositories">Alpha-MS repositories:</a></li>
+  <li><a href="#subsequent-projects-of-alphapeptdeep" id="toc-subsequent-projects-of-alphapeptdeep" class="nav-link" data-scroll-target="#subsequent-projects-of-alphapeptdeep">Subsequent projects of AlphaPeptDeep</a></li>
   </ul></li>
   <li><a href="#license" id="toc-license" class="nav-link" data-scroll-target="#license">License</a></li>
   <li><a href="#installation" id="toc-installation" class="nav-link" data-scroll-target="#installation">Installation</a>
@@ -468,12 +469,18 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <section id="alpha-ms-repositories" class="level3">
 <h3 class="anchored" data-anchor-id="alpha-ms-repositories">Alpha-MS repositories:</h3>
 <ul>
-<li><a href="https://github.com/MannLabs/alphabase"><strong>alphabase</strong></a>: Base data structures for Alpha-MS-Ecosystem</li>
+<li><a href="https://github.com/MannLabs/alphabase"><strong>alphabase</strong></a>: Base data structures for Alpha-MS Ecosystem</li>
 <li><a href="https://github.com/MannLabs/alphapept"><strong>alphapept</strong></a>: DDA search engine</li>
 <li><a href="https://github.com/MannLabs/alphapeptdeep"><strong>alphapeptdeep</strong></a>: Deep learning for proteomics</li>
 <li><a href="https://github.com/MannLabs/alpharaw"><strong>alpharaw</strong></a>: Raw data accessing</li>
-<li><a href="https://github.com/MannLabs/alphaviz"><strong>alphaviz</strong></a>: MS data and results visualization</li>
+<li><a href="https://github.com/MannLabs/alphaviz"><strong>alphaviz</strong></a>: MS data and result visualization</li>
 <li><a href="https://github.com/MannLabs/alphatims"><strong>alphatims</strong></a>: timsTOF data accessing</li>
+</ul>
+</section>
+<section id="subsequent-projects-of-alphapeptdeep" class="level3">
+<h3 class="anchored" data-anchor-id="subsequent-projects-of-alphapeptdeep">Subsequent projects of AlphaPeptDeep</h3>
+<ul>
+<li><a href="https://github.com/MannLabs/PeptDeep-HLA"><strong>peptdeep_hla</strong></a>: DL models that predict if a HLA peptide is present or not.</li>
 </ul>
 <hr>
 </section>
@@ -747,7 +754,7 @@ model_mgr:
 <li><a href="#precursor_table">precursor_table</a>: Tab/comma-delimited txt/tsv/csv (text) files which contain the columns <code>sequence</code>, <code>mods</code>, <code>mod_sites</code>, and <code>charge</code>. peptdeep will not add modifications and charge states for peptides of this file type.</li>
 </ul>
 <p>See examples:</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
 <span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.DataFrame({</span>
 <span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">'sequence'</span>: [<span class="st">'ACDEFGHIK'</span>,<span class="st">'LMNPQRSTVK'</span>,<span class="st">'WYVSTR'</span>],</span>
@@ -758,7 +765,7 @@ model_mgr:
 </div>
 <section id="sequence_table" class="level5">
 <h5 class="anchored" data-anchor-id="sequence_table">sequence_table</h5>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>df[[<span class="st">'sequence'</span>]]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 
@@ -792,7 +799,7 @@ model_mgr:
 </section>
 <section id="peptide_table" class="level5">
 <h5 class="anchored" data-anchor-id="peptide_table">peptide_table</h5>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>df[[<span class="st">'sequence'</span>,<span class="st">'mods'</span>,<span class="st">'mod_sites'</span>]]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 
@@ -834,7 +841,7 @@ model_mgr:
 </section>
 <section id="precursor_table" class="level5">
 <h5 class="anchored" data-anchor-id="precursor_table">precursor_table</h5>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>df</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 
@@ -1053,7 +1060,7 @@ model_mgr:
 <section id="pipeline-apis" class="level4">
 <h4 class="anchored" data-anchor-id="pipeline-apis">Pipeline APIs</h4>
 <p>Pipeline APIs provides the same functionalities with <a href="#cli">CLI</a>, including <a href="#library">library prediction</a>, <a href="#transfer">transfer learning</a>, and <a href="#rescore">rescoring</a>.</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb30"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> peptdeep.pipeline_api <span class="im">import</span> (</span>
 <span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>    generate_library,</span>
 <span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>    transfer_learn, </span>
@@ -1064,7 +1071,7 @@ model_mgr:
 </section>
 <section id="modelmanager" class="level4">
 <h4 class="anchored" data-anchor-id="modelmanager">ModelManager</h4>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb31"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> peptdeep.pretrained_models <span class="im">import</span> ModelManager</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p><a href="https://MannLabs.github.io/alphapeptdeep/pretrained_models.html#modelmanager"><code>ModelManager</code></a> class is the main entry to access MS2/RT/CCS models. It provides functionalities to train/refine the models and then use the new models to predict the data.</p>
@@ -1072,7 +1079,7 @@ model_mgr:
 </section>
 <section id="library-prediction" class="level4">
 <h4 class="anchored" data-anchor-id="library-prediction">Library Prediction</h4>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb32"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> peptdeep.protein.fasta <span class="im">import</span> PredictFastaSpecLib</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p><a href="https://MannLabs.github.io/alphapeptdeep/protein/fasta.html#predictfastaspeclib"><code>PredictFastaSpecLib</code></a> class provides functionalities to deal with fasta files or protein sequences and spectral libraries.</p>
@@ -1080,7 +1087,7 @@ model_mgr:
 </section>
 <section id="dda-rescoring" class="level4">
 <h4 class="anchored" data-anchor-id="dda-rescoring">DDA Rescoring</h4>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb33"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> peptdeep.rescore.percolator <span class="im">import</span> Percolator</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p><a href="https://MannLabs.github.io/alphapeptdeep/rescore/percolator.html#percolator"><code>Percolator</code></a> class provides functionalities to rescore DDA PSMs search by <code>pFind</code> and <code>AlphaPept</code>, (and <code>MaxQuant</code> if output FDR=100%), …</p>
@@ -1088,7 +1095,7 @@ model_mgr:
 </section>
 <section id="hla-peptide-prediction" class="level4">
 <h4 class="anchored" data-anchor-id="hla-peptide-prediction">HLA Peptide Prediction</h4>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb34"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> peptdeep.model.model_interface <span class="im">import</span> ModelInterface</span>
 <span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> peptdeep.model.generic_property_prediction <span class="co"># model shop</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
