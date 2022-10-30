@@ -132,8 +132,21 @@ class ModelInterface(object):
             self.device = torch.device(f"cuda:{','.join([str(_id) for _id in self.device_ids])}")
         else:
             self.device = torch.device(self.device_type)
-        
-        if self.model is not None:
+
+        self._model_to_device()
+
+    def _model_to_device(self):
+        """ Enable multiple GPUs using torch.nn.DataParallele """
+        if self.model is None: return
+        if self.device_type != 'cuda':
+            self.model.to(self.device)
+        else:
+            if (
+                self.device_ids and len(self.device_ids) > 1
+            ) or (
+                not self.device_ids and torch.cuda.device_count()>1
+            ):
+                self.model = torch.nn.DataParallel(self.model)
             self.model.to(self.device)
 
     def build(self,
@@ -146,7 +159,7 @@ class ModelInterface(object):
         """
         self.model = model_class(**kwargs)
         self.model_params = kwargs
-        self.model.to(self.device)
+        self._model_to_device()
         self._init_for_training()
 
     def train_with_warmup(self,

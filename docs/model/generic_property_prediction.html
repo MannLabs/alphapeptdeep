@@ -463,12 +463,15 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <section id="modelinterface_for_generic_aaseq_regression" class="level3">
 <h3 class="anchored" data-anchor-id="modelinterface_for_generic_aaseq_regression">ModelInterface_for_Generic_AASeq_Regression</h3>
 <blockquote class="blockquote">
-<pre><code> ModelInterface_for_Generic_AASeq_Regression (dropout=0.1,
-                                              model_class:torch.nn.modules
-                                              .module.Module=&lt;class '__mai
-                                              n__.Model_for_Generic_AASeq_
-                                              Regression_LSTM'&gt;,
-                                              device:str='gpu', **kwargs)</code></pre>
+<pre><code> ModelInterface_for_Generic_AASeq_Regression
+                                              (model_class:torch.nn.module
+                                              s.module.Module=&lt;class '__ma
+                                              in__.Model_for_Generic_AASeq
+                                              _Regression_LSTM'&gt;,
+                                              dropout=0.1,
+                                              device:str='gpu',
+                                              hidden_dim=256, nlayers=4,
+                                              **kwargs)</code></pre>
 </blockquote>
 <p><code>ModelInterface</code> for Generic_AASeq_Regression models</p>
 <hr>
@@ -489,7 +492,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <section id="model_for_generic_aaseq_regression_lstm" class="level3">
 <h3 class="anchored" data-anchor-id="model_for_generic_aaseq_regression_lstm">Model_for_Generic_AASeq_Regression_LSTM</h3>
 <blockquote class="blockquote">
-<pre><code> Model_for_Generic_AASeq_Regression_LSTM (hidden_dim=256, n_lstm_layers=4,
+<pre><code> Model_for_Generic_AASeq_Regression_LSTM (hidden_dim=256, nlayers=4,
                                           dropout=0.1, **kwargs)</code></pre>
 </blockquote>
 <p>Generic LSTM regression model for AA sequence</p>
@@ -659,9 +662,6 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>model.target_column_to_predict <span class="op">=</span> <span class="st">'predicted_normalized_irt'</span></span>
 <span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>model.train(example_df, epoch<span class="op">=</span><span class="dv">20</span>)</span>
 <span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>model.predict(example_df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>Device `gpu` is not available, set to `cpu`</code></pre>
-</div>
 <div class="cell-output cell-output-display">
 
 <div>
@@ -690,7 +690,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
       <td></td>
       <td>9</td>
       <td>0.000000</td>
-      <td>0.078261</td>
+      <td>0.000000</td>
     </tr>
     <tr>
       <th>1</th>
@@ -701,7 +701,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
       <td></td>
       <td>14</td>
       <td>0.199488</td>
-      <td>0.259011</td>
+      <td>0.263999</td>
     </tr>
     <tr>
       <th>2</th>
@@ -712,7 +712,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
       <td></td>
       <td>13</td>
       <td>0.298671</td>
-      <td>0.228167</td>
+      <td>0.222347</td>
     </tr>
     <tr>
       <th>3</th>
@@ -723,7 +723,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
       <td></td>
       <td>10</td>
       <td>0.357909</td>
-      <td>0.324414</td>
+      <td>0.341881</td>
     </tr>
     <tr>
       <th>4</th>
@@ -734,7 +734,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
       <td></td>
       <td>12</td>
       <td>0.429315</td>
-      <td>0.413254</td>
+      <td>0.379490</td>
     </tr>
     <tr>
       <th>5</th>
@@ -745,7 +745,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
       <td></td>
       <td>12</td>
       <td>0.466699</td>
-      <td>0.433048</td>
+      <td>0.402200</td>
     </tr>
     <tr>
       <th>6</th>
@@ -756,7 +756,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
       <td></td>
       <td>13</td>
       <td>0.537784</td>
-      <td>0.558584</td>
+      <td>0.616874</td>
     </tr>
     <tr>
       <th>7</th>
@@ -767,7 +767,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
       <td></td>
       <td>13</td>
       <td>0.636728</td>
-      <td>0.759285</td>
+      <td>0.667358</td>
     </tr>
     <tr>
       <th>8</th>
@@ -778,7 +778,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
       <td></td>
       <td>12</td>
       <td>0.764009</td>
-      <td>0.818664</td>
+      <td>0.765801</td>
     </tr>
     <tr>
       <th>9</th>
@@ -789,7 +789,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
       <td></td>
       <td>12</td>
       <td>0.897775</td>
-      <td>0.926022</td>
+      <td>0.889290</td>
     </tr>
     <tr>
       <th>10</th>
@@ -800,7 +800,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
       <td></td>
       <td>14</td>
       <td>1.000000</td>
-      <td>1.086530</td>
+      <td>1.028006</td>
     </tr>
   </tbody>
 </table>
@@ -811,20 +811,17 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <section id="building-an-rt-model-for-only-sequences-based-on-model_for_generic_aaseq_regression_transformer" class="level4">
 <h4 class="anchored" data-anchor-id="building-an-rt-model-for-only-sequences-based-on-model_for_generic_aaseq_regression_transformer">Building an RT model for only sequences based on <a href="https://MannLabs.github.io/alphapeptdeep/model/generic_property_prediction.html#model_for_generic_aaseq_regression_transformer"><code>Model_for_Generic_AASeq_Regression_Transformer</code></a></h4>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>example_df <span class="op">=</span> create_example_input_dataframe_normalized_irt()</span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="co">#initialize the modelinterface, specify which of the models to use</span></span>
-<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> ModelInterface_for_Generic_AASeq_Regression(</span>
-<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>    model_class<span class="op">=</span>Model_for_Generic_AASeq_Regression_Transformer</span>
-<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="co"># specify the name of the column you want to use for traning</span></span>
-<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>model.target_column_to_train <span class="op">=</span> <span class="st">'normalized_irt'</span></span>
-<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>model.target_column_to_predict <span class="op">=</span> <span class="st">'predicted_normalized_irt'</span></span>
-<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>model.train(example_df, epoch<span class="op">=</span><span class="dv">20</span>)</span>
-<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>model.predict(example_df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>Device `gpu` is not available, set to `cpu`</code></pre>
-</div>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>example_df <span class="op">=</span> create_example_input_dataframe_normalized_irt()</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="co">#initialize the modelinterface, specify which of the models to use</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> ModelInterface_for_Generic_AASeq_Regression(</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    model_class<span class="op">=</span>Model_for_Generic_AASeq_Regression_Transformer</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="co"># specify the name of the column you want to use for traning</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>model.target_column_to_train <span class="op">=</span> <span class="st">'normalized_irt'</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>model.target_column_to_predict <span class="op">=</span> <span class="st">'predicted_normalized_irt'</span></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>model.train(example_df, epoch<span class="op">=</span><span class="dv">20</span>)</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>model.predict(example_df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 
 <div>
@@ -853,7 +850,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
       <td></td>
       <td>9</td>
       <td>0.000000</td>
-      <td>0.000000</td>
+      <td>0.000834</td>
     </tr>
     <tr>
       <th>1</th>
@@ -864,7 +861,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
       <td></td>
       <td>14</td>
       <td>0.199488</td>
-      <td>0.106846</td>
+      <td>0.215954</td>
     </tr>
     <tr>
       <th>2</th>
@@ -875,7 +872,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
       <td></td>
       <td>13</td>
       <td>0.298671</td>
-      <td>0.210392</td>
+      <td>0.298140</td>
     </tr>
     <tr>
       <th>3</th>
@@ -886,7 +883,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
       <td></td>
       <td>10</td>
       <td>0.357909</td>
-      <td>0.432260</td>
+      <td>0.435898</td>
     </tr>
     <tr>
       <th>4</th>
@@ -897,7 +894,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
       <td></td>
       <td>12</td>
       <td>0.429315</td>
-      <td>0.490918</td>
+      <td>0.487245</td>
     </tr>
     <tr>
       <th>5</th>
@@ -908,7 +905,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
       <td></td>
       <td>12</td>
       <td>0.466699</td>
-      <td>0.563323</td>
+      <td>0.509875</td>
     </tr>
     <tr>
       <th>6</th>
@@ -919,7 +916,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
       <td></td>
       <td>13</td>
       <td>0.537784</td>
-      <td>0.575355</td>
+      <td>0.667695</td>
     </tr>
     <tr>
       <th>7</th>
@@ -930,7 +927,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
       <td></td>
       <td>13</td>
       <td>0.636728</td>
-      <td>0.487903</td>
+      <td>0.605467</td>
     </tr>
     <tr>
       <th>8</th>
@@ -941,7 +938,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
       <td></td>
       <td>12</td>
       <td>0.764009</td>
-      <td>0.911255</td>
+      <td>0.916113</td>
     </tr>
     <tr>
       <th>9</th>
@@ -952,7 +949,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
       <td></td>
       <td>12</td>
       <td>0.897775</td>
-      <td>1.027184</td>
+      <td>1.017125</td>
     </tr>
     <tr>
       <th>10</th>
@@ -963,7 +960,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
       <td></td>
       <td>14</td>
       <td>1.000000</td>
-      <td>1.184417</td>
+      <td>1.222986</td>
     </tr>
   </tbody>
 </table>
@@ -976,63 +973,23 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <section id="regression-models-for-predicting-a-scalar-value-for-a-given-amino-acid-sequence-and-site-specific-ptms" class="level2">
 <h2 class="anchored" data-anchor-id="regression-models-for-predicting-a-scalar-value-for-a-given-amino-acid-sequence-and-site-specific-ptms">Regression models for predicting a scalar value for a given amino acid sequence and site-specific PTMs</h2>
 <hr>
-<p><a href="https://github.com/MannLabs/alphapeptdeep/blob/main/peptdeep/model/generic_property_prediction.py#L211" target="_blank" style="float:right; font-size:smaller">source</a></p>
+<p><a href="https://github.com/MannLabs/alphapeptdeep/blob/main/peptdeep/model/generic_property_prediction.py#L215" target="_blank" style="float:right; font-size:smaller">source</a></p>
 <section id="modelinterface_for_generic_modaaseq_regression" class="level3">
 <h3 class="anchored" data-anchor-id="modelinterface_for_generic_modaaseq_regression">ModelInterface_for_Generic_ModAASeq_Regression</h3>
 <blockquote class="blockquote">
-<pre><code> ModelInterface_for_Generic_ModAASeq_Regression (dropout=0.1,
-                                                 model_class:torch.nn.modu
-                                                 les.module.Module=&lt;class 
+<pre><code> ModelInterface_for_Generic_ModAASeq_Regression
+                                                 (model_class:torch.nn.mod
+                                                 ules.module.Module=&lt;class
                                                  '__main__.Model_for_Gener
                                                  ic_ModAASeq_Regression_LS
-                                                 TM'&gt;, device:str='gpu',
-                                                 **kwargs)</code></pre>
+                                                 TM'&gt;, dropout=0.1,
+                                                 device:str='gpu',
+                                                 hidden_dim=256,
+                                                 nlayers=4, **kwargs)</code></pre>
 </blockquote>
 <p><code>ModelInterface</code> for all Generic_ModAASeq_Regression models</p>
-<table class="table">
-<colgroup>
-<col style="width: 6%">
-<col style="width: 25%">
-<col style="width: 34%">
-<col style="width: 34%">
-</colgroup>
-<thead>
-<tr class="header">
-<th></th>
-<th><strong>Type</strong></th>
-<th><strong>Default</strong></th>
-<th><strong>Details</strong></th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>dropout</td>
-<td>float</td>
-<td>0.1</td>
-<td></td>
-</tr>
-<tr class="even">
-<td>model_class</td>
-<td>Module</td>
-<td>Model_for_Generic_ModAASeq_Regression_LSTM</td>
-<td>model defined above</td>
-</tr>
-<tr class="odd">
-<td>device</td>
-<td>str</td>
-<td>gpu</td>
-<td></td>
-</tr>
-<tr class="even">
-<td>kwargs</td>
-<td></td>
-<td></td>
-<td></td>
-</tr>
-</tbody>
-</table>
 <hr>
-<p><a href="https://github.com/MannLabs/alphapeptdeep/blob/main/peptdeep/model/generic_property_prediction.py#L156" target="_blank" style="float:right; font-size:smaller">source</a></p>
+<p><a href="https://github.com/MannLabs/alphapeptdeep/blob/main/peptdeep/model/generic_property_prediction.py#L160" target="_blank" style="float:right; font-size:smaller">source</a></p>
 </section>
 <section id="model_for_generic_modaaseq_regression_transformer" class="level3">
 <h3 class="anchored" data-anchor-id="model_for_generic_modaaseq_regression_transformer">Model_for_Generic_ModAASeq_Regression_Transformer</h3>
@@ -1044,33 +1001,29 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </blockquote>
 <p>Generic transformer regression model for modified sequence</p>
 <hr>
-<p><a href="https://github.com/MannLabs/alphapeptdeep/blob/main/peptdeep/model/generic_property_prediction.py#L130" target="_blank" style="float:right; font-size:smaller">source</a></p>
+<p><a href="https://github.com/MannLabs/alphapeptdeep/blob/main/peptdeep/model/generic_property_prediction.py#L134" target="_blank" style="float:right; font-size:smaller">source</a></p>
 </section>
 <section id="model_for_generic_modaaseq_regression_lstm" class="level3">
 <h3 class="anchored" data-anchor-id="model_for_generic_modaaseq_regression_lstm">Model_for_Generic_ModAASeq_Regression_LSTM</h3>
 <blockquote class="blockquote">
-<pre><code> Model_for_Generic_ModAASeq_Regression_LSTM (hidden_dim=256,
-                                             n_lstm_layers=4, dropout=0.1,
-                                             **kwargs)</code></pre>
+<pre><code> Model_for_Generic_ModAASeq_Regression_LSTM (hidden_dim=256, nlayers=4,
+                                             dropout=0.1, **kwargs)</code></pre>
 </blockquote>
 <p>Generic LSTM regression model for modified sequence</p>
 <section id="scalar-regression-model-rt-with-modified-aa-sequences-using-model_for_generic_modaaseq_regression_lstm" class="level4">
 <h4 class="anchored" data-anchor-id="scalar-regression-model-rt-with-modified-aa-sequences-using-model_for_generic_modaaseq_regression_lstm">Scalar regression model (RT) with modified AA sequences using <a href="https://MannLabs.github.io/alphapeptdeep/model/generic_property_prediction.html#model_for_generic_modaaseq_regression_lstm"><code>Model_for_Generic_ModAASeq_Regression_LSTM</code></a></h4>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>example_df <span class="op">=</span> create_example_input_dataframe_normalized_irt()</span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="co">#initialize the modelinterface, specify which of the models to use</span></span>
-<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> ModelInterface_for_Generic_ModAASeq_Regression(</span>
-<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>    model_class<span class="op">=</span>Model_for_Generic_ModAASeq_Regression_LSTM</span>
-<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a><span class="co"># specify the name of the column you want to use for traning</span></span>
-<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>model.target_column_to_train <span class="op">=</span> <span class="st">'normalized_irt'</span></span>
-<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>model.target_column_to_predict <span class="op">=</span> <span class="st">'predicted_normalized_irt'</span></span>
-<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>model.train(example_df, epoch<span class="op">=</span><span class="dv">20</span>)</span>
-<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>model.predict(example_df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>Device `gpu` is not available, set to `cpu`</code></pre>
-</div>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>example_df <span class="op">=</span> create_example_input_dataframe_normalized_irt()</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="co">#initialize the modelinterface, specify which of the models to use</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> ModelInterface_for_Generic_ModAASeq_Regression(</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>    model_class<span class="op">=</span>Model_for_Generic_ModAASeq_Regression_LSTM</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a><span class="co"># specify the name of the column you want to use for traning</span></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>model.target_column_to_train <span class="op">=</span> <span class="st">'normalized_irt'</span></span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>model.target_column_to_predict <span class="op">=</span> <span class="st">'predicted_normalized_irt'</span></span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>model.train(example_df, epoch<span class="op">=</span><span class="dv">20</span>)</span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>model.predict(example_df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 
 <div>
@@ -1110,7 +1063,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
       <td></td>
       <td>14</td>
       <td>0.199488</td>
-      <td>0.254498</td>
+      <td>0.218646</td>
     </tr>
     <tr>
       <th>2</th>
@@ -1121,7 +1074,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
       <td></td>
       <td>13</td>
       <td>0.298671</td>
-      <td>0.254223</td>
+      <td>0.238523</td>
     </tr>
     <tr>
       <th>3</th>
@@ -1132,7 +1085,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
       <td></td>
       <td>10</td>
       <td>0.357909</td>
-      <td>0.309119</td>
+      <td>0.338038</td>
     </tr>
     <tr>
       <th>4</th>
@@ -1143,7 +1096,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
       <td></td>
       <td>12</td>
       <td>0.429315</td>
-      <td>0.373578</td>
+      <td>0.389952</td>
     </tr>
     <tr>
       <th>5</th>
@@ -1154,7 +1107,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
       <td></td>
       <td>12</td>
       <td>0.466699</td>
-      <td>0.459781</td>
+      <td>0.414328</td>
     </tr>
     <tr>
       <th>6</th>
@@ -1165,7 +1118,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
       <td></td>
       <td>13</td>
       <td>0.537784</td>
-      <td>0.782105</td>
+      <td>0.542586</td>
     </tr>
     <tr>
       <th>7</th>
@@ -1176,7 +1129,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
       <td></td>
       <td>13</td>
       <td>0.636728</td>
-      <td>0.663410</td>
+      <td>0.578945</td>
     </tr>
     <tr>
       <th>8</th>
@@ -1187,7 +1140,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
       <td></td>
       <td>12</td>
       <td>0.764009</td>
-      <td>0.785333</td>
+      <td>0.741118</td>
     </tr>
     <tr>
       <th>9</th>
@@ -1198,7 +1151,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
       <td></td>
       <td>12</td>
       <td>0.897775</td>
-      <td>0.909505</td>
+      <td>0.851133</td>
     </tr>
     <tr>
       <th>10</th>
@@ -1209,7 +1162,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
       <td></td>
       <td>14</td>
       <td>1.000000</td>
-      <td>1.019181</td>
+      <td>0.970481</td>
     </tr>
   </tbody>
 </table>
@@ -1220,20 +1173,17 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <section id="scalar-regression-model-rt-with-modified-aa-sequences-using-model_for_generic_modaaseq_regression_transformer" class="level4">
 <h4 class="anchored" data-anchor-id="scalar-regression-model-rt-with-modified-aa-sequences-using-model_for_generic_modaaseq_regression_transformer">Scalar regression model (RT) with modified AA sequences using <a href="https://MannLabs.github.io/alphapeptdeep/model/generic_property_prediction.html#model_for_generic_modaaseq_regression_transformer"><code>Model_for_Generic_ModAASeq_Regression_Transformer</code></a></h4>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>example_df <span class="op">=</span> create_example_input_dataframe_normalized_irt()</span>
-<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="co">#initialize the modelinterface, specify which of the models to use</span></span>
-<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> ModelInterface_for_Generic_ModAASeq_Regression(</span>
-<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>    model_class<span class="op">=</span>Model_for_Generic_ModAASeq_Regression_Transformer</span>
-<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a><span class="co"># specify the name of the column you want to use for traning</span></span>
-<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>model.target_column_to_train <span class="op">=</span> <span class="st">'normalized_irt'</span></span>
-<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>model.target_column_to_predict <span class="op">=</span> <span class="st">'predicted_normalized_irt'</span></span>
-<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>model.train(example_df, epoch<span class="op">=</span><span class="dv">20</span>)</span>
-<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>model.predict(example_df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>Device `gpu` is not available, set to `cpu`</code></pre>
-</div>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>example_df <span class="op">=</span> create_example_input_dataframe_normalized_irt()</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="co">#initialize the modelinterface, specify which of the models to use</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> ModelInterface_for_Generic_ModAASeq_Regression(</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>    model_class<span class="op">=</span>Model_for_Generic_ModAASeq_Regression_Transformer</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a><span class="co"># specify the name of the column you want to use for traning</span></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>model.target_column_to_train <span class="op">=</span> <span class="st">'normalized_irt'</span></span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>model.target_column_to_predict <span class="op">=</span> <span class="st">'predicted_normalized_irt'</span></span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>model.train(example_df, epoch<span class="op">=</span><span class="dv">20</span>)</span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>model.predict(example_df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 
 <div>
@@ -1262,7 +1212,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
       <td></td>
       <td>9</td>
       <td>0.000000</td>
-      <td>0.000000</td>
+      <td>0.023732</td>
     </tr>
     <tr>
       <th>1</th>
@@ -1273,7 +1223,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
       <td></td>
       <td>14</td>
       <td>0.199488</td>
-      <td>0.076612</td>
+      <td>0.371864</td>
     </tr>
     <tr>
       <th>2</th>
@@ -1284,7 +1234,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
       <td></td>
       <td>13</td>
       <td>0.298671</td>
-      <td>0.258835</td>
+      <td>0.371675</td>
     </tr>
     <tr>
       <th>3</th>
@@ -1295,7 +1245,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
       <td></td>
       <td>10</td>
       <td>0.357909</td>
-      <td>0.242142</td>
+      <td>0.444706</td>
     </tr>
     <tr>
       <th>4</th>
@@ -1306,7 +1256,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
       <td></td>
       <td>12</td>
       <td>0.429315</td>
-      <td>0.199896</td>
+      <td>0.599888</td>
     </tr>
     <tr>
       <th>5</th>
@@ -1317,7 +1267,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
       <td></td>
       <td>12</td>
       <td>0.466699</td>
-      <td>0.317468</td>
+      <td>0.647195</td>
     </tr>
     <tr>
       <th>6</th>
@@ -1328,7 +1278,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
       <td></td>
       <td>13</td>
       <td>0.537784</td>
-      <td>0.337332</td>
+      <td>0.642657</td>
     </tr>
     <tr>
       <th>7</th>
@@ -1339,7 +1289,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
       <td></td>
       <td>13</td>
       <td>0.636728</td>
-      <td>0.593206</td>
+      <td>0.730952</td>
     </tr>
     <tr>
       <th>8</th>
@@ -1350,7 +1300,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
       <td></td>
       <td>12</td>
       <td>0.764009</td>
-      <td>0.334190</td>
+      <td>0.957414</td>
     </tr>
     <tr>
       <th>9</th>
@@ -1361,7 +1311,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
       <td></td>
       <td>12</td>
       <td>0.897775</td>
-      <td>0.561736</td>
+      <td>1.022258</td>
     </tr>
     <tr>
       <th>10</th>
@@ -1372,7 +1322,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
       <td></td>
       <td>14</td>
       <td>1.000000</td>
-      <td>0.662242</td>
+      <td>1.029660</td>
     </tr>
   </tbody>
 </table>
@@ -1385,66 +1335,26 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <section id="binary-classification-models-for-a-given-amino-acid-sequence" class="level2">
 <h2 class="anchored" data-anchor-id="binary-classification-models-for-a-given-amino-acid-sequence">Binary classification models for a given amino acid sequence</h2>
 <hr>
-<p><a href="https://github.com/MannLabs/alphapeptdeep/blob/main/peptdeep/model/generic_property_prediction.py#L288" target="_blank" style="float:right; font-size:smaller">source</a></p>
+<p><a href="https://github.com/MannLabs/alphapeptdeep/blob/main/peptdeep/model/generic_property_prediction.py#L296" target="_blank" style="float:right; font-size:smaller">source</a></p>
 <section id="modelinterface_for_generic_aaseq_binaryclassification" class="level3">
 <h3 class="anchored" data-anchor-id="modelinterface_for_generic_aaseq_binaryclassification">ModelInterface_for_Generic_AASeq_BinaryClassification</h3>
 <blockquote class="blockquote">
-<pre><code> ModelInterface_for_Generic_AASeq_BinaryClassification (dropout=0.1,
-                                                        model_class:torch.
-                                                        nn.modules.module.
-                                                        Module=&lt;class '__m
-                                                        ain__.Model_for_Ge
-                                                        neric_AASeq_Binary
-                                                        Classification_LST
-                                                        M'&gt;,
+<pre><code> ModelInterface_for_Generic_AASeq_BinaryClassification
+                                                        (model_class:torch
+                                                        .nn.modules.module
+                                                        .Module=&lt;class '__
+                                                        main__.Model_for_G
+                                                        eneric_AASeq_Binar
+                                                        yClassification_LS
+                                                        TM'&gt;, dropout=0.1,
                                                         device:str='gpu',
+                                                        hidden_dim=256,
+                                                        nlayers=4,
                                                         **kwargs)</code></pre>
 </blockquote>
 <p><code>ModelInterface</code> for all Generic_AASeq_BinaryClassification models</p>
-<table class="table">
-<colgroup>
-<col style="width: 6%">
-<col style="width: 25%">
-<col style="width: 34%">
-<col style="width: 34%">
-</colgroup>
-<thead>
-<tr class="header">
-<th></th>
-<th><strong>Type</strong></th>
-<th><strong>Default</strong></th>
-<th><strong>Details</strong></th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>dropout</td>
-<td>float</td>
-<td>0.1</td>
-<td></td>
-</tr>
-<tr class="even">
-<td>model_class</td>
-<td>Module</td>
-<td>Model_for_Generic_AASeq_BinaryClassification_LSTM</td>
-<td>model defined above</td>
-</tr>
-<tr class="odd">
-<td>device</td>
-<td>str</td>
-<td>gpu</td>
-<td></td>
-</tr>
-<tr class="even">
-<td>kwargs</td>
-<td></td>
-<td></td>
-<td></td>
-</tr>
-</tbody>
-</table>
 <hr>
-<p><a href="https://github.com/MannLabs/alphapeptdeep/blob/main/peptdeep/model/generic_property_prediction.py#L260" target="_blank" style="float:right; font-size:smaller">source</a></p>
+<p><a href="https://github.com/MannLabs/alphapeptdeep/blob/main/peptdeep/model/generic_property_prediction.py#L268" target="_blank" style="float:right; font-size:smaller">source</a></p>
 </section>
 <section id="model_for_generic_aaseq_binaryclassification_transformer" class="level3">
 <h3 class="anchored" data-anchor-id="model_for_generic_aaseq_binaryclassification_transformer">Model_for_Generic_AASeq_BinaryClassification_Transformer</h3>
@@ -1458,13 +1368,13 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </blockquote>
 <p>Generic transformer classification model for AA sequence</p>
 <hr>
-<p><a href="https://github.com/MannLabs/alphapeptdeep/blob/main/peptdeep/model/generic_property_prediction.py#L239" target="_blank" style="float:right; font-size:smaller">source</a></p>
+<p><a href="https://github.com/MannLabs/alphapeptdeep/blob/main/peptdeep/model/generic_property_prediction.py#L247" target="_blank" style="float:right; font-size:smaller">source</a></p>
 </section>
 <section id="model_for_generic_aaseq_binaryclassification_lstm" class="level3">
 <h3 class="anchored" data-anchor-id="model_for_generic_aaseq_binaryclassification_lstm">Model_for_Generic_AASeq_BinaryClassification_LSTM</h3>
 <blockquote class="blockquote">
 <pre><code> Model_for_Generic_AASeq_BinaryClassification_LSTM (hidden_dim=256,
-                                                    n_lstm_layers=4,
+                                                    nlayers=4,
                                                     dropout=0.1, **kwargs)</code></pre>
 </blockquote>
 <p>Generic LSTM classification model for AA sequence</p>
@@ -1472,29 +1382,26 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <section id="examples-1" class="level3">
 <h3 class="anchored" data-anchor-id="examples-1">Examples</h3>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> create_example_input_dataframe_classification_rt():</span>
-<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>    rt_df <span class="op">=</span> create_example_input_dataframe_normalized_irt()</span>
-<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>    rt_df[<span class="st">'is_in_first_half_of_column'</span>] <span class="op">=</span> <span class="dv">0</span></span>
-<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>    rt_df.loc[:<span class="dv">5</span>,<span class="st">'is_in_first_half_of_column'</span>]<span class="op">=</span><span class="dv">1</span></span>
-<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> rt_df</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> create_example_input_dataframe_classification_rt():</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>    rt_df <span class="op">=</span> create_example_input_dataframe_normalized_irt()</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>    rt_df[<span class="st">'is_in_first_half_of_column'</span>] <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>    rt_df.loc[:<span class="dv">5</span>,<span class="st">'is_in_first_half_of_column'</span>]<span class="op">=</span><span class="dv">1</span></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> rt_df</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <section id="a-sequence-classification-model-using-model_for_generic_aaseq_binaryclassification_lstm" class="level4">
 <h4 class="anchored" data-anchor-id="a-sequence-classification-model-using-model_for_generic_aaseq_binaryclassification_lstm">A sequence classification model using <a href="https://MannLabs.github.io/alphapeptdeep/model/generic_property_prediction.html#model_for_generic_aaseq_binaryclassification_lstm"><code>Model_for_Generic_AASeq_BinaryClassification_LSTM</code></a></h4>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>example_df <span class="op">=</span> create_example_input_dataframe_classification_rt()</span>
-<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a><span class="co">#initialize the modelinterface, specify which of the models to use</span></span>
-<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> ModelInterface_for_Generic_AASeq_BinaryClassification(</span>
-<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>    model_class<span class="op">=</span>Model_for_Generic_AASeq_BinaryClassification_LSTM</span>
-<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a><span class="co"># specify the name of the column you want to use for traning</span></span>
-<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>model.target_column_to_train <span class="op">=</span> <span class="st">'is_in_first_half_of_column'</span> </span>
-<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a>model.target_column_to_predict <span class="op">=</span> <span class="st">'predicted_will_be_in_first_half_of_column'</span></span>
-<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a>model.train(example_df, epoch<span class="op">=</span><span class="dv">20</span>)</span>
-<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a>model.predict(example_df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>Device `gpu` is not available, set to `cpu`</code></pre>
-</div>
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>example_df <span class="op">=</span> create_example_input_dataframe_classification_rt()</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a><span class="co">#initialize the modelinterface, specify which of the models to use</span></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> ModelInterface_for_Generic_AASeq_BinaryClassification(</span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>    model_class<span class="op">=</span>Model_for_Generic_AASeq_BinaryClassification_LSTM</span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a><span class="co"># specify the name of the column you want to use for traning</span></span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>model.target_column_to_train <span class="op">=</span> <span class="st">'is_in_first_half_of_column'</span> </span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>model.target_column_to_predict <span class="op">=</span> <span class="st">'predicted_will_be_in_first_half_of_column'</span></span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>model.train(example_df, epoch<span class="op">=</span><span class="dv">20</span>)</span>
+<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a>model.predict(example_df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 
 <div>
@@ -1525,7 +1432,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
       <td>9</td>
       <td>0.000000</td>
       <td>1</td>
-      <td>0.991649</td>
+      <td>0.990723</td>
     </tr>
     <tr>
       <th>1</th>
@@ -1537,7 +1444,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
       <td>14</td>
       <td>0.199488</td>
       <td>1</td>
-      <td>0.990971</td>
+      <td>0.990067</td>
     </tr>
     <tr>
       <th>2</th>
@@ -1549,7 +1456,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
       <td>13</td>
       <td>0.298671</td>
       <td>1</td>
-      <td>0.992576</td>
+      <td>0.991260</td>
     </tr>
     <tr>
       <th>3</th>
@@ -1561,7 +1468,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
       <td>10</td>
       <td>0.357909</td>
       <td>1</td>
-      <td>0.990994</td>
+      <td>0.990588</td>
     </tr>
     <tr>
       <th>4</th>
@@ -1573,7 +1480,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
       <td>12</td>
       <td>0.429315</td>
       <td>1</td>
-      <td>0.987793</td>
+      <td>0.990547</td>
     </tr>
     <tr>
       <th>5</th>
@@ -1585,7 +1492,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
       <td>12</td>
       <td>0.466699</td>
       <td>1</td>
-      <td>0.987963</td>
+      <td>0.986322</td>
     </tr>
     <tr>
       <th>6</th>
@@ -1597,7 +1504,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
       <td>13</td>
       <td>0.537784</td>
       <td>0</td>
-      <td>0.402262</td>
+      <td>0.362422</td>
     </tr>
     <tr>
       <th>7</th>
@@ -1609,7 +1516,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
       <td>13</td>
       <td>0.636728</td>
       <td>0</td>
-      <td>0.407929</td>
+      <td>0.357596</td>
     </tr>
     <tr>
       <th>8</th>
@@ -1621,7 +1528,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
       <td>12</td>
       <td>0.764009</td>
       <td>0</td>
-      <td>0.417269</td>
+      <td>0.364087</td>
     </tr>
     <tr>
       <th>9</th>
@@ -1633,7 +1540,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
       <td>12</td>
       <td>0.897775</td>
       <td>0</td>
-      <td>0.403539</td>
+      <td>0.360649</td>
     </tr>
     <tr>
       <th>10</th>
@@ -1645,7 +1552,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
       <td>14</td>
       <td>1.000000</td>
       <td>0</td>
-      <td>0.399278</td>
+      <td>0.357807</td>
     </tr>
   </tbody>
 </table>
@@ -1656,20 +1563,17 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <section id="a-sequence-classification-model-using-model_for_generic_aaseq_binaryclassification_transformer" class="level4">
 <h4 class="anchored" data-anchor-id="a-sequence-classification-model-using-model_for_generic_aaseq_binaryclassification_transformer">A sequence classification model using <a href="https://MannLabs.github.io/alphapeptdeep/model/generic_property_prediction.html#model_for_generic_aaseq_binaryclassification_transformer"><code>Model_for_Generic_AASeq_BinaryClassification_Transformer</code></a></h4>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>example_df <span class="op">=</span> create_example_input_dataframe_classification_rt()</span>
-<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a><span class="co">#initialize the modelinterface, specify which of the models to use</span></span>
-<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> ModelInterface_for_Generic_AASeq_BinaryClassification(</span>
-<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>    model_class<span class="op">=</span>Model_for_Generic_AASeq_BinaryClassification_Transformer</span>
-<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a><span class="co"># specify the name of the column you want to use for traning</span></span>
-<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a>model.target_column_to_train <span class="op">=</span> <span class="st">'is_in_first_half_of_column'</span></span>
-<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a>model.target_column_to_predict <span class="op">=</span> <span class="st">'predicted_will_be_in_first_half_of_column'</span></span>
-<span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a>model.train(example_df, epoch<span class="op">=</span><span class="dv">20</span>)</span>
-<span id="cb23-11"><a href="#cb23-11" aria-hidden="true" tabindex="-1"></a>model.predict(example_df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>Device `gpu` is not available, set to `cpu`</code></pre>
-</div>
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>example_df <span class="op">=</span> create_example_input_dataframe_classification_rt()</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a><span class="co">#initialize the modelinterface, specify which of the models to use</span></span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> ModelInterface_for_Generic_AASeq_BinaryClassification(</span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>    model_class<span class="op">=</span>Model_for_Generic_AASeq_BinaryClassification_Transformer</span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a><span class="co"># specify the name of the column you want to use for traning</span></span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>model.target_column_to_train <span class="op">=</span> <span class="st">'is_in_first_half_of_column'</span></span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a>model.target_column_to_predict <span class="op">=</span> <span class="st">'predicted_will_be_in_first_half_of_column'</span></span>
+<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a>model.train(example_df, epoch<span class="op">=</span><span class="dv">20</span>)</span>
+<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a>model.predict(example_df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 
 <div>
@@ -1700,7 +1604,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
       <td>9</td>
       <td>0.000000</td>
       <td>1</td>
-      <td>0.997350</td>
+      <td>0.997154</td>
     </tr>
     <tr>
       <th>1</th>
@@ -1712,7 +1616,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
       <td>14</td>
       <td>0.199488</td>
       <td>1</td>
-      <td>0.997300</td>
+      <td>0.997196</td>
     </tr>
     <tr>
       <th>2</th>
@@ -1724,7 +1628,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
       <td>13</td>
       <td>0.298671</td>
       <td>1</td>
-      <td>0.994704</td>
+      <td>0.994428</td>
     </tr>
     <tr>
       <th>3</th>
@@ -1736,7 +1640,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
       <td>10</td>
       <td>0.357909</td>
       <td>1</td>
-      <td>0.997478</td>
+      <td>0.997426</td>
     </tr>
     <tr>
       <th>4</th>
@@ -1748,7 +1652,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
       <td>12</td>
       <td>0.429315</td>
       <td>1</td>
-      <td>0.996765</td>
+      <td>0.997273</td>
     </tr>
     <tr>
       <th>5</th>
@@ -1760,7 +1664,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
       <td>12</td>
       <td>0.466699</td>
       <td>1</td>
-      <td>0.996298</td>
+      <td>0.997214</td>
     </tr>
     <tr>
       <th>6</th>
@@ -1772,7 +1676,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
       <td>13</td>
       <td>0.537784</td>
       <td>0</td>
-      <td>0.006340</td>
+      <td>0.007716</td>
     </tr>
     <tr>
       <th>7</th>
@@ -1784,7 +1688,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
       <td>13</td>
       <td>0.636728</td>
       <td>0</td>
-      <td>0.005618</td>
+      <td>0.007046</td>
     </tr>
     <tr>
       <th>8</th>
@@ -1796,7 +1700,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
       <td>12</td>
       <td>0.764009</td>
       <td>0</td>
-      <td>0.003740</td>
+      <td>0.005140</td>
     </tr>
     <tr>
       <th>9</th>
@@ -1808,7 +1712,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
       <td>12</td>
       <td>0.897775</td>
       <td>0</td>
-      <td>0.003513</td>
+      <td>0.004675</td>
     </tr>
     <tr>
       <th>10</th>
@@ -1820,7 +1724,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
       <td>14</td>
       <td>1.000000</td>
       <td>0</td>
-      <td>0.003260</td>
+      <td>0.003902</td>
     </tr>
   </tbody>
 </table>
@@ -1833,67 +1737,28 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <section id="binary-classification-models-for-given-amino-acid-sequence-and-site-specific-ptms" class="level2">
 <h2 class="anchored" data-anchor-id="binary-classification-models-for-given-amino-acid-sequence-and-site-specific-ptms">Binary classification models for given amino acid sequence and site-specific PTMs</h2>
 <hr>
-<p><a href="https://github.com/MannLabs/alphapeptdeep/blob/main/peptdeep/model/generic_property_prediction.py#L371" target="_blank" style="float:right; font-size:smaller">source</a></p>
+<p><a href="https://github.com/MannLabs/alphapeptdeep/blob/main/peptdeep/model/generic_property_prediction.py#L383" target="_blank" style="float:right; font-size:smaller">source</a></p>
 <section id="modelinterface_for_generic_modaaseq_binaryclassification" class="level3">
 <h3 class="anchored" data-anchor-id="modelinterface_for_generic_modaaseq_binaryclassification">ModelInterface_for_Generic_ModAASeq_BinaryClassification</h3>
 <blockquote class="blockquote">
-<pre><code> ModelInterface_for_Generic_ModAASeq_BinaryClassification (dropout=0.1,
-                                                           model_class:tor
-                                                           ch.nn.modules.m
-                                                           odule.Module=&lt;c
-                                                           lass '__main__.
-                                                           Model_for_Gener
-                                                           ic_ModAASeq_Bin
-                                                           aryClassificati
-                                                           on_LSTM'&gt;, devi
-                                                           ce:str='gpu',
+<pre><code> ModelInterface_for_Generic_ModAASeq_BinaryClassification
+                                                           (model_class:to
+                                                           rch.nn.modules.
+                                                           module.Module=&lt;
+                                                           class '__main__
+                                                           .Model_for_Gene
+                                                           ric_ModAASeq_Bi
+                                                           naryClassificat
+                                                           ion_LSTM'&gt;,
+                                                           dropout=0.1, de
+                                                           vice:str='gpu',
+                                                           hidden_dim=256,
+                                                           nlayers=4,
                                                            **kwargs)</code></pre>
 </blockquote>
 <p><code>ModelInterface</code> for Generic_ModAASeq_BinaryClassification</p>
-<table class="table">
-<colgroup>
-<col style="width: 6%">
-<col style="width: 25%">
-<col style="width: 34%">
-<col style="width: 34%">
-</colgroup>
-<thead>
-<tr class="header">
-<th></th>
-<th><strong>Type</strong></th>
-<th><strong>Default</strong></th>
-<th><strong>Details</strong></th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>dropout</td>
-<td>float</td>
-<td>0.1</td>
-<td></td>
-</tr>
-<tr class="even">
-<td>model_class</td>
-<td>Module</td>
-<td>Model_for_Generic_ModAASeq_BinaryClassification_LSTM</td>
-<td>model defined above</td>
-</tr>
-<tr class="odd">
-<td>device</td>
-<td>str</td>
-<td>gpu</td>
-<td></td>
-</tr>
-<tr class="even">
-<td>kwargs</td>
-<td></td>
-<td></td>
-<td></td>
-</tr>
-</tbody>
-</table>
 <hr>
-<p><a href="https://github.com/MannLabs/alphapeptdeep/blob/main/peptdeep/model/generic_property_prediction.py#L335" target="_blank" style="float:right; font-size:smaller">source</a></p>
+<p><a href="https://github.com/MannLabs/alphapeptdeep/blob/main/peptdeep/model/generic_property_prediction.py#L347" target="_blank" style="float:right; font-size:smaller">source</a></p>
 </section>
 <section id="model_for_generic_modaaseq_binaryclassification_transformer" class="level3">
 <h3 class="anchored" data-anchor-id="model_for_generic_modaaseq_binaryclassification_transformer">Model_for_Generic_ModAASeq_BinaryClassification_Transformer</h3>
@@ -1909,13 +1774,13 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </blockquote>
 <p>Generic transformer classification model for modified sequence</p>
 <hr>
-<p><a href="https://github.com/MannLabs/alphapeptdeep/blob/main/peptdeep/model/generic_property_prediction.py#L312" target="_blank" style="float:right; font-size:smaller">source</a></p>
+<p><a href="https://github.com/MannLabs/alphapeptdeep/blob/main/peptdeep/model/generic_property_prediction.py#L324" target="_blank" style="float:right; font-size:smaller">source</a></p>
 </section>
 <section id="model_for_generic_modaaseq_binaryclassification_lstm" class="level3">
 <h3 class="anchored" data-anchor-id="model_for_generic_modaaseq_binaryclassification_lstm">Model_for_Generic_ModAASeq_BinaryClassification_LSTM</h3>
 <blockquote class="blockquote">
 <pre><code> Model_for_Generic_ModAASeq_BinaryClassification_LSTM (hidden_dim=256,
-                                                       n_lstm_layers=4,
+                                                       nlayers=4,
                                                        dropout=0.1,
                                                        **kwargs)</code></pre>
 </blockquote>
@@ -1924,29 +1789,26 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <section id="examples-2" class="level3">
 <h3 class="anchored" data-anchor-id="examples-2">Examples</h3>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> create_example_input_dataframe_classification_rt():</span>
-<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>    rt_df <span class="op">=</span> create_example_input_dataframe_normalized_irt()</span>
-<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>    rt_df[<span class="st">'is_in_first_half_of_column'</span>] <span class="op">=</span> <span class="dv">0</span></span>
-<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a>    rt_df.loc[:<span class="dv">5</span>,<span class="st">'is_in_first_half_of_column'</span>]<span class="op">=</span><span class="dv">1</span></span>
-<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> rt_df</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> create_example_input_dataframe_classification_rt():</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>    rt_df <span class="op">=</span> create_example_input_dataframe_normalized_irt()</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>    rt_df[<span class="st">'is_in_first_half_of_column'</span>] <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>    rt_df.loc[:<span class="dv">5</span>,<span class="st">'is_in_first_half_of_column'</span>]<span class="op">=</span><span class="dv">1</span></span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> rt_df</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <section id="a-sequence-classification-model-using-model_for_generic_modaaseq_binaryclassification_lstm" class="level4">
 <h4 class="anchored" data-anchor-id="a-sequence-classification-model-using-model_for_generic_modaaseq_binaryclassification_lstm">A sequence classification model using <a href="https://MannLabs.github.io/alphapeptdeep/model/generic_property_prediction.html#model_for_generic_modaaseq_binaryclassification_lstm"><code>Model_for_Generic_ModAASeq_BinaryClassification_LSTM</code></a></h4>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>example_df <span class="op">=</span> create_example_input_dataframe_classification_rt()</span>
-<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a><span class="co">#initialize the modelinterface, specify which of the models to use</span></span>
-<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> ModelInterface_for_Generic_ModAASeq_BinaryClassification(</span>
-<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a>    model_class<span class="op">=</span>Model_for_Generic_ModAASeq_BinaryClassification_LSTM</span>
-<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a><span class="co"># specify the name of the column you want to use for traning</span></span>
-<span id="cb29-8"><a href="#cb29-8" aria-hidden="true" tabindex="-1"></a>model.target_column_to_train <span class="op">=</span> <span class="st">'is_in_first_half_of_column'</span> </span>
-<span id="cb29-9"><a href="#cb29-9" aria-hidden="true" tabindex="-1"></a>model.target_column_to_predict <span class="op">=</span> <span class="st">'predicted_will_be_in_first_half_of_column'</span></span>
-<span id="cb29-10"><a href="#cb29-10" aria-hidden="true" tabindex="-1"></a>model.train(example_df, epoch<span class="op">=</span><span class="dv">20</span>)</span>
-<span id="cb29-11"><a href="#cb29-11" aria-hidden="true" tabindex="-1"></a>model.predict(example_df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>Device `gpu` is not available, set to `cpu`</code></pre>
-</div>
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>example_df <span class="op">=</span> create_example_input_dataframe_classification_rt()</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a><span class="co">#initialize the modelinterface, specify which of the models to use</span></span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> ModelInterface_for_Generic_ModAASeq_BinaryClassification(</span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>    model_class<span class="op">=</span>Model_for_Generic_ModAASeq_BinaryClassification_LSTM</span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a><span class="co"># specify the name of the column you want to use for traning</span></span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a>model.target_column_to_train <span class="op">=</span> <span class="st">'is_in_first_half_of_column'</span> </span>
+<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a>model.target_column_to_predict <span class="op">=</span> <span class="st">'predicted_will_be_in_first_half_of_column'</span></span>
+<span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a>model.train(example_df, epoch<span class="op">=</span><span class="dv">20</span>)</span>
+<span id="cb23-11"><a href="#cb23-11" aria-hidden="true" tabindex="-1"></a>model.predict(example_df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 
 <div>
@@ -1977,7 +1839,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
       <td>9</td>
       <td>0.000000</td>
       <td>1</td>
-      <td>0.983938</td>
+      <td>0.991679</td>
     </tr>
     <tr>
       <th>1</th>
@@ -1989,7 +1851,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
       <td>14</td>
       <td>0.199488</td>
       <td>1</td>
-      <td>0.984635</td>
+      <td>0.991799</td>
     </tr>
     <tr>
       <th>2</th>
@@ -2001,7 +1863,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
       <td>13</td>
       <td>0.298671</td>
       <td>1</td>
-      <td>0.983983</td>
+      <td>0.991879</td>
     </tr>
     <tr>
       <th>3</th>
@@ -2013,7 +1875,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
       <td>10</td>
       <td>0.357909</td>
       <td>1</td>
-      <td>0.984137</td>
+      <td>0.991361</td>
     </tr>
     <tr>
       <th>4</th>
@@ -2025,7 +1887,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
       <td>12</td>
       <td>0.429315</td>
       <td>1</td>
-      <td>0.983949</td>
+      <td>0.990937</td>
     </tr>
     <tr>
       <th>5</th>
@@ -2037,7 +1899,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
       <td>12</td>
       <td>0.466699</td>
       <td>1</td>
-      <td>0.982874</td>
+      <td>0.987399</td>
     </tr>
     <tr>
       <th>6</th>
@@ -2049,7 +1911,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
       <td>13</td>
       <td>0.537784</td>
       <td>0</td>
-      <td>0.360878</td>
+      <td>0.399395</td>
     </tr>
     <tr>
       <th>7</th>
@@ -2061,7 +1923,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
       <td>13</td>
       <td>0.636728</td>
       <td>0</td>
-      <td>0.358027</td>
+      <td>0.400205</td>
     </tr>
     <tr>
       <th>8</th>
@@ -2073,7 +1935,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
       <td>12</td>
       <td>0.764009</td>
       <td>0</td>
-      <td>0.364059</td>
+      <td>0.407074</td>
     </tr>
     <tr>
       <th>9</th>
@@ -2085,7 +1947,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
       <td>12</td>
       <td>0.897775</td>
       <td>0</td>
-      <td>0.359271</td>
+      <td>0.400328</td>
     </tr>
     <tr>
       <th>10</th>
@@ -2097,7 +1959,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
       <td>14</td>
       <td>1.000000</td>
       <td>0</td>
-      <td>0.356979</td>
+      <td>0.395036</td>
     </tr>
   </tbody>
 </table>
@@ -2108,20 +1970,17 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <section id="a-sequence-classification-model-using-model_for_generic_modaaseq_binaryclassification_transformer" class="level4">
 <h4 class="anchored" data-anchor-id="a-sequence-classification-model-using-model_for_generic_modaaseq_binaryclassification_transformer">A sequence classification model using <a href="https://MannLabs.github.io/alphapeptdeep/model/generic_property_prediction.html#model_for_generic_modaaseq_binaryclassification_transformer"><code>Model_for_Generic_ModAASeq_BinaryClassification_Transformer</code></a></h4>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>example_df <span class="op">=</span> create_example_input_dataframe_classification_rt()</span>
-<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a><span class="co">#initialize the modelinterface, specify which of the models to use</span></span>
-<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> ModelInterface_for_Generic_ModAASeq_BinaryClassification(</span>
-<span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a>    model_class<span class="op">=</span>Model_for_Generic_ModAASeq_BinaryClassification_Transformer</span>
-<span id="cb31-6"><a href="#cb31-6" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb31-7"><a href="#cb31-7" aria-hidden="true" tabindex="-1"></a><span class="co"># specify the name of the column you want to use for traning</span></span>
-<span id="cb31-8"><a href="#cb31-8" aria-hidden="true" tabindex="-1"></a>model.target_column_to_train <span class="op">=</span> <span class="st">'is_in_first_half_of_column'</span> </span>
-<span id="cb31-9"><a href="#cb31-9" aria-hidden="true" tabindex="-1"></a>model.target_column_to_predict <span class="op">=</span> <span class="st">'predicted_will_be_in_first_half_of_column'</span></span>
-<span id="cb31-10"><a href="#cb31-10" aria-hidden="true" tabindex="-1"></a>model.train(example_df, epoch<span class="op">=</span><span class="dv">20</span>)</span>
-<span id="cb31-11"><a href="#cb31-11" aria-hidden="true" tabindex="-1"></a>model.predict(example_df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>Device `gpu` is not available, set to `cpu`</code></pre>
-</div>
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>example_df <span class="op">=</span> create_example_input_dataframe_classification_rt()</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a><span class="co">#initialize the modelinterface, specify which of the models to use</span></span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> ModelInterface_for_Generic_ModAASeq_BinaryClassification(</span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>    model_class<span class="op">=</span>Model_for_Generic_ModAASeq_BinaryClassification_Transformer</span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a><span class="co"># specify the name of the column you want to use for traning</span></span>
+<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a>model.target_column_to_train <span class="op">=</span> <span class="st">'is_in_first_half_of_column'</span> </span>
+<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a>model.target_column_to_predict <span class="op">=</span> <span class="st">'predicted_will_be_in_first_half_of_column'</span></span>
+<span id="cb24-10"><a href="#cb24-10" aria-hidden="true" tabindex="-1"></a>model.train(example_df, epoch<span class="op">=</span><span class="dv">20</span>)</span>
+<span id="cb24-11"><a href="#cb24-11" aria-hidden="true" tabindex="-1"></a>model.predict(example_df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 
 <div>
@@ -2152,7 +2011,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
       <td>9</td>
       <td>0.000000</td>
       <td>1</td>
-      <td>0.996941</td>
+      <td>0.996980</td>
     </tr>
     <tr>
       <th>1</th>
@@ -2164,7 +2023,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
       <td>14</td>
       <td>0.199488</td>
       <td>1</td>
-      <td>0.996235</td>
+      <td>0.994647</td>
     </tr>
     <tr>
       <th>2</th>
@@ -2176,7 +2035,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
       <td>13</td>
       <td>0.298671</td>
       <td>1</td>
-      <td>0.995477</td>
+      <td>0.995371</td>
     </tr>
     <tr>
       <th>3</th>
@@ -2188,7 +2047,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
       <td>10</td>
       <td>0.357909</td>
       <td>1</td>
-      <td>0.996797</td>
+      <td>0.997050</td>
     </tr>
     <tr>
       <th>4</th>
@@ -2200,7 +2059,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
       <td>12</td>
       <td>0.429315</td>
       <td>1</td>
-      <td>0.996394</td>
+      <td>0.995105</td>
     </tr>
     <tr>
       <th>5</th>
@@ -2212,7 +2071,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
       <td>12</td>
       <td>0.466699</td>
       <td>1</td>
-      <td>0.995965</td>
+      <td>0.994481</td>
     </tr>
     <tr>
       <th>6</th>
@@ -2224,7 +2083,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
       <td>13</td>
       <td>0.537784</td>
       <td>0</td>
-      <td>0.006249</td>
+      <td>0.002750</td>
     </tr>
     <tr>
       <th>7</th>
@@ -2236,7 +2095,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
       <td>13</td>
       <td>0.636728</td>
       <td>0</td>
-      <td>0.006324</td>
+      <td>0.003557</td>
     </tr>
     <tr>
       <th>8</th>
@@ -2248,7 +2107,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
       <td>12</td>
       <td>0.764009</td>
       <td>0</td>
-      <td>0.004462</td>
+      <td>0.002703</td>
     </tr>
     <tr>
       <th>9</th>
@@ -2260,7 +2119,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
       <td>12</td>
       <td>0.897775</td>
       <td>0</td>
-      <td>0.004381</td>
+      <td>0.002480</td>
     </tr>
     <tr>
       <th>10</th>
@@ -2272,7 +2131,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
       <td>14</td>
       <td>1.000000</td>
       <td>0</td>
-      <td>0.004144</td>
+      <td>0.002323</td>
     </tr>
   </tbody>
 </table>

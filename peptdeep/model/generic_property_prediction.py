@@ -28,7 +28,7 @@ class Model_for_Generic_AASeq_Regression_LSTM(torch.nn.Module):
     def __init__(self, 
         *,
         hidden_dim=256,
-        n_lstm_layers=4,
+        nlayers=4,
         dropout=0.1,
         **kwargs,
     ):
@@ -41,7 +41,7 @@ class Model_for_Generic_AASeq_Regression_LSTM(torch.nn.Module):
             self.dropout,
             building_block.SeqLSTM(
                 hidden_dim, hidden_dim, 
-                rnn_layer=n_lstm_layers
+                rnn_layer=nlayers
             ),
             building_block.SeqAttentionSum(hidden_dim),
             self.dropout,
@@ -110,15 +110,19 @@ class ModelInterface_for_Generic_AASeq_Regression(ModelInterface):
     `ModelInterface` for Generic_AASeq_Regression models
     """
     def __init__(self, 
-        dropout=0.1,
         model_class:torch.nn.Module=Model_for_Generic_AASeq_Regression_LSTM, 
+        dropout=0.1,
         device:str='gpu',
+        hidden_dim=256,
+        nlayers=4,
         **kwargs,
     ):
         super().__init__(device=device)
         self.build(
             model_class,
             dropout=dropout,
+            hidden_dim=hidden_dim,
+            nlayers=nlayers,
             **kwargs
         )
         self.loss_func = torch.nn.L1Loss() # for regression
@@ -132,7 +136,7 @@ class Model_for_Generic_ModAASeq_Regression_LSTM(torch.nn.Module):
     def __init__(self, 
         *,
         hidden_dim=256,
-        n_lstm_layers=4,
+        nlayers=4,
         dropout=0.1,
         **kwargs,
     ):
@@ -141,7 +145,7 @@ class Model_for_Generic_ModAASeq_Regression_LSTM(torch.nn.Module):
 
         self.encoder_nn = building_block.Encoder_AA_Mod_CNN_LSTM_AttnSum(
             hidden_dim,
-            n_lstm_layers=n_lstm_layers,
+            n_lstm_layers=nlayers,
         )
         self.output_nn = torch.nn.Sequential(
             self.dropout,
@@ -213,15 +217,19 @@ class ModelInterface_for_Generic_ModAASeq_Regression(ModelInterface):
     `ModelInterface` for all Generic_ModAASeq_Regression models
     """
     def __init__(self, 
+        model_class:torch.nn.Module=Model_for_Generic_ModAASeq_Regression_LSTM,
         dropout=0.1,
-        model_class:torch.nn.Module=Model_for_Generic_ModAASeq_Regression_LSTM, #model defined above
         device:str='gpu',
+        hidden_dim=256,
+        nlayers=4,
         **kwargs,
     ):
         super().__init__(device=device)
         self.build(
             model_class,
             dropout=dropout,
+            hidden_dim=hidden_dim,
+            nlayers=nlayers,
             **kwargs
         )
         self.loss_func = torch.nn.L1Loss() # for regression
@@ -243,13 +251,13 @@ class Model_for_Generic_AASeq_BinaryClassification_LSTM(
     def __init__(self, 
         *,
         hidden_dim=256,
-        n_lstm_layers=4,
+        nlayers=4,
         dropout=0.1,
         **kwargs,
     ):
         super().__init__(
             hidden_dim=hidden_dim,
-            n_lstm_layers=n_lstm_layers,
+            nlayers=nlayers,
             dropout=dropout,
         )
 
@@ -290,9 +298,11 @@ class ModelInterface_for_Generic_AASeq_BinaryClassification(ModelInterface):
     `ModelInterface` for all Generic_AASeq_BinaryClassification models
     """
     def __init__(self, 
+        model_class:torch.nn.Module=Model_for_Generic_AASeq_BinaryClassification_LSTM,
         dropout=0.1,
-        model_class:torch.nn.Module=Model_for_Generic_AASeq_BinaryClassification_LSTM, #model defined above
         device:str='gpu',
+        hidden_dim=256,
+        nlayers=4,
         **kwargs,
     ):
         """
@@ -302,6 +312,8 @@ class ModelInterface_for_Generic_AASeq_BinaryClassification(ModelInterface):
         self.build(
             model_class,
             dropout=dropout,
+            hidden_dim=hidden_dim,
+            nlayers=nlayers,
             **kwargs
         )
         self.loss_func = torch.nn.BCELoss() # for binary classification
@@ -316,13 +328,13 @@ class Model_for_Generic_ModAASeq_BinaryClassification_LSTM(
     def __init__(self, 
         *,
         hidden_dim=256,
-        n_lstm_layers=4,
+        nlayers=4,
         dropout=0.1,
         **kwargs,
     ):
         super().__init__(
             hidden_dim=hidden_dim,
-            n_lstm_layers=n_lstm_layers,
+            nlayers=nlayers,
             dropout=dropout,
             **kwargs,
         )
@@ -373,9 +385,11 @@ class ModelInterface_for_Generic_ModAASeq_BinaryClassification(ModelInterface):
     `ModelInterface` for Generic_ModAASeq_BinaryClassification
     """
     def __init__(self, 
+        model_class:torch.nn.Module=Model_for_Generic_ModAASeq_BinaryClassification_LSTM,
         dropout=0.1,
-        model_class:torch.nn.Module=Model_for_Generic_ModAASeq_BinaryClassification_LSTM, #model defined above
         device:str='gpu',
+        hidden_dim=256,
+        nlayers=4,
         **kwargs,
     ):
         super().__init__(device=device)

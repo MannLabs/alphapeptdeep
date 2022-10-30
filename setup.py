@@ -40,7 +40,7 @@ def get_requirements():
                 # conditional requirements like: pywin32; sys_platform=='win32'
                 line, *conditions = line.split(';')
                 requirement, *comparison = re.split("[><=~!]", line)
-                requirement == requirement.strip()
+                requirement = requirement.strip()
                 requirement = ";".join([requirement] + conditions)
                 extra_requirements[extra].append(requirement)
     requirements = extra_requirements.pop("")
