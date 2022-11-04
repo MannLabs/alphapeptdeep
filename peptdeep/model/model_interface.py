@@ -25,7 +25,7 @@ from alphabase.yaml_utils import save_yaml, load_yaml
 from alphabase.peptide.precursor import is_precursor_sorted
 
 from ..settings import model_const
-from ..utils import logging, torch_devices, process_bar
+from ..utils import logging, process_bar, get_device
 from ..settings import global_settings
 
 from peptdeep.model.featurize import (
@@ -85,6 +85,18 @@ class ModelInterface(object):
         self._min_pred_value = 0.0
 
     @property
+    def device_type(self)->str:
+        return self._device_type
+    
+    @property
+    def device(self)->torch.device:
+        return self._device
+
+    @property
+    def device_ids(self)->list:
+        return self._device_ids
+
+    @property
     def target_column_to_predict(self)->str:
         return self._target_column_to_predict
 
@@ -117,33 +129,30 @@ class ModelInterface(object):
             List of int. Device ids for cuda/gpu (e.g. [1,3] for cuda:1,3). 
             By default global_settings['torch_device']['device_ids']
         """
-        self.device_type = device_type.lower()
-        self.device_ids = device_ids
+        self._device_ids = device_ids
 
-        if self.device_type not in torch_devices:
-            self.device_type = 'cpu'
-        else:
-            if torch_devices[self.device_type]['is_available']():
-                self.device_type = torch_devices[self.device_type]['device']
-            else:
-                self.device_type = 'cpu'
-                
-        if self.device_type == 'cuda' and self.device_ids:
-            self.device = torch.device(f"cuda:{','.join([str(_id) for _id in self.device_ids])}")
-        else:
-            self.device = torch.device(self.device_type)
+        self._device, self._device_type = get_device(
+            device_type, device_ids
+        )
 
         self._model_to_device()
 
     def _model_to_device(self):
-        """ Enable multiple GPUs using torch.nn.DataParallele """
+        """ 
+        Enable multiple GPUs using torch.nn.DataParallel.
+
+        TODO It is better to use torch.nn.parallel.DistributedDataParallel, 
+        but this may need more setups for models and optimizers.
+        """
         if self.model is None: return
         if self.device_type != 'cuda':
             self.model.to(self.device)
         else:
             if (
                 self.device_ids and len(self.device_ids) > 1
-            ) or (
+            ):
+                self.model = torch.nn.DataParallel(self.model, self.device_ids)
+            elif (
                 not self.device_ids and torch.cuda.device_count()>1
             ):
                 self.model = torch.nn.DataParallel(self.model)
