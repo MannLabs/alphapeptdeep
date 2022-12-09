@@ -147,11 +147,15 @@ class FlatPredictSpecLib(FlatSpecLib):
     def __init__(self, 
         min_fragment_intensity:float = 0.001,
         keep_top_k_fragments:int = 1000,
+        custom_fragment_df_columns:list = [
+            'type','number','position','charge','loss_type'
+        ],
         **kwargs,
     ):
         super().__init__(
             min_fragment_intensity=min_fragment_intensity,
-            keep_top_k_fragments=keep_top_k_fragments
+            keep_top_k_fragments=keep_top_k_fragments,
+            custom_fragment_df_columns=custom_fragment_df_columns
         )
 
     def predict_and_parse_lib_in_batch(self, 
@@ -184,7 +188,8 @@ class FlatPredictSpecLib(FlatSpecLib):
                     predict_lib.fragment_mz_df,
                     predict_lib.fragment_intensity_df,
                     min_fragment_intensity = self.min_fragment_intensity,
-                    keep_top_k_fragments = self.keep_top_k_fragments
+                    keep_top_k_fragments = self.keep_top_k_fragments,
+                    custom_columns=self.custom_fragment_df_columns
                 )
                 precursor_df_list.append(df)
                 fragment_df_list.append(frag_df)
