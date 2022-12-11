@@ -125,6 +125,7 @@ class PredictSpecLib(SpecLibBase):
             self._precursor_df,
             predict_items=['rt','mobility','ms2'],
             frag_types=self.charged_frag_types,
+            min_required_precursor_num_for_mp=min_required_precursor_num_for_mp
         )
         self.set_precursor_and_fragment(**res)
         if self.verbose:
