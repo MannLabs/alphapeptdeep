@@ -42,7 +42,7 @@ from .utils import logging, process_bar
 from .settings import global_settings
 
 from peptdeep.model.ms2 import (
-    pDeepModel, normalize_training_intensities
+    pDeepModel, normalize_fragment_intensities,
 )
 from .model.rt import AlphaRTModel
 from .model.ccs import AlphaCCSModel
@@ -620,15 +620,15 @@ class ModelManager(object):
             else:
                 tr_df = psm_df
             if len(tr_df) > 0:
-                tr_df, frag_df = normalize_training_intensities(
-                    tr_df, matched_intensity_df
-                )
                 tr_inten_df = pd.DataFrame()
                 for frag_type in self.ms2_model.charged_frag_types:
-                    if frag_type in frag_df.columns:
-                        tr_inten_df[frag_type] = frag_df[frag_type]
+                    if frag_type in matched_intensity_df.columns:
+                        tr_inten_df[frag_type] = matched_intensity_df[frag_type]
                     else:
-                        tr_inten_df[frag_type] = 0
+                        tr_inten_df[frag_type] = 0.0
+                normalize_fragment_intensities(
+                    tr_df, tr_inten_df
+                )
 
                 if self.use_grid_nce_search:
                     self.nce, self.instrument = self.ms2_model.grid_nce_search(
