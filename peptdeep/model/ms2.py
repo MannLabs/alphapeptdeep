@@ -3,8 +3,8 @@
 # %% auto 0
 __all__ = ['mod_feature_size', 'max_instrument_num', 'frag_types', 'max_frag_charge', 'num_ion_types', 'pearson', 'spearman',
            'ModelMS2Transformer', 'ModelMS2Bert', 'ModelMS2pDeep', 'IntenAwareLoss', 'pDeepModel',
-           'normalize_training_intensities', 'normalize_fragment_intensities_', 'pearson_correlation', 'spectral_angle',
-           'spearman_correlation', 'add_cutoff_metric', 'calc_ms2_similarity']
+           'normalize_fragment_intensities', 'pearson_correlation', 'spectral_angle', 'spearman_correlation',
+           'add_cutoff_metric', 'calc_ms2_similarity']
 
 # %% ../../nbdev_nbs/model/ms2.ipynb 3
 import torch
@@ -657,60 +657,11 @@ class pDeepModel(model_interface.ModelInterface):
 
 
 # %% ../../nbdev_nbs/model/ms2.ipynb 13
-def normalize_training_intensities(
-    train_df:pd.DataFrame, 
-    frag_intensity_df:pd.DataFrame
-)->Tuple[pd.DataFrame, pd.DataFrame]:
-    """Normalize the intensities to 0-1 values for MS2 model training.
-    This will remove fragments not corresponded to the train_df (psm_df),
-    and generate a new psm_df.
-
-    Parameters
-    ----------
-    train_df : pd.DataFrame
-        training psm dataframe
-        
-    frag_intensity_df : pd.DataFrame
-        training intensity dataframe
-
-    Returns
-    -------
-    pd.DataFrame
-        normalized training psm dataframe 
-        which is different from train_df
-
-    pd.DataFrame
-        normalized training intensity dataframe
-
-    """
-    new_frag_intens_list = []
-    new_frag_lens = []
-    for i, (frag_start_idx, frag_end_idx) in enumerate(
-        train_df[['frag_start_idx','frag_end_idx']].values
-    ):
-        intens = frag_intensity_df.values[frag_start_idx:frag_end_idx]
-        new_frag_lens.append(len(intens))
-        max_inten = np.max(intens)
-        if max_inten > 0:
-            intens /= max_inten
-        new_frag_intens_list.append(intens)
-    indices = np.zeros(len(new_frag_lens)+1, dtype=np.int64)
-    indices[1:] = new_frag_lens
-    indices = np.cumsum(indices)
-    train_df['frag_start_idx'] = indices[:-1]
-    train_df['frag_end_idx'] = indices[1:]
-
-    frag_df = pd.DataFrame(
-        data=np.concatenate(new_frag_intens_list, axis=0), 
-        columns=frag_intensity_df.columns
-    )
-    return train_df, frag_df
-
-def normalize_fragment_intensities_(
+def normalize_fragment_intensities(
     psm_df:pd.DataFrame, 
     frag_intensity_df:pd.DataFrame
 ):
-    """Normalize the intensities inplace
+    """Normalize the intensities to 0-1 values inplace
 
     Parameters
     ----------

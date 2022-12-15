@@ -284,18 +284,44 @@ torch_devices:dict = {
     'mps': {
         'is_available': _is_mps_available, 
         'device': 'mps',
+    },
+    'm1': {
+        'is_available': _is_mps_available, 
+        'device': 'mps',
     }
 }
 
-def get_device(device:str)->tuple:
+def get_device(device:str, device_ids:list=[])->tuple:
+    """Device name to torch.device
+
+    Parameters
+    ----------
+    device : str
+        device type: cuda, gpu, mps, m1.
+    device_ids : list, optional
+        device_ids for cuda, by default []
+
+    Returns
+    -------
+    tuple
+        torch.device
+        str: device name
+    """
     device = device.lower()
     if device in torch_devices:
         if torch_devices[device]['is_available']():
-            return (
-                torch.device(torch_devices[device]['device']), 
-                device
-            )
-    warnings.warn(f'Device "{device}" is not available, switch to "cpu".')
+            if (
+                torch_devices[device]['device'] == 'cuda' 
+                and len(device_ids) > 0
+            ):
+                return torch.device(
+                    f'cuda:{",".join(str(_id) for _id in device_ids)}'
+                ), 'cuda'
+            else:
+                return (
+                    torch.device(torch_devices[device]['device']), 
+                    device
+                )
     return torch.device('cpu'), 'cpu'
 
 def get_available_device()->tuple:
@@ -304,7 +330,7 @@ def get_available_device()->tuple:
             return torch.device(item['device']), name
     return torch.device('cpu'), 'cpu'
 
-# %% ../nbdev_nbs/utils.ipynb 10
+# %% ../nbdev_nbs/utils.ipynb 11
 def regional_sampling(psm_df:pd.DataFrame,
     target:str='rt_norm', n_train:int=1000,
     return_test_df:bool=False,
@@ -375,7 +401,7 @@ def regional_sampling(psm_df:pd.DataFrame,
 #legacy
 uniform_sampling = regional_sampling
 
-# %% ../nbdev_nbs/utils.ipynb 12
+# %% ../nbdev_nbs/utils.ipynb 13
 def evaluate_linear_regression(
     df:pd.DataFrame, x='rt_pred', y='rt_norm', 
     ci=95, n_sample=10000000

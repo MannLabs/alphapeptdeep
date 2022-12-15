@@ -25,7 +25,7 @@ from alphabase.yaml_utils import save_yaml, load_yaml
 from alphabase.peptide.precursor import is_precursor_sorted
 
 from ..settings import model_const
-from ..utils import logging, torch_devices, process_bar
+from ..utils import logging, process_bar, get_device
 from ..settings import global_settings
 
 from peptdeep.model.featurize import (
@@ -84,6 +84,20 @@ class ModelInterface(object):
 
         self._min_pred_value = 0.0
 
+        self.training_groupby_nAA = True
+
+    @property
+    def device_type(self)->str:
+        return self._device_type
+    
+    @property
+    def device(self)->torch.device:
+        return self._device
+
+    @property
+    def device_ids(self)->list:
+        return self._device_ids
+
     @property
     def target_column_to_predict(self)->str:
         return self._target_column_to_predict
@@ -117,33 +131,30 @@ class ModelInterface(object):
             List of int. Device ids for cuda/gpu (e.g. [1,3] for cuda:1,3). 
             By default global_settings['torch_device']['device_ids']
         """
-        self.device_type = device_type.lower()
-        self.device_ids = device_ids
+        self._device_ids = device_ids
 
-        if self.device_type not in torch_devices:
-            self.device_type = 'cpu'
-        else:
-            if torch_devices[self.device_type]['is_available']():
-                self.device_type = torch_devices[self.device_type]['device']
-            else:
-                self.device_type = 'cpu'
-                
-        if self.device_type == 'cuda' and self.device_ids:
-            self.device = torch.device(f"cuda:{','.join([str(_id) for _id in self.device_ids])}")
-        else:
-            self.device = torch.device(self.device_type)
+        self._device, self._device_type = get_device(
+            device_type, device_ids
+        )
 
         self._model_to_device()
 
     def _model_to_device(self):
-        """ Enable multiple GPUs using torch.nn.DataParallele """
+        """ 
+        Enable multiple GPUs using torch.nn.DataParallel.
+
+        TODO It is better to use torch.nn.parallel.DistributedDataParallel, 
+        but this may need more setups for models and optimizers.
+        """
         if self.model is None: return
         if self.device_type != 'cuda':
             self.model.to(self.device)
         else:
             if (
                 self.device_ids and len(self.device_ids) > 1
-            ) or (
+            ):
+                self.model = torch.nn.DataParallel(self.model, self.device_ids)
+            elif (
                 not self.device_ids and torch.cuda.device_count()>1
             ):
                 self.model = torch.nn.DataParallel(self.model)
@@ -184,11 +195,18 @@ class ModelInterface(object):
         )
 
         for epoch in range(epoch):
-            batch_cost = self._train_one_epoch(
-                precursor_df, epoch,
-                batch_size, verbose_each_epoch,
-                **kwargs
-            )
+            if self.training_groupby_nAA:
+                batch_cost = self._train_one_epoch(
+                    precursor_df, epoch,
+                    batch_size, verbose_each_epoch,
+                    **kwargs
+                )
+            else:
+                batch_cost = self._train_one_epoch_by_padding_zeros(
+                    precursor_df, epoch,
+                    batch_size, verbose_each_epoch,
+                    **kwargs
+                )
             lr_scheduler.step()
             if verbose: print(
                 f'[Training] Epoch={epoch+1}, lr={lr_scheduler.get_last_lr()[0]}, loss={np.mean(batch_cost)}'
@@ -225,11 +243,18 @@ class ModelInterface(object):
             self._prepare_training(precursor_df, lr, **kwargs)
 
             for epoch in range(epoch):
-                batch_cost = self._train_one_epoch(
-                    precursor_df, epoch,
-                    batch_size, verbose_each_epoch,
-                    **kwargs
-                )
+                if self.training_groupby_nAA:
+                    batch_cost = self._train_one_epoch(
+                        precursor_df, epoch,
+                        batch_size, verbose_each_epoch,
+                        **kwargs
+                    )
+                else:
+                    batch_cost = self._train_one_epoch_by_padding_zeros(
+                        precursor_df, epoch,
+                        batch_size, verbose_each_epoch,
+                        **kwargs
+                    )
                 if verbose: print(f'[Training] Epoch={epoch+1}, Mean Loss={np.mean(batch_cost)}')
             
             torch.cuda.empty_cache()
@@ -478,6 +503,42 @@ class ModelInterface(object):
         except (TypeError, ValueError, KeyError) as e:
             logging.info(f'Cannot save model source codes: {str(e)}')
 
+    def _train_one_epoch_by_padding_zeros(self, 
+        precursor_df, epoch, batch_size, verbose_each_epoch, 
+        **kwargs
+    ):
+        """Training for an epoch"""
+        batch_cost = []
+        rnd_df = precursor_df.sample(frac=1)
+        if verbose_each_epoch:
+            batch_tqdm = tqdm(range(0, len(rnd_df), batch_size))
+        else:
+            batch_tqdm = range(0, len(rnd_df), batch_size)
+        for i in batch_tqdm:
+            batch_end = i+batch_size
+
+            batch_df = rnd_df.iloc[i:batch_end,:]
+            targets = self._get_targets_from_batch_df(
+                batch_df, **kwargs
+            )
+            features = self._get_features_from_batch_df(
+                batch_df, **kwargs
+            )
+            if isinstance(features, tuple):
+                batch_cost.append(
+                    self._train_one_batch(targets, *features)
+                )
+            else:
+                batch_cost.append(
+                    self._train_one_batch(targets, features)
+                )
+                
+        if verbose_each_epoch:
+            batch_tqdm.set_description(
+                f'Epoch={epoch+1}, batch={len(batch_cost)}, loss={batch_cost[-1]:.4f}'
+            )
+        return batch_cost
+
     def _train_one_epoch(self, 
         precursor_df, epoch, batch_size, verbose_each_epoch, 
         **kwargs
@@ -562,6 +623,22 @@ class ModelInterface(object):
             dtype=torch.float32
         )
 
+    def _get_aa_indice_features_padding_zeros(
+        self, batch_df:pd.DataFrame
+    )->torch.LongTensor:
+        """
+        Get indices values for 128 ascii codes.
+        """
+        max_len = batch_df.sequence.str.len().max()
+        return self._as_tensor(
+            get_ascii_indices(
+                batch_df['sequence'].apply(
+                    lambda seq: seq + chr(0)*(max_len-len(seq))
+                ).values.astype('U')
+            ), 
+            dtype=torch.long
+        )
+
     def _get_aa_indice_features(
         self, batch_df:pd.DataFrame
     )->torch.LongTensor:
@@ -595,9 +672,16 @@ class ModelInterface(object):
         """
         Get modification features.
         """
-        return self._as_tensor(
-            get_batch_mod_feature(batch_df)
-        )
+        if self.training_groupby_nAA:
+            return self._as_tensor(
+                get_batch_mod_feature(batch_df)
+            )
+        else:
+            batch_df = batch_df.copy()
+            batch_df['nAA'] = batch_df.sequence.str.len().max()
+            return self._as_tensor(
+                get_batch_mod_feature(batch_df)
+            )
 
     def _get_aa_mod_features(self,
         batch_df:pd.DataFrame, **kwargs,
@@ -626,7 +710,10 @@ class ModelInterface(object):
             A feature tensor if call `self._get_aa_indice_features(batch_df)` (default).
             Or a tuple of tensors if call `self._get_aa_mod_features(batch_df)`.
         """
-        return self._get_aa_indice_features(batch_df)
+        if self.training_groupby_nAA:
+            return self._get_aa_indice_features(batch_df)
+        else:
+            return self._get_aa_indice_features_padding_zeros(batch_df)
 
     def _prepare_predict_data_df(self,
         precursor_df:pd.DataFrame, 

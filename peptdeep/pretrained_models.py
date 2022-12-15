@@ -42,7 +42,7 @@ from .utils import logging, process_bar
 from .settings import global_settings
 
 from peptdeep.model.ms2 import (
-    pDeepModel, normalize_training_intensities
+    pDeepModel, normalize_fragment_intensities,
 )
 from .model.rt import AlphaRTModel
 from .model.ccs import AlphaCCSModel
@@ -620,15 +620,15 @@ class ModelManager(object):
             else:
                 tr_df = psm_df
             if len(tr_df) > 0:
-                tr_df, frag_df = normalize_training_intensities(
-                    tr_df, matched_intensity_df
-                )
                 tr_inten_df = pd.DataFrame()
                 for frag_type in self.ms2_model.charged_frag_types:
-                    if frag_type in frag_df.columns:
-                        tr_inten_df[frag_type] = frag_df[frag_type]
+                    if frag_type in matched_intensity_df.columns:
+                        tr_inten_df[frag_type] = matched_intensity_df[frag_type]
                     else:
-                        tr_inten_df[frag_type] = 0
+                        tr_inten_df[frag_type] = 0.0
+                normalize_fragment_intensities(
+                    tr_df, tr_inten_df
+                )
 
                 if self.use_grid_nce_search:
                     self.nce, self.instrument = self.ms2_model.grid_nce_search(
@@ -763,11 +763,94 @@ class ModelManager(object):
             precursor_df
         )
 
-    def _predict_all_for_mp(self, arg_dict):
+    def _predict_func_for_mp(self, arg_dict):
         """Internal function, for multiprocessing"""
         return self.predict_all(
             multiprocessing=False, **arg_dict
         )
+
+    def predict_all_mp(self, precursor_df:pd.DataFrame,
+        *,
+        predict_items:list = [
+            'rt' ,'mobility' ,'ms2'
+        ], 
+        frag_types:list =  None,
+        process_num:int = global_settings['thread_num'],
+        mp_batch_size:int = 100000,
+    ):
+        self.ms2_model.model.share_memory()
+        self.rt_model.model.share_memory()
+        self.ccs_model.model.share_memory()
+
+        df_groupby = precursor_df.groupby('nAA')
+
+        def get_batch_num_mp(df_groupby):
+            batch_num = 0
+            for group_len in df_groupby.size().values:
+                for i in range(0, group_len, mp_batch_size):
+                    batch_num += 1
+            return batch_num
+
+        def mp_param_generator(df_groupby):
+            for nAA, df in df_groupby:
+                for i in range(0, len(df), mp_batch_size):
+                    yield {
+                        'precursor_df': df.iloc[i:i+mp_batch_size,:],
+                        'predict_items': predict_items,
+                        'frag_types': frag_types,
+                    }
+
+        precursor_df_list = []
+        if 'ms2' in predict_items:
+            fragment_mz_df_list = []
+            fragment_intensity_df_list = []
+        else:
+            fragment_mz_df_list = None
+
+        if self.verbose:
+            logging.info(
+                f'Predicting {",".join(predict_items)} ...'
+            )
+        verbose_bak = self.verbose
+        self.verbose = False
+
+        with mp.Pool(process_num) as p:
+            for ret_dict in process_bar(
+                p.imap_unordered(
+                    self._predict_func_for_mp, 
+                    mp_param_generator(df_groupby)
+                ), 
+                get_batch_num_mp(df_groupby)
+            ):
+                precursor_df_list.append(ret_dict['precursor_df'])
+                if fragment_mz_df_list is not None:
+                    fragment_mz_df_list.append(
+                        ret_dict['fragment_mz_df']
+                    )
+                    fragment_intensity_df_list.append(
+                        ret_dict['fragment_intensity_df']
+                    )
+        self.verbose = verbose_bak
+
+        if fragment_mz_df_list is not None:
+            (
+                precursor_df, fragment_mz_df, fragment_intensity_df
+            ) = concat_precursor_fragment_dataframes(
+                precursor_df_list,
+                fragment_mz_df_list,
+                fragment_intensity_df_list,
+            )
+            
+            return {
+                'precursor_df': precursor_df, 
+                'fragment_mz_df': fragment_mz_df,
+                'fragment_intensity_df': fragment_intensity_df, 
+            }
+        else:
+            precursor_df = pd.concat(precursor_df_list)
+            precursor_df.reset_index(drop=True, inplace=True)
+            
+            return {'precursor_df': precursor_df} 
 
     def predict_all(self, precursor_df:pd.DataFrame,
         *, 
@@ -885,77 +968,10 @@ class ModelManager(object):
                 return {'precursor_df': precursor_df}
         else:
             logging.info("Using multiprocessing ...")
-            self.ms2_model.model.share_memory()
-            self.rt_model.model.share_memory()
-            self.ccs_model.model.share_memory()
-
-            df_groupby = precursor_df.groupby('nAA')
-
-            def get_batch_num_mp(df_groupby):
-                batch_num = 0
-                for group_len in df_groupby.size().values:
-                    for i in range(0, group_len, mp_batch_size):
-                        batch_num += 1
-                return batch_num
-
-            def mp_param_generator(df_groupby):
-                for nAA, df in df_groupby:
-                    for i in range(0, len(df), mp_batch_size):
-                        yield {
-                            'precursor_df': df.iloc[i:i+mp_batch_size,:],
-                            'predict_items': predict_items,
-                            'frag_types': frag_types,
-                        }
-
-            precursor_df_list = []
-            if 'ms2' in predict_items:
-                fragment_mz_df_list = []
-                fragment_intensity_df_list = []
-            else:
-                fragment_mz_df_list = None
-
-            if self.verbose:
-                logging.info(
-                    f'Predicting {",".join(predict_items)} ...'
-                )
-            verbose_bak = self.verbose
-            self.verbose = False
-
-            with mp.Pool(process_num) as p:
-                for ret_dict in process_bar(
-                    p.imap_unordered(
-                        self._predict_all_for_mp, 
-                        mp_param_generator(df_groupby)
-                    ), 
-                    get_batch_num_mp(df_groupby)
-                ):
-                    precursor_df_list.append(ret_dict['precursor_df'])
-                    if fragment_mz_df_list is not None:
-                        fragment_mz_df_list.append(
-                            ret_dict['fragment_mz_df']
-                        )
-                        fragment_intensity_df_list.append(
-                            ret_dict['fragment_intensity_df']
-                        )
-            self.verbose = verbose_bak
-
-            if fragment_mz_df_list is not None:
-                (
-                    precursor_df, fragment_mz_df, fragment_intensity_df
-                ) = concat_precursor_fragment_dataframes(
-                    precursor_df_list,
-                    fragment_mz_df_list,
-                    fragment_intensity_df_list,
-                )
-                
-                return {
-                    'precursor_df': precursor_df, 
-                    'fragment_mz_df': fragment_mz_df,
-                    'fragment_intensity_df': fragment_intensity_df, 
-                }
-            else:
-                precursor_df = pd.concat(precursor_df_list)
-                precursor_df.reset_index(drop=True, inplace=True)
-                
-                return {'precursor_df': precursor_df} 
+            return self.predict_all_mp(
+                precursor_df, 
+                predict_items=predict_items,
+                process_num = process_num,
+                mp_batch_size=mp_batch_size,
+            )
 

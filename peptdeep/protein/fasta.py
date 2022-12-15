@@ -52,7 +52,3 @@ class PredictFastaSpecLib(FastaLib, PredictSpecLib):
             precursor_mz_max=self.max_precursor_mz,
             decoy=self.decoy,
         )
-
-    def _process_after_load_pep_seqs(self):
-        FastaLib._process_after_load_pep_seqs(self)
-        self.predict_all()
