@@ -1,7 +1,7 @@
 # AlphaPeptDeep (PeptDeep)
 
-![Pip Installation](https://github.com/MannLabs/alphapeptdeep/workflows/Default%20installation%20and%20tests/badge.svg)
-![GitHub and PyPi releases](https://github.com/MannLabs/alphapeptdeep/workflows/Publish%20on%20PyPi%20and%20release%20on%20GitHub/badge.svg")
+[![Default installation and tests](https://github.com/MannLabs/alphapeptdeep/actions/workflows/pip_installation.yml/badge.svg)](https://github.com/MannLabs/alphapeptdeep/actions/workflows/pip_installation.yml)
+[![Publish on PyPi and release on GitHub](https://github.com/MannLabs/alphapeptdeep/actions/workflows/publish_and_release.yml/badge.svg)](https://github.com/MannLabs/alphapeptdeep/actions/workflows/publish_and_release.yml)
 [![pypi](https://img.shields.io/pypi/v/peptdeep)](https://pypi.org/project/peptdeep)
 [![GitHub release](https://img.shields.io/github/v/release/mannlabs/alphapeptdeep?display_name=tag)](https://github.com/MannLabs/alphapeptdeep/releases)
 [![GitHub downloads](https://img.shields.io/github/downloads/mannlabs/alphapeptdeep/total?label=github%20downloads)](https://github.com/MannLabs/alphapeptdeep/releases)
@@ -41,8 +41,7 @@ from fasta files.
 
 For details, check out our [publications](#citations).
 
-For documentation, see [GitHub
-pages](https://mannlabs.github.io/alphapeptdeep/).
+For documentation, see [readthedocs](https://alphapeptdeep.readthedocs.io/en/latest/).
 
 ### AlphaX repositories:
 
@@ -918,7 +917,7 @@ from peptdeep.pipeline_api import (
 ```
 
 All these functionalities take a `settings_dict` as the inputs, the dict
-structure is the same as the settings yaml file. See the documatation of `generate_library`, `transfer_learn`, `rescore`. See https://alphapeptdeep.readthedocs.io/en/latest/module_pipeline_api.html for details.
+structure is the same as the settings yaml file. See the documatation of `generate_library`, `transfer_learn`, `rescore` in https://alphapeptdeep.readthedocs.io/en/latest/module_pipeline_api.html.
 
 #### ModelManager
 
@@ -926,14 +925,9 @@ structure is the same as the settings yaml file. See the documatation of `genera
 from peptdeep.pretrained_models import ModelManager
 ```
 
-[`ModelManager`](https://MannLabs.github.io/alphapeptdeep/pretrained_models.html#modelmanager)
-class is the main entry to access MS2/RT/CCS models. It provides
-functionalities to train/refine the models and then use the new models
-to predict the data.
+[`ModelManager`](https://alphapeptdeep.readthedocs.io/en/latest/module_pretrained_models.html#peptdeep.pretrained_models.ModelManager) class is the main entry to access MS2/RT/CCS models. It provides functionalities to train/refine the models and then use the new models to predict the data.
 
-Check out
-[tutorial_model_manager.ipynb](https://github.com/MannLabs/alphapeptdeep/blob/main/nbs/tutorial_model_manager.ipynb)
-for details.
+Check [tutorial_model_manager.ipynb](https://github.com/MannLabs/alphapeptdeep/blob/main/nbs/docs/tutorial_model_manager.ipynb) for details.
 
 #### Library Prediction
 
@@ -941,7 +935,7 @@ for details.
 from peptdeep.protein.fasta import PredictSpecLibFasta
 ```
 
-`PredictSpecLibFasta` class provides functionalities to deal with fasta files or protein
+[`PredictSpecLibFasta`](https://alphapeptdeep.readthedocs.io/en/latest/protein/fasta.html#peptdeep.protein.fasta.PredictSpecLibFasta) class provides functionalities to deal with fasta files or protein
 sequences and spectral libraries.
 
 Check out
@@ -967,15 +961,9 @@ from peptdeep.model.model_interface import ModelInterface
 import peptdeep.model.generic_property_prediction # model shop
 ```
 
-Building new DL models for peptide property prediction is one of the key
-features of AlphaPeptDeep. The key functionalities are
-`ModelInterface` and the pre-designed models and model interfaces in the model shop
-(module `peptdeep.model.generic_property_prediction`).
+Building new DL models for peptide property prediction is one of the key features of AlphaPeptDeep. The key functionalities are [`ModelInterface`](https://alphapeptdeep.readthedocs.io/en/latest/model/model_interface.html#peptdeep.model.model_interface.ModelInterface) and the pre-designed models and model interfaces in the model shop (module [`peptdeep.model.generic_property_prediction`](https://alphapeptdeep.readthedocs.io/en/latest/model/generic_property_prediction.html)).
 
-For example, we can built a HLA classifier that distinguishes HLA
-peptides from non-HLA peptides, see
-[HLA_peptide_prediction.ipynb](https://github.com/MannLabs/alphapeptdeep/blob/main/docs/nbs/HLA_peptide_prediction.ipynb)
-for details.
+For example, we can built a HLA classifier that distinguishes HLA peptides from non-HLA peptides, see [tutorial_HLA_prediction.ipynb](https://github.com/MannLabs/alphapeptdeep/blob/main/docs/nbs/tutorial_HLA_prediction.ipynb) for details.
 
 ------------------------------------------------------------------------
 
