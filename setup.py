@@ -14,10 +14,10 @@ def get_long_description():
     return long_description
 
 #nbdev2
-from configparser import ConfigParser
-nbdev_config = ConfigParser(delimiters=['='])
-nbdev_config.read('settings.ini')
-nbdev_cfg = nbdev_config['DEFAULT']
+# from configparser import ConfigParser
+# nbdev_config = ConfigParser(delimiters=['='])
+# nbdev_config.read('settings.ini')
+# nbdev_cfg = nbdev_config['DEFAULT']
 
 def get_requirements():
     extra_requirements = {}
@@ -66,7 +66,7 @@ def create_pip_wheel():
         include_package_data=True,
         entry_points={
             "console_scripts": package2install.__console_scripts__,
-            'nbdev': [f'{nbdev_cfg.get("lib_path")}={nbdev_cfg.get("lib_path")}._modidx:d'],
+            # 'nbdev': [f'{nb.ydev_cfg.get("lib_path")}={nbdev_cfg.get("lib_path")}._modidx:d'],
         },
         install_requires=requirements,
         extras_require=extra_requirements,

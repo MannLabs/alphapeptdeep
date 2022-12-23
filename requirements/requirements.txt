@@ -5,7 +5,6 @@ click
 pandas
 numpy
 torch
-regex
 tqdm
 numba
 psutil

@@ -31,8 +31,10 @@ jobs:
       - name: Unittests
         shell: bash -l {0}
         run: |
-          cd tests
-          . ./run_tests.sh
+          conda activate peptdeep
+          peptdeep
+          nbdev_test
+          conda deactivate
   loose_installation:
     name: Test loose pip installation on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
@@ -56,5 +58,7 @@ jobs:
       - name: Unittests
         shell: bash -l {0}
         run: |
-          cd tests
-          . ./run_tests.sh
+          conda activate peptdeep
+          peptdeep
+          nbdev_test
+          conda deactivate
