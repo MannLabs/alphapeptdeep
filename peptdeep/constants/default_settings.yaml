@@ -254,5 +254,11 @@ user_defined_modifications: {}
 #     composition: "2H(4)13C(2)"
 #   - "Dimethyl6@K":
 #     composition: "2H(4)13C(2)"
+
 psm_readers:
-    add_modification_mapping: {} # search engine modifications to alphabase modifications
+    add_modification_mapping: {} # alphabase modifications to modifications of other search engines
+# For example,
+# add_modification_mapping:
+#   - "Dimethyl@Any N-term": ["_(Dimethyl-n-0)"]
+#   - "Dimethyl:2H(2)@K": ["_(Dimethyl-K-2)"]
+#   - ...

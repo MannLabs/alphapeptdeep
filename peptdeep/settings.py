@@ -4,7 +4,7 @@ import collections
 from alphabase.yaml_utils import load_yaml
 from alphabase.constants.modification import (
     load_mod_df, keep_modloss_by_importance,
-    add_a_new_modification
+    add_new_modifications
 )
 
 from peptdeep.constants._const import CONST_FOLDER
@@ -61,9 +61,8 @@ def update_modifications(tsv:str="",
     if os.path.isfile(tsv):
         load_mod_df(tsv, modloss_importance_level=modloss_importance_level)
         
-        from peptdeep.model.featurize import get_all_mod_features
-
-        get_all_mod_features()
+        from peptdeep.model.featurize import update_all_mod_features
+        update_all_mod_features()
     else:
         keep_modloss_by_importance(modloss_importance_level)
 
@@ -83,15 +82,18 @@ def add_user_defined_modifications(
         "Dimethyl2@Any N-term": { 
         "composition": "H(2)2H(2)C(2)",
         "modloss_composition": ""
-        }}
+        }, ...
+        }
         ```
         Set as `global_settings["user_defined_modifications"]` if it is None.
         By default None.
     """
     if user_mods is None:
         user_mods = global_settings["user_defined_modifications"]
-    for mod_name, mod_info in user_mods.items():
-        add_a_new_modification(mod_name, **mod_info)
+    add_new_modifications(user_mods)
+
+    from peptdeep.model.featurize import update_all_mod_features
+    update_all_mod_features()
 
 update_modifications()
 add_user_defined_modifications()
