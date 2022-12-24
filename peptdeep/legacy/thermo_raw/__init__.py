@@ -1,1 +1,1 @@
-from . import pyrawfilereader
+from peptdeep.legacy import pyrawfilereader

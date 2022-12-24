@@ -165,7 +165,7 @@ percolator:
     ms_file_type: alphapept_hdf
     ms_file_type_choices:
       - hdf
-      - thermo_raw # if alphapept is installed
+      - thermo_raw # if alpharaw is installed
       - mgf
       - mzml
     ms_files: []
@@ -191,9 +191,9 @@ library:
     fasta:
       protease: '([KR])'
       protease_choices:
-      - 'trypsin/P'
-      - '([KR])'
       - 'trypsin'
+      - '([KR])'
+      - 'trypsin_not_P'
       - '([KR](?=[^P]))'
       - 'lys-c'
       - 'K'
@@ -206,8 +206,17 @@ library:
     var_mods:
     - Acetyl@Protein N-term
     - Oxidation@M
+    append_modifications: [] # normally for Phospho. TODO
+    labeling: {} # TODO
+    # For example,
+    # labeling:  
+    # - 0: ['Dimethyl@Any N-term','Dimethyl@K']
+    # - 4: ['Dimethyl:2H(2)@Any N-term','Dimethyl:2H(2)@K']
+    # - 8: [...]
     min_var_mod_num: 0
     max_var_mod_num: 2
+    min_append_mod_num: 0
+    max_append_mod_num: 1
     min_precursor_charge: 2
     max_precursor_charge: 4
     min_peptide_len: 7
@@ -232,3 +241,18 @@ library:
     keep_higest_k_peaks: 12
     translate_batch_size: 1000000
     translate_mod_to_unimod_id: False
+
+user_defined_modifications: {}
+# For example,
+# user_defined_modifications:
+#   - "Dimethyl2@Any N-term": 
+#     composition: "H(2)2H(2)C(2)"
+#     modloss_composition: "H(0)" # can be without if no modloss
+#   - "Dimethyl2@K":
+#     composition: "H(2)2H(2)C(2)"
+#   - "Dimethyl6@Any N-term":
+#     composition: "2H(4)13C(2)"
+#   - "Dimethyl6@K":
+#     composition: "2H(4)13C(2)"
+psm_readers:
+    add_modification_mapping: {} # search engine modifications to alphabase modifications
