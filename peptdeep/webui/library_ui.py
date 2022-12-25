@@ -35,10 +35,17 @@ def mod_options():
         st.dataframe(MOD_DF.loc[fixmod+varmod,['mod_name','classification','composition','mass','modloss_composition','modloss','modloss_importance']])
 
 def varmod_range():
-    min_varmod = st.number_input(label='Min number of variable modifications',min_value = 0, max_value = 1, value = global_settings['library']['input']['min_var_mod_num'], step = 1)
-    max_varmod = st.number_input(label='Max number of variable modifications',min_value = 1, max_value = 2, value = global_settings['library']['input']['max_var_mod_num'], step = 1)
+    min_varmod = st.number_input(label='Min number of variable modifications',min_value = 0, value = global_settings['library']['input']['min_var_mod_num'], step = 1)
+    max_varmod = st.number_input(label='Max number of variable modifications',min_value = min_varmod, value = global_settings['library']['input']['max_var_mod_num'], step = 1)
     global_settings['library']['input']['min_var_mod_num'] = min_varmod
     global_settings['library']['input']['max_var_mod_num'] = max_varmod
+
+
+def raremod_range():
+    min_raremod = st.number_input(label='Min number of rare modifications',min_value = 0, value = global_settings['library']['input']['min_rare_mod_num'], step = 1)
+    max_raremod = st.number_input(label='Max number of rare modifications',min_value = min_raremod, value = global_settings['library']['input']['max_rare_mod_num'], step = 1)
+    global_settings['library']['input']['min_rare_mod_num'] = min_raremod
+    global_settings['library']['input']['max_rare_mod_num'] = max_raremod
 
 
 def choose_precursor_charge():

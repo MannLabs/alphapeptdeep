@@ -2,6 +2,8 @@ import os
 import pandas as pd
 import traceback
 
+from typing import Tuple
+
 from alphabase.yaml_utils import save_yaml
 from alphabase.io.psm_reader import psm_reader_provider
 from alphabase.peptide.fragment import (
@@ -59,7 +61,10 @@ def import_psm_df(psm_files:list, psm_type:str)->pd.DataFrame:
         DataFrame that contains all PSM information
     """
     psm_reader = psm_reader_provider.get_reader(
-        psm_type
+        psm_type, 
+        modificatin_mapping=settings.global_settings[
+            'psm_reader'
+        ]['other_modification_mapping']
     )
     psm_df_list = []
     for psm_file in psm_files:
@@ -69,8 +74,11 @@ def import_psm_df(psm_files:list, psm_type:str)->pd.DataFrame:
         psm_df_list.append(psm_reader.psm_df)
     return pd.concat(psm_df_list).reset_index(drop=True)
 
-def match_psms(settings_dict:dict=settings.global_settings)->tuple:
-    """Match the PSMs against the MS files.
+def match_psms(
+    settings_dict:dict=settings.global_settings
+)->Tuple[pd.DataFrame,pd.DataFrame]:
+    """
+    Match the PSMs against the MS files.
 
     All required information is in settings_dict:
     ```
@@ -92,8 +100,9 @@ def match_psms(settings_dict:dict=settings.global_settings)->tuple:
     
     Returns
     -------
-    tuple
-        Tuple[pd.DataFrame]. The PSM DataFrame and the matched fragment intensity DataFrame
+    Tuple[pd.DataFrame,pd.DataFrame]
+        pd.DataFrame: the PSM DataFrame, and
+        pd.DataFrame: the matched fragment intensity DataFrame
     """
     mgr_settings = settings_dict['model_mgr']
 
