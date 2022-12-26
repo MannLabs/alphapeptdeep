@@ -1,5 +1,6 @@
 import yaml
 import streamlit as st
+import pandas as pd
 from io import StringIO
 import multiprocessing
 
@@ -10,13 +11,100 @@ from alphabase.constants.modification import (
 from peptdeep.settings import (
     global_settings,
     update_settings,
+    add_user_defined_modifications,
 )
+
+def add_user_mods():
+    st.write("#### User-defined modifications")
+    st.write('PeptDeep supports modifications those are not in UniMod')
+    user_mod_expander = st.expander(label="User-defined modifications")
+    with user_mod_expander:
+        mod_name = st.text_input(
+            label='User-defined modification name, e.g. Hello@K',
+            key='user_mod_name'
+        ).strip()
+        composition = st.text_input(
+            label='The modification composition, e.g. H(1)P(1)O(3)',
+            key='user_mod_comp'
+        ).strip()
+        modloss_composition = st.text_input(
+            label="The modification loss composition, e.g. H(3)P(1)O(4)",
+            key='user_mod_loss'
+        ).strip()
+
+        if mod_name:
+            global_settings['user_defined_modifications'][mod_name] = {
+                'composition': composition,
+                'modloss_composition': modloss_composition,
+            }
+
+        st.dataframe(pd.DataFrame().from_dict(
+            global_settings['user_defined_modifications'],
+            orient = 'index',
+        ))
+
+        def _clear_user_mods():
+            global_settings['user_defined_modifications'] = {}
+            st.session_state.user_mod_name = ''
+            st.session_state.user_mod_comp = ''
+            st.session_state.user_mod_loss = ''
+
+        st.button(label='Clear all user modifications', 
+            on_click=_clear_user_mods
+        )
+
+        if st.button(label='Add user modifications into AlphaBase'):
+            add_user_defined_modifications()
+            st.write("Check last n+2 modifications:")
+            st.dataframe(MOD_DF.tail(
+                len(global_settings['user_defined_modifications'])+2
+            ))
+
+
+def add_other_psm_reader_mods():
+    st.write("#### Other modification mapping for PSM readers")
+    st.write('PeptDeep supports to read more modifications from other PSM readers')
+    other_mod_expander = st.expander(label="Other modification mapping")
+    with other_mod_expander:
+        mod_name = st.selectbox(label='AlphaBase modification',
+            options=MOD_DF.index.values,
+        )
+        other_mods = st.text_input(
+            label='Other modifications, sep by ";" for multiple ones',
+            key='other_reader_mods'
+        ).strip()
+        st.text("Examples of other modifications: _(Dimethyl-n-0);_(Dimethyl) or K(Dimethyl-K-0)")
+
+        if st.button("Add a modification mapping"):
+            global_settings['psm_reader'][
+                'other_modification_mapping'
+            ][mod_name] = other_mods.split(';')
+
+        st.dataframe(pd.DataFrame().from_dict(
+            global_settings['psm_reader'][
+                'other_modification_mapping'
+            ],
+            orient = 'index',
+        ))
+
+        def _clear_user_mods():
+            global_settings['psm_reader'][
+                'other_modification_mapping'
+            ] = {}
+            st.session_state.other_reader_mods = ''
+
+        st.button(label='Clear all other modification mapping', 
+            on_click=_clear_user_mods
+        )
 
 def show():
     load_settings_gui()
     save_settings_gui()
 
     st.write("### Common settings")
+
+    add_other_psm_reader_mods()
+    add_user_mods()
 
     ms2_ppm = st.checkbox(label='MS2 ppm (otherwise Da)', value=global_settings['peak_matching']['ms2_ppm'])
     global_settings['peak_matching']['ms2_ppm'] = ms2_ppm

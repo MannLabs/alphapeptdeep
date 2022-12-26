@@ -5,7 +5,6 @@ click
 pandas
 numpy
 torch
-regex
 tqdm
 numba
 psutil
@@ -13,6 +12,7 @@ biopython
 transformers
 scikit-learn
 streamlit
+streamlit-aggrid
 lxml
 
 alphabase

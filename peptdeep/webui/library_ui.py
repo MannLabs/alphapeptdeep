@@ -17,36 +17,133 @@ from peptdeep.webui.server import queue_folder
 
 def mod_options():
     with st.form(key="Select modifications"):
-        fixmod, = st.multiselect(
-                label='Please select fixed modifications',
-                options=MOD_DF.index.values,
-                default = global_settings['library']['input']['fix_mods']
-            ),
-        varmod, = st.multiselect(
-                label='Please select variable modifications',
-                options=MOD_DF.index.values,
-                default = global_settings['library']['input']['var_mods']
-            ),
+        st.write('#### Fixed and variable modificatins')
+        fixmod = st.multiselect(
+            label='Please select fixed modifications',
+            options=MOD_DF.index.values,
+            default = global_settings['library']['input']['fix_mods']
+        )
+        varmod = st.multiselect(
+            label='Please select variable modifications',
+            options=MOD_DF.index.values,
+            default = global_settings['library']['input']['var_mods']
+        )
         global_settings['library']['input']['fix_mods'] = fixmod
         global_settings['library']['input']['var_mods'] = varmod
 
         st.form_submit_button(label="Click to confirm the selected modifications")
-        st.text("Selected modifications")
-        st.dataframe(MOD_DF.loc[fixmod+varmod,['mod_name','classification','composition','mass','modloss_composition','modloss','modloss_importance']])
+        st.write("Selected modifications:")
+        st.dataframe(MOD_DF.loc[fixmod+varmod,[
+            'mod_name','classification','composition','mass',
+            'modloss_composition','modloss','modloss_importance'
+        ]])
+
+    varmod_range()
 
 def varmod_range():
-    min_varmod = st.number_input(label='Min number of variable modifications',min_value = 0, value = global_settings['library']['input']['min_var_mod_num'], step = 1)
-    max_varmod = st.number_input(label='Max number of variable modifications',min_value = min_varmod, value = global_settings['library']['input']['max_var_mod_num'], step = 1)
+    min_varmod = st.number_input(label='Min number of variable modifications',
+        value = global_settings['library']['input']['min_var_mod_num'], 
+        min_value = 0, step = 1,
+    )
+    max_varmod = st.number_input(label='Max number of variable modifications',
+        value = global_settings['library']['input']['max_var_mod_num'], 
+        min_value = 0, step = 1,
+    )
     global_settings['library']['input']['min_var_mod_num'] = min_varmod
     global_settings['library']['input']['max_var_mod_num'] = max_varmod
 
+def raremod_options():
+    st.write('#### Rare modificatins')
+    st.write('*Useful for Phospho@S/T or GlyGly@K*')
+    raremod_expander = st.expander(label='Rare modificatins')
+    with raremod_expander:
+        with st.form(key="Select rare modifications"):
+            global_settings['library']['input']['rare_mods'] = st.multiselect(
+                label='Please select rare modifications',
+                options=MOD_DF.index.values,
+                default=global_settings['library']['input']['rare_mods']
+            )
+            st.form_submit_button(label="Click to add selected modifications")
+            st.write("Selected rare modifications:")
+            st.dataframe(MOD_DF.loc[
+                global_settings['library']['input']['rare_mods'],
+                [
+                    'mod_name','classification','composition','mass',
+                    'modloss_composition','modloss','modloss_importance'
+                ]
+            ])
+
+        raremod_range()
 
 def raremod_range():
-    min_raremod = st.number_input(label='Min number of rare modifications',min_value = 0, value = global_settings['library']['input']['min_rare_mod_num'], step = 1)
-    max_raremod = st.number_input(label='Max number of rare modifications',min_value = min_raremod, value = global_settings['library']['input']['max_rare_mod_num'], step = 1)
+    min_raremod = st.number_input(label='Min number of rare modifications',
+        value = global_settings['library']['input']['min_rare_mod_num'], 
+        min_value = 0, step = 1
+    )
+    max_raremod = st.number_input(label='Max number of rare modifications',
+        value = global_settings['library']['input']['max_rare_mod_num'], 
+        min_value = 0, step = 1
+    )
     global_settings['library']['input']['min_rare_mod_num'] = min_raremod
     global_settings['library']['input']['max_rare_mod_num'] = max_raremod
 
+    st.write("Rare modifications cannot modify AAs at:")
+    st.write("*e.g. GlyGly@K will not occur at C-term Lys/K*")
+    global_settings['library']['input'][
+        'rare_mods_cannot_modify_pep_n_term'
+    ] = bool(
+        st.checkbox(label='N-term', 
+        value=global_settings['library']['input'][
+            'rare_mods_cannot_modify_pep_n_term'
+        ])
+    )
+    global_settings['library']['input'][
+        'rare_mods_cannot_modify_pep_c_term'
+    ] = bool(
+        st.checkbox(label='C-term', 
+        value=global_settings['library']['input'][
+            'rare_mods_cannot_modify_pep_c_term'
+        ])
+    )
+
+def labeling_options():
+    def _concat_df_dict(d):
+        df_list = []
+        for channel, mods in d.items():
+            _df = MOD_DF.loc[mods,['mod_name','composition','mass']]
+            _df['labeling_channel'] = channel
+            df_list.append(_df)
+        if len(df_list) == 0:
+            return pd.DataFrame()
+        else:
+            return pd.concat(df_list, ignore_index=True)
+    def _clear_all():
+        global_settings['library']['input']['labeling_channels'] = {}
+        st.session_state.select_labeling = []
+        st.session_state.labeling_channel_id = ''
+        return
+    st.write('#### Peptide labeling')
+    st.write('*For multiplex-DIA (mDIA) workflow*')
+    labeling_expander = st.expander(label='Labeling channels')
+    with labeling_expander:
+        with st.form(key="Peptide labeling"):
+            channel = st.text_input(label="Channel",key='labeling_channel_id')
+            try:
+                channel = int(channel)
+            except ValueError:
+                pass
+            mods = st.multiselect(
+                label='Please select labeling modifications',
+                options=MOD_DF.index.values,
+                key='select_labeling'
+            )
+            if channel and len(mods) > 0:
+                global_settings['library']['input']['labeling_channels'][channel] = mods
+
+            st.form_submit_button(label="Add selected labeling")
+            st.write("Selected labeling modifications:")
+            st.dataframe(_concat_df_dict(global_settings['library']['input']['labeling_channels']))
+        st.button(label='Clear all labeling', on_click=_clear_all)
 
 def choose_precursor_charge():
     from_charge = st.number_input(label='Min precursor charge', min_value = 1, max_value = 4, value = global_settings['library']['input']['min_precursor_charge'], step = 1)
@@ -137,25 +234,25 @@ def show():
     st.write('### Library settings')
     add_decoy()
 
-    choose_precursor_mz()
-
     if infile_type == 'fasta':
         choose_protease()
         mod_options()
-        varmod_range()
-        choose_precursor_charge()
-        choose_peptide_len()
+        raremod_options()
 
     elif infile_type == 'sequence_table':
         mod_options()
-        varmod_range()
-        choose_precursor_charge()
+        raremod_options()
+    
+    labeling_options()
+    
+    if infile_type == 'fasta':
+        choose_peptide_len()
 
-    elif infile_type == 'peptide_table':
+    if infile_type in ['fasta','sequence_table','peptide_table']:
         choose_precursor_charge()
-
+    
+    choose_precursor_mz()
     choose_frag_types()
-
 
     st.write("### Output")
 

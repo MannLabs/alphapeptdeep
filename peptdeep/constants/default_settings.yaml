@@ -209,12 +209,12 @@ library:
     rare_mods: [] # normally for Phospho or GlyGly@K
     rare_mods_cannot_modify_pep_n_term: False
     rare_mods_cannot_modify_pep_c_term: False
-    labeling_channels: {} # TODO
+    labeling_channels: {}
     # For example,
     # labeling_channels:
-    # - 0: ['Dimethyl@Any N-term','Dimethyl@K']
-    # - 4: ['Dimethyl:2H(2)@Any N-term','Dimethyl:2H(2)@K']
-    # - 8: [...]
+    #   0: ['Dimethyl@Any N-term','Dimethyl@K']
+    #   4: ['Dimethyl:2H(2)@Any N-term','Dimethyl:2H(2)@K']
+    #   8: [...]
     min_var_mod_num: 0
     max_var_mod_num: 2
     min_rare_mod_num: 0
@@ -248,20 +248,20 @@ library:
 user_defined_modifications: {}
 # For example,
 # user_defined_modifications:
-#   - "Dimethyl2@Any N-term": 
+#   "Dimethyl2@Any N-term": 
 #     composition: "H(2)2H(2)C(2)"
 #     modloss_composition: "H(0)" # can be without if no modloss
-#   - "Dimethyl2@K":
+#   "Dimethyl2@K":
 #     composition: "H(2)2H(2)C(2)"
-#   - "Dimethyl6@Any N-term":
+#   "Dimethyl6@Any N-term":
 #     composition: "2H(4)13C(2)"
-#   - "Dimethyl6@K":
+#   "Dimethyl6@K":
 #     composition: "2H(4)13C(2)"
 
 psm_reader:
     other_modification_mapping: {} # alphabase modification to modifications of other search engines
 # For example,
 # other_modification_mapping:
-#   - "Dimethyl@Any N-term": ["_(Dimethyl-n-0)"]
-#   - "Dimethyl:2H(2)@K": ["_(Dimethyl-K-2)"]
-#   - ...
+#   "Dimethyl@Any N-term": _(Dimethyl-n-0);_(Dimethyl)
+#   "Dimethyl:2H(2)@K": K(Dimethyl-K-2)
+#   ...
