@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 from typing import List, Union
-from alphabase.constants.modification import MOD_CHEM
+from alphabase.constants.modification import MOD_DF
 
 from peptdeep.settings import model_const
 
@@ -26,12 +26,10 @@ def _parse_mod_formula(formula):
     return feature
 
 MOD_TO_FEATURE = {}
-def get_all_mod_features():
-    global MOD_TO_FEATURE
-    MOD_TO_FEATURE = {}
-    for modname, formula in MOD_CHEM.items():
+def update_all_mod_features():
+    for modname, formula in MOD_DF[['mod_name','composition']].values:
         MOD_TO_FEATURE[modname] = _parse_mod_formula(formula)
-get_all_mod_features()
+update_all_mod_features()
 
 def parse_mod_feature(
     nAA:int, 

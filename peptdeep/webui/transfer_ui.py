@@ -5,6 +5,7 @@ import time
 from datetime import datetime
 
 from alphabase.yaml_utils import save_yaml
+from alphabase.constants.modification import MOD_DF
 
 from peptdeep.settings import global_settings
 from peptdeep.webui.ui_utils import (
@@ -44,6 +45,42 @@ def fine_tune():
     global_settings['model_mgr']['transfer']['batch_size_rt_ccs'] = batch_size_rt_ccs
     lr_rt_ccs = st.number_input(label='Learning rate to train RT and CCS model', value = global_settings['model_mgr']['transfer']['lr_rt_ccs'], format='%e', step=1e-5)
     global_settings['model_mgr']['transfer']['lr_rt_ccs'] = lr_rt_ccs
+
+def add_other_psm_reader_mods():
+    st.write("#### Other modification mapping for PSM readers")
+    st.write('Thus PeptDeep supports to any modifications from other PSM readers')
+    other_mod_expander = st.expander(label="Add other modification mapping")
+    with other_mod_expander:
+        mod_name = st.selectbox(label='AlphaBase modification',
+            options=MOD_DF.index.values,
+        )
+        other_mods = st.text_input(
+            label='Other modifications, sep by ";" for multiple ones',
+            key='other_reader_mods'
+        ).strip()
+        st.text("Examples of other modifications: _(Dimethyl-n-0);_(Dimethyl) or K(Dimethyl-K-0)")
+
+        if st.button("Add a modification mapping"):
+            global_settings['model_mgr']['transfer'][
+                'other_modification_mapping'
+            ][mod_name] = other_mods.split(';')
+
+        st.dataframe(pd.DataFrame().from_dict(
+            global_settings['model_mgr']['transfer'][
+                'other_modification_mapping'
+            ],
+            orient = 'index',
+        ))
+
+        def _clear_user_mods():
+            global_settings['model_mgr']['transfer'][
+                'other_modification_mapping'
+            ] = {}
+            st.session_state.other_reader_mods = ''
+
+        st.button(label='Clear all other modification mapping', 
+            on_click=_clear_user_mods
+        )
 
 def show():
     st.write("# Transfer learning")
@@ -85,6 +122,7 @@ def show():
         psm_type_to_ext_dict[psm_type], 
         "Input PSM files"
     )
+    add_other_psm_reader_mods()
 
     st.write("### MS files for training")
     ms_file_type = file_type_selectbox(
@@ -111,23 +149,28 @@ def show():
     )
 
     st.write("### Training settings")
-    fine_tune()
 
-    psm_num_to_train_ms2 = st.number_input(label='PSM num to tune MS2 model', value = int(global_settings['model_mgr']['transfer']['psm_num_to_train_ms2']), step = 1)
-    global_settings['model_mgr']['transfer']['psm_num_to_train_ms2'] = psm_num_to_train_ms2
-    psm_num_per_mod_to_train_ms2 = st.number_input(label='PSM num per mod to tune MS2 model', value = int(global_settings['model_mgr']['transfer']['psm_num_per_mod_to_train_ms2']), step = 1)
-    global_settings['model_mgr']['transfer']['psm_num_per_mod_to_train_ms2'] = psm_num_per_mod_to_train_ms2
-    psm_num_to_train_rt_ccs = st.number_input(label='PSM num to tune RT and CCS model', value = int(global_settings['model_mgr']['transfer']['psm_num_to_train_rt_ccs']), step = 1)
-    global_settings['model_mgr']['transfer']['psm_num_to_train_rt_ccs'] = psm_num_to_train_rt_ccs
-    psm_num_per_mod_to_train_rt_ccs = st.number_input(label='PSM num per mod to tune RT and CCS model', value = int(global_settings['model_mgr']['transfer']['psm_num_per_mod_to_train_rt_ccs']), step = 1)
-    global_settings['model_mgr']['transfer']['psm_num_per_mod_to_train_rt_ccs'] = psm_num_per_mod_to_train_rt_ccs
-    top_n_mods_to_train = st.number_input(label='Top n mods to tune', value = int(global_settings['model_mgr']['transfer']['top_n_mods_to_train']), step = 1)
-    global_settings['model_mgr']['transfer']['top_n_mods_to_train'] = top_n_mods_to_train
+    training_expander = st.expander("Training hyper-parameters")
+    with training_expander:
+        fine_tune()
+
+        psm_num_to_train_ms2 = st.number_input(label='PSM num to tune MS2 model', value = int(global_settings['model_mgr']['transfer']['psm_num_to_train_ms2']), step = 1)
+        global_settings['model_mgr']['transfer']['psm_num_to_train_ms2'] = psm_num_to_train_ms2
+        psm_num_per_mod_to_train_ms2 = st.number_input(label='PSM num per mod to tune MS2 model', value = int(global_settings['model_mgr']['transfer']['psm_num_per_mod_to_train_ms2']), step = 1)
+        global_settings['model_mgr']['transfer']['psm_num_per_mod_to_train_ms2'] = psm_num_per_mod_to_train_ms2
+        psm_num_to_train_rt_ccs = st.number_input(label='PSM num to tune RT and CCS model', value = int(global_settings['model_mgr']['transfer']['psm_num_to_train_rt_ccs']), step = 1)
+        global_settings['model_mgr']['transfer']['psm_num_to_train_rt_ccs'] = psm_num_to_train_rt_ccs
+        psm_num_per_mod_to_train_rt_ccs = st.number_input(label='PSM num per mod to tune RT and CCS model', value = int(global_settings['model_mgr']['transfer']['psm_num_per_mod_to_train_rt_ccs']), step = 1)
+        global_settings['model_mgr']['transfer']['psm_num_per_mod_to_train_rt_ccs'] = psm_num_per_mod_to_train_rt_ccs
+        top_n_mods_to_train = st.number_input(label='Top n mods to tune', value = int(global_settings['model_mgr']['transfer']['top_n_mods_to_train']), step = 1)
+        global_settings['model_mgr']['transfer']['top_n_mods_to_train'] = top_n_mods_to_train
 
 
-    st.write('### Grid search for NCEs and instruments')
+    st.write('#### Grid search for NCEs and instruments')
     st.write('If NCE and instrument are unknown, grid search will look for the best NCE and instrument)')
-    grid_nce_search = st.checkbox(label='Enabled', value=global_settings['model_mgr']['transfer']['grid_nce_search'])
+    grid_nce_search = bool(st.checkbox(label='Enabled', 
+        value=global_settings['model_mgr']['transfer']['grid_nce_search']
+    ))
     global_settings['model_mgr']['transfer']['grid_nce_search'] = grid_nce_search
     if grid_nce_search is True:
         nce_search()

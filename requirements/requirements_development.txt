@@ -22,6 +22,7 @@ numba
 psutil
 biopython
 streamlit
+streamlit-aggrid # df interact
 transformers
 scikit-learn
 lxml

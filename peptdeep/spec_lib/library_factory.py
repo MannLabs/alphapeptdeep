@@ -8,7 +8,7 @@ from peptdeep.settings import global_settings
 from peptdeep.protein.fasta import PredictSpecLibFasta
 from peptdeep.spec_lib.translate import (
     speclib_to_single_df, mod_to_unimod_dict,
-    translate_to_tsv, mod_to_modname_dict
+    translate_to_tsv
 )
 
 from peptdeep.pretrained_models import ModelManager
@@ -48,8 +48,15 @@ class PredictLibraryMakerBase(object):
             precursor_mz_min = in_settings['min_precursor_mz'], 
             precursor_mz_max = in_settings['max_precursor_mz'],
             var_mods = in_settings['var_mods'],
+            min_var_mod_num = in_settings['min_var_mod_num'],
             max_var_mod_num = in_settings['max_var_mod_num'],
             fix_mods = in_settings['fix_mods'],
+            labeling_channels = in_settings['labeling_channels'],
+            special_mods = in_settings['special_mods'],
+            min_special_mod_num = in_settings['min_special_mod_num'],
+            max_special_mod_num = in_settings['max_special_mod_num'],
+            special_mods_cannot_modify_pep_n_term = in_settings['special_mods_cannot_modify_pep_n_term'],
+            special_mods_cannot_modify_pep_c_term = in_settings['special_mods_cannot_modify_pep_c_term'],
             decoy = in_settings['decoy'],
             I_to_L=False,
     )
@@ -94,12 +101,13 @@ class PredictLibraryMakerBase(object):
             self._check_df()
             self._predict()
             self._set_df()
+            logging.info(f"Generated the library for {len(self.precursor_df)} precursors.")
         except ValueError as e:
             raise e
     
     def translate_to_tsv(self, 
         tsv_path:str, 
-        translate_mod_dict:dict=mod_to_modname_dict
+        translate_mod_dict:dict=None
     ):
         """Translate the predicted DataFrames into a TSV file
         """
@@ -131,7 +139,7 @@ class PredictLibraryMakerBase(object):
         )
     
     def translate_library(self, 
-        translate_mod_dict:dict=mod_to_modname_dict
+        translate_mod_dict:dict=None
     )->pd.DataFrame:
         """Translate predicted DataFrames into 
         a single DataFrame in SWATH library format
@@ -163,6 +171,7 @@ class PrecursorLibraryMaker(PredictLibraryMakerBase):
     """For input dataframe of charged modified sequences"""
     def _input(self, precursor_df:pd.DataFrame):
         self.spec_lib._precursor_df = precursor_df
+        self.spec_lib.add_peptide_labeling()
         self.spec_lib.append_decoy_sequence()
     
     def _check_df(self):
@@ -193,6 +202,7 @@ class PeptideLibraryMaker(PrecursorLibraryMaker):
     def _input(self, peptide_df:pd.DataFrame):
         self.spec_lib._precursor_df = peptide_df
         self.spec_lib.append_decoy_sequence()
+        self.spec_lib.add_peptide_labeling()
         self.spec_lib.add_charge()
 
 class SequenceLibraryMaker(PeptideLibraryMaker):
@@ -201,6 +211,8 @@ class SequenceLibraryMaker(PeptideLibraryMaker):
         self.spec_lib._precursor_df = sequence_df
         self.spec_lib.append_decoy_sequence()
         self.spec_lib.add_modifications()
+        self.spec_lib.add_special_modifications()
+        self.spec_lib.add_peptide_labeling()
         self.spec_lib.add_charge()
 
 class FastaLibraryMaker(PredictLibraryMakerBase):
@@ -209,6 +221,8 @@ class FastaLibraryMaker(PredictLibraryMakerBase):
         self.spec_lib.get_peptides_from_fasta(fasta)
         self.spec_lib.append_decoy_sequence()
         self.spec_lib.add_modifications()
+        self.spec_lib.add_special_modifications()
+        self.spec_lib.add_peptide_labeling()
         self.spec_lib.add_charge()
 
 class LibraryMakerProvider:

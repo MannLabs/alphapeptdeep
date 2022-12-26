@@ -36,7 +36,7 @@ class PredictSpecLib(SpecLibBase):
     precursor_mz_max : float, optional
         precursor_mz_max, by default 2000.0
 
-    generate_precursor_isotopes : bool, optional
+    generate_precursor_isotope : bool, optional
         If calculate isotope masses and relative intensities for precursors
 
     decoy : str, optional
@@ -48,7 +48,7 @@ class PredictSpecLib(SpecLibBase):
         charged_frag_types = ['b_z1','b_z2','y_z1','y_z2'],
         precursor_mz_min:float = 400.0, 
         precursor_mz_max:float = 2000.0,
-        generate_precursor_isotopes:bool = False,
+        generate_precursor_isotope:bool = False,
         decoy:str = 'pseudo_reverse'
     ):
         super().__init__(
@@ -57,7 +57,7 @@ class PredictSpecLib(SpecLibBase):
             precursor_mz_max=precursor_mz_max,
             decoy = decoy
         )
-        self.generate_precursor_isotopes = generate_precursor_isotopes
+        self.generate_precursor_isotope = generate_precursor_isotope
         self.verbose = True
         if model_manager is None:
             self.model_manager = ModelManager(
@@ -106,7 +106,7 @@ class PredictSpecLib(SpecLibBase):
         2. Calculate isotope information in self._precursor_df
         """
         self.calc_precursor_mz()
-        if self.generate_precursor_isotopes:
+        if self.generate_precursor_isotope:
             if self.verbose:
                 logging.info('Calculating precursor isotope distributions ...')
             if len(self.precursor_df) < min_required_precursor_num_for_mp:
