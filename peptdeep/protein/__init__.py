@@ -1,1 +1,1 @@
-from . import fasta
+from peptdeep.protein import fasta

@@ -38,6 +38,18 @@ log_level_choices:
 
 common:
   modloss_importance_level: 1.0
+  user_defined_modifications: {}
+  # For example,
+  # user_defined_modifications:
+  #   "Dimethyl2@Any N-term": 
+  #     composition: "H(2)2H(2)C(2)"
+  #     modloss_composition: "H(0)" # can be without if no modloss
+  #   "Dimethyl2@K":
+  #     composition: "H(2)2H(2)C(2)"
+  #   "Dimethyl6@Any N-term":
+  #     composition: "2H(4)13C(2)"
+  #   "Dimethyl6@K":
+  #     composition: "2H(4)13C(2)"
 
 peak_matching:
   ms2_ppm: True
@@ -90,7 +102,7 @@ model_mgr:
     batch_size_rt_ccs: 1024
     lr_rt_ccs: 0.0001
     verbose: False
-    grid_nce_search: True
+    grid_nce_search: False
     grid_nce_first: 15.0
     grid_nce_last: 45.0
     grid_nce_step: 3.0
@@ -115,6 +127,15 @@ model_mgr:
     psm_num_to_train_rt_ccs: 100000000
     psm_num_per_mod_to_train_rt_ccs: 50
     top_n_mods_to_train: 10
+    other_modification_mapping: {} # alphabase modification to modifications of other search engines
+    # For example,
+    # other_modification_mapping:
+    #   Dimethyl@Any N-term: 
+    #     - _(Dimethyl-n-0)
+    #     - _(Dimethyl)
+    #   Dimethyl:2H(2)@K: 
+    #     - K(Dimethyl-K-2)
+    #   ...
 percolator:
   require_model_tuning: True
   raw_num_to_tune: 8
@@ -165,7 +186,7 @@ percolator:
     ms_file_type: alphapept_hdf
     ms_file_type_choices:
       - hdf
-      - thermo_raw # if alphapept is installed
+      - thermo_raw # if alpharaw is installed
       - mgf
       - mzml
     ms_files: []
@@ -191,9 +212,9 @@ library:
     fasta:
       protease: '([KR])'
       protease_choices:
-      - 'trypsin/P'
-      - '([KR])'
       - 'trypsin'
+      - '([KR])'
+      - 'trypsin_not_P'
       - '([KR](?=[^P]))'
       - 'lys-c'
       - 'K'
@@ -206,14 +227,26 @@ library:
     var_mods:
     - Acetyl@Protein N-term
     - Oxidation@M
+    special_mods: [] # normally for Phospho or GlyGly@K
+    special_mods_cannot_modify_pep_n_term: False
+    special_mods_cannot_modify_pep_c_term: False
+    labeling_channels: {}
+    # For example,
+    # labeling_channels:
+    #   0: ['Dimethyl@Any N-term','Dimethyl@K']
+    #   4: ['Dimethyl:2H(2)@Any N-term','Dimethyl:2H(2)@K']
+    #   8: [...]
     min_var_mod_num: 0
     max_var_mod_num: 2
+    min_special_mod_num: 0
+    max_special_mod_num: 1
     min_precursor_charge: 2
     max_precursor_charge: 4
     min_peptide_len: 7
     max_peptide_len: 35
     min_precursor_mz: 200.0
     max_precursor_mz: 2000.0
+    generate_precursor_isotope: False
     decoy: pseudo_reverse
     decoy_choices:
     - pseudo_reverse
@@ -228,7 +261,7 @@ library:
     enabled: False
     min_fragment_mz: 200
     max_fragment_mz: 2000
-    min_relative_intensity: 0.01
+    min_relative_intensity: 0.001
     keep_higest_k_peaks: 12
     translate_batch_size: 1000000
     translate_mod_to_unimod_id: False

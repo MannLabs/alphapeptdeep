@@ -1,1 +1,1 @@
-from . import thermo_raw
+from peptdeep.legacy import thermo_raw

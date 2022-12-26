@@ -14,10 +14,10 @@ def get_long_description():
     return long_description
 
 #nbdev2
-from configparser import ConfigParser
-nbdev_config = ConfigParser(delimiters=['='])
-nbdev_config.read('settings.ini')
-nbdev_cfg = nbdev_config['DEFAULT']
+# from configparser import ConfigParser
+# nbdev_config = ConfigParser(delimiters=['='])
+# nbdev_config.read('settings.ini')
+# nbdev_cfg = nbdev_config['DEFAULT']
 
 def get_requirements():
     extra_requirements = {}
@@ -40,7 +40,7 @@ def get_requirements():
                 # conditional requirements like: pywin32; sys_platform=='win32'
                 line, *conditions = line.split(';')
                 requirement, *comparison = re.split("[><=~!]", line)
-                requirement == requirement.strip()
+                requirement = requirement.strip()
                 requirement = ";".join([requirement] + conditions)
                 extra_requirements[extra].append(requirement)
     requirements = extra_requirements.pop("")
@@ -66,7 +66,7 @@ def create_pip_wheel():
         include_package_data=True,
         entry_points={
             "console_scripts": package2install.__console_scripts__,
-            'nbdev': [f'{nbdev_cfg.get("lib_path")}={nbdev_cfg.get("lib_path")}._modidx:d'],
+            # 'nbdev': [f'{nb.ydev_cfg.get("lib_path")}={nbdev_cfg.get("lib_path")}._modidx:d'],
         },
         install_requires=requirements,
         extras_require=extra_requirements,
