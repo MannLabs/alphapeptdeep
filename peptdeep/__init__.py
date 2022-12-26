@@ -12,7 +12,7 @@ except ImportError:
     pass
 
 __project__ = "peptdeep"
-__version__ = "0.2.1"
+__version__ = "0.2.2"
 __license__ = "Apache 2.0"
 __description__ = "The AlphaPept Deep (PeptDeep) Learning Platform for Proteomics"
 __author__ = "Mann Labs"
