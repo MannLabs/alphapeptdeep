@@ -372,6 +372,18 @@ different tasks:
 
     common:
       modloss_importance_level: 1.0
+      user_defined_modifications: {}
+      # For example,
+      # user_defined_modifications:
+      #   "Dimethyl2@Any N-term": 
+      #     composition: "H(2)2H(2)C(2)"
+      #     modloss_composition: "H(0)" # can be without if no modloss
+      #   "Dimethyl2@K":
+      #     composition: "H(2)2H(2)C(2)"
+      #   "Dimethyl6@Any N-term":
+      #     composition: "2H(4)13C(2)"
+      #   "Dimethyl6@K":
+      #     composition: "2H(4)13C(2)"
 
     peak_matching:
       ms2_ppm: True
@@ -739,6 +751,16 @@ based on `model_mgr:transfer:psm_files` and
         psm_num_to_train_rt_ccs: 100000000
         psm_num_per_mod_to_train_rt_ccs: 50
         top_n_mods_to_train: 10
+        other_modification_mapping: {} 
+        # alphabase mod to mods of other engines
+        # For example,
+        # other_modification_mapping:
+        #   Dimethyl@Any N-term: 
+        #     - _(Dimethyl-n-0)
+        #     - _(Dimethyl)
+        #   Dimethyl:2H(2)@K: 
+        #     - K(Dimethyl-K-2)
+        #   ...
 
 For DDA data, peptdeep can also extract MS2 intensities from the
 spectrum files from `model_mgr:transfer:ms_files` and
