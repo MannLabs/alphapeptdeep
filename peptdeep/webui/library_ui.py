@@ -31,7 +31,7 @@ def mod_options():
         global_settings['library']['input']['fix_mods'] = fixmod
         global_settings['library']['input']['var_mods'] = varmod
 
-        st.form_submit_button(label="Click to confirm the selected modifications")
+        st.form_submit_button(label="Click to add these selected modifications")
         st.write("Selected modifications:")
         st.dataframe(MOD_DF.loc[fixmod+varmod,[
             'mod_name','classification','composition','mass',
@@ -220,7 +220,21 @@ def show():
     global_settings['library']['input']['infile_type'] = infile_type
 
     if infile_type != 'fasta':
-        st.write("For tabular input `sequence_table`, `peptide_table` and `precursor_table`, check the format via https://mannlabs.github.io/alphapeptdeep#sequence_table")
+        import pandas as pd
+        df = pd.DataFrame({
+            'sequence': ['ACDEFGHIK','LMNPQRSTVK','WYVSTR'],
+            'mods': ['Carbamidomethyl@C','Acetyl@Protein N-term;Phospho@S',''],
+            'mod_sites': ['2','0;7',''],
+            'charge': [2,3,1],
+        })
+        infile_expander = st.expander("Input file examples")
+        with infile_expander:
+            st.write('`sequence_table`:')
+            st.dataframe(df[['sequence']])
+            st.write('`peptide_table`:')
+            st.dataframe(df[['sequence','mods','mod_sites']])
+            st.write('`precursor_table`:')
+            st.dataframe(df[['sequence','mods','mod_sites','charge']])
 
     infile_ext_dict = {
         'fasta': ['.fasta','.fa'],
