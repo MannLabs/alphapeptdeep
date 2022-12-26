@@ -89,7 +89,7 @@ def add_user_defined_modifications(
         By default None.
     """
     if user_mods is None:
-        user_mods = global_settings["user_defined_modifications"]
+        user_mods = global_settings["common"]["user_defined_modifications"]
     add_new_modifications(user_mods)
 
     from peptdeep.model.featurize import update_all_mod_features

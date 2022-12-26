@@ -52,57 +52,59 @@ def varmod_range():
     global_settings['library']['input']['min_var_mod_num'] = min_varmod
     global_settings['library']['input']['max_var_mod_num'] = max_varmod
 
-def raremod_options():
-    st.write('#### Rare modificatins')
+def specialmod_options():
+    st.write('#### Special modificatins')
     st.write('*Useful for Phospho@S/T or GlyGly@K*')
-    raremod_expander = st.expander(label='Rare modificatins')
-    with raremod_expander:
-        with st.form(key="Select rare modifications"):
-            global_settings['library']['input']['rare_mods'] = st.multiselect(
-                label='Please select rare modifications',
+    st.write('- For Phospho@S/T or HexNAc@S, as a sequence may generate many peptidoforms, this can control the overall number.')
+    st.write('- For GlyGly@K or GG@K, it will not occur at C-term Lys/K, using `special modifications` to enable this feature.')
+    specialmod_expander = st.expander(label='Special modificatins')
+    with specialmod_expander:
+        with st.form(key="Select special modifications"):
+            global_settings['library']['input']['special_mods'] = st.multiselect(
+                label='Please select special modifications',
                 options=MOD_DF.index.values,
-                default=global_settings['library']['input']['rare_mods']
+                default=global_settings['library']['input']['special_mods']
             )
             st.form_submit_button(label="Click to add selected modifications")
-            st.write("Selected rare modifications:")
+            st.write("Selected special modifications:")
             st.dataframe(MOD_DF.loc[
-                global_settings['library']['input']['rare_mods'],
+                global_settings['library']['input']['special_mods'],
                 [
                     'mod_name','classification','composition','mass',
                     'modloss_composition','modloss','modloss_importance'
                 ]
             ])
 
-        raremod_range()
+        specialmod_range()
 
-def raremod_range():
-    min_raremod = st.number_input(label='Min number of rare modifications',
-        value = global_settings['library']['input']['min_rare_mod_num'], 
+def specialmod_range():
+    min_specialmod = st.number_input(label='Min number of special modifications',
+        value = global_settings['library']['input']['min_special_mod_num'], 
         min_value = 0, step = 1
     )
-    max_raremod = st.number_input(label='Max number of rare modifications',
-        value = global_settings['library']['input']['max_rare_mod_num'], 
+    max_specialmod = st.number_input(label='Max number of special modifications',
+        value = global_settings['library']['input']['max_special_mod_num'], 
         min_value = 0, step = 1
     )
-    global_settings['library']['input']['min_rare_mod_num'] = min_raremod
-    global_settings['library']['input']['max_rare_mod_num'] = max_raremod
+    global_settings['library']['input']['min_special_mod_num'] = min_specialmod
+    global_settings['library']['input']['max_special_mod_num'] = max_specialmod
 
-    st.write("Rare modifications cannot modify AAs at:")
+    st.write("Special modifications cannot modify AAs at:")
     st.write("*e.g. GlyGly@K will not occur at C-term Lys/K*")
     global_settings['library']['input'][
-        'rare_mods_cannot_modify_pep_n_term'
+        'special_mods_cannot_modify_pep_n_term'
     ] = bool(
         st.checkbox(label='N-term', 
         value=global_settings['library']['input'][
-            'rare_mods_cannot_modify_pep_n_term'
+            'special_mods_cannot_modify_pep_n_term'
         ])
     )
     global_settings['library']['input'][
-        'rare_mods_cannot_modify_pep_c_term'
+        'special_mods_cannot_modify_pep_c_term'
     ] = bool(
         st.checkbox(label='C-term', 
         value=global_settings['library']['input'][
-            'rare_mods_cannot_modify_pep_c_term'
+            'special_mods_cannot_modify_pep_c_term'
         ])
     )
 
@@ -128,16 +130,17 @@ def labeling_options():
     with labeling_expander:
         with st.form(key="Peptide labeling"):
             channel = st.text_input(label="Channel",key='labeling_channel_id')
-            try:
-                channel = int(channel)
-            except ValueError:
-                pass
+
             mods = st.multiselect(
                 label='Please select labeling modifications',
                 options=MOD_DF.index.values,
                 key='select_labeling'
             )
             if channel and len(mods) > 0:
+                try:
+                    channel = int(channel)
+                except ValueError:
+                    pass
                 global_settings['library']['input']['labeling_channels'][channel] = mods
 
             st.form_submit_button(label="Add selected labeling")
@@ -237,13 +240,15 @@ def show():
     if infile_type == 'fasta':
         choose_protease()
         mod_options()
-        raremod_options()
+        specialmod_options()
 
     elif infile_type == 'sequence_table':
         mod_options()
-        raremod_options()
+        specialmod_options()
     
     labeling_options()
+
+    st.write("#### Common peptide settings")
     
     if infile_type == 'fasta':
         choose_peptide_len()

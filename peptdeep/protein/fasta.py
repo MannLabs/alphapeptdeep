@@ -22,11 +22,11 @@ class PredictSpecLibFasta(SpecLibFasta, PredictSpecLib):
         max_var_mod_num:int = 2,
         fix_mods:list = ['Carbamidomethyl@C'],
         labeling_channels:dict = None,
-        rare_mods:list = [],
-        min_rare_mod_num:int = 0,
-        max_rare_mod_num:int = 1,
-        rare_mods_cannot_modify_pep_n_term:bool=False,
-        rare_mods_cannot_modify_pep_c_term:bool=False,
+        special_mods:list = [],
+        min_special_mod_num:int = 0,
+        max_special_mod_num:int = 1,
+        special_mods_cannot_modify_pep_n_term:bool=False,
+        special_mods_cannot_modify_pep_c_term:bool=False,
         decoy: str = None, # or pseudo_reverse or diann
         I_to_L=False,
     ):
@@ -90,28 +90,28 @@ class PredictSpecLibFasta(SpecLibFasta, PredictSpecLib):
             see :meth:`add_peptide_labeling()`. 
             Defaults to None
 
-        rare_mods : list, optional
-            Modifications with rare occurance per peptide.
+        special_mods : list, optional
+            Special modifications.
             It is useful for modificaitons like Phospho which may largely 
             explode the number of candidate modified peptides.
-            The number of rare_mods per peptide 
+            The number of special_mods per peptide 
             is controlled by `max_append_mod_num`.
             Defaults to [].
 
-        min_rare_mod_num : int, optional
-            Control the min number of rare_mods per peptide, by default 0.
+        min_special_mod_num : int, optional
+            Control the min number of special_mods per peptide, by default 0.
 
-        max_rare_mod_num : int, optional
-            Control the max number of rare_mods per peptide, by default 1.
+        max_special_mod_num : int, optional
+            Control the max number of special_mods per peptide, by default 1.
 
-        rare_mods_cannot_modify_pep_c_term : bool, optional
+        special_mods_cannot_modify_pep_c_term : bool, optional
             Some modifications cannot modify the peptide C-term, 
             this will be useful for GlyGly@K as if C-term is di-Glyed, 
             it cannot be cleaved/digested. 
             Defaults to False.
 
-        rare_mods_cannot_modify_pep_n_term : bool, optional
-            Similar to `rare_mods_cannot_modify_pep_c_term`, but at N-term.
+        special_mods_cannot_modify_pep_n_term : bool, optional
+            Similar to `special_mods_cannot_modify_pep_c_term`, but at N-term.
             Defaults to False.
 
         decoy : str, optional
@@ -133,11 +133,11 @@ class PredictSpecLibFasta(SpecLibFasta, PredictSpecLib):
             max_var_mod_num=max_var_mod_num,
             fix_mods=fix_mods,
             labeling_channels=labeling_channels,
-            rare_mods=rare_mods,
-            min_rare_mod_num=min_rare_mod_num,
-            max_rare_mod_num=max_rare_mod_num,
-            rare_mods_cannot_modify_pep_n_term=rare_mods_cannot_modify_pep_n_term,
-            rare_mods_cannot_modify_pep_c_term=rare_mods_cannot_modify_pep_c_term,
+            special_mods=special_mods,
+            min_special_mod_num=min_special_mod_num,
+            max_special_mod_num=max_special_mod_num,
+            special_mods_cannot_modify_pep_n_term=special_mods_cannot_modify_pep_n_term,
+            special_mods_cannot_modify_pep_c_term=special_mods_cannot_modify_pep_c_term,
             decoy=decoy,
             I_to_L=I_to_L,
         )
