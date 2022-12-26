@@ -14,14 +14,14 @@ except ImportError:
 __project__ = "peptdeep"
 __version__ = "0.2.2"
 __license__ = "Apache 2.0"
-__description__ = "The AlphaPept Deep (PeptDeep) Learning Platform for Proteomics"
+__description__ = "The AlphaX Deep (PeptDeep) Learning Platform for Proteomics"
 __author__ = "Mann Labs"
 __author_email__ = "jalew.zwf@qq.com"
 __github__ = "https://github.com/MannLabs/peptdeep"
 __keywords__ = [
     "deep learning",
     "proteomics",
-    "AlphaPept ecosystem",
+    "AlphaX ecosystem",
 ]
 __python_version__ = ">=3.8,<3.10"
 __classifiers__ = [
@@ -45,10 +45,8 @@ __urls__ = {
     "Mann Labs at MPIB": "https://www.biochem.mpg.de/mann",
     "Mann Labs at CPR": "https://www.cpr.ku.dk/research/proteomics/mann/",
     "GitHub": __github__,
-    "Docs": "https://mannlabs.github.io/alphapeptdeep/",
+    "Docs": "https://alphapeptdeep.readthedocs.io/en/latest/",
     "PyPi": "https://pypi.org/project/peptdeep/",
-    "Preprint Paper": "https://www.biorxiv.org/content/10.1101/2022.07.14.499992v1",
-    # "Peer Reviewed Paper": None
 }
 __extra_requirements__ = {
     "development": "requirements_development.txt",

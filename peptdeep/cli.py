@@ -75,7 +75,7 @@ _help_str = (
     "\n\nTo get the settings_yaml file,"
     " you can either export from the GUI,"
     " or use `peptdeep export-settings`."
-    " Visit https://mannlabs.github.io/alphapeptdeep/#cli" 
+    " Visit https://github.com/mannlabs/alphapeptdeep/#cli" 
     " for detailed usages."
 )
 

@@ -45,8 +45,7 @@ For documentation, see [readthedocs](https://alphapeptdeep.readthedocs.io/en/lat
 
 ### AlphaX repositories:
 
-- [**alphabase**](https://github.com/MannLabs/alphabase): Base data
-  structures for Alpha-MS Ecosystem
+- [**alphabase**](https://github.com/MannLabs/alphabase): Infrastructure for AlphaX Ecosystem
 - [**alphapept**](https://github.com/MannLabs/alphapept): DDA search
   engine
 - [**alphapeptdeep**](https://github.com/MannLabs/alphapeptdeep): Deep
