@@ -23,7 +23,7 @@ project = 'peptdeep'
 copyright = '2022, Mann Labs, MPIB'
 author = 'Mann Labs, MPIB'
 
-release = "0.2.2"
+release = "0.2.3"
 
 # -- General configuration ---------------------------------------------------
 
