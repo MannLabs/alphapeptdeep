@@ -127,7 +127,8 @@ model_mgr:
     psm_num_to_train_rt_ccs: 100000000
     psm_num_per_mod_to_train_rt_ccs: 50
     top_n_mods_to_train: 10
-    other_modification_mapping: {} # alphabase modification to modifications of other search engines
+    other_modification_mapping: {} 
+    # alphabase modification to modifications of other search engines
     # For example,
     # other_modification_mapping:
     #   Dimethyl@Any N-term: 

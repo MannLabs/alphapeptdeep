@@ -231,9 +231,9 @@ def show():
         with infile_expander:
             st.write('`sequence_table`:')
             st.dataframe(df[['sequence']])
-            st.write('`peptide_table`:')
+            st.write('`peptide_table` with alphabase PTMs:')
             st.dataframe(df[['sequence','mods','mod_sites']])
-            st.write('`precursor_table`:')
+            st.write('`precursor_table` with alphabase PTMs:')
             st.dataframe(df[['sequence','mods','mod_sites','charge']])
 
     infile_ext_dict = {
