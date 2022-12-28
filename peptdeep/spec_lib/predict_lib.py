@@ -20,44 +20,48 @@ lib_settings = global_settings['library']
 model_mgr_settings = global_settings['model_mgr']
 
 class PredictSpecLib(SpecLibBase):
-    """PredictSpecLib
-
-    Parameters
-    ----------
-    model_manager : ModelManager, optional
-        `ModelManager`, by default None
-
-    charged_frag_types : list, optional
-        Charged fragment types, by default ['b_z1','b_z2','y_z1','y_z2']
-
-    precursor_mz_min : float, optional
-        precursor_mz_min, by default 400.0
-
-    precursor_mz_max : float, optional
-        precursor_mz_max, by default 2000.0
-
-    generate_precursor_isotope : bool, optional
-        If calculate isotope masses and relative intensities for precursors
-
-    decoy : str, optional
-        Decoy choice, see `alphabase.spec_lib.decoy_library`, 
-        by default 'pseudo_reverse'
-    """
     def __init__(self,
         model_manager: ModelManager = None,
         charged_frag_types = ['b_z1','b_z2','y_z1','y_z2'],
         precursor_mz_min:float = 400.0, 
         precursor_mz_max:float = 2000.0,
+        decoy:str = 'pseudo_reverse',
+        rt_to_irt:bool = False,
         generate_precursor_isotope:bool = False,
-        decoy:str = 'pseudo_reverse'
     ):
+        """
+        PredictSpecLib
+
+        Parameters
+        ----------
+        model_manager : ModelManager, optional
+            `ModelManager`, by default None
+
+        charged_frag_types : list, optional
+            Charged fragment types, by default ['b_z1','b_z2','y_z1','y_z2']
+
+        precursor_mz_min : float, optional
+            precursor_mz_min, by default 400.0
+
+        precursor_mz_max : float, optional
+            precursor_mz_max, by default 2000.0
+
+        decoy : str, optional
+            Decoy choice, see `alphabase.spec_lib.decoy_library`, 
+            by default 'pseudo_reverse'
+
+        rt_to_irt : bool, optional
+            Convert predicted RT to iRT values, by default False
+
+        generate_precursor_isotope : bool, optional
+            Generate precursor isotopes
+        """
         super().__init__(
             charged_frag_types,
             precursor_mz_min=precursor_mz_min,
             precursor_mz_max=precursor_mz_max,
             decoy = decoy
         )
-        self.generate_precursor_isotope = generate_precursor_isotope
         self.verbose = True
         if model_manager is None:
             self.model_manager = ModelManager(
@@ -73,6 +77,8 @@ class PredictSpecLib(SpecLibBase):
         self.mp_predict_batch_size:int = 100000
         self.use_multiprocessing:bool = model_mgr_settings['predict']['multiprocessing']
         self.mp_predict_process_num:int = global_settings['thread_num']
+        self.rt_to_irt = rt_to_irt
+        self.generate_precursor_isotope = generate_precursor_isotope
 
     def set_precursor_and_fragment(self,
         *,
@@ -94,7 +100,7 @@ class PredictSpecLib(SpecLibBase):
             if col not in self.charged_frag_types
         ], inplace=True)
 
-    def rt_to_irt_pred(self):
+    def translate_rt_to_irt_pred(self):
         """ Add 'irt_pred' into columns based on 'rt_pred' """
         return self.model_manager.rt_model.add_irt_column_to_precursor_df(self._precursor_df)
 
@@ -129,6 +135,8 @@ class PredictSpecLib(SpecLibBase):
             process_num=self.mp_predict_process_num,
         )
         self.set_precursor_and_fragment(**res)
+        if self.rt_to_irt and 'rt_pred' in self._precursor_df.columns:
+            self.translate_rt_to_irt_pred()
         if self.verbose:
             logging.info('End Predicting RT/IM/MS2')
         

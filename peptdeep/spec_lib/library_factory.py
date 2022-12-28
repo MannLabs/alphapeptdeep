@@ -59,6 +59,8 @@ class PredictLibraryMakerBase(object):
             special_mods_cannot_modify_pep_c_term = in_settings['special_mods_cannot_modify_pep_c_term'],
             decoy = in_settings['decoy'],
             I_to_L=False,
+            generate_precursor_isotope=lib_settings['output']['generate_precursor_isotope'],
+            rt_to_irt=lib_settings['output']['rt_to_irt']
     )
 
     def _check_df(self)->str:

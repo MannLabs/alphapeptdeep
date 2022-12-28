@@ -249,7 +249,6 @@ library:
     max_peptide_len: 35
     min_precursor_mz: 200.0
     max_precursor_mz: 2000.0
-    generate_precursor_isotope: False
     decoy: pseudo_reverse
     decoy_choices:
     - pseudo_reverse
@@ -259,6 +258,9 @@ library:
     frag_types:
     - b
     - y
+  output:
+    rt_to_irt: True
+    generate_precursor_isotope: False
   output_folder: "{PEPTDEEP_HOME}/spec_libs"
   output_tsv:
     enabled: False

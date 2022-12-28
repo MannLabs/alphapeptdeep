@@ -285,9 +285,18 @@ def show():
     output_folder = get_posix(output_folder)
     global_settings['library']['output_folder'] = output_folder
 
-    tsv_enabled = bool(st.checkbox(label='Output TSV (for DiaNN/Spectronaut)', value=global_settings['library']['output_tsv']['enabled']))
-    st.warning("Writing the TSV file for a big library is very slow")
+
+    global_settings['library']['output']['rt_to_irt'] = bool(st.checkbox(
+        label='Convert predicted RT to iRT', 
+        value=global_settings['library']['output']['rt_to_irt']
+    ))
+
+    tsv_enabled = bool(st.checkbox(
+        label='Output TSV (for DiaNN/Spectronaut)', 
+        value=global_settings['library']['output_tsv']['enabled']
+    ))
     global_settings['library']['output_tsv']['enabled'] = tsv_enabled
+    st.warning("Writing the TSV file for a big library is very slow")
     if tsv_enabled:
         output_tsv()
 
