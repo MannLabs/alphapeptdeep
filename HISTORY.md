@@ -2,6 +2,16 @@
 
 ## 1.0.0 - TODO Next Release
 
+## 0.4.0 - 2022.12.28
+
+### Added
+
+- Test the model after transfer learning (MS2/RT/CCS), and the metrics will be logged.
+
+### Changed
+
+- `frag_end_idx`->`frag_stop_idx`
+
 ## 0.3.0 - 2022.12.27
 
 ### Added

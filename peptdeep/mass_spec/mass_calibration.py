@@ -21,7 +21,7 @@ class MassCalibratorForRT_KNN:
     
     def fit(self, psm_df:pd.DataFrame, mass_error_df:pd.DataFrame):
         mass_error_df = mass_error_df.replace(np.inf, np.nan)
-        mean_merrs = psm_df[['frag_start_idx','frag_end_idx']].apply(
+        mean_merrs = psm_df[['frag_start_idx','frag_stop_idx']].apply(
             get_fragment_median, axis=1, frag_df=mass_error_df
         ).values
         self.model.fit(psm_df.rt.values.reshape((-1,1)), mean_merrs.reshape(-1,1))
@@ -32,7 +32,7 @@ class MassCalibratorForRT_KNN:
         psm_df['frag_mass_shift'] = self.model.predict(
             psm_df.rt.values.reshape((-1,1))
         ).reshape(-1)
-        psm_df[['frag_start_idx','frag_end_idx','frag_mass_shift']].apply(
+        psm_df[['frag_start_idx','frag_stop_idx','frag_mass_shift']].apply(
             calibrate_one, axis=1, frag_df=mass_error_df
         ).values
         return mass_error_df

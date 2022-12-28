@@ -105,7 +105,7 @@ class MaxQuantMSMSReader(MaxQuantReader, PSMReader_w_FragBase):
         ))
 
         for ith_psm, (nAA, start,end) in enumerate(
-            mq_df[['nAA','frag_start_idx','frag_end_idx']].values
+            mq_df[['nAA','frag_start_idx','frag_stop_idx']].values
         ):
             intens = np.zeros((nAA-1, len(self.charged_frag_types)))
 
@@ -144,8 +144,8 @@ class MaxQuantMSMSReader(MaxQuantReader, PSMReader_w_FragBase):
             ] = intens
         
         self._psm_df[
-            ['frag_start_idx','frag_end_idx']
-        ] = mq_df[['frag_start_idx','frag_end_idx']]
+            ['frag_start_idx','frag_stop_idx']
+        ] = mq_df[['frag_start_idx','frag_stop_idx']]
 
         self._psm_df = self._psm_df[~self._psm_df.mods.isna()]
 

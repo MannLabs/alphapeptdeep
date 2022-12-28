@@ -420,7 +420,7 @@ class pDeepModel(model_interface.ModelInterface):
             
             if 'frag_start_idx' in precursor_df.columns:
                 precursor_df.drop(
-                    columns=['frag_start_idx','frag_end_idx'],
+                    columns=['frag_start_idx','frag_stop_idx'],
                     inplace=True
                 )
         else:
@@ -465,7 +465,7 @@ class pDeepModel(model_interface.ModelInterface):
             get_sliced_fragment_dataframe(
                 fragment_intensity_df, 
                 batch_df[
-                    ['frag_start_idx','frag_end_idx']
+                    ['frag_start_idx','frag_stop_idx']
                 ].values
             ).values
         ).view(-1, 
@@ -485,7 +485,7 @@ class pDeepModel(model_interface.ModelInterface):
         if self._predict_in_order:
             self.predict_df.values[
                 batch_df.frag_start_idx.values[0]:
-                batch_df.frag_end_idx.values[-1], 
+                batch_df.frag_stop_idx.values[-1], 
             :] = predicts.reshape(
                     (-1, len(self.charged_frag_types))
                 )
@@ -496,7 +496,7 @@ class pDeepModel(model_interface.ModelInterface):
                     (-1, len(self.charged_frag_types))
                 ),
                 batch_df[
-                    ['frag_start_idx','frag_end_idx']
+                    ['frag_start_idx','frag_stop_idx']
                 ].values,
             )
 
@@ -657,14 +657,14 @@ def normalize_fragment_intensities(
         Fragment intensity DataFrame to be normalized. 
         Intensities will be normalzied inplace.
     """
-    for i, (frag_start_idx, frag_end_idx) in enumerate(
-        psm_df[['frag_start_idx','frag_end_idx']].values
+    for i, (frag_start_idx, frag_stop_idx) in enumerate(
+        psm_df[['frag_start_idx','frag_stop_idx']].values
     ):
-        intens = frag_intensity_df.values[frag_start_idx:frag_end_idx]
+        intens = frag_intensity_df.values[frag_start_idx:frag_stop_idx]
         max_inten = np.max(intens)
         if max_inten > 0:
             intens /= max_inten
-        frag_intensity_df.values[frag_start_idx:frag_end_idx,:] = intens
+        frag_intensity_df.values[frag_start_idx:frag_stop_idx,:] = intens
 
 
 
@@ -778,7 +778,7 @@ def calc_ms2_similarity(
                 get_sliced_fragment_dataframe(
                     predict_intensity_df, 
                     batch_df[
-                        ['frag_start_idx','frag_end_idx']
+                        ['frag_start_idx','frag_stop_idx']
                     ].values,
                     charged_frag_types
                 ).values,
@@ -791,7 +791,7 @@ def calc_ms2_similarity(
                 get_sliced_fragment_dataframe(
                     fragment_intensity_df, 
                     batch_df[
-                        ['frag_start_idx','frag_end_idx']
+                        ['frag_start_idx','frag_stop_idx']
                     ].values,
                     charged_frag_types
                 ).values,

@@ -17,7 +17,7 @@ from peptdeep.settings import (
 def add_user_mods():
     st.write("#### User-defined modifications")
     st.write('PeptDeep supports modifications those are not in UniMod')
-    user_mod_expander = st.expander(label="User-defined modifications")
+    user_mod_expander = st.expander(label="Add user-defined modifications")
     with user_mod_expander:
         mod_name = st.text_input(
             label='User-defined modification name, e.g. Hello@K',
@@ -129,7 +129,7 @@ def _update_st_session_state_after_loading_settings(
 
 def load_settings_gui():
     st.write("### Load previous yaml settings")
-    uploaded_file = st.file_uploader("Choose a local yaml file")
+    uploaded_file = st.file_uploader("Choose a yaml file")
     if uploaded_file is not None:
         f = StringIO(uploaded_file.getvalue().decode("utf-8"))
         uploaded_settings = yaml.load(f, Loader=yaml.FullLoader)
@@ -138,7 +138,7 @@ def load_settings_gui():
 
 def save_settings_gui():
     st.write("### Save current settings")
-    st.write("The saved yaml file can be used as a template for CLI commands)")
+    st.write("The saved yaml file can be used for CLI)")
 
     f = StringIO()
     yaml.dump(global_settings, f)

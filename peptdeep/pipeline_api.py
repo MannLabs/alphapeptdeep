@@ -325,7 +325,6 @@ def generate_library(settings_dict:dict=settings.global_settings):
             'predict.speclib.hdf'
         )
         logging.info(f"Saving HDF library to {hdf_path} ...")
-        lib_maker.spec_lib.rt_to_irt_pred()
         lib_maker.spec_lib.save_hdf(hdf_path)
         if lib_settings['output_tsv']['enabled']:
             tsv_path = os.path.join(

@@ -16,7 +16,6 @@ class PredictSpecLibFasta(SpecLibFasta, PredictSpecLib):
         precursor_charge_max:int = 4,
         precursor_mz_min:float = 200.0, 
         precursor_mz_max:float = 2000.0,
-        generate_precursor_isotope:bool = False,
         var_mods:list = ['Acetyl@Protein N-term','Oxidation@M'],
         min_var_mod_num:int = 0,
         max_var_mod_num:int = 2,
@@ -29,6 +28,8 @@ class PredictSpecLibFasta(SpecLibFasta, PredictSpecLib):
         special_mods_cannot_modify_pep_c_term:bool=False,
         decoy: str = None, # or pseudo_reverse or diann
         I_to_L=False,
+        generate_precursor_isotope:bool = False,
+        rt_to_irt:bool = False,
     ):
         """
         Parameters
@@ -65,10 +66,6 @@ class PredictSpecLibFasta(SpecLibFasta, PredictSpecLib):
 
         precursor_mz_max : float, optional
             Maximal precursor mz, by default 2000.0
-
-        generate_precursor_isotope : bool, optional
-            If :meth:`peptdeep.spec_lib.predict_lib.PredictSpecLib.predict_all()` 
-            includes :meth:`peptdeep.spec_lib.predict_lib.PredictSpecLib.calc_precursor_isotope()`.
 
         var_mods : list, optional
             list of variable modifications, 
@@ -117,6 +114,13 @@ class PredictSpecLibFasta(SpecLibFasta, PredictSpecLib):
         decoy : str, optional
             Decoy type, see `alphabase.spectral_library.decoy_library`,
             by default None
+
+        generate_precursor_isotope : bool, optional
+            If :meth:`peptdeep.spec_lib.predict_lib.PredictSpecLib.predict_all()` 
+            includes :meth:`peptdeep.spec_lib.predict_lib.PredictSpecLib.calc_precursor_isotope()`.
+            Defaults to False
+        
+        rt_to_irt : bool, optional
         """
         SpecLibFasta.__init__(self,
             charged_frag_types=charged_frag_types,
@@ -149,4 +153,5 @@ class PredictSpecLibFasta(SpecLibFasta, PredictSpecLib):
             precursor_mz_max=self.max_precursor_mz,
             decoy=self.decoy,
             generate_precursor_isotope=generate_precursor_isotope,
+            rt_to_irt=rt_to_irt,
         )

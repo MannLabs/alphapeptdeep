@@ -101,7 +101,7 @@ class PSMLabelReader(pFindReader,PSMReader_w_FragBase):
         )
 
         for ith_psm, (nAA, start,end) in enumerate(
-            psmlabel_df[['nAA','frag_start_idx','frag_end_idx']].values
+            psmlabel_df[['nAA','frag_start_idx','frag_stop_idx']].values
         ):
             intens = np.zeros((nAA-1, len(self.charged_frag_types)))
             for ion_type in self.psmlabel_frag_columns:
@@ -137,8 +137,8 @@ class PSMLabelReader(pFindReader,PSMReader_w_FragBase):
             ] = intens
         
         self._psm_df[
-            ['frag_start_idx','frag_end_idx']
-        ] = psmlabel_df[['frag_start_idx','frag_end_idx']]
+            ['frag_start_idx','frag_stop_idx']
+        ] = psmlabel_df[['frag_start_idx','frag_stop_idx']]
 
 psm_w_frag_reader_provider.register_reader(
     'psmlabel', PSMLabelReader
