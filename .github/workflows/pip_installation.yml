@@ -31,8 +31,8 @@ jobs:
       - name: Unittests
         shell: bash -l {0}
         run: |
-          pip install -U git+https://github.com/mannlabs/alphabase.git@development
           conda activate peptdeep
+          pip install -U git+https://github.com/mannlabs/alphabase.git@development
           peptdeep
           nbdev_test
           conda deactivate
@@ -59,8 +59,8 @@ jobs:
       - name: Unittests
         shell: bash -l {0}
         run: |
-          pip install -U git+https://github.com/mannlabs/alphabase.git@development
           conda activate peptdeep
+          pip install -U git+https://github.com/mannlabs/alphabase.git@development
           peptdeep
           nbdev_test
           conda deactivate

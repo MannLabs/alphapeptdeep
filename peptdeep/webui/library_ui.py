@@ -285,10 +285,14 @@ def show():
     output_folder = get_posix(output_folder)
     global_settings['library']['output_folder'] = output_folder
 
-
     global_settings['library']['output']['rt_to_irt'] = bool(st.checkbox(
         label='Convert predicted RT to iRT', 
         value=global_settings['library']['output']['rt_to_irt']
+    ))
+
+    global_settings['library']['output']['generate_precursor_isotope'] = bool(st.checkbox(
+        label='Convert predicted RT to iRT', 
+        value=global_settings['library']['output']['generate_precursor_isotope']
     ))
 
     tsv_enabled = bool(st.checkbox(
