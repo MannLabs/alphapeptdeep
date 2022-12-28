@@ -89,21 +89,21 @@ def show():
     )
     global_settings['thread_num'] = thread_num
 
-    device_type = st.selectbox(label='Computing devices',
+    global_settings['torch_device']['device_type'] = st.selectbox(
+        label='Computing devices',
         options=global_settings['torch_device']['device_type_choices'],
         index = global_settings['torch_device']['device_type_choices'].index(
             global_settings['torch_device']['device_type']
         )
     )
-    global_settings['torch_device']['device_type'] = device_type
 
-    log_level = st.selectbox(label='Log level', 
+    global_settings['log_level'] = st.selectbox(
+        label='Log level', 
         options=global_settings['log_level_choices'], 
         index = global_settings['log_level_choices'].index(
             global_settings['log_level']
         )
     )
-    global_settings['log_level'] = log_level
 
     global_settings['common']['modloss_importance_level'] = st.number_input(
         'Modification loss importance level (for a PTM, fragment modloss mz=0 if modloss_importance<modloss_importance_level)', 

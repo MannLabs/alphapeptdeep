@@ -14,7 +14,8 @@ def show():
     #st.write('The current raw folder is', raw_folder)
     MS_type = st.selectbox(
      label='MS file type',
-     options=('Raw', 'MGF', 'ms_data.hdf'))
+     options=('Raw', 'MGF', 'ms_data.hdf')
+    )
     #st.write('You selected:', MS_type)
     if os.path.isdir(raw_folder):
         st.text(
@@ -30,7 +31,8 @@ def show():
     result_folder = st.text_input(label='Result folder')
     #st.write('The current result folder is', result_folder)
     PSM_type = st.selectbox(label='PSM file type',
-     options=('AlphaPept', 'pFind', 'MaxQuant'))
+     options=('AlphaPept', 'pFind', 'MaxQuant')
+    )
     if PSM_type == 'AlphaPept':
         psm_type = 'ms_data.hdf'
     elif PSM_type == 'pFind':

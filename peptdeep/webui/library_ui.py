@@ -164,15 +164,22 @@ def choose_precursor_mz():
     global_settings['library']['input']['max_precursor_mz'] = max_precursor_mz
 
 def add_decoy():
-    decoy = st.selectbox(label='Decoy method',options=global_settings['library']['input']['decoy_choices'],index = 0)
-    global_settings['library']['input']['decoy'] = decoy
+    global_settings['library']['input']['decoy'] = st.selectbox(
+        label='Decoy method',
+        options=global_settings['library']['input']['decoy_choices'],
+        index = global_settings['library']['input']['decoy_choices'].index(
+            global_settings['library']['input']['decoy']
+        )
+    )
 
 def choose_protease():
-    protease = st.selectbox(
+    global_settings['library']['input']['fasta']['protease'] = st.selectbox(
         label='Protease',
         options=global_settings['library']['input']['fasta']['protease_choices'],
+        index=global_settings['library']['input']['fasta']['protease_choices'].index(
+            global_settings['library']['input']['fasta']['protease']
+        )
     )
-    global_settings['library']['input']['fasta']['protease'] = protease
     max_miss_cleave = st.number_input(label='Max number of miss cleavages',value = global_settings['library']['input']['fasta']['max_miss_cleave'])
     global_settings['library']['input']['fasta']['max_miss_cleave'] = max_miss_cleave
 
@@ -220,7 +227,6 @@ def show():
     global_settings['library']['input']['infile_type'] = infile_type
 
     if infile_type != 'fasta':
-        import pandas as pd
         df = pd.DataFrame({
             'sequence': ['ACDEFGHIK','LMNPQRSTVK','WYVSTR'],
             'mods': ['Carbamidomethyl@C','Acetyl@Protein N-term;Phospho@S',''],
