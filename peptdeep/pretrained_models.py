@@ -529,7 +529,7 @@ class ModelManager(object):
         """
         psm_df = psm_df.groupby(
             ['sequence','mods','mod_sites']
-        )[['rt','rt_norm']].median().reset_index(drop=False)
+        )[['rt_norm']].median().reset_index(drop=False)
 
         if self.psm_num_to_train_rt_ccs > 0:
             if self.psm_num_to_train_rt_ccs < len(psm_df):
