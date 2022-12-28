@@ -9,7 +9,7 @@ def predict():
 
     default_instrument = st.selectbox(label='Instrument',options=list(global_settings['model_mgr']['instrument_group'].keys()),index = 0)
     global_settings['model_mgr']['default_instrument'] = default_instrument
-    default_nce = st.number_input(label='NCE', value = global_settings['model_mgr']['default_nce'],disabled=(default_instrument=='timsTOF'))
+    default_nce = st.number_input(label='NCE', value = global_settings['model_mgr']['default_nce'])
     global_settings['model_mgr']['default_nce'] = default_nce
 
     verbose = st.checkbox(label='Verbose', value=global_settings['model_mgr']['predict']['verbose'])
