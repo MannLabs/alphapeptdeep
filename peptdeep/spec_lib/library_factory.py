@@ -1,3 +1,6 @@
+import os
+import psutil
+
 import pandas as pd
 import numpy as np
 from typing import Union
@@ -72,11 +75,18 @@ class PredictLibraryMakerBase(object):
 
     def _predict(self):
         self.spec_lib.predict_all()
-        
-    def _set_df(self):
-        self.precursor_df = self.spec_lib.precursor_df
-        self.fragment_mz_df = self.spec_lib.fragment_mz_df
-        self.fragment_intensity_df = self.spec_lib.fragment_intensity_df
+
+    @property
+    def precursor_df(self)->pd.DataFrame:
+        return self.spec_lib.precursor_df
+
+    @property
+    def fragment_intensity_df(self)->pd.DataFrame:
+        return self.spec_lib.fragment_intensity_df
+
+    @property
+    def fragment_mz_df(self)->pd.DataFrame:
+        return self.spec_lib.fragment_mz_df
 
     def make_library(self, _input):
         """Predict a library for the `_input`, 
@@ -85,7 +95,6 @@ class PredictLibraryMakerBase(object):
         - self._input(_input)
         - self._check_df()
         - self._predict()
-        - self._set_df()
 
         Parameters
         ----------
@@ -97,13 +106,18 @@ class PredictLibraryMakerBase(object):
         ValueError
             ValueError for some reasons
         """
-        logging.info("Generating the library...")
+        logging.info("Generating the spectral library ...")
         try:
             self._input(_input)
             self._check_df()
             self._predict()
-            self._set_df()
-            logging.info(f"Generated the library for {len(self.precursor_df)} precursors.")
+
+            logging.info(
+                'The spectral library with '
+                f'{len(self.precursor_df)*1e-6:.2f}M precursors '
+                f'and {np.prod(self.fragment_mz_df.values.shape, dtype=float)*(1e-6):.2f}M fragments '
+                f'used {psutil.Process(os.getpid()).memory_info().rss/1024**3:.4f} GB memory'
+            )
         except ValueError as e:
             raise e
     

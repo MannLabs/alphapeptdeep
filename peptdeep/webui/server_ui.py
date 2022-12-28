@@ -35,20 +35,20 @@ def display_tasks():
 def show():
     st.write("# AlphaPeptDeep Server")
 
-    if st.button("Start the server"):
-        _server.start()
-        print("Server started")
+    # if st.button("Start the server"):
+    #     _server.start()
+    #     print("Server started")
 
-    if st.button("Stop the server"):
-        _server.terminate()
-        print("Server stopped")
+    # if st.button("Stop the server"):
+    #     _server.terminate()
+    #     print("Server stopped")
 
-    if _server.process is not None:
-        st.write("The server is running or waiting for tasks")
-        st.warning("Stop the server before exit")
-    else:
-        st.write("The server is not running")
-        st.warning("Start the server to submit tasks")
+    # if _server.process is not None:
+    #     st.write("The server is running or waiting for tasks")
+    #     st.warning("Stop the server before exit")
+    # else:
+    #     st.write("The server is not running")
+    #     st.warning("Start the server to submit tasks")
 
     display_tasks()
 
@@ -65,6 +65,4 @@ def show():
             1 - psutil.virtual_memory().available / psutil.virtual_memory().total
         )
         cpu.progress(psutil.cpu_percent() / 100)
-        time.sleep(0.5)
-
-
+        time.sleep(1)
