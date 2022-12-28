@@ -35,10 +35,13 @@ from peptdeep.settings import global_settings
 
 from peptdeep.model.ms2 import (
     pDeepModel, normalize_fragment_intensities,
+    calc_ms2_similarity
 )
 from peptdeep.model.rt import AlphaRTModel
 from peptdeep.model.ccs import AlphaCCSModel
-from peptdeep.utils import uniform_sampling
+from peptdeep.utils import (
+    uniform_sampling, evaluate_linear_regression
+)
 
 from peptdeep.settings import global_settings
 
@@ -305,6 +308,9 @@ class ModelManager(object):
         self.psm_num_to_train_ms2 = mgr_settings[
             "transfer"
         ]["psm_num_to_train_ms2"]
+        self.psm_num_to_test_ms2 = mgr_settings[
+            'transfer'
+        ]["psm_num_to_test_ms2"]
         self.epoch_to_train_ms2 = mgr_settings[
             'transfer'
         ]['epoch_ms2']
@@ -323,6 +329,9 @@ class ModelManager(object):
         self.psm_num_to_train_rt_ccs = mgr_settings[
             "transfer"
         ]["psm_num_to_train_rt_ccs"]
+        self.psm_num_to_test_rt_ccs = mgr_settings[
+            'transfer'
+        ]["psm_num_to_test_rt_ccs"]
         self.epoch_to_train_rt_ccs = mgr_settings[
             'transfer'
         ]['epoch_rt_ccs']
@@ -341,6 +350,7 @@ class ModelManager(object):
         self.psm_num_per_mod_to_train_ms2 = mgr_settings[
             'transfer'
         ]["psm_num_per_mod_to_train_ms2"]
+
         self.psm_num_per_mod_to_train_rt_ccs = mgr_settings[
             'transfer'
         ]["psm_num_per_mod_to_train_rt_ccs"]
@@ -517,13 +527,16 @@ class ModelManager(object):
         psm_df : pd.DataFrame
             Training psm_df which contains 'rt_norm' column.
         """
+        psm_df = psm_df.groupby(
+            ['sequence','mods','mod_sites']
+        )[['rt','rt_norm']].median().reset_index(drop=False)
+
         if self.psm_num_to_train_rt_ccs > 0:
             if self.psm_num_to_train_rt_ccs < len(psm_df):
                 tr_df = psm_sampling_with_important_mods(
                     psm_df, self.psm_num_to_train_rt_ccs,
                     self.top_n_mods_to_train,
                     self.psm_num_per_mod_to_train_rt_ccs,
-                    uniform_sampling_column='rt_norm'
                 )
             else:
                 tr_df = psm_df
@@ -538,6 +551,29 @@ class ModelManager(object):
                     lr=self.lr_to_train_rt_ccs,
                     verbose=self.train_verbose,
                 )
+        else:
+            tr_df = []
+        
+        if self.psm_num_to_test_rt_ccs > 0:
+            if self.psm_num_to_train_rt_ccs > 0 and len(tr_df) > 0:
+                test_psm_df = psm_df[
+                    ~psm_df.sequence.isin(set(tr_df.sequence))
+                ]
+                if len(test_psm_df) > self.psm_num_to_test_rt_ccs:
+                    test_psm_df = test_psm_df.sample(
+                        n=self.psm_num_to_test_rt_ccs
+                    ).copy()
+                elif len(test_psm_df) == 0:
+                    test_psm_df = psm_df
+            else:
+                test_psm_df = psm_df
+            
+            logging.info(
+                "Testing refined RT model:\n" + 
+                str(evaluate_linear_regression(
+                    self.rt_model.predict(test_psm_df))
+                )
+            )
 
     def train_ccs_model(self,
         psm_df:pd.DataFrame,
@@ -563,13 +599,16 @@ class ModelManager(object):
                 psm_df, 'ccs'
             )
 
+        psm_df = psm_df.groupby(
+            ['sequence','mods','mod_sites','charge']
+        )[['mobility','ccs']].median().reset_index(drop=False)
+
         if self.psm_num_to_train_rt_ccs > 0:
             if self.psm_num_to_train_rt_ccs < len(psm_df):
                 tr_df = psm_sampling_with_important_mods(
                     psm_df, self.psm_num_to_train_rt_ccs,
                     self.top_n_mods_to_train,
                     self.psm_num_per_mod_to_train_rt_ccs,
-                    uniform_sampling_column='ccs'
                 )
             else:
                 tr_df = psm_df
@@ -583,6 +622,30 @@ class ModelManager(object):
                     lr=self.lr_to_train_rt_ccs,
                     verbose=self.train_verbose,
                 )
+        else:
+            tr_df = []
+        
+        if self.psm_num_to_test_rt_ccs > 0:
+            if len(tr_df) > 0:
+                test_psm_df = psm_df[
+                    ~psm_df.sequence.isin(set(tr_df.sequence))
+                ]
+                if len(test_psm_df) > self.psm_num_to_test_rt_ccs:
+                    test_psm_df = test_psm_df.sample(
+                        n=self.psm_num_to_test_rt_ccs
+                    ).copy()
+                elif len(test_psm_df) == 0:
+                    test_psm_df = psm_df
+            else:
+                test_psm_df = psm_df
+            
+            logging.info(
+                "Testing refined CCS model:\n" + 
+                str(evaluate_linear_regression(
+                    self.ccs_model.predict(test_psm_df),
+                    x = 'ccs_pred', y='ccs'
+                ))
+            )
 
     def train_ms2_model(self,
         psm_df: pd.DataFrame,
@@ -653,6 +716,38 @@ class ModelManager(object):
                     lr=self.lr_to_train_ms2,
                     verbose=self.train_verbose,
                 )
+        else:
+            tr_df = []
+
+        if self.psm_num_to_test_ms2 > 0:
+            if len(tr_df) > 0:
+                test_psm_df = psm_df[
+                    ~psm_df.sequence.isin(set(tr_df.sequence))
+                ].copy()
+                if len(test_psm_df) > self.psm_num_to_test_ms2:
+                    test_psm_df = test_psm_df.sample(n=self.psm_num_to_test_ms2)
+                elif len(test_psm_df) == 0:
+                    test_psm_df = psm_df.copy()
+            else:
+                test_psm_df = psm_df.copy()
+                tr_inten_df = pd.DataFrame()
+                for frag_type in self.ms2_model.charged_frag_types:
+                    if frag_type in matched_intensity_df.columns:
+                        tr_inten_df[frag_type] = matched_intensity_df[frag_type]
+                    else:
+                        tr_inten_df[frag_type] = 0.0
+            self.set_default_nce_instrument(test_psm_df)
+            logging.info(
+                "Testing refined MS2 model:\n"+
+                str(calc_ms2_similarity(
+                    test_psm_df, 
+                    self.ms2_model.predict(
+                        test_psm_df, reference_frag_df=matched_intensity_df
+                    ), 
+                    fragment_intensity_df=matched_intensity_df
+                )[-1])
+            )
+            
 
     def predict_ms2(self, precursor_df:pd.DataFrame, 
         *, 
@@ -681,7 +776,7 @@ class ModelManager(object):
         pd.DataFrame
             Predicted fragment intensity dataframe. 
             If there are no such two columns in precursor_df, 
-            it will insert 'frag_start_idx' and `frag_end_idx` in 
+            it will insert 'frag_start_idx' and `frag_stop_idx` in 
             precursor_df pointing to this predicted fragment dataframe.
         """
         self.set_default_nce_instrument(precursor_df)

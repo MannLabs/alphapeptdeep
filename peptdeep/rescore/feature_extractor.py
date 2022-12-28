@@ -119,7 +119,7 @@ def get_psm_scores(
     (
         psm_df['merr_weighted_score'],
         psm_df['pred_weighted_score'],
-    ) = zip(*psm_df[['frag_start_idx','frag_end_idx']].apply(
+    ) = zip(*psm_df[['frag_start_idx','frag_stop_idx']].apply(
         _get_one_score, axis=1,
         peak_score_values = peak_score_df.values,
         pred_weighted_score_values = pred_weighted_score_df.values,
@@ -290,7 +290,7 @@ def get_ms2_features(
         psm_df['pred_not_matched_frag_ratio'],
         psm_df['matched_frag_rel_to_pred'],
         psm_df['pred_frag_rel_to_matched'],
-    ) = zip(*psm_df[['frag_start_idx','frag_end_idx']].apply(
+    ) = zip(*psm_df[['frag_start_idx','frag_stop_idx']].apply(
         _get_frag_features, axis=1,
         matched_inten_values=matched_intensity_df[used_frag_types].values,
         predicted_inten_values=predict_intensity_df[used_frag_types].values,
@@ -351,7 +351,7 @@ def get_ms2_features(
             psm_df['pred_not_matched_bion_ratio'],
             psm_df['matched_bion_rel_to_pred'],
             psm_df['pred_bion_rel_to_matched'],
-        ) = zip(*psm_df[['frag_start_idx','frag_end_idx']].apply(
+        ) = zip(*psm_df[['frag_start_idx','frag_stop_idx']].apply(
             _get_frag_features, axis=1,
             matched_inten_values=matched_intensity_df[b_frag_types].values,
             predicted_inten_values=predict_intensity_df[b_frag_types].values,
@@ -425,7 +425,7 @@ def get_ms2_features(
             psm_df['pred_not_matched_yion_ratio'],
             psm_df['matched_yion_rel_to_pred'],
             psm_df['pred_yion_rel_to_matched'],
-        ) = zip(*psm_df[['frag_start_idx','frag_end_idx']].apply(
+        ) = zip(*psm_df[['frag_start_idx','frag_stop_idx']].apply(
             _get_frag_features, axis=1,
             matched_inten_values=matched_intensity_df[y_frag_types].values,
             predicted_inten_values=predict_intensity_df[y_frag_types].values,

@@ -163,7 +163,7 @@ def match_first_last_profile_mz(
 
 @numba.njit
 def match_one_raw_with_numba(
-    spec_idxes, frag_start_idxes, frag_end_idxes,
+    spec_idxes, frag_start_idxes, frag_stop_idxes,
     all_frag_mzs,
     all_spec_mzs, all_spec_intensities, 
     peak_start_idxes, peak_end_idxes,
@@ -175,7 +175,7 @@ def match_one_raw_with_numba(
     Matched_mz_errs[i] = np.inf if no peaks are matched.
     """
     for spec_idx, frag_start, frag_end in zip(
-        spec_idxes, frag_start_idxes, frag_end_idxes
+        spec_idxes, frag_start_idxes, frag_stop_idxes
     ):
         peak_start = peak_start_idxes[spec_idx]
         peak_end = peak_end_idxes[spec_idx]
@@ -319,10 +319,10 @@ class PepSpecMatch(object):
         )
         
         for (
-            spec_idx, frag_start_idx, frag_end_idx
+            spec_idx, frag_start_idx, frag_stop_idx
         ) in psm_df[[
             'spec_idx', 'frag_start_idx', 
-            'frag_end_idx'
+            'frag_stop_idx'
         ]].values:
             (
                 spec_mzs, spec_intens
@@ -335,7 +335,7 @@ class PepSpecMatch(object):
                 mz_tols = np.full_like(spec_mzs, tol)
 
             frag_mzs = fragment_mz_df.values[
-                frag_start_idx:frag_end_idx,:
+                frag_start_idx:frag_stop_idx,:
             ]
             
             matched_idxes = match_centroid_mz(
@@ -350,11 +350,11 @@ class PepSpecMatch(object):
             matched_mz_errs[matched_idxes==-1] = np.inf
 
             matched_intensity_df.values[
-                frag_start_idx:frag_end_idx,:
+                frag_start_idx:frag_stop_idx,:
             ] = matched_intens
 
             matched_mz_err_df.values[
-                frag_start_idx:frag_end_idx,:
+                frag_start_idx:frag_stop_idx,:
             ] = matched_mz_errs
 
         return (
@@ -387,7 +387,7 @@ class PepSpecMatch(object):
             match_one_raw_with_numba(
                 df_group.spec_idx.values,
                 df_group.frag_start_idx.values,
-                df_group.frag_end_idx.values,
+                df_group.frag_stop_idx.values,
                 self.fragment_mz_df.values,
                 ms2_reader.peak_df.mz.values, 
                 ms2_reader.peak_df.intensity.values,
@@ -435,7 +435,7 @@ class PepSpecMatch(object):
 
         if 'frag_start_idx' in self.psm_df.columns:
             del self.psm_df['frag_start_idx']
-            del self.psm_df['frag_end_idx']
+            del self.psm_df['frag_stop_idx']
             
         self.fragment_mz_df = self.get_fragment_mz_df(self.psm_df)
         

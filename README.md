@@ -112,7 +112,7 @@ Older releases remain available on the [release
 page](https://github.com/MannLabs/alphapeptdeep/releases), but no
 backwards compatibility is guaranteed.
 
-Note that these installers do not have GPU supported.
+Note that, as GitHub does not allow large release files, these installers do not have GPU support. To create GPU version installers, clone the source code and install GPU-version pytorch (#use-gpu), and then use `release/one_click_xxx_gui/create_installer_xxx.sh` to build installer locally.
 
 ### Pip
 
@@ -195,7 +195,7 @@ to check your NVIDIA driver:
 nvidia-smi
 ```
 
-See [pytorch.org](https://pytorch.org/get-started/locally/) for details.
+For latest pytorch version, see [pytorch.org](https://pytorch.org/get-started/locally/).
 
 ### Developer
 

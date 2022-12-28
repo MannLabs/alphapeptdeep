@@ -154,17 +154,64 @@ def show():
     with training_expander:
         fine_tune()
 
-        psm_num_to_train_ms2 = st.number_input(label='PSM num to tune MS2 model', value = int(global_settings['model_mgr']['transfer']['psm_num_to_train_ms2']), step = 1)
-        global_settings['model_mgr']['transfer']['psm_num_to_train_ms2'] = psm_num_to_train_ms2
-        psm_num_per_mod_to_train_ms2 = st.number_input(label='PSM num per mod to tune MS2 model', value = int(global_settings['model_mgr']['transfer']['psm_num_per_mod_to_train_ms2']), step = 1)
-        global_settings['model_mgr']['transfer']['psm_num_per_mod_to_train_ms2'] = psm_num_per_mod_to_train_ms2
-        psm_num_to_train_rt_ccs = st.number_input(label='PSM num to tune RT and CCS model', value = int(global_settings['model_mgr']['transfer']['psm_num_to_train_rt_ccs']), step = 1)
-        global_settings['model_mgr']['transfer']['psm_num_to_train_rt_ccs'] = psm_num_to_train_rt_ccs
-        psm_num_per_mod_to_train_rt_ccs = st.number_input(label='PSM num per mod to tune RT and CCS model', value = int(global_settings['model_mgr']['transfer']['psm_num_per_mod_to_train_rt_ccs']), step = 1)
-        global_settings['model_mgr']['transfer']['psm_num_per_mod_to_train_rt_ccs'] = psm_num_per_mod_to_train_rt_ccs
-        top_n_mods_to_train = st.number_input(label='Top n mods to tune', value = int(global_settings['model_mgr']['transfer']['top_n_mods_to_train']), step = 1)
-        global_settings['model_mgr']['transfer']['top_n_mods_to_train'] = top_n_mods_to_train
+        global_settings['model_mgr']['transfer'][
+            'psm_num_to_train_ms2'
+        ] = st.number_input(
+            label='PSM num to refine MS2 model', 
+            value = int(global_settings['model_mgr']['transfer'][
+                'psm_num_to_train_ms2'
+            ]), step = 1
+        )
+        global_settings['model_mgr']['transfer'][
+            'psm_num_per_mod_to_train_ms2'
+        ] = st.number_input(
+            label='PSM num per mod to refine MS2 model', 
+            value = int(global_settings['model_mgr']['transfer'][
+                'psm_num_per_mod_to_train_ms2'
+            ]), step = 1
+        )
+        global_settings['model_mgr']['transfer'][
+            'psm_num_to_test_ms2'
+        ] = st.number_input(
+            label='PSM num to test MS2 model', 
+            value = int(global_settings['model_mgr']['transfer'][
+                'psm_num_to_test_ms2'
+            ]), step = 1
+        )
 
+        global_settings['model_mgr']['transfer'][
+            'psm_num_to_train_rt_ccs'
+        ] = st.number_input(
+            label='PSM num to refine RT and CCS model', 
+            value = int(global_settings['model_mgr']['transfer'][
+                'psm_num_to_train_rt_ccs'
+            ]), step = 1
+        )
+        global_settings['model_mgr']['transfer'][
+            'psm_num_per_mod_to_train_rt_ccs'
+        ] = st.number_input(
+            label='PSM num per mod to refine RT and CCS model', 
+            value = int(global_settings['model_mgr']['transfer'][
+                'psm_num_per_mod_to_train_rt_ccs'
+            ]), step = 1
+        )
+        
+        global_settings['model_mgr']['transfer'][
+            'psm_num_to_test_rt_ccs'
+        ] = st.number_input(
+            label='PSM num to test RT and CCS model', 
+            value = int(global_settings['model_mgr']['transfer'][
+                'psm_num_to_test_rt_ccs'
+            ]), step = 1
+        )
+        global_settings['model_mgr']['transfer'][
+            'top_n_mods_to_train'
+        ] = st.number_input(
+            label='Top n mods to refine models', 
+            value = int(global_settings['model_mgr']['transfer'][
+                'top_n_mods_to_train'
+            ]), step = 1
+        )
 
     st.write('#### Grid search for NCEs and instruments')
     st.write('If NCE and instrument are unknown, grid search will look for the best NCE and instrument)')

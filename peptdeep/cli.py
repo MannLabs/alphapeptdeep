@@ -2,15 +2,16 @@
 
 
 import click
+import os
 
-from alphabase.yaml_utils import save_yaml
+from alphabase.yaml_utils import save_yaml, load_yaml
 
 import peptdeep
 from peptdeep.pipeline_api import (
     rescore, generate_library, 
     transfer_learn, load_settings
 )
-from peptdeep.settings import global_settings
+from peptdeep.settings import global_settings, update_settings
 
 @click.group(
     context_settings=dict(
@@ -47,9 +48,15 @@ r'''
 @click.option("--port", default=10077, type=int,
     show_default=True, help="The web server port."
 )
-def _gui(port):
+@click.option("--settings_yaml", default='', type=str,
+    show_default=True, help="Load default settings yaml file."
+)
+def _gui(port, settings_yaml):
     import peptdeep.gui
     from peptdeep.webui.server import _server
+    if os.path.isfile(settings_yaml):
+        _dict = load_yaml(settings_yaml)
+        update_settings(global_settings, _dict)
     # start the server to monitor tasks
     _server.start()
     peptdeep.gui.run(port)
