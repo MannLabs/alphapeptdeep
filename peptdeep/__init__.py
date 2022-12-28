@@ -18,6 +18,8 @@ __description__ = "The AlphaX Deep (PeptDeep) Learning Platform for Proteomics"
 __author__ = "Mann Labs"
 __author_email__ = "jalew.zwf@qq.com"
 __github__ = "https://github.com/MannLabs/peptdeep"
+__doc__ = "https://alphapeptdeep.readthedocs.io/en/latest/"
+__pypi__ = "https://pypi.org/project/peptdeep/"
 __keywords__ = [
     "deep learning",
     "proteomics",
@@ -45,8 +47,8 @@ __urls__ = {
     "Mann Labs at MPIB": "https://www.biochem.mpg.de/mann",
     "Mann Labs at CPR": "https://www.cpr.ku.dk/research/proteomics/mann/",
     "GitHub": __github__,
-    "Docs": "https://alphapeptdeep.readthedocs.io/en/latest/",
-    "PyPi": "https://pypi.org/project/peptdeep/",
+    "Docs": __doc__,
+    "PyPi": __pypi__,
 }
 __extra_requirements__ = {
     "development": "requirements_development.txt",
