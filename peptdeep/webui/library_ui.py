@@ -291,7 +291,7 @@ def show():
     ))
 
     global_settings['library']['output']['generate_precursor_isotope'] = bool(st.checkbox(
-        label='Convert predicted RT to iRT', 
+        label="Generate precursor isotopes (don't check for DiaNN/Spectronaut search)", 
         value=global_settings['library']['output']['generate_precursor_isotope']
     ))
 
