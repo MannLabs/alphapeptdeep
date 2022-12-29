@@ -54,9 +54,8 @@ jobs:
       - name: Creating installer for Linux
         shell: bash -l {0}
         run: |
-          pip install torch -U --extra-index-url https://download.pytorch.org/whl/cpu
           cd release/one_click_linux_gui
-          . ./create_installer_linux.sh
+          . ./create_installer_linux.sh CPU
       - name: Test installer for Linux
         shell: bash -l {0}
         run: |
