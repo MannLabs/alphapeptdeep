@@ -11,8 +11,6 @@ psutil
 biopython
 transformers
 scikit-learn
-streamlit
-streamlit-aggrid
 lxml
 
 alphabase
