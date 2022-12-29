@@ -39,7 +39,8 @@ def run(port=10077):
         "streamlit", "run", 
         file_path, "--global.developmentMode=false", 
         f"--server.port={port}", 
-        "--browser.gatherUsageStats=False"
+        "--browser.gatherUsageStats=False",
+        "--logger.level=error"
     ]
 
     args.extend(theme)

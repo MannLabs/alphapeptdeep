@@ -41,12 +41,12 @@ st.sidebar.code(f"AlphaPeptDeep (PeptDeep) {peptdeep.__version__} \n{computer_na
 
 sidebar = {
     'Start page': startpage.show,
-    'Server': server_ui.show,
-    'Settings':  settings_ui.show,
     'Model': model_ui.show,
     'Transfer': transfer_ui.show,
     'Library': library_ui.show,
     'Rescore': rescore_ui.show,
+    'Server': server_ui.show,
+    'Settings':  settings_ui.show,
 }
 
 menu = st.sidebar.radio("", list(sidebar.keys()))

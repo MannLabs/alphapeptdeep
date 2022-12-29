@@ -1,6 +1,9 @@
 import os
-import pandas as pd
 import traceback
+import psutil
+
+import numpy as np
+import pandas as pd
 
 from typing import Tuple
 
@@ -320,6 +323,7 @@ def generate_library(settings_dict:dict=settings.global_settings):
             os.path.join(output_folder, 'peptdeep_settings.yaml'),
             settings_dict
         )
+        
         hdf_path = os.path.join(
             output_folder, 
             'predict.speclib.hdf'

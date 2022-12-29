@@ -89,17 +89,29 @@ def serve():
 class PeptDeepServer:
     def __init__(self):
         self.process:mp.Process = None
+        self._process_file = os.path.join(
+            global_settings['PEPTDEEP_HOME'], 
+            'tasks/serve_pid.txt', 
+        )
 
     def start(self):
         if self.process is None:
             self.process = mp.Process(target=serve)
             self.process.start()
 
+            with open(self._process_file, 'w') as f:
+                f.write(str(self.process.pid))
+
     def terminate(self):
         if self.process is not None:
             self.process.terminate()
             self.process.kill()
             self.process = None
+
+        os.replace(self._process_file, self._process_file[:-3]+'prev.txt')
+
+    def __del__(self):
+        self.terminate()
     
 _server = PeptDeepServer()
 

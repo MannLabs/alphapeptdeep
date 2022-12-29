@@ -164,15 +164,22 @@ def choose_precursor_mz():
     global_settings['library']['input']['max_precursor_mz'] = max_precursor_mz
 
 def add_decoy():
-    decoy = st.selectbox(label='Decoy method',options=global_settings['library']['input']['decoy_choices'],index = 0)
-    global_settings['library']['input']['decoy'] = decoy
+    global_settings['library']['input']['decoy'] = st.selectbox(
+        label='Decoy method',
+        options=global_settings['library']['input']['decoy_choices'],
+        index = global_settings['library']['input']['decoy_choices'].index(
+            global_settings['library']['input']['decoy']
+        )
+    )
 
 def choose_protease():
-    protease = st.selectbox(
+    global_settings['library']['input']['fasta']['protease'] = st.selectbox(
         label='Protease',
         options=global_settings['library']['input']['fasta']['protease_choices'],
+        index=global_settings['library']['input']['fasta']['protease_choices'].index(
+            global_settings['library']['input']['fasta']['protease']
+        )
     )
-    global_settings['library']['input']['fasta']['protease'] = protease
     max_miss_cleave = st.number_input(label='Max number of miss cleavages',value = global_settings['library']['input']['fasta']['max_miss_cleave'])
     global_settings['library']['input']['fasta']['max_miss_cleave'] = max_miss_cleave
 
@@ -196,11 +203,22 @@ def output_tsv():
     global_settings['library']['output_tsv']['min_fragment_mz'] = min_fragment_mz
     max_fragment_mz = st.number_input(label='Max fragment mz:', min_value = min_fragment_mz, value = global_settings['library']['output_tsv']['max_fragment_mz'])
     global_settings['library']['output_tsv']['max_fragment_mz'] = max_fragment_mz
-    min_relative_intensity = st.number_input(label='Min relative intensity:', value = global_settings['library']['output_tsv']['min_relative_intensity'])
+    min_relative_intensity = st.number_input(
+        label='Min relative intensity:', 
+        value = global_settings['library']['output_tsv']['min_relative_intensity'],
+        step=0.0001,
+        format='%0.4f'
+    )
     global_settings['library']['output_tsv']['min_relative_intensity'] = min_relative_intensity
-    keep_higest_k_peaks = st.number_input(label='Number of highest peaks to keep:', value = global_settings['library']['output_tsv']['keep_higest_k_peaks'])
+    keep_higest_k_peaks = st.number_input(
+        label='Number of highest peaks to keep:', 
+        value = global_settings['library']['output_tsv']['keep_higest_k_peaks']
+    )
     global_settings['library']['output_tsv']['keep_higest_k_peaks'] = keep_higest_k_peaks
-    global_settings['library']['output_tsv']['translate_mod_to_unimod_id']=bool(st.checkbox(label='Translate modifications to Unimod ids'))
+    global_settings['library']['output_tsv']['translate_mod_to_unimod_id']=bool(
+        st.checkbox(label='Translate modifications to Unimod ids',
+        value=global_settings['library']['output_tsv']['translate_mod_to_unimod_id']
+    ))
 
 def show():
     st.write("# Library Prediction")
@@ -220,7 +238,6 @@ def show():
     global_settings['library']['input']['infile_type'] = infile_type
 
     if infile_type != 'fasta':
-        import pandas as pd
         df = pd.DataFrame({
             'sequence': ['ACDEFGHIK','LMNPQRSTVK','WYVSTR'],
             'mods': ['Carbamidomethyl@C','Acetyl@Protein N-term;Phospho@S',''],
