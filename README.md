@@ -652,7 +652,7 @@ the yaml file):
       input:
         ...
         infile_type: fasta
-        iifiles:
+        infiles:
         - /path/to/fasta/human.fasta
         - /path/to/fasta/yeast.fasta
         ...
