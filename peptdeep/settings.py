@@ -65,6 +65,8 @@ def update_modifications(tsv:str="",
         update_all_mod_features()
     else:
         keep_modloss_by_importance(modloss_importance_level)
+    
+    add_user_defined_modifications()
 
 def add_user_defined_modifications(
     user_mods:dict=None
@@ -96,4 +98,3 @@ def add_user_defined_modifications(
     update_all_mod_features()
 
 update_modifications()
-add_user_defined_modifications()

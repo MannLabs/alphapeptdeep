@@ -6,6 +6,7 @@ from datetime import datetime
 
 from alphabase.constants.modification import MOD_DF
 from alphabase.yaml_utils import save_yaml
+from alphabase.protein.fasta import protease_dict
 
 from peptdeep.settings import global_settings
 
@@ -173,13 +174,44 @@ def add_decoy():
     )
 
 def choose_protease():
-    global_settings['library']['input']['fasta']['protease'] = st.selectbox(
-        label='Protease',
-        options=global_settings['library']['input']['fasta']['protease_choices'],
-        index=global_settings['library']['input']['fasta']['protease_choices'].index(
+    def on_custom_protease():
+        if (
+            len(st.session_state['custom_protease_text']) <= 1 
+            or st.session_state['custom_protease_text'] in protease_dict
+            or (
+                '(' in st.session_state['custom_protease_text'] and 
+                ')' in st.session_state['custom_protease_text'] and 
+                len(st.session_state['custom_protease_text']) >= 3
+            )
+        ):
+            return
+        else:
+            st.session_state['custom_protease_text'] = ''
+
+        print(
+            st.session_state['custom_protease_text'],
             global_settings['library']['input']['fasta']['protease']
         )
+
+    custom_protease = st.text_input(
+        label="Custom protease (protease name or regular expression, use `Common protease` if empty)",
+        value=global_settings['library']['input']['fasta']['protease'],
+        key="custom_protease_text",
+        on_change=on_custom_protease
     )
+    if custom_protease:
+        global_settings['library']['input']['fasta']['protease'] = custom_protease
+
+    protease = st.selectbox(
+        label='Common protease',
+        options=global_settings['library']['input']['fasta']['protease_choices'],
+        index=0, disabled=(custom_protease!='')
+    )
+    if not custom_protease:
+        global_settings['library']['input']['fasta']['protease'] = protease
+
+    st.text(f"Selected protease: {global_settings['library']['input']['fasta']['protease']}")
+
     max_miss_cleave = st.number_input(label='Max number of miss cleavages',value = global_settings['library']['input']['fasta']['max_miss_cleave'])
     global_settings['library']['input']['fasta']['max_miss_cleave'] = max_miss_cleave
 

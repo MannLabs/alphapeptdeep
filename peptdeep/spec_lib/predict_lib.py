@@ -75,8 +75,6 @@ class PredictSpecLib(SpecLibBase):
         self._fragment_mz_df = pd.DataFrame()
 
         self.mp_predict_batch_size:int = 100000
-        self.use_multiprocessing:bool = model_mgr_settings['predict']['multiprocessing']
-        self.mp_predict_process_num:int = global_settings['thread_num']
         self.rt_to_irt = rt_to_irt
         self.generate_precursor_isotope = generate_precursor_isotope
 
@@ -130,9 +128,9 @@ class PredictSpecLib(SpecLibBase):
             predict_items=['rt','mobility','ms2'],
             frag_types=self.charged_frag_types,
             min_required_precursor_num_for_mp=min_required_precursor_num_for_mp,
-            multiprocessing=self.use_multiprocessing,
+            multiprocessing=model_mgr_settings['predict']['multiprocessing'],
             mp_batch_size=self.mp_predict_batch_size,
-            process_num=self.mp_predict_process_num,
+            process_num=global_settings['thread_num'],
         )
         self.set_precursor_and_fragment(**res)
         if self.rt_to_irt and 'rt_pred' in self._precursor_df.columns:

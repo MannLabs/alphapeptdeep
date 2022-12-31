@@ -50,6 +50,10 @@ def serve():
         if len(files) > 0:
             yaml_file = files.pop(0)
             print(f"[PeptDeep] Starting a new job '{yaml_file}'...")
+            
+            running_txt = f'{home_folder}/tasks/running.txt'
+            with open(running_txt,'w') as f:
+                f.write(yaml_file)
 
             try:
                 update_global_settings(yaml_file)
@@ -65,17 +69,23 @@ def serve():
                 else:
                     logging.warning(f"[PeptDeep] Unknown task type `{global_settings['task_type']}`, skip ... ")
                     continue
-                shutil.move(
-                    yaml_file, 
-                    os.path.join(done_folder, os.path.basename(yaml_file))
-                )
+                if os.path.isfile(yaml_file):
+                    shutil.move(
+                        yaml_file, 
+                        os.path.join(done_folder, os.path.basename(yaml_file))
+                    )
             except KeyboardInterrupt as e:
+                with open(running_txt,'w') as f:
+                    f.write("")
                 raise e
             except Exception:
-                shutil.move(
-                    yaml_file, 
-                    os.path.join(failed_folder, os.path.basename(yaml_file))
-                )
+                if os.path.isfile(yaml_file):
+                    shutil.move(
+                        yaml_file, 
+                        os.path.join(failed_folder, os.path.basename(yaml_file)),
+                    )
+            with open(running_txt,'w') as f:
+                f.write("")
             echo_waiting=True
         else:
             if echo_waiting:

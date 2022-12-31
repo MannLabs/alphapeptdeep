@@ -26,7 +26,7 @@ def show():
 
         raw_files = files_in_folder_pandas(raw_folder,MS_type)
 
-        st.table(raw_files)
+        st.dataframe(raw_files)
 
     result_folder = st.text_input(label='Result folder')
     #st.write('The current result folder is', result_folder)
@@ -49,6 +49,6 @@ def show():
 
         result_files = files_in_folder_pandas(result_folder,psm_type)
 
-        st.table(result_files)
+        st.dataframe(result_files)
 
     st.warning("We are still working on Rescore GUI panel, please use command line (`peptdeep rescore`) for rescoring.")

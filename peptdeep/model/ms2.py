@@ -382,6 +382,7 @@ class pDeepModel(model_interface.ModelInterface):
 
         self.charge_factor = 0.1
         self.NCE_factor = 0.01
+        self.model:ModelMS2Bert = None
         self.build(
             model_class, 
             num_frag_types = len(self.charged_frag_types),
@@ -415,7 +416,7 @@ class pDeepModel(model_interface.ModelInterface):
         precursor_df:pd.DataFrame,
         reference_frag_df:pd.DataFrame=None,
     ):
-        if reference_frag_df is None and precursor_df.nAA.is_monotonic:
+        if reference_frag_df is None and precursor_df.nAA.is_monotonic_increasing:
             self._predict_in_order = True
             
             if 'frag_start_idx' in precursor_df.columns:

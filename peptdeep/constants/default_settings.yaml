@@ -213,7 +213,7 @@ library:
     infiles: 
     - xxx.fasta
     fasta:
-      protease: '([KR])'
+      protease: 'trypsin'
       protease_choices:
       - 'trypsin'
       - '([KR])'
@@ -224,6 +224,8 @@ library:
       - 'lys-n'
       - '\w(?=K)'
       - 'chymotrypsin'
+      - 'asp-n'
+      - 'glu-c'
       max_miss_cleave: 2
     fix_mods: 
     - Carbamidomethyl@C

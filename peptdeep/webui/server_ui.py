@@ -17,8 +17,6 @@ def display_tasks():
     st.write(f"There are {len(yamls)} tasks in the queue:")
     df = files_in_pandas(yamls)
 
-    st.write(f"See yaml files in `{os.path.expanduser(queue_folder)}`")
-
     tasks = []
     for _yml in yamls:
         _dict = load_yaml(_yml)
@@ -30,7 +28,21 @@ def display_tasks():
 
     df['Task Type'] = tasks
 
-    st.table(df)
+    st.dataframe(df)
+
+    st.write(f"See yaml files in `{queue_folder}`")
+
+    with st.expander(label="Remove tasks in the task queue"):
+        yaml_fname = st.text_input(label="Task yaml file to delete")
+        if st.button(label="Remove this yaml file") and len(df) > 0:
+            if (df["File Path"].values[0] == yaml_fname):
+                st.write("Cannot remove the task which is currently running")
+            elif (
+                os.path.isfile(yaml_fname) and
+                yaml_fname.startswith(queue_folder)
+            ):
+                os.remove(yaml_fname)
+                st.write(f"Task {yaml_fname} has been removed")
 
 def show():
     st.write("# AlphaPeptDeep Server")
