@@ -1,6 +1,17 @@
 # Changelog
 
+Follow the changelog format from https://keepachangelog.com/en/1.0.0/.
+
 ## 1.0.0 - TODO Next Release
+
+### Changed
+
+- multiprocessing with `spawn` for different OS systems.
+- Using constant values as defaults params of class methods instead of `global_settings[xxx]` values. Using `global_settings[xxx]` values as defaults params of class methods does not update once `global_settings` updates, this is dangerous.
+
+### Added
+
+- GUI: it is able to delete tasks in the taks queue.
 
 ## 0.4.0 - 2022.12.28
 
