@@ -2,8 +2,7 @@
 
 try:
     from . import (
-        model, rescore, spec_lib, legacy,
-        psm_frag_reader
+        model, rescore, spec_lib
     )
 
     from . import protein # rely on spec_lib, import after
