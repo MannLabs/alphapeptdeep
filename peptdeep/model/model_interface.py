@@ -66,7 +66,7 @@ class ModelInterface(object):
     the abstract (i.e. not implemented) methods.
     """
     def __init__(self,
-        device:str=global_settings['torch_device']['device_type'],
+        device:str='gpu',
         **kwargs
     ):
         """
@@ -74,7 +74,7 @@ class ModelInterface(object):
         ----------
         device : str, optional
             device type in 'cpu', 'mps', 'gpu' (or 'cuda'),
-            by default global_settings['torch_device']['device_type']
+            by default 'gpu'
         """
         self.model:torch.nn.Module = None
         self.optimizer = None
@@ -114,8 +114,8 @@ class ModelInterface(object):
         self._target_column_to_train = column
 
     def set_device(self, 
-        device_type:str = global_settings['torch_device']['device_type'], 
-        device_ids:list = global_settings['torch_device']['device_ids']
+        device_type:str = 'gpu', 
+        device_ids:list = []
     ):
         """
         Set the device (e.g. gpu (cuda), mps, cpu, ...) to be used for the model.
@@ -124,11 +124,11 @@ class ModelInterface(object):
         ----------
         device_type : str, optional
             Device type, see `torch_device_dict`. 
-            By default global_settings['torch_device']['device_type']
+            By default 'gpu'
 
         device_ids : list, optional
             List of int. Device ids for cuda/gpu (e.g. [1,3] for cuda:1,3). 
-            By default global_settings['torch_device']['device_ids']
+            By default []
         """
         self._device_ids = device_ids
 
@@ -340,7 +340,7 @@ class ModelInterface(object):
         print("Predicting with multiprocessing ...")
         self.model.share_memory()
         df_list = []
-        with mp.Pool(process_num) as p:
+        with mp.get_context('spawn').Pool(process_num) as p:
             for ret_df in process_bar(p.imap(
                     _predict_func,
                     batch_df_gen(precursor_df, mp_batch_size),

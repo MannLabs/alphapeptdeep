@@ -17,16 +17,17 @@ Global settings in peptdeep,
 it controls all functionalities of PeptDeep.
 """
 
-global_settings['PEPTDEEP_HOME'] = os.path.expanduser(
-    global_settings['PEPTDEEP_HOME']
-)
-
-for key, val in list(global_settings['model_mgr'][
-    'instrument_group'
-].items()):
-    global_settings['model_mgr'][
+def _refine_global_settings():
+    global_settings['PEPTDEEP_HOME'] = os.path.expanduser(
+        global_settings['PEPTDEEP_HOME']
+    )
+    for key, val in list(global_settings['model_mgr'][
         'instrument_group'
-    ][key.upper()] = val
+    ].items()):
+        global_settings['model_mgr'][
+            'instrument_group'
+        ][key.upper()] = val
+_refine_global_settings()
 
 model_const = load_yaml(
     os.path.join(CONST_FOLDER, 'model_const.yaml')
@@ -40,10 +41,13 @@ def update_settings(dict_, new_dict):
             dict_[k] = v
     return dict_
 
+def load_global_settings(yaml:str):
+    d = load_yaml(yaml)
+    update_settings(global_settings, d)
+    _refine_global_settings()
+
 def update_modifications(tsv:str="", 
-    modloss_importance_level:float=global_settings[
-        'common']['modloss_importance_level'
-    ]
+    modloss_importance_level:float=1.0
 ):
     """
     Load modification tsv either from alphabase default 
@@ -56,7 +60,7 @@ def update_modifications(tsv:str="",
         External modification tsv file, "" refers to the default alphabase tsv,
         by default "".
     modloss_importance_level : float, optional
-        Only keep the important modification losses, by default global_settings[ 'common']['modloss_importance_level']
+        Only keep the important modification losses, by default 1.0
     """
     if os.path.isfile(tsv):
         load_mod_df(tsv, modloss_importance_level=modloss_importance_level)

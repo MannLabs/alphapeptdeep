@@ -33,6 +33,9 @@ from peptdeep.utils import parse_ms_file_names_to_dict
 
 from peptdeep.utils import process_bar
 
+#: The global models for pipeline APIs
+model_mgr:ModelManager = ModelManager()
+
 def load_settings(settings_yaml:str):
     """Load settings yaml file into 
     `peptdeep.settings.global_settings` (dict).
@@ -214,10 +217,7 @@ def transfer_learn(settings_dict:dict=settings.global_settings, verbose=True):
         show_platform_info()
         show_python_info()
 
-        model_mgr = ModelManager(
-            mask_modloss=mgr_settings['mask_modloss'],
-            mgr_settings=mgr_settings,
-        )
+        model_mgr.reset_by_global_settings()
 
         logging.info('Loading PSMs and extracting fragments ...')
         if (
@@ -308,8 +308,11 @@ def generate_library(settings_dict:dict=settings.global_settings):
             modloss_importance_level=settings_dict['common']['modloss_importance_level']
         )
 
+        model_mgr.reset_by_global_settings()
+
         lib_maker = library_maker_provider.get_maker(
-            lib_settings['input']['infile_type']
+            lib_settings['input']['infile_type'],
+            model_manager=model_mgr
         )
         if lib_settings['input']['infile_type'] == 'fasta':
             lib_maker.make_library(lib_settings['input']['infiles'])
@@ -383,7 +386,8 @@ def rescore(settings_dict:dict=settings.global_settings):
         )
         show_platform_info()
         show_python_info()
-        percolator = Percolator()
+        model_mgr.reset_by_global_settings()
+        percolator = Percolator(model_mgr=model_mgr)
         psm_df = percolator.load_psms(
             perc_settings['input_files']['psm_files'],
             perc_settings['input_files']['psm_type']

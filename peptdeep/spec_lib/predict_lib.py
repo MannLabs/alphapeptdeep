@@ -16,7 +16,6 @@ from peptdeep.settings import global_settings
 from peptdeep.utils import logging
 from peptdeep.utils import process_bar
 
-lib_settings = global_settings['library']
 model_mgr_settings = global_settings['model_mgr']
 
 class PredictSpecLib(SpecLibBase):
@@ -65,7 +64,7 @@ class PredictSpecLib(SpecLibBase):
         self.verbose = True
         if model_manager is None:
             self.model_manager = ModelManager(
-                mask_modloss=False
+                mask_modloss=True
             )
         else:
             self.model_manager = model_manager

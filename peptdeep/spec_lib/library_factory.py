@@ -20,21 +20,11 @@ from peptdeep.utils import logging
 class PredictLibraryMakerBase(object):
     """
     Base class to predict libraries
-
-    Parameters
-    ----------
-    settings : dict, optional
-        By default `global_settings`
-
-    model_manager : ModelManager, optional
-        By default None
     """
     def __init__(self, 
-        settings:dict = global_settings,
         model_manager:ModelManager = None,
     ):
-        self._settings = settings
-        lib_settings = settings['library']
+        lib_settings = global_settings['library']
         in_settings = lib_settings['input']
         self.spec_lib = PredictSpecLibFasta(
             model_manager=model_manager,
@@ -251,13 +241,12 @@ class LibraryMakerProvider:
     def register_maker(self, maker_name:str, maker_class):
         self.library_maker_dict[maker_name.lower()] = maker_class
 
-    def get_maker(self, maker_name:str, *, 
-        settings:dict = global_settings,
+    def get_maker(self, maker_name:str, *,
         model_manager = None,
     )->PredictLibraryMakerBase:
         maker_name = maker_name.lower()
         if maker_name in self.library_maker_dict:
-            return self.library_maker_dict[maker_name](settings, model_manager)
+            return self.library_maker_dict[maker_name](model_manager)
         else:
             raise ValueError(f'library maker "{maker_name}" is not registered.')
 

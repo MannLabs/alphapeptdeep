@@ -127,40 +127,6 @@ class Percolator:
     ```
     perc_settings = peptdeep.settings.global_settings['percolator']
     ```
-
-    Parameters
-    ----------
-    percolator_model : str, optional
-        machine learning 
-        model type for rescoring, could be:
-        "linear": logistic regression
-        "random_forest": random forest
-        Defaults to perc_settings['percolator_model'].
-
-    percolator_backend : str, optional
-        `sklearn` or `pytorch`.
-        Defaults to perc_settings['percolator_backend']
-
-    cv_fold : int, optional
-        cross-validation fold. 
-        Defaults to perc_settings['cv_fold'].
-
-    iter_num : int, optional
-        percolator iteration number. 
-        Defaults to perc_settings['percolator_iter_num'].
-
-    ms2_ppm : bool, optional
-        is ms2 tolerance the ppm. 
-        Defaults to perc_settings['ms2_ppm'].
-
-    ms2_tol : float, optional
-        ms2 tolerance. 
-        Defaults to perc_settings['ms2_tol'].
-
-    model_mgr : ModelManager, optional
-        peptdeep.pretrained_model.ModelManager.
-        If None, self.model_mgr will be init by default (see `peptdeep.pretrained_models.ModelManager`).
-        Defaults to None.
     """
     def __init__(self,
         *,
@@ -172,6 +138,42 @@ class Percolator:
         ms2_tol:float = global_settings['peak_matching']['ms2_tol_value'],
         model_mgr:ModelManager = None
     ):
+        """
+        Parameters
+        ----------
+        percolator_model : str, optional
+            machine learning 
+            model type for rescoring, could be:
+            "linear": logistic regression
+            "random_forest": random forest
+            Defaults to perc_settings['percolator_model'].
+
+        percolator_backend : str, optional
+            `sklearn` or `pytorch`.
+            Defaults to perc_settings['percolator_backend']
+
+        cv_fold : int, optional
+            cross-validation fold. 
+            Defaults to perc_settings['cv_fold'].
+
+        iter_num : int, optional
+            percolator iteration number. 
+            Defaults to perc_settings['percolator_iter_num'].
+
+        ms2_ppm : bool, optional
+            is ms2 tolerance the ppm. 
+            Defaults to perc_settings['ms2_ppm'].
+
+        ms2_tol : float, optional
+            ms2 tolerance. 
+            Defaults to perc_settings['ms2_tol'].
+
+        model_mgr : ModelManager, optional
+            peptdeep.pretrained_model.ModelManager.
+            If None, self.model_mgr will be init by default (see `peptdeep.pretrained_models.ModelManager`).
+            Defaults to None.
+        """
+        
         if model_mgr is None:
             self.model_mgr = ModelManager()
         else:

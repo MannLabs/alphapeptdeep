@@ -295,11 +295,11 @@ class ModelManager(object):
         self.rt_model:AlphaRTModel = AlphaRTModel(device=device)
         self.ccs_model:AlphaCCSModel = AlphaCCSModel(device=device)
 
-        self.update_from_global_settings(False, False)
+        self.reset_by_global_settings(False, False)
 
     def reset_by_global_settings(self, 
-        update_mask_modloss:bool=True, 
-        update_device:bool=True,
+        set_mask_modloss:bool=True, 
+        set_device:bool=True,
     ):
         mgr_settings = global_settings['model_mgr']
         self.load_installed_models(mgr_settings['model_type'])
@@ -309,10 +309,10 @@ class ModelManager(object):
             ccs_model_file = mgr_settings['external_ccs_model'],
         )
 
-        if update_mask_modloss:
+        if set_mask_modloss:
             self.ms2_model.model._mask_modloss = mgr_settings['mask_modloss']
         
-        if update_device:
+        if set_device:
             self.ms2_model.set_device(global_settings['torch_device']['device_type'])
             self.rt_model.set_device(global_settings['torch_device']['device_type'])
             self.ccs_model.set_device(global_settings['torch_device']['device_type'])
@@ -429,7 +429,7 @@ class ModelManager(object):
             self.save_models(folder)
 
     def load_installed_models(self, 
-        model_type:str=model_mgr_settings['model_type']
+        model_type:str='generic'
     ):
         """ Load built-in MS2/CCS/RT models.
         
@@ -438,7 +438,7 @@ class ModelManager(object):
         model_type : str, optional
             To load the installed MS2/RT/CCS models or phos MS2/RT/CCS models. 
             It could be 'digly', 'phospho', 'HLA', or 'generic'.
-            Defaults to `global_settings['model_mgr']['model_type']` ('generic').
+            Defaults to 'generic'.
         """
         if model_type.lower() in [
             'phospho','phos','phosphorylation'
@@ -493,9 +493,9 @@ class ModelManager(object):
 
     def load_external_models(self,
         *,
-        ms2_model_file: Tuple[str, io.BytesIO]=model_mgr_settings['external_ms2_model'],
-        rt_model_file: Tuple[str, io.BytesIO]=model_mgr_settings['external_rt_model'],
-        ccs_model_file: Tuple[str, io.BytesIO]=model_mgr_settings['external_ccs_model'],
+        ms2_model_file: Tuple[str, io.BytesIO]='',
+        rt_model_file: Tuple[str, io.BytesIO]='',
+        ccs_model_file: Tuple[str, io.BytesIO]='',
     ):
         """Load external MS2/RT/CCS models.
 
@@ -503,15 +503,15 @@ class ModelManager(object):
         ----------
         ms2_model_file : Tuple[str, io.BytesIO], optional
             MS2 model file or stream. Do nothing if the value is '' or None. 
-            Defaults to global_settings['model_mgr']['external_ms2_model'].
+            Defaults to ''.
 
         rt_model_file : Tuple[str, io.BytesIO], optional
             RT model file or stream. Do nothing if the value is '' or None.
-            Defaults to global_settings['model_mgr']['external_rt_model'].
+            Defaults to ''.
 
         ccs_model_file : Tuple[str, io.BytesIO], optional
             CCS model or stream. Do nothing if the value is '' or None. 
-            Defaults to global_settings['model_mgr']['external_ccs_model'].
+            Defaults to ''.
         """
 
         def _load_file(model, model_file):
@@ -909,7 +909,7 @@ class ModelManager(object):
         verbose_bak = self.verbose
         self.verbose = False
 
-        with mp.Pool(process_num) as p:
+        with mp.get_context('spawn').Pool(process_num) as p:
             for ret_dict in process_bar(
                 p.imap_unordered(
                     self._predict_func_for_mp, 
