@@ -16,6 +16,10 @@ from peptdeep.webui.ui_utils import (
 
 from peptdeep.webui.server import queue_folder
 
+from peptdeep.constants._const import CONST_FOLDER
+
+contaminants_fasta = os.path.join(CONST_FOLDER, 'contaminants.fasta')
+
 def mod_options():
     with st.form(key="Select modifications"):
         st.write('#### Fixed and variable modificatins')
@@ -291,6 +295,20 @@ def show():
         'peptide_table': ['tsv','txt','csv'],
         'precursor_table': ['tsv','txt','csv'],
     }
+
+    if infile_type == 'fasta':
+        col1, col2, col3 = st.columns([0.5,0.5,1])
+        with col1:
+            add_con = st.button(label='Add contaminants', key="Add_contaminants")
+        with col2:
+            remove_con = st.button(label='Remove contaminants', key="Remove_contaminants")
+        if add_con:
+            if contaminants_fasta not in global_settings['library']['input']['infiles']:
+                global_settings['library']['input']['infiles'].append(contaminants_fasta)
+        elif remove_con:
+            if contaminants_fasta in global_settings['library']['input']['infiles']:
+                global_settings['library']['input']['infiles'].remove(contaminants_fasta)
+    
     select_files(
         global_settings['library']['input']['infiles'],
         infile_ext_dict[infile_type],

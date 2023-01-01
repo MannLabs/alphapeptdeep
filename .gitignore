@@ -135,7 +135,6 @@ peptdeep/logs
 *sandbox*
 *installed_models*
 *.last_checked*
-*.fasta
 
 # nbdev2
 *.gitattributes
