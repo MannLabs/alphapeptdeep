@@ -64,9 +64,6 @@ def update_modifications(tsv:str="",
     """
     if os.path.isfile(tsv):
         load_mod_df(tsv, modloss_importance_level=modloss_importance_level)
-        
-        from peptdeep.model.featurize import update_all_mod_features
-        update_all_mod_features()
     else:
         keep_modloss_by_importance(modloss_importance_level)
     

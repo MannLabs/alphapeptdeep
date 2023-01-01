@@ -103,6 +103,7 @@ class PredictSpecLib(SpecLibBase):
 
     def predict_all(self, 
         min_required_precursor_num_for_mp:int=2000,
+        predict_items:list = ['rt','mobility','ms2'],
     ):
         """
         1. Predict RT/IM/MS2 for self._precursor_df
@@ -124,7 +125,7 @@ class PredictSpecLib(SpecLibBase):
             logging.info('Predicting RT/IM/MS2 ...')
         res = self.model_manager.predict_all(
             self._precursor_df,
-            predict_items=['rt','mobility','ms2'],
+            predict_items=predict_items,
             frag_types=self.charged_frag_types,
             min_required_precursor_num_for_mp=min_required_precursor_num_for_mp,
             multiprocessing=model_mgr_settings['predict']['multiprocessing'],

@@ -15,7 +15,7 @@ from alphabase.peptide.fragment import (
 )
 
 from peptdeep.spec_lib.translate import mod_to_unimod_dict
-from peptdeep import settings
+from peptdeep.settings import global_settings
 from peptdeep.utils import (
     logging, set_logger, 
     show_platform_info, show_python_info
@@ -36,20 +36,6 @@ from peptdeep.utils import process_bar
 #: The global models for pipeline APIs
 model_mgr:ModelManager = ModelManager()
 
-def load_settings(settings_yaml:str):
-    """Load settings yaml file into 
-    `peptdeep.settings.global_settings` (dict).
-
-    Parameters
-    ----------
-    settings_yaml : str
-        The settings yaml file.
-    """
-    settings_dict = settings.load_yaml(settings_yaml)
-    settings.global_settings = settings.update_settings(
-        settings.global_settings, settings_dict
-    )
-
 def import_psm_df(psm_files:list, psm_type:str)->pd.DataFrame:
     """Import PSM files of a search engine as a pd.DataFrame
 
@@ -68,7 +54,7 @@ def import_psm_df(psm_files:list, psm_type:str)->pd.DataFrame:
     """
     psm_reader = psm_reader_provider.get_reader(
         psm_type, 
-        modificatin_mapping=settings.global_settings[
+        modificatin_mapping=global_settings[
             'model_mgr']['transfer'
         ]['other_modification_mapping']
     )
@@ -80,45 +66,38 @@ def import_psm_df(psm_files:list, psm_type:str)->pd.DataFrame:
         psm_df_list.append(psm_reader.psm_df)
     return pd.concat(psm_df_list).reset_index(drop=True)
 
-def match_psms(
-    settings_dict:dict=settings.global_settings
-)->Tuple[pd.DataFrame,pd.DataFrame]:
+def match_psms()->Tuple[pd.DataFrame,pd.DataFrame]:
     """
     Match the PSMs against the MS files.
 
-    All required information is in settings_dict:
+    All required information is in global_settings:
     ```
-    mgr_settings = settings_dict['model_mgr']
+    mgr_settings = global_settings['model_mgr']
     mgr_settings['transfer']['psm_files'] # list. PSM file paths
     mgr_settings['transfer']['psm_type'] # str. PSM type or earch engine type
     mgr_settings['transfer']['ms_files'] # list. MS files or RAW files
     mgr_settings['transfer']['ms_file_type'] # str. MS file type
-    settings_dict['model']['frag_types'] # list. Fragment types to be considered, e.g. b_z1, y_modloss_z2 ...
-    settings_dict['model']['max_frag_charge'] # int. Max fragment charge to be considered
-    settings_dict['peak_matching']['ms2_ppm'] # bool. If use ppm as MS2 tolerance
-    settings_dict['peak_matching']['ms2_tol_value'] # float. MS2 tolerance value
+    global_settings['model']['frag_types'] # list. Fragment types to be considered, e.g. b_z1, y_modloss_z2 ...
+    global_settings['model']['max_frag_charge'] # int. Max fragment charge to be considered
+    global_settings['peak_matching']['ms2_ppm'] # bool. If use ppm as MS2 tolerance
+    global_settings['peak_matching']['ms2_tol_value'] # float. MS2 tolerance value
     ```
 
-    Parameters
-    ----------
-    settings_dict : dict
-        The settings dict. Optional, by default `peptdeep.settings.global_settings`.
-    
     Returns
     -------
     Tuple[pd.DataFrame,pd.DataFrame]
         pd.DataFrame: the PSM DataFrame, and
         pd.DataFrame: the matched fragment intensity DataFrame
     """
-    mgr_settings = settings_dict['model_mgr']
+    mgr_settings = global_settings['model_mgr']
 
     frag_types = []
     if mgr_settings['mask_modloss']:
-        for _type in settings_dict['model']['frag_types']:
+        for _type in global_settings['model']['frag_types']:
             if 'modloss' not in _type:
                 frag_types.append(_type)
 
-    max_charge = settings_dict['model']['max_frag_charge']
+    max_charge = global_settings['model']['max_frag_charge']
     charged_frag_types = get_charged_frag_types(frag_types, max_charge)
 
     psm_df = import_psm_df(
@@ -144,8 +123,8 @@ def match_psms(
             df, ms2_file_dict[raw_name],
             mgr_settings['transfer']['ms_file_type'],
             charged_frag_types,
-            settings_dict['peak_matching']['ms2_ppm'], 
-            settings_dict['peak_matching']['ms2_tol_value'],
+            global_settings['peak_matching']['ms2_ppm'], 
+            global_settings['peak_matching']['ms2_tol_value'],
             calibrate_frag_mass_error=False,
         )
         psm_df_list.append(df)
@@ -156,14 +135,14 @@ def match_psms(
         matched_intensity_df_list
     )
 
-def transfer_learn(settings_dict:dict=settings.global_settings, verbose=True):
+def transfer_learn(verbose=True):
     """Transfer learn / refine the RT/CCS(/MS2) models.
     
-    All required information in settings_dict:
+    All required information in global_settings:
     ```
-    mgr_settings = settings_dict['model_mgr']
+    mgr_settings = global_settings['model_mgr']
     mgr_settings['transfer']['verbose'] = verbose # bool
-    settings_dict['PEPTDEEP_HOME'] # str. The folder to store all refined models. By default "~/peptdeep".
+    global_settings['PEPTDEEP_HOME'] # str. The folder to store all refined models. By default "~/peptdeep".
     ```
     For transfer learning of MS2 model, the required information:
     ```
@@ -171,18 +150,14 @@ def transfer_learn(settings_dict:dict=settings.global_settings, verbose=True):
     mgr_settings['transfer']['psm_type'] # str. PSM type or earch engine type
     mgr_settings['transfer']['ms_files'] # list. MS files or RAW files
     mgr_settings['transfer']['ms_file_type'] # str. MS file type
-    settings_dict['model']['frag_types'] # list. Fragment types to be considered, e.g. b_z1, y_modloss_z2 ...
-    settings_dict['model']['max_frag_charge'] # int. Max fragment charge to be considered
-    settings_dict['peak_matching']['ms2_ppm'] # bool. If use ppm as MS2 tolerance
-    settings_dict['peak_matching']['ms2_tol_value'] # float. MS2 tolerance value
+    global_settings['model']['frag_types'] # list. Fragment types to be considered, e.g. b_z1, y_modloss_z2 ...
+    global_settings['model']['max_frag_charge'] # int. Max fragment charge to be considered
+    global_settings['peak_matching']['ms2_ppm'] # bool. If use ppm as MS2 tolerance
+    global_settings['peak_matching']['ms2_tol_value'] # float. MS2 tolerance value
     ```
 
     Parameters
     ----------
-    settings_dict : dict
-        The settings dict. 
-        Optional, by default `peptdeep.settings.global_settings`
-    
     verbose : bool
         Print the training details. 
         Optional, default True
@@ -193,7 +168,7 @@ def transfer_learn(settings_dict:dict=settings.global_settings, verbose=True):
         Any kinds of exception if the pipeline fails.
     """
     try:
-        mgr_settings = settings_dict['model_mgr']
+        mgr_settings = global_settings['model_mgr']
         mgr_settings['transfer']['verbose'] = verbose
 
         output_folder = os.path.expanduser(
@@ -202,7 +177,7 @@ def transfer_learn(settings_dict:dict=settings.global_settings, verbose=True):
         if not output_folder:
             output_folder = os.path.join(
                 os.path.expanduser(
-                    settings_dict['PEPTDEEP_HOME']
+                    global_settings['PEPTDEEP_HOME']
                 ),
                 'transfer_models'
             )
@@ -211,7 +186,7 @@ def transfer_learn(settings_dict:dict=settings.global_settings, verbose=True):
 
         set_logger(
             log_file_name=os.path.join(output_folder, 'peptdeep_transfer.log'),
-            log_level=settings_dict['log_level'],
+            log_level=global_settings['log_level'],
             overwrite=True, stream=True, 
         )
         show_platform_info()
@@ -224,7 +199,7 @@ def transfer_learn(settings_dict:dict=settings.global_settings, verbose=True):
             model_mgr.psm_num_to_train_ms2 > 0 and 
             len(mgr_settings['transfer']['ms_files'])>0
         ):
-            psm_df, frag_df = match_psms(settings_dict)
+            psm_df, frag_df = match_psms(global_settings)
         else:
             psm_df = import_psm_df(
                 mgr_settings['transfer']['psm_files'],
@@ -268,30 +243,24 @@ def read_peptide_table(tsv_file:str)->pd.DataFrame:
         df['mod_sites'] = df.mod_sites.astype('U')
     return df
 
-def generate_library(settings_dict:dict=settings.global_settings):
+def generate_library():
     """Generate/predict a spectral library.
     
-    All required information in settings_dict:
+    All required information in global_settings:
     ```
-    lib_settings = settings_dict['library']
+    lib_settings = global_settings['library']
     output_folder = lib_settings['output_folder'] # str. Output folder of the library
     lib_settings['input']['infile_type'] # str. Input type for the library, could be 'fasta', 'sequence', 'peptide', or 'precursor'
     lib_settings['input']['infiles'] # list of str. Input files to generate librarys
     lib_settings['output_tsv']['enabled'] # bool. If output tsv for diann/spectronaut
     ```
-    
-    Parameters
-    ----------
-    settings_dict : dict
-        The settings dict. Optional, by default `peptdeep.settings.global_settings`.
-
     Raises
     ------
     Exception
         Any kinds of exception if the pipeline fails.
     """
     try:
-        lib_settings = settings_dict['library']
+        lib_settings = global_settings['library']
         output_folder = os.path.expanduser(
             lib_settings['output_folder']
         )
@@ -299,14 +268,11 @@ def generate_library(settings_dict:dict=settings.global_settings):
             os.makedirs(output_folder)
         set_logger(
             log_file_name=os.path.join(output_folder, 'peptdeep_library.log'),
-            log_level=settings_dict['log_level'],
+            log_level=global_settings['log_level'],
             overwrite=True, stream=True, 
         )
         show_platform_info()
         show_python_info()
-        settings.update_modifications(
-            modloss_importance_level=settings_dict['common']['modloss_importance_level']
-        )
 
         model_mgr.reset_by_global_settings()
 
@@ -324,7 +290,7 @@ def generate_library(settings_dict:dict=settings.global_settings):
             lib_maker.make_library(df)
         save_yaml(
             os.path.join(output_folder, 'peptdeep_settings.yaml'),
-            settings_dict
+            global_settings
         )
         
         hdf_path = os.path.join(
@@ -349,23 +315,18 @@ def generate_library(settings_dict:dict=settings.global_settings):
         logging.error(traceback.format_exc())
         raise e
 
-def rescore(settings_dict:dict=settings.global_settings):
+def rescore():
     """Generate/predict a spectral library.
     
-    All required information in settings_dict:
+    All required information in global_settings:
     ```
-    perc_settings = settings_dict['percolator']
+    perc_settings = global_settings['percolator']
     output_folder = perc_settings['output_folder'] # str. Output folder of the rescored results
     perc_settings['input_files']['psm_files'] # list of str. all PSM files (at 100% FDR and including decoys) from the search engines
     perc_settings['input_files']['psm_type'] # str. PSM or search engine type, e.g. pfind, alphapept, maxquant
     perc_settings['input_files']['ms_file_type'] # str. Could be alphapept_hdf, thermo, ...
     perc_settings['input_files']['ms_files'] # list of str. MS file list to match MS2 peaks
     ```
-    
-    Parameters
-    ----------
-    settings_dict : dict
-        The settings dict. Optional, by default `peptdeep.settings.global_settings`.
 
     Raises
     ------
@@ -373,7 +334,7 @@ def rescore(settings_dict:dict=settings.global_settings):
         Any kinds of exception if the pipeline fails.
     """
     try:
-        perc_settings = settings_dict['percolator']
+        perc_settings = global_settings['percolator']
         output_folder = os.path.expanduser(
             perc_settings['output_folder']
         )
@@ -381,7 +342,7 @@ def rescore(settings_dict:dict=settings.global_settings):
             os.makedirs(output_folder)
         set_logger(
             log_file_name=os.path.join(output_folder, 'peptdeep_rescore.log'),
-            log_level=settings_dict['log_level'],
+            log_level=global_settings['log_level'],
             overwrite=True, stream=True, 
         )
         show_platform_info()

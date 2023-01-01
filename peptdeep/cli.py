@@ -9,9 +9,9 @@ from alphabase.yaml_utils import save_yaml, load_yaml
 import peptdeep
 from peptdeep.pipeline_api import (
     rescore, generate_library, 
-    transfer_learn, load_settings
+    transfer_learn
 )
-from peptdeep.settings import global_settings, update_settings
+from peptdeep.settings import global_settings, load_global_settings
 
 @click.group(
     context_settings=dict(
@@ -55,9 +55,8 @@ def _gui(port, settings_yaml):
     import peptdeep.gui
     from peptdeep.webui.server import _server
     if os.path.isfile(settings_yaml):
-        _dict = load_yaml(settings_yaml)
-        update_settings(global_settings, _dict)
-    # start the server to monitor tasks
+        load_global_settings(settings_yaml)
+    # start the server to run tasks
     _server.start()
     peptdeep.gui.run(port)
 
@@ -91,7 +90,7 @@ _help_str = (
 )
 @click.argument("settings_yaml", type=str)
 def _rescore(settings_yaml:str):
-    load_settings(settings_yaml)
+    load_global_settings(settings_yaml)
     rescore()
 
 @run.command("library", help=
@@ -99,7 +98,7 @@ def _rescore(settings_yaml:str):
 )
 @click.argument("settings_yaml", type=str)
 def _library(settings_yaml:str):
-    load_settings(settings_yaml)
+    load_global_settings(settings_yaml)
     generate_library()
 
 @run.command("transfer", help=
@@ -107,7 +106,7 @@ def _library(settings_yaml:str):
 )
 @click.argument("settings_yaml", type=str)
 def _transfer(settings_yaml:str):
-    load_settings(settings_yaml)
+    load_global_settings(settings_yaml)
     transfer_learn()
 
 @run.command("export-settings", help="Export the default settings to a yaml file. It can be used as the template setting.")
