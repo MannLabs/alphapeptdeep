@@ -53,7 +53,7 @@ class PredictSpecLib(SpecLibBase):
             Convert predicted RT to iRT values, by default False
 
         generate_precursor_isotope : bool, optional
-            Generate precursor isotopes
+            Generate precursor isotopes, defaults to False
         """
         super().__init__(
             charged_frag_types,
@@ -122,7 +122,7 @@ class PredictSpecLib(SpecLibBase):
                     self._precursor_df, process_bar=process_bar
                 )
         if self.verbose:
-            logging.info('Predicting RT/IM/MS2 ...')
+            logging.info(f'Predicting RT/IM/MS2 for {len(self._precursor_df)} precursors ...')
         res = self.model_manager.predict_all(
             self._precursor_df,
             predict_items=predict_items,
