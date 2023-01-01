@@ -21,6 +21,16 @@ def _refine_global_settings():
     global_settings['PEPTDEEP_HOME'] = os.path.expanduser(
         global_settings['PEPTDEEP_HOME']
     )
+    global_settings['library']['output_folder']=(
+        global_settings['library']['output_folder'].format(
+            PEPTDEEP_HOME=global_settings['PEPTDEEP_HOME']
+        )
+    )
+    global_settings['model_mgr']['transfer']['model_output_folder']=(
+        global_settings['model_mgr']['transfer']['model_output_folder'].format(
+            PEPTDEEP_HOME=global_settings['PEPTDEEP_HOME']
+        )
+    )
     for key, val in list(global_settings['model_mgr'][
         'instrument_group'
     ].items()):

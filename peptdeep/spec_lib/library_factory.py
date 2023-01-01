@@ -103,8 +103,8 @@ class PredictLibraryMakerBase(object):
             self._predict()
 
             logging.info(
-                'The spectral library with '
-                f'{len(self.precursor_df)*1e-6:.2f}M precursors '
+                'Predicting the spectral library with '
+                f'{len(self.precursor_df)} precursors '
                 f'and {np.prod(self.fragment_mz_df.values.shape, dtype=float)*(1e-6):.2f}M fragments '
                 f'used {psutil.Process(os.getpid()).memory_info().rss/1024**3:.4f} GB memory'
             )
@@ -118,7 +118,7 @@ class PredictLibraryMakerBase(object):
         """Translate the predicted DataFrames into a TSV file
         """
         logging.info(f"Translating to {tsv_path} for DiaNN/Spectronaut...")
-        lib_settings = self._settings['library']
+        lib_settings = global_settings['library']
 
         if 'proteins' not in self.spec_lib._precursor_df.columns:
             self.spec_lib.append_protein_name()
@@ -151,7 +151,7 @@ class PredictLibraryMakerBase(object):
         a single DataFrame in SWATH library format
         """
         logging.info("Translating library for DiaNN/Spectronaut...")
-        lib_settings = self._settings['library']
+        lib_settings = global_settings['library']
 
         if 'proteins' not in self.spec_lib._precursor_df.columns:
             self.spec_lib.append_protein_name()
