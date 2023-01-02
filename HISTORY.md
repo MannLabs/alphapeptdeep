@@ -6,8 +6,8 @@ Follow the changelog format from https://keepachangelog.com/en/1.0.0/.
 
 ### Changed
 
-- multiprocessing with `spawn` for different OS systems.
-- Using constant values as defaults params of class methods instead of `global_settings[xxx]` values. Using `global_settings[xxx]` values as defaults params of class methods does not update once `global_settings` updates, this is dangerous.
+- Multiprocessing with `spawn` for different OS systems.
+- Using constant values as defaults params of class methods or functions instead of `global_settings[xxx]` values. Using `global_settings[xxx]` values as defaults params does not update once `global_settings` changes, this is dangerous.
 
 ### Added
 

@@ -201,15 +201,14 @@ def choose_protease():
         key="custom_protease_text",
         on_change=on_custom_protease
     )
-    if custom_protease:
-        global_settings['library']['fasta']['protease'] = custom_protease
-
     protease = st.selectbox(
         label='Common protease (set `Custom protease` above as empty to enable this)',
         options=global_settings['library']['fasta']['protease_choices'],
         index=0, disabled=(custom_protease!='')
     )
-    if not custom_protease:
+    if custom_protease:
+        global_settings['library']['fasta']['protease'] = custom_protease
+    else:
         global_settings['library']['fasta']['protease'] = protease
 
     st.text(f"Selected protease: {global_settings['library']['fasta']['protease']}")
