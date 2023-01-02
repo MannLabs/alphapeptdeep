@@ -12,6 +12,7 @@ Follow the changelog format from https://keepachangelog.com/en/1.0.0/.
 ### Added
 
 - GUI: it is able to delete tasks in the taks queue.
+- TODO dimethyl models in pretrained_models.zip
 
 ## 0.4.0 - 2022.12.28
 

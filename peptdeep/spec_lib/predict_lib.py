@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 import torch
+import tqdm
 
 from alphabase.peptide.precursor import (
     calc_precursor_isotope_mp, calc_precursor_isotope
@@ -29,8 +30,6 @@ class PredictSpecLib(SpecLibBase):
         generate_precursor_isotope:bool = False,
     ):
         """
-        PredictSpecLib
-
         Parameters
         ----------
         model_manager : ModelManager, optional
@@ -61,7 +60,6 @@ class PredictSpecLib(SpecLibBase):
             precursor_mz_max=precursor_mz_max,
             decoy = decoy
         )
-        self.verbose = True
         if model_manager is None:
             self.model_manager = ModelManager(
                 mask_modloss=True
@@ -111,7 +109,7 @@ class PredictSpecLib(SpecLibBase):
         """
         self.calc_precursor_mz()
         if self.generate_precursor_isotope:
-            if self.verbose:
+            if self.model_manager.verbose:
                 logging.info('Calculating precursor isotope distributions ...')
             if len(self.precursor_df) < min_required_precursor_num_for_mp:
                 self._precursor_df = calc_precursor_isotope(
@@ -121,7 +119,7 @@ class PredictSpecLib(SpecLibBase):
                 self._precursor_df = calc_precursor_isotope_mp(
                     self._precursor_df, process_bar=process_bar
                 )
-        if self.verbose:
+        if self.model_manager.verbose:
             logging.info(f'Predicting RT/IM/MS2 for {len(self._precursor_df)} precursors ...')
         res = self.model_manager.predict_all(
             self._precursor_df,
@@ -135,7 +133,7 @@ class PredictSpecLib(SpecLibBase):
         self.set_precursor_and_fragment(**res)
         if self.rt_to_irt and 'rt_pred' in self._precursor_df.columns:
             self.translate_rt_to_irt_pred()
-        if self.verbose:
+        if self.model_manager.verbose:
             logging.info('End Predicting RT/IM/MS2')
         
 
@@ -182,15 +180,16 @@ class PredictSpecLibFlat(SpecLibFlat):
             predict_lib.predict_all()
             self.parse_base_library(predict_lib)
         else:
-            predict_lib.verbose = False
+            predict_lib.model_manager.verbose = False
             predict_lib.refine_df()
-            precursor_df = predict_lib.precursor_df
+            df = predict_lib.precursor_df
             precursor_df_list = []
             fragment_df_list = []
-            for i in range(0, len(precursor_df), batch_size):
-                predict_lib._precursor_df = precursor_df.iloc[i:i+batch_size].copy()
+            logging.info(f"Flattening {len(df)} precursors in batch size {batch_size} ...")
+            for i in tqdm.tqdm(range(0, len(df), batch_size)):
+                predict_lib._precursor_df = df.iloc[i:i+batch_size].copy()
                 predict_lib.predict_all()
-                df, frag_df = flatten_fragments(
+                flat_df, frag_df = flatten_fragments(
                     predict_lib.precursor_df,
                     predict_lib.fragment_mz_df,
                     predict_lib.fragment_intensity_df,
@@ -198,9 +197,9 @@ class PredictSpecLibFlat(SpecLibFlat):
                     keep_top_k_fragments = self.keep_top_k_fragments,
                     custom_columns=self.custom_fragment_df_columns
                 )
-                precursor_df_list.append(df)
+                precursor_df_list.append(flat_df)
                 fragment_df_list.append(frag_df)
-            predict_lib._precursor_df = precursor_df
+            predict_lib._precursor_df = df
             self._precursor_df, self._fragment_df = concat_precursor_fragment_dataframes(
                 precursor_df_list, fragment_df_list
             )

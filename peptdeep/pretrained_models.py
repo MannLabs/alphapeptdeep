@@ -870,7 +870,7 @@ class ModelManager(object):
             'rt' ,'mobility' ,'ms2'
         ], 
         frag_types:list =  None,
-        process_num:int = 4,
+        process_num:int = 8,
         mp_batch_size:int = 100000,
     ):
         self.ms2_model.model.share_memory()
@@ -955,7 +955,7 @@ class ModelManager(object):
         frag_types:list =  None,
         multiprocessing:bool = True,
         min_required_precursor_num_for_mp:int = 3000,
-        process_num:int = 4,
+        process_num:int = 8,
         mp_batch_size:int = 100000,
     )->Dict[str, pd.DataFrame]:
         """ 
@@ -1070,7 +1070,7 @@ class ModelManager(object):
             else:
                 return {'precursor_df': precursor_df}
         else:
-            logging.info("Using multiprocessing ...")
+            logging.info(f"Using multiprocessing with {process_num} processes ...")
             return self.predict_all_mp(
                 precursor_df, 
                 predict_items=predict_items,
