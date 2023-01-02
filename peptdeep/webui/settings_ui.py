@@ -121,7 +121,7 @@ def _update_st_session_state_after_loading_settings(
     state_dict:dict={
         'select_psm_type': global_settings['model_mgr']['transfer']['psm_type'],
         'select_ms_file_type': global_settings['model_mgr']['transfer']['ms_file_type'],
-        'lib_input_type': global_settings['library']['input']['infile_type'],
+        'lib_input_type': global_settings['library']['infile_type'],
     }
 ):
     for key, val in state_dict.items():

@@ -250,8 +250,8 @@ def generate_library():
     ```
     lib_settings = global_settings['library']
     output_folder = lib_settings['output_folder'] # str. Output folder of the library
-    lib_settings['input']['infile_type'] # str. Input type for the library, could be 'fasta', 'sequence', 'peptide', or 'precursor'
-    lib_settings['input']['infiles'] # list of str. Input files to generate librarys
+    lib_settings['infile_type'] # str. Input type for the library, could be 'fasta', 'sequence', 'peptide', or 'precursor'
+    lib_settings['infiles'] # list of str. Input files to generate librarys
     lib_settings['output_tsv']['enabled'] # bool. If output tsv for diann/spectronaut
     ```
     Raises
@@ -277,14 +277,14 @@ def generate_library():
         model_mgr.reset_by_global_settings()
 
         lib_maker = library_maker_provider.get_maker(
-            lib_settings['input']['infile_type'],
+            lib_settings['infile_type'],
             model_manager=model_mgr
         )
-        if lib_settings['input']['infile_type'] == 'fasta':
-            lib_maker.make_library(lib_settings['input']['infiles'])
+        if lib_settings['infile_type'] == 'fasta':
+            lib_maker.make_library(lib_settings['infiles'])
         else:
             df_list = []
-            for file_path in lib_settings['input']['infiles']:
+            for file_path in lib_settings['infiles']:
                 df_list.append(read_peptide_table(file_path))
             df = pd.concat(df_list, ignore_index=True)
             lib_maker.make_library(df)

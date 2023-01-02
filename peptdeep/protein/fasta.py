@@ -27,6 +27,7 @@ class PredictSpecLibFasta(SpecLibFasta, PredictSpecLib):
         special_mods_cannot_modify_pep_n_term:bool=False,
         special_mods_cannot_modify_pep_c_term:bool=False,
         decoy: str = None, # or pseudo_reverse or diann
+        include_contaminants: bool=False,
         I_to_L=False,
         generate_precursor_isotope:bool = False,
         rt_to_irt:bool = False,
@@ -143,6 +144,7 @@ class PredictSpecLibFasta(SpecLibFasta, PredictSpecLib):
             special_mods_cannot_modify_pep_n_term=special_mods_cannot_modify_pep_n_term,
             special_mods_cannot_modify_pep_c_term=special_mods_cannot_modify_pep_c_term,
             decoy=decoy,
+            include_contaminants=include_contaminants,
             I_to_L=I_to_L,
         )
 

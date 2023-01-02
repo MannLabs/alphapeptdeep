@@ -18,23 +18,21 @@ from peptdeep.webui.server import queue_folder
 
 from peptdeep.constants._const import CONST_FOLDER
 
-contaminants_fasta = os.path.join(CONST_FOLDER, 'contaminants.fasta')
-
 def mod_options():
     with st.form(key="Select modifications"):
         st.write('#### Fixed and variable modificatins')
         fixmod = st.multiselect(
             label='Please select fixed modifications',
             options=MOD_DF.index.values,
-            default = global_settings['library']['input']['fix_mods']
+            default = global_settings['library']['fix_mods']
         )
         varmod = st.multiselect(
             label='Please select variable modifications',
             options=MOD_DF.index.values,
-            default = global_settings['library']['input']['var_mods']
+            default = global_settings['library']['var_mods']
         )
-        global_settings['library']['input']['fix_mods'] = fixmod
-        global_settings['library']['input']['var_mods'] = varmod
+        global_settings['library']['fix_mods'] = fixmod
+        global_settings['library']['var_mods'] = varmod
 
         st.form_submit_button(label="Click to add these selected modifications")
         st.write("Selected modifications:")
@@ -47,15 +45,15 @@ def mod_options():
 
 def varmod_range():
     min_varmod = st.number_input(label='Min number of variable modifications',
-        value = global_settings['library']['input']['min_var_mod_num'], 
+        value = global_settings['library']['min_var_mod_num'], 
         min_value = 0, step = 1,
     )
     max_varmod = st.number_input(label='Max number of variable modifications',
-        value = global_settings['library']['input']['max_var_mod_num'], 
+        value = global_settings['library']['max_var_mod_num'], 
         min_value = 0, step = 1,
     )
-    global_settings['library']['input']['min_var_mod_num'] = min_varmod
-    global_settings['library']['input']['max_var_mod_num'] = max_varmod
+    global_settings['library']['min_var_mod_num'] = min_varmod
+    global_settings['library']['max_var_mod_num'] = max_varmod
 
 def specialmod_options():
     st.write('#### Special modificatins')
@@ -65,15 +63,15 @@ def specialmod_options():
     specialmod_expander = st.expander(label='Special modificatins')
     with specialmod_expander:
         with st.form(key="Select special modifications"):
-            global_settings['library']['input']['special_mods'] = st.multiselect(
+            global_settings['library']['special_mods'] = st.multiselect(
                 label='Please select special modifications',
                 options=MOD_DF.index.values,
-                default=global_settings['library']['input']['special_mods']
+                default=global_settings['library']['special_mods']
             )
             st.form_submit_button(label="Click to add selected modifications")
             st.write("Selected special modifications:")
             st.dataframe(MOD_DF.loc[
-                global_settings['library']['input']['special_mods'],
+                global_settings['library']['special_mods'],
                 [
                     'mod_name','classification','composition','mass',
                     'modloss_composition','modloss','modloss_importance'
@@ -84,31 +82,31 @@ def specialmod_options():
 
 def specialmod_range():
     min_specialmod = st.number_input(label='Min number of special modifications',
-        value = global_settings['library']['input']['min_special_mod_num'], 
+        value = global_settings['library']['min_special_mod_num'], 
         min_value = 0, step = 1
     )
     max_specialmod = st.number_input(label='Max number of special modifications',
-        value = global_settings['library']['input']['max_special_mod_num'], 
+        value = global_settings['library']['max_special_mod_num'], 
         min_value = 0, step = 1
     )
-    global_settings['library']['input']['min_special_mod_num'] = min_specialmod
-    global_settings['library']['input']['max_special_mod_num'] = max_specialmod
+    global_settings['library']['min_special_mod_num'] = min_specialmod
+    global_settings['library']['max_special_mod_num'] = max_specialmod
 
     st.write("Special modifications cannot modify AAs at:")
     st.write("*e.g. GlyGly@K will not occur at C-term Lys/K*")
-    global_settings['library']['input'][
+    global_settings['library'][
         'special_mods_cannot_modify_pep_n_term'
     ] = bool(
         st.checkbox(label='N-term', 
-        value=global_settings['library']['input'][
+        value=global_settings['library'][
             'special_mods_cannot_modify_pep_n_term'
         ])
     )
-    global_settings['library']['input'][
+    global_settings['library'][
         'special_mods_cannot_modify_pep_c_term'
     ] = bool(
         st.checkbox(label='C-term', 
-        value=global_settings['library']['input'][
+        value=global_settings['library'][
             'special_mods_cannot_modify_pep_c_term'
         ])
     )
@@ -125,7 +123,7 @@ def labeling_options():
         else:
             return pd.concat(df_list, ignore_index=True)
     def _clear_all():
-        global_settings['library']['input']['labeling_channels'] = {}
+        global_settings['library']['labeling_channels'] = {}
         st.session_state.select_labeling = []
         st.session_state.labeling_channel_id = ''
         return
@@ -146,34 +144,34 @@ def labeling_options():
                     channel = int(channel)
                 except ValueError:
                     pass
-                global_settings['library']['input']['labeling_channels'][channel] = mods
+                global_settings['library']['labeling_channels'][channel] = mods
 
             st.form_submit_button(label="Add selected labeling")
             st.write("Selected labeling modifications:")
-            st.dataframe(_concat_df_dict(global_settings['library']['input']['labeling_channels']))
+            st.dataframe(_concat_df_dict(global_settings['library']['labeling_channels']))
         st.button(label='Clear all labeling', on_click=_clear_all)
 
 def choose_precursor_charge():
-    from_charge = st.number_input(label='Min precursor charge', min_value = 1, max_value = 4, value = global_settings['library']['input']['min_precursor_charge'], step = 1)
+    from_charge = st.number_input(label='Min precursor charge', min_value = 1, max_value = 4, value = global_settings['library']['min_precursor_charge'], step = 1)
     to_charge = st.number_input(
         label='Max precursor charge',
-        min_value = from_charge, max_value = 7, value = global_settings['library']['input']['max_precursor_charge'], step = 1
+        min_value = from_charge, max_value = 7, value = global_settings['library']['max_precursor_charge'], step = 1
     )
-    global_settings['library']['input']['min_precursor_charge'] = from_charge
-    global_settings['library']['input']['max_precursor_charge'] = to_charge
+    global_settings['library']['min_precursor_charge'] = from_charge
+    global_settings['library']['max_precursor_charge'] = to_charge
 
 def choose_precursor_mz():
-    min_precursor_mz = st.number_input(label='Min precursor mz', value = global_settings['library']['input']['min_precursor_mz'])
-    global_settings['library']['input']['min_precursor_mz'] = min_precursor_mz
-    max_precursor_mz = st.number_input(label='Max precursor mz', min_value = min_precursor_mz, value = global_settings['library']['input']['max_precursor_mz'])
-    global_settings['library']['input']['max_precursor_mz'] = max_precursor_mz
+    min_precursor_mz = st.number_input(label='Min precursor mz', value = global_settings['library']['min_precursor_mz'])
+    global_settings['library']['min_precursor_mz'] = min_precursor_mz
+    max_precursor_mz = st.number_input(label='Max precursor mz', min_value = min_precursor_mz, value = global_settings['library']['max_precursor_mz'])
+    global_settings['library']['max_precursor_mz'] = max_precursor_mz
 
 def add_decoy():
-    global_settings['library']['input']['decoy'] = st.selectbox(
+    global_settings['library']['decoy'] = st.selectbox(
         label='Decoy method',
-        options=global_settings['library']['input']['decoy_choices'],
-        index = global_settings['library']['input']['decoy_choices'].index(
-            global_settings['library']['input']['decoy']
+        options=global_settings['library']['decoy_choices'],
+        index = global_settings['library']['decoy_choices'].index(
+            global_settings['library']['decoy']
         )
     )
 
@@ -194,45 +192,45 @@ def choose_protease():
 
         print(
             st.session_state['custom_protease_text'],
-            global_settings['library']['input']['fasta']['protease']
+            global_settings['library']['fasta']['protease']
         )
 
     custom_protease = st.text_input(
-        label="Custom protease (protease name or regular expression, use `Common protease` if empty)",
-        value=global_settings['library']['input']['fasta']['protease'],
+        label="Custom protease (name or regular expression, use `Common protease` below if empty)",
+        value=global_settings['library']['fasta']['protease'],
         key="custom_protease_text",
         on_change=on_custom_protease
     )
     if custom_protease:
-        global_settings['library']['input']['fasta']['protease'] = custom_protease
+        global_settings['library']['fasta']['protease'] = custom_protease
 
     protease = st.selectbox(
-        label='Common protease',
-        options=global_settings['library']['input']['fasta']['protease_choices'],
+        label='Common protease (set `Custom protease` above as empty to enable this)',
+        options=global_settings['library']['fasta']['protease_choices'],
         index=0, disabled=(custom_protease!='')
     )
     if not custom_protease:
-        global_settings['library']['input']['fasta']['protease'] = protease
+        global_settings['library']['fasta']['protease'] = protease
 
-    st.text(f"Selected protease: {global_settings['library']['input']['fasta']['protease']}")
+    st.text(f"Selected protease: {global_settings['library']['fasta']['protease']}")
 
-    max_miss_cleave = st.number_input(label='Max number of miss cleavages',value = global_settings['library']['input']['fasta']['max_miss_cleave'])
-    global_settings['library']['input']['fasta']['max_miss_cleave'] = max_miss_cleave
+    max_miss_cleave = st.number_input(label='Max number of miss cleavages',value = global_settings['library']['fasta']['max_miss_cleave'])
+    global_settings['library']['fasta']['max_miss_cleave'] = max_miss_cleave
 
 def choose_peptide_len():
-    min_peptide_len = st.number_input(label='Min peptide length', value = global_settings['library']['input']['min_peptide_len'])
-    max_peptide_len = st.number_input(label='Max peptide length', min_value = min_peptide_len, value = global_settings['library']['input']['max_peptide_len'])
-    global_settings['library']['input']['min_peptide_len'] = min_peptide_len
-    global_settings['library']['input']['max_peptide_len'] = max_peptide_len
+    min_peptide_len = st.number_input(label='Min peptide length', value = global_settings['library']['min_peptide_len'])
+    max_peptide_len = st.number_input(label='Max peptide length', min_value = min_peptide_len, value = global_settings['library']['max_peptide_len'])
+    global_settings['library']['min_peptide_len'] = min_peptide_len
+    global_settings['library']['max_peptide_len'] = max_peptide_len
 
 def choose_frag_types():
     frag_types = st.multiselect(
         label='Fragment types',options=(global_settings['model']['frag_types']),
-        default = global_settings['library']['input']['frag_types']
+        default = global_settings['library']['frag_types']
     )
-    global_settings['library']['input']['frag_types'] = frag_types
-    max_frag_charge = st.number_input(label='Max fragment charge',min_value = 1, max_value = 2, value = global_settings['library']['input']['max_frag_charge'], step = 1)
-    global_settings['library']['input']['max_frag_charge'] = max_frag_charge
+    global_settings['library']['frag_types'] = frag_types
+    max_frag_charge = st.number_input(label='Max fragment charge',min_value = 1, max_value = 2, value = global_settings['library']['max_frag_charge'], step = 1)
+    global_settings['library']['max_frag_charge'] = max_frag_charge
 
 def output_tsv():
     min_fragment_mz = st.number_input(label='Min fragment mz:', value = global_settings['library']['output_tsv']['min_fragment_mz'])
@@ -264,14 +262,14 @@ def show():
     infile_type = file_type_selectbox(
         ui_label='Input file type',
         st_key='lib_input_type',
-        default_type=global_settings['library']['input']['infile_type'],
-        monitor_files=global_settings['library']['input']['infiles'],
-        choices=global_settings['library']['input']['infile_type_choices'], 
-        index=global_settings['library']['input']['infile_type_choices'].index(
-            global_settings['library']['input']['infile_type']
+        default_type=global_settings['library']['infile_type'],
+        monitor_files=global_settings['library']['infiles'],
+        choices=global_settings['library']['infile_type_choices'], 
+        index=global_settings['library']['infile_type_choices'].index(
+            global_settings['library']['infile_type']
         )
     )
-    global_settings['library']['input']['infile_type'] = infile_type
+    global_settings['library']['infile_type'] = infile_type
 
     if infile_type != 'fasta':
         df = pd.DataFrame({
@@ -297,20 +295,12 @@ def show():
     }
 
     if infile_type == 'fasta':
-        col1, col2, col3 = st.columns([0.5,0.5,1])
-        with col1:
-            add_con = st.button(label='Add contaminants', key="Add_contaminants")
-        with col2:
-            remove_con = st.button(label='Remove contaminants', key="Remove_contaminants")
-        if add_con:
-            if contaminants_fasta not in global_settings['library']['input']['infiles']:
-                global_settings['library']['input']['infiles'].append(contaminants_fasta)
-        elif remove_con:
-            if contaminants_fasta in global_settings['library']['input']['infiles']:
-                global_settings['library']['input']['infiles'].remove(contaminants_fasta)
-    
+        global_settings['library']['fasta']['add_contaminants'] = bool(st.checkbox(
+            label='Add fasta of contaminants', 
+            value=global_settings['library']['fasta']['add_contaminants']
+        ))
     select_files(
-        global_settings['library']['input']['infiles'],
+        global_settings['library']['infiles'],
         infile_ext_dict[infile_type],
         'Input sequence files',
     )
@@ -352,14 +342,14 @@ def show():
     output_folder = get_posix(output_folder)
     global_settings['library']['output_folder'] = output_folder
 
-    global_settings['library']['output']['rt_to_irt'] = bool(st.checkbox(
+    global_settings['library']['rt_to_irt'] = bool(st.checkbox(
         label='Convert predicted RT to iRT', 
-        value=global_settings['library']['output']['rt_to_irt']
+        value=global_settings['library']['rt_to_irt']
     ))
 
-    global_settings['library']['output']['generate_precursor_isotope'] = bool(st.checkbox(
-        label="Generate precursor isotopes (don't check for DiaNN/Spectronaut search)", 
-        value=global_settings['library']['output']['generate_precursor_isotope']
+    global_settings['library']['generate_precursor_isotope'] = bool(st.checkbox(
+        label="Generate precursor isotopes (don't check this for DiaNN/Spectronaut search)", 
+        value=global_settings['library']['generate_precursor_isotope']
     ))
 
     tsv_enabled = bool(st.checkbox(

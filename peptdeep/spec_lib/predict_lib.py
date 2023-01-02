@@ -134,7 +134,7 @@ class PredictSpecLib(SpecLibBase):
         if self.rt_to_irt and 'rt_pred' in self._precursor_df.columns:
             self.translate_rt_to_irt_pred()
         if self.model_manager.verbose:
-            logging.info('End Predicting RT/IM/MS2')
+            logging.info('End predicting RT/IM/MS2')
         
 
 class PredictSpecLibFlat(SpecLibFlat):
@@ -176,6 +176,7 @@ class PredictSpecLibFlat(SpecLibFlat):
         batch_size : int, optional
             the batch size, by default 200000
         """
+        logging.info(f"Flattening {len(predict_lib.precursor_df)} precursors in batch size {batch_size} ...")
         if len(predict_lib.precursor_df) <= batch_size:
             predict_lib.predict_all()
             self.parse_base_library(predict_lib)
@@ -185,7 +186,6 @@ class PredictSpecLibFlat(SpecLibFlat):
             df = predict_lib.precursor_df
             precursor_df_list = []
             fragment_df_list = []
-            logging.info(f"Flattening {len(df)} precursors in batch size {batch_size} ...")
             for i in tqdm.tqdm(range(0, len(df), batch_size)):
                 predict_lib._precursor_df = df.iloc[i:i+batch_size].copy()
                 predict_lib.predict_all()
