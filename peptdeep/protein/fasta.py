@@ -4,6 +4,9 @@ from peptdeep.pretrained_models import ModelManager
 
 
 class PredictSpecLibFasta(SpecLibFasta, PredictSpecLib):
+    """
+    Predicted spec lib from fasta files or other peptide files.
+    """
     def __init__(self,
         model_manager:ModelManager = None,
         *,
@@ -116,12 +119,16 @@ class PredictSpecLibFasta(SpecLibFasta, PredictSpecLib):
             Decoy type, see `alphabase.spectral_library.decoy_library`,
             by default None
 
+        include_contaminants : bool, optional
+            If include contaminants.fasta, by default False
+
         generate_precursor_isotope : bool, optional
             If :meth:`peptdeep.spec_lib.predict_lib.PredictSpecLib.predict_all()` 
             includes :meth:`peptdeep.spec_lib.predict_lib.PredictSpecLib.calc_precursor_isotope()`.
             Defaults to False
         
         rt_to_irt : bool, optional
+            If convert predicted RT to iRT values
         """
         SpecLibFasta.__init__(self,
             charged_frag_types=charged_frag_types,
