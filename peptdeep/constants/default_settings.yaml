@@ -184,11 +184,10 @@ percolator:
     psm_type_choices:
       - alphapept
       - pfind
-      - maxquant
     psm_files: []
     ms_file_type: alphapept_hdf
     ms_file_type_choices:
-      - hdf
+      - alphapept_hdf
       - thermo_raw # if alpharaw is installed
       - mgf
       - mzml
@@ -203,64 +202,65 @@ percolator:
       maxquant: {}
   output_folder: "{PEPTDEEP_HOME}/rescore"
 library:
-  input:
-    infile_type: fasta
-    infile_type_choices:
-    - fasta
-    - sequence_table
-    - peptide_table # sequence with mods and mod_sites
-    - precursor_table # peptide with charge state
-    infiles: 
-    - xxx.fasta
-    fasta:
-      protease: '([KR])'
-      protease_choices:
-      - 'trypsin'
-      - '([KR])'
-      - 'trypsin_not_P'
-      - '([KR](?=[^P]))'
-      - 'lys-c'
-      - 'K'
-      - 'lys-n'
-      - '\w(?=K)'
-      - 'chymotrypsin'
-      max_miss_cleave: 2
-    fix_mods: 
-    - Carbamidomethyl@C
-    var_mods:
-    - Acetyl@Protein N-term
-    - Oxidation@M
-    special_mods: [] # normally for Phospho or GlyGly@K
-    special_mods_cannot_modify_pep_n_term: False
-    special_mods_cannot_modify_pep_c_term: False
-    labeling_channels: {}
-    # For example,
-    # labeling_channels:
-    #   0: ['Dimethyl@Any N-term','Dimethyl@K']
-    #   4: ['Dimethyl:2H(2)@Any N-term','Dimethyl:2H(2)@K']
-    #   8: [...]
-    min_var_mod_num: 0
-    max_var_mod_num: 2
-    min_special_mod_num: 0
-    max_special_mod_num: 1
-    min_precursor_charge: 2
-    max_precursor_charge: 4
-    min_peptide_len: 7
-    max_peptide_len: 35
-    min_precursor_mz: 200.0
-    max_precursor_mz: 2000.0
-    decoy: pseudo_reverse
-    decoy_choices:
-    - pseudo_reverse
-    - diann
-    - None
-    max_frag_charge: 2
-    frag_types:
-    - b
-    - y
-  output:
-    rt_to_irt: True
-    generate_precursor_isotope: False
+  infile_type: fasta
+  infile_type_choices:
+  - fasta
+  - sequence_table
+  - peptide_table # sequence with mods and mod_sites
+  - precursor_table # peptide with charge state
+  infiles: 
+  - xxx.fasta
+  fasta:
+    protease: 'trypsin'
+    protease_choices:
+    - 'trypsin'
+    - '([KR])'
+    - 'trypsin_not_P'
+    - '([KR](?=[^P]))'
+    - 'lys-c'
+    - 'K'
+    - 'lys-n'
+    - '\w(?=K)'
+    - 'chymotrypsin'
+    - 'asp-n'
+    - 'glu-c'
+    max_miss_cleave: 2
+    add_contaminants: False
+  fix_mods: 
+  - Carbamidomethyl@C
+  var_mods:
+  - Acetyl@Protein N-term
+  - Oxidation@M
+  special_mods: [] # normally for Phospho or GlyGly@K
+  special_mods_cannot_modify_pep_n_term: False
+  special_mods_cannot_modify_pep_c_term: False
+  labeling_channels: {}
+  # For example,
+  # labeling_channels:
+  #   0: ['Dimethyl@Any N-term','Dimethyl@K']
+  #   4: ['Dimethyl:2H(2)@Any N-term','Dimethyl:2H(2)@K']
+  #   8: [...]
+  min_var_mod_num: 0
+  max_var_mod_num: 2
+  min_special_mod_num: 0
+  max_special_mod_num: 1
+  min_precursor_charge: 2
+  max_precursor_charge: 4
+  min_peptide_len: 7
+  max_peptide_len: 35
+  min_precursor_mz: 200.0
+  max_precursor_mz: 2000.0
+  decoy: pseudo_reverse
+  decoy_choices:
+  - pseudo_reverse
+  - diann
+  - None
+  max_frag_charge: 2
+  frag_types:
+  - b
+  - y
+  rt_to_irt: True
+  generate_precursor_isotope: False
   output_folder: "{PEPTDEEP_HOME}/spec_libs"
   output_tsv:
     enabled: False

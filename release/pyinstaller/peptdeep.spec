@@ -16,7 +16,7 @@ script_name = 'peptdeep_pyinstaller.py'
 if sys.platform[:6] == "darwin":
 	icon = '../logos/alpha_logo.icns'
 else:
-	icon = '../logos/alpha_logo.ico'
+	icon = '../../peptdeep/webui/logos/peptdeep.ico'
 block_cipher = None
 location = os.getcwd()
 project = "peptdeep"

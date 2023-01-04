@@ -1,3 +1,3 @@
 from peptdeep.spec_lib import (
-    library_factory, predict_lib, translate
+    predict_lib, translate, library_factory
 )

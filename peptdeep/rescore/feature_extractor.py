@@ -500,19 +500,6 @@ class ScoreFeatureExtractor:
 
         self.raw_num_to_tune = perc_settings['raw_num_to_tune']
 
-        self.require_model_tuning = perc_settings[
-            'require_model_tuning'
-        ]
-        self.require_raw_specific_tuning = perc_settings[
-            'require_raw_specific_tuning'
-        ]
-        self.raw_specific_ms2_tuning = perc_settings[
-            'raw_specific_ms2_tuning'
-        ]
-        self.calibrate_frag_mass_error = perc_settings[
-            'calibrate_frag_mass_error'
-        ]
-
         self.score_feature_list = [
             'sa','spc','pcc',
             'sa_bion','spc_bion','pcc_bion',
@@ -557,6 +544,22 @@ class ScoreFeatureExtractor:
             'pep_z1','pep_z2','pep_z3','pep_z4',
             'pep_z5','pep_z6','pep_z_gt_6',
             'mod_num',
+        ]
+
+        self.reset_by_global_settings()
+
+    def reset_by_global_settings(self):
+        self.require_model_tuning = perc_settings[
+            'require_model_tuning'
+        ]
+        self.require_raw_specific_tuning = perc_settings[
+            'require_raw_specific_tuning'
+        ]
+        self.raw_specific_ms2_tuning = perc_settings[
+            'raw_specific_ms2_tuning'
+        ]
+        self.calibrate_frag_mass_error = perc_settings[
+            'calibrate_frag_mass_error'
         ]
 
     def _select_raw_to_tune(self,
@@ -984,7 +987,7 @@ class ScoreFeatureExtractorMP(ScoreFeatureExtractor):
         logging.info('Preparing for fine-tuning ...')  
         psm_df_list = []
         matched_intensity_df_list = []  
-        with mp.Pool(global_settings['thread_num']) as p:
+        with mp.get_context('spawn').Pool(global_settings['thread_num']) as p:
             for df, _, inten_df, _ in process_bar(
                 p.imap_unordered(
                     match_one_raw_mp, 
@@ -1113,7 +1116,7 @@ class ScoreFeatureExtractorMP(ScoreFeatureExtractor):
         ):
             # multiprocessing is only used for ms2 matching
             def prediction_gen(df_groupby_raw):
-                with mp.Pool(global_settings['thread_num']) as _p:
+                with mp.get_context('spawn').Pool(global_settings['thread_num']) as _p:
                     for (
                         df, frag_mz_df, frag_inten_df, frag_merr_df
                     ) in _p.imap_unordered(
@@ -1178,7 +1181,7 @@ class ScoreFeatureExtractorMP(ScoreFeatureExtractor):
                             frag_inten_df, frag_merr_df,
                         )
 
-            with mp.Pool(global_settings['thread_num']) as p:
+            with mp.get_context('spawn').Pool(global_settings['thread_num']) as p:
                 for df in process_bar(p.imap_unordered(
                     get_ms2_features_mp, 
                     prediction_gen(df_groupby_raw)
@@ -1188,7 +1191,7 @@ class ScoreFeatureExtractorMP(ScoreFeatureExtractor):
         else:
             # use multiprocessing for prediction 
             # only when no GPUs are available
-            with mp.Pool(global_settings['thread_num']) as p:
+            with mp.get_context('spawn').Pool(global_settings['thread_num']) as p:
                 for _df in process_bar(p.imap_unordered(
                     self.extract_features_one_raw_mp, 
                     one_raw_param_generator(df_groupby_raw)

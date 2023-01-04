@@ -11,12 +11,8 @@ from peptdeep.pipeline_api import (
     transfer_learn, 
     rescore
 )
-from peptdeep.settings import global_settings, update_settings
+from peptdeep.settings import global_settings, load_global_settings
 from peptdeep.utils import logging
-
-def update_global_settings(yaml_file):
-    _settings = load_yaml(yaml_file)
-    update_settings(global_settings, _settings)
 
 def get_yamls(folder):
     ymls = []
@@ -50,32 +46,42 @@ def serve():
         if len(files) > 0:
             yaml_file = files.pop(0)
             print(f"[PeptDeep] Starting a new job '{yaml_file}'...")
+            
+            running_txt = f'{home_folder}/tasks/running.txt'
+            with open(running_txt,'w') as f:
+                f.write(yaml_file)
 
             try:
-                update_global_settings(yaml_file)
+                load_global_settings(yaml_file)
                 if global_settings['task_type'] == 'train':
                     print("[PeptDeep] Transfer learning ... ")
-                    transfer_learn(global_settings)
+                    transfer_learn()
                 elif global_settings['task_type'] == 'library':
                     print("[PeptDeep] Predicting library ... ")
-                    generate_library(global_settings)
+                    generate_library()
                 elif global_settings['task_type'] == 'rescore':
                     print("[PeptDeep] Rescoring PSMs ... ")
-                    rescore(global_settings)
+                    rescore()
                 else:
                     logging.warning(f"[PeptDeep] Unknown task type `{global_settings['task_type']}`, skip ... ")
                     continue
-                shutil.move(
-                    yaml_file, 
-                    os.path.join(done_folder, os.path.basename(yaml_file))
-                )
+                if os.path.isfile(yaml_file):
+                    shutil.move(
+                        yaml_file, 
+                        os.path.join(done_folder, os.path.basename(yaml_file))
+                    )
             except KeyboardInterrupt as e:
+                with open(running_txt,'w') as f:
+                    f.write("")
                 raise e
-            except Exception:
-                shutil.move(
-                    yaml_file, 
-                    os.path.join(failed_folder, os.path.basename(yaml_file))
-                )
+            except Exception as e:
+                if os.path.isfile(yaml_file):
+                    shutil.move(
+                        yaml_file, 
+                        os.path.join(failed_folder, os.path.basename(yaml_file)),
+                    )
+            with open(running_txt,'w') as f:
+                f.write("")
             echo_waiting=True
         else:
             if echo_waiting:
@@ -96,7 +102,7 @@ class PeptDeepServer:
 
     def start(self):
         if self.process is None:
-            self.process = mp.Process(target=serve)
+            self.process = mp.get_context('spawn').Process(target=serve)
             self.process.start()
 
             with open(self._process_file, 'w') as f:
@@ -114,6 +120,3 @@ class PeptDeepServer:
         self.terminate()
     
 _server = PeptDeepServer()
-
-if __name__ == '__main__':
-    serve()

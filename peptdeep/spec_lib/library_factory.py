@@ -20,50 +20,40 @@ from peptdeep.utils import logging
 class PredictLibraryMakerBase(object):
     """
     Base class to predict libraries
-
-    Parameters
-    ----------
-    settings : dict, optional
-        By default `global_settings`
-
-    model_manager : ModelManager, optional
-        By default None
     """
     def __init__(self, 
-        settings:dict = global_settings,
         model_manager:ModelManager = None,
     ):
-        self._settings = settings
-        lib_settings = settings['library']
-        in_settings = lib_settings['input']
+        lib_settings = global_settings['library']
         self.spec_lib = PredictSpecLibFasta(
             model_manager=model_manager,
             charged_frag_types = get_charged_frag_types(
-                in_settings['frag_types'],
-                in_settings['max_frag_charge'],
+                lib_settings['frag_types'],
+                lib_settings['max_frag_charge'],
             ),
-            protease = in_settings['fasta']['protease'],
-            max_missed_cleavages = in_settings['fasta']['max_miss_cleave'],
-            peptide_length_min = in_settings['min_peptide_len'],
-            peptide_length_max = in_settings['max_peptide_len'],
-            precursor_charge_min = in_settings['min_precursor_charge'],
-            precursor_charge_max = in_settings['max_precursor_charge'],
-            precursor_mz_min = in_settings['min_precursor_mz'], 
-            precursor_mz_max = in_settings['max_precursor_mz'],
-            var_mods = in_settings['var_mods'],
-            min_var_mod_num = in_settings['min_var_mod_num'],
-            max_var_mod_num = in_settings['max_var_mod_num'],
-            fix_mods = in_settings['fix_mods'],
-            labeling_channels = in_settings['labeling_channels'],
-            special_mods = in_settings['special_mods'],
-            min_special_mod_num = in_settings['min_special_mod_num'],
-            max_special_mod_num = in_settings['max_special_mod_num'],
-            special_mods_cannot_modify_pep_n_term = in_settings['special_mods_cannot_modify_pep_n_term'],
-            special_mods_cannot_modify_pep_c_term = in_settings['special_mods_cannot_modify_pep_c_term'],
-            decoy = in_settings['decoy'],
+            protease = lib_settings['fasta']['protease'],
+            max_missed_cleavages = lib_settings['fasta']['max_miss_cleave'],
+            peptide_length_min = lib_settings['min_peptide_len'],
+            peptide_length_max = lib_settings['max_peptide_len'],
+            precursor_charge_min = lib_settings['min_precursor_charge'],
+            precursor_charge_max = lib_settings['max_precursor_charge'],
+            precursor_mz_min = lib_settings['min_precursor_mz'], 
+            precursor_mz_max = lib_settings['max_precursor_mz'],
+            var_mods = lib_settings['var_mods'],
+            min_var_mod_num = lib_settings['min_var_mod_num'],
+            max_var_mod_num = lib_settings['max_var_mod_num'],
+            fix_mods = lib_settings['fix_mods'],
+            labeling_channels = lib_settings['labeling_channels'],
+            special_mods = lib_settings['special_mods'],
+            min_special_mod_num = lib_settings['min_special_mod_num'],
+            max_special_mod_num = lib_settings['max_special_mod_num'],
+            special_mods_cannot_modify_pep_n_term = lib_settings['special_mods_cannot_modify_pep_n_term'],
+            special_mods_cannot_modify_pep_c_term = lib_settings['special_mods_cannot_modify_pep_c_term'],
+            decoy = lib_settings['decoy'],
+            include_contaminants=lib_settings['fasta']['add_contaminants'],
             I_to_L=False,
-            generate_precursor_isotope=lib_settings['output']['generate_precursor_isotope'],
-            rt_to_irt=lib_settings['output']['rt_to_irt']
+            generate_precursor_isotope=lib_settings['generate_precursor_isotope'],
+            rt_to_irt=lib_settings['rt_to_irt'],
     )
 
     def _check_df(self)->str:
@@ -113,8 +103,8 @@ class PredictLibraryMakerBase(object):
             self._predict()
 
             logging.info(
-                'The spectral library with '
-                f'{len(self.precursor_df)*1e-6:.2f}M precursors '
+                'Predicting the spectral library with '
+                f'{len(self.precursor_df)} precursors '
                 f'and {np.prod(self.fragment_mz_df.values.shape, dtype=float)*(1e-6):.2f}M fragments '
                 f'used {psutil.Process(os.getpid()).memory_info().rss/1024**3:.4f} GB memory'
             )
@@ -128,7 +118,7 @@ class PredictLibraryMakerBase(object):
         """Translate the predicted DataFrames into a TSV file
         """
         logging.info(f"Translating to {tsv_path} for DiaNN/Spectronaut...")
-        lib_settings = self._settings['library']
+        lib_settings = global_settings['library']
 
         if 'proteins' not in self.spec_lib._precursor_df.columns:
             self.spec_lib.append_protein_name()
@@ -161,7 +151,7 @@ class PredictLibraryMakerBase(object):
         a single DataFrame in SWATH library format
         """
         logging.info("Translating library for DiaNN/Spectronaut...")
-        lib_settings = self._settings['library']
+        lib_settings = global_settings['library']
 
         if 'proteins' not in self.spec_lib._precursor_df.columns:
             self.spec_lib.append_protein_name()
@@ -251,13 +241,12 @@ class LibraryMakerProvider:
     def register_maker(self, maker_name:str, maker_class):
         self.library_maker_dict[maker_name.lower()] = maker_class
 
-    def get_maker(self, maker_name:str, *, 
-        settings:dict = global_settings,
+    def get_maker(self, maker_name:str, *,
         model_manager = None,
     )->PredictLibraryMakerBase:
         maker_name = maker_name.lower()
         if maker_name in self.library_maker_dict:
-            return self.library_maker_dict[maker_name](settings, model_manager)
+            return self.library_maker_dict[maker_name](model_manager)
         else:
             raise ValueError(f'library maker "{maker_name}" is not registered.')
 

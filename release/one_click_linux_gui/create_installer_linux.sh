@@ -17,7 +17,11 @@ python setup.py sdist bdist_wheel
 # Setting up the local package
 cd release/one_click_linux_gui
 # Make sure you include the required extra packages and always use the stable or very-stable options!
-pip install "../../dist/peptdeep-0.4.0-py3-none-any.whl[stable]"
+pip install "../../dist/peptdeep-0.4.1-py3-none-any.whl[stable]"
+
+if [ "$1" == "CPU" ]; then
+    pip install torch -U --extra-index-url https://download.pytorch.org/whl/cpu
+fi
 
 # Creating the stand-alone pyinstaller folder
 pip install pyinstaller

@@ -112,7 +112,12 @@ Older releases remain available on the [release
 page](https://github.com/MannLabs/alphapeptdeep/releases), but no
 backwards compatibility is guaranteed.
 
-Note that, as GitHub does not allow large release files, these installers do not have GPU support. To create GPU version installers, clone the source code and install GPU-version pytorch (#use-gpu), and then use `release/one_click_xxx_gui/create_installer_xxx.sh` to build installer locally.
+Note that, as GitHub does not allow large release files, these installers do not have GPU support. To create GPU version installers, clone the source code and install GPU-version pytorch (#use-gpu), and then use `release/one_click_xxx_gui/create_installer_xxx.sh` to build installer locally. For example in Windows, run
+
+```bash
+cd release/one_click_windows_gui
+. ./create_installer_windows.sh
+```
 
 ### Pip
 
@@ -652,7 +657,7 @@ the yaml file):
       input:
         ...
         infile_type: fasta
-        iifiles:
+        infiles:
         - /path/to/fasta/human.fasta
         - /path/to/fasta/yeast.fasta
         ...

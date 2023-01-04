@@ -4,18 +4,21 @@ from peptdeep.pretrained_models import ModelManager
 
 
 class PredictSpecLibFasta(SpecLibFasta, PredictSpecLib):
+    """
+    Predicted spec lib from fasta files or other peptide files.
+    """
     def __init__(self,
         model_manager:ModelManager = None,
         *,
         charged_frag_types:list = ['b_z1','b_z2','y_z1','y_z2'],
-        protease:str = 'trypsin/P',
+        protease:str = 'trypsin',
         max_missed_cleavages:int = 2,
         peptide_length_min:int = 7,
         peptide_length_max:int = 35,
         precursor_charge_min:int = 2,
         precursor_charge_max:int = 4,
-        precursor_mz_min:float = 200.0, 
-        precursor_mz_max:float = 2000.0,
+        precursor_mz_min:float = 400.0, 
+        precursor_mz_max:float = 1800.0,
         var_mods:list = ['Acetyl@Protein N-term','Oxidation@M'],
         min_var_mod_num:int = 0,
         max_var_mod_num:int = 2,
@@ -27,6 +30,7 @@ class PredictSpecLibFasta(SpecLibFasta, PredictSpecLib):
         special_mods_cannot_modify_pep_n_term:bool=False,
         special_mods_cannot_modify_pep_c_term:bool=False,
         decoy: str = None, # or pseudo_reverse or diann
+        include_contaminants: bool=False,
         I_to_L=False,
         generate_precursor_isotope:bool = False,
         rt_to_irt:bool = False,
@@ -115,12 +119,16 @@ class PredictSpecLibFasta(SpecLibFasta, PredictSpecLib):
             Decoy type, see `alphabase.spectral_library.decoy_library`,
             by default None
 
+        include_contaminants : bool, optional
+            If include contaminants.fasta, by default False
+
         generate_precursor_isotope : bool, optional
             If :meth:`peptdeep.spec_lib.predict_lib.PredictSpecLib.predict_all()` 
             includes :meth:`peptdeep.spec_lib.predict_lib.PredictSpecLib.calc_precursor_isotope()`.
             Defaults to False
         
         rt_to_irt : bool, optional
+            If convert predicted RT to iRT values
         """
         SpecLibFasta.__init__(self,
             charged_frag_types=charged_frag_types,
@@ -143,6 +151,7 @@ class PredictSpecLibFasta(SpecLibFasta, PredictSpecLib):
             special_mods_cannot_modify_pep_n_term=special_mods_cannot_modify_pep_n_term,
             special_mods_cannot_modify_pep_c_term=special_mods_cannot_modify_pep_c_term,
             decoy=decoy,
+            include_contaminants=include_contaminants,
             I_to_L=I_to_L,
         )
 

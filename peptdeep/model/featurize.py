@@ -62,7 +62,9 @@ def parse_mod_feature(
     '''
     mod_x = np.zeros((nAA+2,mod_feature_size))
     if len(mod_names) > 0:
-        mod_x[mod_sites] = [MOD_TO_FEATURE[mod] for mod in mod_names]
+        for site, mod in zip(mod_sites, mod_names):
+            mod_x[site] += MOD_TO_FEATURE[mod]
+        # mod_x[mod_sites] = [MOD_TO_FEATURE[mod] for mod in mod_names]
     return mod_x
 
 def get_batch_mod_feature(
@@ -80,7 +82,7 @@ def get_batch_mod_feature(
     np.ndarray
         3-D tensor with shape (batch_size, nAA+2, mod_feature_size)
     '''
-    mod_x_batch = np.zeros((len(batch_df), batch_df.nAA.values[0]+2, mod_feature_size))
+
     mod_features_list = batch_df.mods.str.split(';').apply(
         lambda mod_names: [
             MOD_TO_FEATURE[mod] for mod in mod_names
@@ -93,11 +95,17 @@ def get_batch_mod_feature(
             if len(site)>0
         ]
     )
-    for i, (mod_feas, mod_sites) in enumerate(
+    mod_x_batch = np.zeros(
+        (len(batch_df), batch_df.nAA.values[0]+2, mod_feature_size)
+    )
+    for i, (mod_feats, mod_sites) in enumerate(
         zip(mod_features_list, mod_sites_list)
     ):
         if len(mod_sites)>0:
-            mod_x_batch[i,mod_sites,:] = mod_feas
+            for site, feat in zip(mod_sites, mod_feats):
+                # Process multiple mods on one site
+                mod_x_batch[i,site,:] += feat
+            # mod_x_batch[i,mod_sites,:] = mod_feats
     return mod_x_batch
 
 def get_batch_aa_indices(

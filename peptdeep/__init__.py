@@ -2,8 +2,7 @@
 
 try:
     from . import (
-        model, rescore, spec_lib, legacy,
-        psm_frag_reader
+        model, rescore, spec_lib
     )
 
     from . import protein # rely on spec_lib, import after
@@ -12,7 +11,7 @@ except ImportError:
     pass
 
 __project__ = "peptdeep"
-__version__ = "0.4.0"
+__version__ = "0.4.1"
 __license__ = "Apache 2.0"
 __description__ = "The AlphaX Deep (PeptDeep) Learning Platform for Proteomics"
 __author__ = "Mann Labs"

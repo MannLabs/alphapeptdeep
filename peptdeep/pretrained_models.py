@@ -229,77 +229,93 @@ def clear_error_modloss_intensities(
             ] = 0
 
 class ModelManager(object):
-    def __init__(self, 
-        mask_modloss:bool=model_mgr_settings['mask_modloss'],
-        device:str=global_settings['torch_device']['device_type'],
-        mgr_settings:dict=model_mgr_settings,
-    ):
-        """ The manager class to access MS2/RT/CCS models.
+    """ 
+    The manager class to access MS2/RT/CCS models.
+                
+    Attributes
+    ----------
+    ms2_model : peptdeep.model.ms2.pDeepModel
+        The MS2 prediction model.
 
+    rt_model : peptdeep.model.rt.AlphaRTModel
+        The RT prediction model.
+
+    ccs_model : peptdeep.model.ccs.AlphaCCSModel
+        The CCS prediciton model.
+
+    psm_num_to_train_ms2 : int
+        Number of PSMs to train the MS2 model. 
+        Defaults to global_settings['model_mgr']['transfer']['psm_num_to_train_ms2'].
+
+    epoch_to_train_ms2 : int
+        Number of epoches to train the MS2 model. 
+        Defaults to global_settings['model_mgr']['transfer']['epoch_ms2'].
+
+    psm_num_to_train_rt_ccs : int
+        Number of PSMs to train RT/CCS model. 
+        Defaults to global_settings['model_mgr']['transfer']['psm_num_to_train_rt_ccs'].
+
+    epoch_to_train_rt_ccs : int
+        Number of epoches to train RT/CCS model. 
+        Defaults to global_settings['model_mgr']['transfer']['epoch_rt_ccs'].
+
+    nce : float
+        Default NCE value for a precursor_df without the 'nce' column.
+        Defaults to global_settings['model_mgr']['default_nce'].
+
+    instrument : str
+        Default instrument type for a precursor_df without the 'instrument' column.
+        Defaults to global_settings['model_mgr']['default_instrument'].
+
+    use_grid_nce_search : bool
+        If self.ms2_model uses `peptdeep.model.ms2.pDeepModel.grid_nce_search()` to determine optimal
+        NCE and instrument type. This will change `self.nce` and `self.instrument` values.
+        Defaults to global_settings['model_mgr']['transfer']['grid_nce_search'].
+    """
+    def __init__(self, 
+        mask_modloss:bool=True,
+        device:str='gpu',
+    ):
+        """
         Parameters
         ----------
         mask_modloss : bool, optional
             If modloss ions are masked to zeros in the ms2 model. `modloss` 
             ions are mostly useful for phospho MS2 prediciton model. 
-            Defaults to global_settings['model_mgr']['mask_modloss']
+            Defaults to True.
 
         device : str, optional
             Device for DL models, could be 'gpu' ('cuda') or 'cpu'.
             if device=='gpu' but no GPUs are detected, it will automatically switch to 'cpu'.
             Defaults to 'gpu'
-                
-        Attributes
-        ----------
-        ms2_model : peptdeep.model.ms2.pDeepModel
-            The MS2 prediction model.
-
-        rt_model : peptdeep.model.rt.AlphaRTModel
-            The RT prediction model.
-
-        ccs_model : peptdeep.model.ccs.AlphaCCSModel
-            The CCS prediciton model.
-
-        psm_num_to_train_ms2 : int
-            Number of PSMs to train the MS2 model. 
-            Defaults to global_settings['model_mgr']['transfer']['psm_num_to_train_ms2'].
-
-        epoch_to_train_ms2 : int
-            Number of epoches to train the MS2 model. 
-            Defaults to global_settings['model_mgr']['transfer']['epoch_ms2'].
-
-        psm_num_to_train_rt_ccs : int
-            Number of PSMs to train RT/CCS model. 
-            Defaults to global_settings['model_mgr']['transfer']['psm_num_to_train_rt_ccs'].
-
-        epoch_to_train_rt_ccs : int
-            Number of epoches to train RT/CCS model. 
-            Defaults to global_settings['model_mgr']['transfer']['epoch_rt_ccs'].
-
-        nce : float
-            Default NCE value for a precursor_df without the 'nce' column.
-            Defaults to global_settings['model_mgr']['default_nce'].
-
-        instrument : str
-            Default instrument type for a precursor_df without the 'instrument' column.
-            Defaults to global_settings['model_mgr']['default_instrument'].
-
-        use_grid_nce_search : bool
-            If self.ms2_model uses `peptdeep.model.ms2.pDeepModel.grid_nce_search()` to determine optimal
-            NCE and instrument type. This will change `self.nce` and `self.instrument` values.
-            Defaults to global_settings['model_mgr']['transfer']['grid_nce_search'].
         """
-        self.mgr_settings = mgr_settings
+        self._train_psm_logging = True
 
         self.ms2_model:pDeepModel = pDeepModel(mask_modloss=mask_modloss, device=device)
         self.rt_model:AlphaRTModel = AlphaRTModel(device=device)
         self.ccs_model:AlphaCCSModel = AlphaCCSModel(device=device)
 
+        self.reset_by_global_settings(False, False)
+
+    def reset_by_global_settings(self, 
+        set_mask_modloss:bool=True, 
+        set_device:bool=True,
+    ):
+        mgr_settings = global_settings['model_mgr']
         self.load_installed_models(mgr_settings['model_type'])
         self.load_external_models(
             ms2_model_file = mgr_settings['external_ms2_model'],
             rt_model_file = mgr_settings['external_rt_model'],
             ccs_model_file = mgr_settings['external_ccs_model'],
         )
+
+        if set_mask_modloss:
+            self.ms2_model.model._mask_modloss = mgr_settings['mask_modloss']
+        
+        if set_device:
+            self.ms2_model.set_device(global_settings['torch_device']['device_type'])
+            self.rt_model.set_device(global_settings['torch_device']['device_type'])
+            self.ccs_model.set_device(global_settings['torch_device']['device_type'])
 
         self.use_grid_nce_search = mgr_settings[
             'transfer'
@@ -362,7 +378,6 @@ class ModelManager(object):
         self.instrument = mgr_settings['default_instrument']
         self.verbose = mgr_settings['predict']['verbose']
         self.train_verbose = mgr_settings['transfer']['verbose']
-        self._train_psm_logging = True
 
 
     @property
@@ -371,10 +386,10 @@ class ModelManager(object):
     @instrument.setter
     def instrument(self, instrument_name:str):
         instrument_name = instrument_name.upper()
-        if instrument_name in self.mgr_settings[
+        if instrument_name in model_mgr_settings[
             'instrument_group'
         ]:
-            self._instrument = self.mgr_settings[
+            self._instrument = model_mgr_settings[
                 'instrument_group'
             ][instrument_name]
         else:
@@ -414,7 +429,7 @@ class ModelManager(object):
             self.save_models(folder)
 
     def load_installed_models(self, 
-        model_type:str=model_mgr_settings['model_type']
+        model_type:str='generic'
     ):
         """ Load built-in MS2/CCS/RT models.
         
@@ -423,7 +438,7 @@ class ModelManager(object):
         model_type : str, optional
             To load the installed MS2/RT/CCS models or phos MS2/RT/CCS models. 
             It could be 'digly', 'phospho', 'HLA', or 'generic'.
-            Defaults to `global_settings['model_mgr']['model_type']` ('generic').
+            Defaults to 'generic'.
         """
         if model_type.lower() in [
             'phospho','phos','phosphorylation'
@@ -478,9 +493,9 @@ class ModelManager(object):
 
     def load_external_models(self,
         *,
-        ms2_model_file: Tuple[str, io.BytesIO]=model_mgr_settings['external_ms2_model'],
-        rt_model_file: Tuple[str, io.BytesIO]=model_mgr_settings['external_rt_model'],
-        ccs_model_file: Tuple[str, io.BytesIO]=model_mgr_settings['external_ccs_model'],
+        ms2_model_file: Tuple[str, io.BytesIO]='',
+        rt_model_file: Tuple[str, io.BytesIO]='',
+        ccs_model_file: Tuple[str, io.BytesIO]='',
     ):
         """Load external MS2/RT/CCS models.
 
@@ -488,15 +503,15 @@ class ModelManager(object):
         ----------
         ms2_model_file : Tuple[str, io.BytesIO], optional
             MS2 model file or stream. Do nothing if the value is '' or None. 
-            Defaults to global_settings['model_mgr']['external_ms2_model'].
+            Defaults to ''.
 
         rt_model_file : Tuple[str, io.BytesIO], optional
             RT model file or stream. Do nothing if the value is '' or None.
-            Defaults to global_settings['model_mgr']['external_rt_model'].
+            Defaults to ''.
 
         ccs_model_file : Tuple[str, io.BytesIO], optional
             CCS model or stream. Do nothing if the value is '' or None. 
-            Defaults to global_settings['model_mgr']['external_ccs_model'].
+            Defaults to ''.
         """
 
         def _load_file(model, model_file):
@@ -689,16 +704,16 @@ class ModelManager(object):
                 if self.use_grid_nce_search:
                     self.nce, self.instrument = self.ms2_model.grid_nce_search(
                         tr_df, tr_inten_df,
-                        nce_first=self.mgr_settings['transfer'][
+                        nce_first=model_mgr_settings['transfer'][
                             'grid_nce_first'
                         ],
-                        nce_last=self.mgr_settings['transfer'][
+                        nce_last=model_mgr_settings['transfer'][
                             'grid_nce_last'
                         ],
-                        nce_step=self.mgr_settings['transfer'][
+                        nce_step=model_mgr_settings['transfer'][
                             'grid_nce_step'
                         ],
-                        search_instruments=self.mgr_settings['transfer'][
+                        search_instruments=model_mgr_settings['transfer'][
                             'grid_instrument'
                         ],
                     )
@@ -751,9 +766,7 @@ class ModelManager(object):
 
     def predict_ms2(self, precursor_df:pd.DataFrame, 
         *, 
-        batch_size:int=model_mgr_settings[
-            'predict'
-        ]['batch_size_ms2'],
+        batch_size:int=512,
         reference_frag_df:pd.DataFrame = None,
     )->pd.DataFrame:
         """Predict MS2 for the given precursor_df
@@ -765,7 +778,7 @@ class ModelManager(object):
 
         batch_size : int, optional
             Batch size for prediction. 
-            Defaults to mgr_settings[ 'predict' ]['batch_size_ms2']
+            Defaults to 512.
 
         reference_frag_df : pd.DataFrame, optional
             If precursor_df has 'frag_start_idx' pointing to reference_frag_df. 
@@ -790,9 +803,7 @@ class ModelManager(object):
 
     def predict_rt(self, precursor_df:pd.DataFrame,
         *, 
-        batch_size:int=model_mgr_settings[
-            'predict'
-        ]['batch_size_rt_ccs']
+        batch_size:int=1024
     )->pd.DataFrame:
         """ Predict RT ('rt_pred') inplace into `precursor_df`.
 
@@ -803,8 +814,7 @@ class ModelManager(object):
 
         batch_size : int, optional
             Batch size for prediction. 
-            Defaults to mgr_settings[ 'predict' ]['batch_size_rt_ccs']. 
-            mgr_settings=peptdeep.settings.global_settings['model_mgr'].
+            Defaults to 1024.
 
         Returns
         -------
@@ -821,9 +831,7 @@ class ModelManager(object):
 
     def predict_mobility(self, precursor_df:pd.DataFrame,
         *, 
-        batch_size:int=model_mgr_settings[
-            'predict'
-        ]['batch_size_rt_ccs']
+        batch_size:int=1024
     )->pd.DataFrame:
         """ Predict mobility (`ccs_pred` and `mobility_pred`) inplace into `precursor_df`.
 
@@ -834,8 +842,7 @@ class ModelManager(object):
 
         batch_size : int, optional
             Batch size for prediction. 
-            Defaults to mgr_settings[ 'predict' ]['batch_size_rt_ccs'],
-            where mgr_settings=peptdeep.settings.global_settings['model_mgr'].
+            Defaults to 1024.
 
         Returns
         -------
@@ -863,7 +870,7 @@ class ModelManager(object):
             'rt' ,'mobility' ,'ms2'
         ], 
         frag_types:list =  None,
-        process_num:int = global_settings['thread_num'],
+        process_num:int = 8,
         mp_batch_size:int = 100000,
     ):
         self.ms2_model.model.share_memory()
@@ -902,7 +909,7 @@ class ModelManager(object):
         verbose_bak = self.verbose
         self.verbose = False
 
-        with mp.Pool(process_num) as p:
+        with mp.get_context('spawn').Pool(process_num) as p:
             for ret_dict in process_bar(
                 p.imap_unordered(
                     self._predict_func_for_mp, 
@@ -946,9 +953,9 @@ class ModelManager(object):
             'rt' ,'mobility' ,'ms2'
         ], 
         frag_types:list =  None,
-        multiprocessing:bool = model_mgr_settings['predict']['multiprocessing'],
+        multiprocessing:bool = True,
         min_required_precursor_num_for_mp:int = 3000,
-        process_num:int = global_settings['thread_num'],
+        process_num:int = 8,
         mp_batch_size:int = 100000,
     )->Dict[str, pd.DataFrame]:
         """ 
@@ -976,7 +983,7 @@ class ModelManager(object):
             Defaults to True.
 
         process_num : int, optional
-            Defaults to global_settings['thread_num']
+            Defaults to 4
 
         min_required_precursor_num_for_mp : int, optional
             It will not use multiprocessing when the number of precursors in precursor_df 
@@ -1023,9 +1030,13 @@ class ModelManager(object):
         ):
             refine_df(precursor_df)
             if 'rt' in predict_items:
-                self.predict_rt(precursor_df)
+                self.predict_rt(precursor_df, 
+                    batch_size=model_mgr_settings['predict']['batch_size_rt_ccs']
+                )
             if 'mobility' in predict_items:
-                self.predict_mobility(precursor_df)
+                self.predict_mobility(precursor_df,
+                    batch_size=model_mgr_settings['predict']['batch_size_rt_ccs']
+                )
             if 'ms2' in predict_items:
                 fragment_mz_df = create_fragment_mz_dataframe(
                     precursor_df, frag_types
@@ -1036,7 +1047,8 @@ class ModelManager(object):
                 )
                 
                 fragment_intensity_df = self.predict_ms2(
-                    precursor_df
+                    precursor_df,
+                    batch_size=model_mgr_settings['predict']['batch_size_ms2']
                 )
 
                 fragment_intensity_df.drop(
@@ -1058,7 +1070,7 @@ class ModelManager(object):
             else:
                 return {'precursor_df': precursor_df}
         else:
-            logging.info("Using multiprocessing ...")
+            logging.info(f"Using multiprocessing with {process_num} processes ...")
             return self.predict_all_mp(
                 precursor_df, 
                 predict_items=predict_items,
