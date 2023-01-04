@@ -4,7 +4,7 @@
 import click
 import os
 
-from alphabase.yaml_utils import save_yaml, load_yaml
+from alphabase.yaml_utils import save_yaml
 
 import peptdeep
 from peptdeep.pipeline_api import (

@@ -138,7 +138,7 @@ def load_settings_gui():
 
 def save_settings_gui():
     st.write("### Save current settings")
-    st.write("The saved yaml file can be used for CLI")
+    st.write("The saved yaml file can be used in command line interface")
 
     f = StringIO()
     yaml.dump(global_settings, f)

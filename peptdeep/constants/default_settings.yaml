@@ -184,11 +184,10 @@ percolator:
     psm_type_choices:
       - alphapept
       - pfind
-      - maxquant
     psm_files: []
     ms_file_type: alphapept_hdf
     ms_file_type_choices:
-      - hdf
+      - alphapept_hdf
       - thermo_raw # if alpharaw is installed
       - mgf
       - mzml

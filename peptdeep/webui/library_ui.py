@@ -60,7 +60,10 @@ def specialmod_options():
     st.write('*Useful for Phospho@S/T or GlyGly@K*')
     st.write('- For Phospho@S/T or HexNAc@S, as a sequence may generate many peptidoforms, this can control the overall number.')
     st.write('- For GlyGly@K or GG@K, it will not occur at C-term Lys/K, using `special modifications` to enable this feature.')
-    specialmod_expander = st.expander(label='Special modificatins')
+    specialmod_expander = st.expander(
+        label='Special modificatins', 
+        expanded=len(global_settings['library']['special_mods'])>0,
+    )
     with specialmod_expander:
         with st.form(key="Select special modifications"):
             global_settings['library']['special_mods'] = st.multiselect(
@@ -129,7 +132,10 @@ def labeling_options():
         return
     st.write('#### Peptide labeling')
     st.write('*For multiplex-DIA (mDIA) workflow*')
-    labeling_expander = st.expander(label='Labeling channels')
+    labeling_expander = st.expander(
+        label='Labeling channels',
+        expanded=len(global_settings['library']['labeling_channels'])>0,
+    )
     with labeling_expander:
         with st.form(key="Peptide labeling"):
             channel = st.text_input(label="Channel",key='labeling_channel_id')

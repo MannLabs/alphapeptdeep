@@ -138,14 +138,16 @@ def match_psms()->Tuple[pd.DataFrame,pd.DataFrame]:
 def transfer_learn(verbose=True):
     """Transfer learn / refine the RT/CCS(/MS2) models.
     
-    All required information in global_settings:
-    ```
+    Required information in global_settings:
+
+    ```python
     mgr_settings = global_settings['model_mgr']
     mgr_settings['transfer']['verbose'] = verbose # bool
     global_settings['PEPTDEEP_HOME'] # str. The folder to store all refined models. By default "~/peptdeep".
     ```
     For transfer learning of MS2 model, the required information:
-    ```
+
+    ```python
     mgr_settings['transfer']['psm_files'] # list. PSM file paths
     mgr_settings['transfer']['psm_type'] # str. PSM type or earch engine type
     mgr_settings['transfer']['ms_files'] # list. MS files or RAW files
@@ -246,8 +248,9 @@ def read_peptide_table(tsv_file:str)->pd.DataFrame:
 def generate_library():
     """Generate/predict a spectral library.
     
-    All required information in global_settings:
-    ```
+    Required information in global_settings:
+
+    ```python
     lib_settings = global_settings['library']
     output_folder = lib_settings['output_folder'] # str. Output folder of the library
     lib_settings['infile_type'] # str. Input type for the library, could be 'fasta', 'sequence', 'peptide', or 'precursor'
@@ -319,7 +322,8 @@ def rescore():
     """Generate/predict a spectral library.
     
     All required information in global_settings:
-    ```
+    
+    ```python
     perc_settings = global_settings['percolator']
     output_folder = perc_settings['output_folder'] # str. Output folder of the rescored results
     perc_settings['input_files']['psm_files'] # list of str. all PSM files (at 100% FDR and including decoys) from the search engines
@@ -362,18 +366,18 @@ def rescore():
             psm_df, ms_file_dict, 
             perc_settings['input_files']['ms_file_type']
         )
-        
-        psm_df = percolator.re_score(psm_df)
-        psm_df.to_csv(
-            os.path.join(output_folder, 'peptdeep.tsv'), 
-            sep='\t', index=False
-        )
 
         df_fdr = psm_df[
             (psm_df.fdr<0.01)&(psm_df.decoy==0)
         ]
         df_fdr.to_csv(
             os.path.join(output_folder, 'peptdeep_fdr.tsv'), 
+            sep='\t', index=False
+        )
+        
+        psm_df = percolator.re_score(psm_df)
+        psm_df.to_csv(
+            os.path.join(output_folder, 'peptdeep.tsv'), 
             sep='\t', index=False
         )
     except Exception as e:

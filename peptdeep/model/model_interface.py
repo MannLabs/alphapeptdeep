@@ -227,6 +227,11 @@ class ModelInterface(object):
         """
         Train the model according to specifications.
         """
+
+        if verbose: print(
+            f"Training with padding zero sequences: {self.training_groupby_nAA}"
+        )
+
         if warmup_epoch > 0:
             self.train_with_warmup(
                 precursor_df,
@@ -626,9 +631,10 @@ class ModelInterface(object):
         self, batch_df:pd.DataFrame
     )->torch.LongTensor:
         """
-        Get indices values for 128 ascii codes.
+        Get indices values of variable length sequences 
+        using 128 ascii codes
         """
-        max_len = batch_df.sequence.str.len().max()
+        max_len = batch_df.nAA.max()
         return self._as_tensor(
             get_ascii_indices(
                 batch_df['sequence'].apply(
@@ -642,7 +648,8 @@ class ModelInterface(object):
         self, batch_df:pd.DataFrame
     )->torch.LongTensor:
         """
-        Get indices values for 128 ascii codes.
+        Get indices values for fixed length sequences 
+        with 128 ascii codes.
         """
         return self._as_tensor(
             get_ascii_indices(
