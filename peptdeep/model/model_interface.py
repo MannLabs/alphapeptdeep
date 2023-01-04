@@ -65,6 +65,22 @@ class ModelInterface(object):
     with ml models. Inherit into new class and override
     the abstract (i.e. not implemented) methods.
     """
+
+    #: The predicted values cannot be smaller than this value.
+    _min_pred_value:float = 0.0
+    
+    fixed_sequence_len:int = 0
+    """
+    This attribute controls how to train and infer for variable-length sequences:
+    
+    - if the value is 0, all sequence data will be grouped by 
+    nAA and train/infer on same nAA in batch.
+    - if the value is > 0: all data will be padded by zeros to 
+    the fixed length.
+    - if the value is < 0: in each batch, padded by zeros to
+    max length of the batch.
+    """
+    
     def __init__(self,
         device:str='gpu',
         **kwargs
@@ -80,10 +96,6 @@ class ModelInterface(object):
         self.optimizer = None
         self.model_params:dict = {}
         self.set_device(device)
-
-        self._min_pred_value = 0.0
-
-        self.training_groupby_nAA = True
 
     @property
     def device_type(self)->str:
@@ -194,7 +206,7 @@ class ModelInterface(object):
         )
 
         for epoch in range(epoch):
-            if self.training_groupby_nAA:
+            if self.fixed_sequence_len == 0:
                 batch_cost = self._train_one_epoch(
                     precursor_df, epoch,
                     batch_size, verbose_each_epoch,
@@ -206,6 +218,7 @@ class ModelInterface(object):
                     batch_size, verbose_each_epoch,
                     **kwargs
                 )
+
             lr_scheduler.step()
             if verbose: print(
                 f'[Training] Epoch={epoch+1}, lr={lr_scheduler.get_last_lr()[0]}, loss={np.mean(batch_cost)}'
@@ -229,7 +242,7 @@ class ModelInterface(object):
         """
 
         if verbose: print(
-            f"Training with padding zero sequences: {self.training_groupby_nAA}"
+            f"Training with fixed sequence length: {self.fixed_sequence_len}"
         )
 
         if warmup_epoch > 0:
@@ -247,7 +260,7 @@ class ModelInterface(object):
             self._prepare_training(precursor_df, lr, **kwargs)
 
             for epoch in range(epoch):
-                if self.training_groupby_nAA:
+                if self.fixed_sequence_len == 0:
                     batch_cost = self._train_one_epoch(
                         precursor_df, epoch,
                         batch_size, verbose_each_epoch,
@@ -275,6 +288,7 @@ class ModelInterface(object):
         Returns the ouput as a pandas dataframe.
         """
         precursor_df = append_nAA_column_if_missing(precursor_df)
+        self._pad_zeros_if_fixed_len(precursor_df)
         self._check_predict_in_order(precursor_df)
         self._prepare_predict_data_df(precursor_df,**kwargs)
         self.model.eval()
@@ -511,7 +525,7 @@ class ModelInterface(object):
         precursor_df, epoch, batch_size, verbose_each_epoch, 
         **kwargs
     ):
-        """Training for an epoch"""
+        """Training for an epoch by padding zeros"""
         batch_cost = []
         rnd_df = precursor_df.sample(frac=1)
         if verbose_each_epoch:
@@ -634,7 +648,10 @@ class ModelInterface(object):
         Get indices values of variable length sequences 
         using 128 ascii codes
         """
-        max_len = batch_df.nAA.max()
+        if self.fixed_sequence_len < 0:
+            max_len = batch_df.nAA.max()
+        else:
+            max_len = self.fixed_sequence_len
         return self._as_tensor(
             get_ascii_indices(
                 batch_df['sequence'].apply(
@@ -678,16 +695,12 @@ class ModelInterface(object):
         """
         Get modification features.
         """
-        if self.training_groupby_nAA:
-            return self._as_tensor(
-                get_batch_mod_feature(batch_df)
-            )
-        else:
+        if self.fixed_sequence_len < 0:
             batch_df = batch_df.copy()
-            batch_df['nAA'] = batch_df.sequence.str.len().max()
-            return self._as_tensor(
-                get_batch_mod_feature(batch_df)
-            )
+            batch_df['nAA'] = batch_df.nAA.max()
+        return self._as_tensor(
+            get_batch_mod_feature(batch_df)
+        )
 
     def _get_aa_mod_features(self,
         batch_df:pd.DataFrame, **kwargs,
@@ -716,7 +729,7 @@ class ModelInterface(object):
             A feature tensor if call `self._get_aa_indice_features(batch_df)` (default).
             Or a tuple of tensors if call `self._get_aa_mod_features(batch_df)`.
         """
-        if self.training_groupby_nAA:
+        if self.fixed_sequence_len == 0:
             return self._get_aa_indice_features(batch_df)
         else:
             return self._get_aa_indice_features_padding_zeros(batch_df)
@@ -792,9 +805,25 @@ class ModelInterface(object):
             self.optimizer, warmup_epoch, epoch
         )
 
-    def _prepare_training(self, precursor_df, lr, **kwargs):
+    def _pad_zeros_if_fixed_len(self, precursor_df:pd.DataFrame):
+        if self.fixed_sequence_len > 0:
+            precursor_df.drop(
+                index=precursor_df[
+                    precursor_df.nAA>self.fixed_sequence_len
+                ].index, 
+                inplace=True,
+            )
+            precursor_df.reset_index(drop=True, inplace=True)
+            precursor_df['nAA'] = self.fixed_sequence_len
+
+    def _prepare_training(self, 
+        precursor_df:pd.DataFrame, 
+        lr:float, 
+        **kwargs
+    ):
         if 'nAA' not in precursor_df.columns:
             precursor_df['nAA'] = precursor_df.sequence.str.len()
+        self._pad_zeros_if_fixed_len(precursor_df)
         self._prepare_train_data_df(precursor_df, **kwargs)
         self.model.train()
 
