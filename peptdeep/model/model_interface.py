@@ -11,7 +11,8 @@ import functools
 
 from types import ModuleType
 
-from torch.optim.lr_scheduler import LambdaLR
+# from torch.optim.lr_scheduler import LambdaLR
+from transformers.optimization import get_cosine_schedule_with_warmup
 
 from zipfile import ZipFile
 from typing import IO, Tuple, List, Union
@@ -27,27 +28,27 @@ from peptdeep.model.featurize import (
     get_batch_mod_feature
 )
 
-# copied from huggingface
-def get_cosine_schedule_with_warmup(
-    optimizer, num_warmup_steps, 
-    num_training_steps, num_cycles=0.5, 
-    last_epoch=-1
-):
-    """ Create a schedule with a learning rate that decreases following the
-    values of the cosine function between 0 and `pi * cycles` after a warmup
-    period during which it increases linearly between 0 and 1.
-    """
-    def lr_lambda(current_step):
-        if current_step < num_warmup_steps:
-            return float(current_step) / max(1, num_warmup_steps)
-        progress = float(
-            current_step - num_warmup_steps
-        ) / max(1, num_training_steps - num_warmup_steps)
-        return max(0.0, 0.5 * (
-            1.0 + np.cos(np.pi * num_cycles * 2.0 * progress)
-        ))
+# def get_cosine_schedule_with_warmup(
+#     optimizer, num_warmup_steps, 
+#     num_training_steps, num_cycles=0.5, 
+#     last_epoch=-1
+# ):
+#     """
+#     Create a schedule with a learning rate that decreases following the
+#     values of the cosine function between 0 and `pi * cycles` after a warmup
+#     period during which it increases linearly between 0 and 1.
+#     """
+#     def lr_lambda(current_step):
+#         if current_step < num_warmup_steps:
+#             return float(current_step) / max(1, num_warmup_steps)
+#         progress = float(
+#             current_step - num_warmup_steps
+#         ) / max(1, num_training_steps - num_warmup_steps)
+#         return max(0.0, 0.5 * (
+#             1.0 + np.cos(np.pi * num_cycles * 2.0 * progress)
+#         ))
 
-    return LambdaLR(optimizer, lr_lambda, last_epoch)
+#     return LambdaLR(optimizer, lr_lambda, last_epoch)
 
 def append_nAA_column_if_missing(precursor_df):
     """
@@ -65,24 +66,11 @@ class ModelInterface(object):
     with ml models. Inherit into new class and override
     the abstract (i.e. not implemented) methods.
     """
-
-    #: The predicted values cannot be smaller than this value.
-    _min_pred_value:float = 0.0
-    
-    fixed_sequence_len:int = 0
-    """
-    This attribute controls how to train and infer for variable-length sequences:
-    
-    - if the value is 0, all sequence data will be grouped by 
-    nAA and train/infer on same nAA in batch.
-    - if the value is > 0: all data will be padded by zeros to 
-    the fixed length.
-    - if the value is < 0: in each batch, padded by zeros to
-    max length of the batch.
-    """
     
     def __init__(self,
         device:str='gpu',
+        fixed_sequence_len:int = 0,
+        min_pred_value:float = 0.0,
         **kwargs
     ):
         """
@@ -91,22 +79,61 @@ class ModelInterface(object):
         device : str, optional
             device type in 'cpu', 'mps', 'gpu' (or 'cuda'),
             by default 'gpu'
+        
+        fixed_sequence_len : int, optional
+            See :attr:`fixed_sequence_len`, defaults to 0.
+
+        min_pred_value : float, optional
+            See :attr:`min_pred_value`, defaults to 0.0.
         """
         self.model:torch.nn.Module = None
         self.optimizer = None
         self.model_params:dict = {}
         self.set_device(device)
+        self.fixed_sequence_len = fixed_sequence_len
+        self.min_pred_value = min_pred_value
+
+    @property
+    def fixed_sequence_len(self)->int:
+        """
+        This attribute controls how to train and infer for variable-length sequences:
+        
+        - if the value is 0, all sequence tensors will be grouped by nAA and train/infer on same nAA in batch.
+        - if the value is > 0: all sequence tensors will be padded by zeros to the fixed length.
+        - if the value is < 0: in each batch, padded by zeros to max length of the batch.
+        """
+        return self._fixed_sequence_len
+
+    @fixed_sequence_len.setter
+    def fixed_sequence_len(self, seq_len:int):
+        self._fixed_sequence_len = seq_len
+        self.model_params['fixed_sequence_len'] = seq_len
+
+    @property
+    def min_pred_value(self)->float:
+        """
+        The predicted values cannot be smaller than this value.
+        """
+        return self._min_pred_value
+
+    @min_pred_value.setter
+    def min_pred_value(self, val:float):
+        self._min_pred_value = val
+        self.model_params['min_pred_value'] = val
 
     @property
     def device_type(self)->str:
+        """Read-only"""
         return self._device_type
     
     @property
     def device(self)->torch.device:
+        """Read-only"""
         return self._device
 
     @property
     def device_ids(self)->list:
+        """Read-only"""
         return self._device_ids
 
     @property
@@ -180,7 +207,7 @@ class ModelInterface(object):
         the parameters, the device, the loss function ...
         """
         self.model = model_class(**kwargs)
-        self.model_params = kwargs
+        self.model_params.update(**kwargs)
         self._model_to_device()
         self._init_for_training()
 
