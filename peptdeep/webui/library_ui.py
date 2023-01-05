@@ -20,7 +20,7 @@ from peptdeep.constants._const import CONST_FOLDER
 
 def mod_options():
     with st.form(key="Select modifications"):
-        st.write('#### Fixed and variable modificatins')
+        st.write('#### Fixed and variable modifications')
         fixmod = st.multiselect(
             label='Please select fixed modifications',
             options=MOD_DF.index.values,

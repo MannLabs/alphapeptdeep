@@ -799,7 +799,7 @@ experimental fragment intensities.
 #### install-models
 
 ``` bash
-peptdeep install-models --model-file url_or_local_model_zip --overwrite True
+peptdeep install-models [--model-file url_or_local_model_zip] --overwrite True
 ```
 
 Running peptdeep for the first time, it will download and install models
@@ -905,7 +905,7 @@ import peptdeep.model.generic_property_prediction # model shop
 
 Building new DL models for peptide property prediction is one of the key features of AlphaPeptDeep. The key functionalities are [`ModelInterface`](https://alphapeptdeep.readthedocs.io/en/latest/model/model_interface.html#peptdeep.model.model_interface.ModelInterface) and the pre-designed models and model interfaces in the model shop (module [`peptdeep.model.generic_property_prediction`](https://alphapeptdeep.readthedocs.io/en/latest/model/generic_property_prediction.html)).
 
-For example, we can built a HLA classifier that distinguishes HLA peptides from non-HLA peptides, see [tutorial_HLA_prediction.ipynb](https://github.com/MannLabs/alphapeptdeep/blob/main/docs/nbs/tutorial_HLA_prediction.ipynb) for details.
+For example, we can built a HLA classifier that distinguishes HLA peptides from non-HLA peptides, see https://github.com/MannLabs/PeptDeep-HLA for details.
 
 ------------------------------------------------------------------------
 

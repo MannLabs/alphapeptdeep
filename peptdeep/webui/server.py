@@ -80,6 +80,7 @@ def serve():
                         yaml_file, 
                         os.path.join(failed_folder, os.path.basename(yaml_file)),
                     )
+                print(e)
             with open(running_txt,'w') as f:
                 f.write("")
             echo_waiting=True
@@ -103,6 +104,7 @@ class PeptDeepServer:
     def start(self):
         if self.process is None:
             self.process = mp.get_context('spawn').Process(target=serve)
+            # self.process = mp.Process(target=serve)
             self.process.start()
 
             with open(self._process_file, 'w') as f:
