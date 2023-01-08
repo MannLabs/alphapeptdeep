@@ -2,13 +2,13 @@
 
 [![Default installation and tests](https://github.com/MannLabs/alphapeptdeep/actions/workflows/pip_installation.yml/badge.svg)](https://github.com/MannLabs/alphapeptdeep/actions/workflows/pip_installation.yml)
 [![Publish on PyPi and release on GitHub](https://github.com/MannLabs/alphapeptdeep/actions/workflows/publish_and_release.yml/badge.svg)](https://github.com/MannLabs/alphapeptdeep/actions/workflows/publish_and_release.yml)
+[![Documentation Status](https://readthedocs.org/projects/alphapeptdeep/badge/?version=latest)](https://alphapeptdeep.readthedocs.io/en/latest/?badge=latest)
 [![pypi](https://img.shields.io/pypi/v/peptdeep)](https://pypi.org/project/peptdeep)
 [![GitHub release](https://img.shields.io/github/v/release/mannlabs/alphapeptdeep?display_name=tag)](https://github.com/MannLabs/alphapeptdeep/releases)
 [![GitHub downloads](https://img.shields.io/github/downloads/mannlabs/alphapeptdeep/total?label=github%20downloads)](https://github.com/MannLabs/alphapeptdeep/releases)
 [![Downloads@pre-train-models](https://img.shields.io/github/downloads/mannlabs/alphapeptdeep/pre-trained-models/total)](https://github.com/MannLabs/alphapeptdeep/releases/tag/pre-trained-models)
 [![pip downloads](https://img.shields.io/pypi/dm/peptdeep?color=blue&label=pip%20downloads)](https://pypi.org/project/peptdeep)
 ![Python](https://img.shields.io/pypi/pyversions/peptdeep)
-[![Documentation Status](https://readthedocs.org/projects/alphapeptdeep/badge/?version=latest)](https://alphapeptdeep.readthedocs.io/en/latest/?badge=latest)
 
 - [**About**](#about)
 - [**License**](#license)
