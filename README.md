@@ -67,6 +67,13 @@ For documentation, see [readthedocs](https://alphapeptdeep.readthedocs.io/en/lat
 
 ------------------------------------------------------------------------
 
+## Citations
+
+Wen-Feng Zeng, Xie-Xuan Zhou, Sander Willems, Constantin Ammar, Maria Wahle, Isabell Bludau, Eugenia Voytik, Maximillian T. Strauss & Matthias Mann. AlphaPeptDeep: a modular deep learning framework to predict peptide properties for proteomics. Nat Commun 13, 7238 (2022). https://doi.org/10.1038/s41467-022-34904-3
+
+
+------------------------------------------------------------------------
+
 ## License
 
 AlphaPeptDeep was developed by the [Mann Labs at the Max Planck
@@ -922,13 +929,6 @@ In case of issues, check out the following:
 
 - [Discussions](https://github.com/MannLabs/alphapeptdeep/discussions).
   Check if your problem or feature requests has been discussed before.
-
-------------------------------------------------------------------------
-
-## Citations
-
-Wen-Feng Zeng, Xie-Xuan Zhou, Sander Willems, Constantin Ammar, Maria Wahle, Isabell Bludau, Eugenia Voytik, Maximillian T. Strauss & Matthias Mann. AlphaPeptDeep: a modular deep learning framework to predict peptide properties for proteomics. Nat Commun 13, 7238 (2022). https://doi.org/10.1038/s41467-022-34904-3
-
 
 ------------------------------------------------------------------------
 
