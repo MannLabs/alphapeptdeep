@@ -8,7 +8,7 @@ rm -rf dist
 rm -rf build
 
 # Creating a conda environment
-conda create -n peptdeep_installer python=3.8 -y
+conda create -n peptdeep_installer python=3.9 -y
 conda activate peptdeep_installer
 
 # Creating the wheel
@@ -17,7 +17,7 @@ python setup.py sdist bdist_wheel
 # Setting up the local package
 cd release/one_click_linux_gui
 # Make sure you include the required extra packages and always use the stable or very-stable options!
-pip install "../../dist/peptdeep-0.5.0-py3-none-any.whl[stable]"
+pip install "../../dist/peptdeep-1.0.0-py3-none-any.whl[stable]"
 
 if [ "$1" == "CPU" ]; then
     pip install torch -U --extra-index-url https://download.pytorch.org/whl/cpu

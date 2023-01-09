@@ -2,17 +2,27 @@
 
 Follow the changelog format from https://keepachangelog.com/en/1.0.0/.
 
-## 1.0.0 - TODO Next Release
+## 1.0.0 - 2023.01.09 (key changes of previous versions)
 
 ### Changed
 
-- Multiprocessing with `spawn` for different OS systems.
+- Multiprocessing with `spawn` for different OS systems to prevent hangs on Linux.
 - Using constant values as defaults params of class methods or functions instead of `global_settings[xxx]` values. Using `global_settings[xxx]` values as defaults params does not update once `global_settings` changes, this is dangerous.
 
 ### Added
 
-- GUI: it is able to delete tasks in the taks queue.
-- TODO dimethyl models in pretrained_models.zip
+- Testing on Python 3.10
+- `fixed_sequence_len` with padding zeros for sequence models.
+- GUI: it is able to delete tasks in the task queue.
+- `user_defined_modifications` in `peptdeep/constants/global_settings.yaml` for CLI and GUI, it allows us to define our own modifications.
+- `other_modification_mapping` in `peptdeep/constants/global_settings.yaml` for CLI and GUI, it allows us to read arbitrary PTMs from other search engines.
+- `special_mods` in global_settings for special modifications like GlyGly@K or Phospho.
+- `labeling_channels` in global_settings.
+- MS2/RT/CCS models for Dimethyl-labeled peptides, see https://github.com/MannLabs/alphapeptdeep/releases/tag/dimethyl-models.
+
+### Fixed
+
+- "No match found for given type params" for `IntPtr.__overloads__[Int64]` in `pythonnet>=3` for `DotNetArrayToNPArray()`, see https://github.com/MannLabs/alphapeptdeep/blob/main/peptdeep/legacy/thermo_raw/pyrawfilereader.py#L77
 
 ## 0.4.0 - 2022.12.28
 
@@ -30,8 +40,6 @@ Follow the changelog format from https://keepachangelog.com/en/1.0.0/.
 
 - More features (mostly about modifications) in GUI.
 - Peptide labeling and special modifications in `peptdeep.protein.fasta.PredictSpecLibFasta`.
-- `user_defined_modifications` in `peptdeep/constants/global_settings.yaml` for CLI and GUI, it allows us to define our own modifications.
-- `other_modification_mapping` in `peptdeep/constants/global_settings.yaml` for CLI and GUI, it allows us to read arbitrary PTMs from other search engines.
 - Use queue system in `peptdeep/webui/serve.py` to reduce conflicts of prediction.
 
 ### Changed

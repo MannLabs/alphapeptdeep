@@ -2,6 +2,6 @@ name: peptdeep
 channels:
   - defaults
 dependencies:
-  - python=3.8
+  - python=3.9
   - pip:
     - -e ../.[development]

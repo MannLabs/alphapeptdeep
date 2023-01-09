@@ -11,7 +11,7 @@ except ImportError:
     pass
 
 __project__ = "peptdeep"
-__version__ = "0.5.0"
+__version__ = "1.0.0"
 __license__ = "Apache 2.0"
 __description__ = "The AlphaX Deep (PeptDeep) Learning Platform for Proteomics"
 __author__ = "Mann Labs"
@@ -24,13 +24,13 @@ __keywords__ = [
     "proteomics",
     "AlphaX ecosystem",
 ]
-__python_version__ = ">=3.8,<3.10"
+__python_version__ = ">=3.8"
 __classifiers__ = [
     # "Development Status :: 1 - Planning",
     # "Development Status :: 2 - Pre-Alpha",
     # "Development Status :: 3 - Alpha",
-    "Development Status :: 4 - Beta",
-    # "Development Status :: 5 - Production/Stable",
+    # "Development Status :: 4 - Beta",
+    "Development Status :: 5 - Production/Stable",
     # "Development Status :: 6 - Mature",
     # "Development Status :: 7 - Inactive"
     "Intended Audience :: Science/Research",

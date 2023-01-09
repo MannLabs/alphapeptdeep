@@ -2,13 +2,13 @@
 
 [![Default installation and tests](https://github.com/MannLabs/alphapeptdeep/actions/workflows/pip_installation.yml/badge.svg)](https://github.com/MannLabs/alphapeptdeep/actions/workflows/pip_installation.yml)
 [![Publish on PyPi and release on GitHub](https://github.com/MannLabs/alphapeptdeep/actions/workflows/publish_and_release.yml/badge.svg)](https://github.com/MannLabs/alphapeptdeep/actions/workflows/publish_and_release.yml)
+[![Documentation Status](https://readthedocs.org/projects/alphapeptdeep/badge/?version=latest)](https://alphapeptdeep.readthedocs.io/en/latest/?badge=latest)
 [![pypi](https://img.shields.io/pypi/v/peptdeep)](https://pypi.org/project/peptdeep)
 [![GitHub release](https://img.shields.io/github/v/release/mannlabs/alphapeptdeep?display_name=tag)](https://github.com/MannLabs/alphapeptdeep/releases)
 [![GitHub downloads](https://img.shields.io/github/downloads/mannlabs/alphapeptdeep/total?label=github%20downloads)](https://github.com/MannLabs/alphapeptdeep/releases)
 [![Downloads@pre-train-models](https://img.shields.io/github/downloads/mannlabs/alphapeptdeep/pre-trained-models/total)](https://github.com/MannLabs/alphapeptdeep/releases/tag/pre-trained-models)
 [![pip downloads](https://img.shields.io/pypi/dm/peptdeep?color=blue&label=pip%20downloads)](https://pypi.org/project/peptdeep)
 ![Python](https://img.shields.io/pypi/pyversions/peptdeep)
-[![Documentation Status](https://readthedocs.org/projects/alphapeptdeep/badge/?version=latest)](https://alphapeptdeep.readthedocs.io/en/latest/?badge=latest)
 
 - [**About**](#about)
 - [**License**](#license)
@@ -59,8 +59,11 @@ For documentation, see [readthedocs](https://alphapeptdeep.readthedocs.io/en/lat
 
 ### Subsequent projects of AlphaPeptDeep
 
-- [**peptdeep_hla**](https://github.com/MannLabs/PeptDeep-HLA): DL
-  models that predict if a HLA peptide is present or not.
+- [**peptdeep_hla**](https://github.com/MannLabs/PeptDeep-HLA): the DL model that predict if a peptide is presented by indivudual HLA or not.
+
+### Other pre-trained MS2/RT/CCS models
+
+- [**Dimethyl**](https://github.com/MannLabs/alphapeptdeep/releases/tag/dimethyl-models): the MS2/RT/CCS models for Dimethyl-labeled peptides.
 
 ------------------------------------------------------------------------
 
@@ -233,7 +236,7 @@ otherwise *dependancy conflicts can occur with already existing
 packages*.
 
 ``` bash
-conda create --name peptdeep python=3.8 -y
+conda create --name peptdeep python=3.9 -y
 conda activate peptdeep
 ```
 
@@ -355,81 +358,88 @@ as a template, users can edit the yaml file to run other commands.
 
 Here is a section of the yaml file which controls global parameters for
 different tasks:
+  
+```
+model_url: "https://github.com/MannLabs/alphapeptdeep/releases/download/pre-trained-models/pretrained_models.zip"
 
-    model_url: "https://github.com/MannLabs/alphapeptdeep/releases/download/pre-trained-models/pretrained_models.zip"
+task_type: library
+task_type_choices:
+  - library
+  - train
+  - rescore
+thread_num: 8
+torch_device:
+  device_type: gpu
+  device_type_choices:
+    - gpu
+    - mps
+    - cpu
+  device_ids: []
 
-    thread_num: 8
-    torch_device:
-      name: gpu
-      ids: []
-      name_choices:
-        - gpu
-        - cpu
-        - mps
+log_level: info
+log_level_choices:
+  - debug
+  - info
+  - warning
+  - error
+  - critical
 
-    log_level: info
-    log_level_choices:
-      - debug
-      - info
-      - warning
-      - error
-      - critical
+common:
+  modloss_importance_level: 1.0
+  user_defined_modifications: {}
+  # For example,
+  # user_defined_modifications:
+  #   "Dimethyl2@Any N-term": 
+  #     composition: "H(2)2H(2)C(2)"
+  #     modloss_composition: "H(0)" # can be without if no modloss
+  #   "Dimethyl2@K":
+  #     composition: "H(2)2H(2)C(2)"
+  #   "Dimethyl6@Any N-term":
+  #     composition: "2H(4)13C(2)"
+  #   "Dimethyl6@K":
+  #     composition: "2H(4)13C(2)"
 
-    common:
-      modloss_importance_level: 1.0
-      user_defined_modifications: {}
-      # For example,
-      # user_defined_modifications:
-      #   "Dimethyl2@Any N-term": 
-      #     composition: "H(2)2H(2)C(2)"
-      #     modloss_composition: "H(0)" # can be without if no modloss
-      #   "Dimethyl2@K":
-      #     composition: "H(2)2H(2)C(2)"
-      #   "Dimethyl6@Any N-term":
-      #     composition: "2H(4)13C(2)"
-      #   "Dimethyl6@K":
-      #     composition: "2H(4)13C(2)"
+peak_matching:
+  ms2_ppm: True
+  ms2_tol_value: 20.0
+  ms1_ppm: True
+  ms1_tol_value: 20.0
 
-    peak_matching:
-      ms2_ppm: True
-      ms2_tol_value: 20.0
-      ms1_ppm: True
-      ms1_tol_value: 20.0
-
-    model_mgr:
-      default_nce: 30.0
-      default_instrument: Lumos
-      mask_modloss: True
-      model_type: generic
-      model_choices:
-      - generic
-      - phos
-      - hla # same as generic
-      - digly
-      external_ms2_model: ''
-      external_rt_model: ''
-      external_ccs_model: ''
-      instrument_group:
-        Lumos: Lumos
-        QE: QE
-        timsTOF: timsTOF
-        SciexTOF: SciexTOF
-        Fusion: Lumos
-        Eclipse: Lumos
-        Velos: Lumos # not important
-        Elite: Lumos # not important
-        OrbitrapTribrid: Lumos
-        ThermoTribrid: Lumos
-        QE+: QE
-        QEHF: QE
-        QEHFX: QE
-        Exploris: QE
-        Exploris480: QE
-      predict:
-        batch_size_ms2: 512
-        batch_size_rt_ccs: 1024
-        verbose: True
-        multiprocessing: True
+model_mgr:
+  default_nce: 30.0
+  default_instrument: Lumos
+  mask_modloss: True
+  model_type: generic
+  model_choices:
+  - generic
+  - phos
+  - hla # same as generic
+  - digly
+  external_ms2_model: ''
+  external_rt_model: ''
+  external_ccs_model: ''
+  instrument_group:
+    Lumos: Lumos
+    QE: QE
+    timsTOF: timsTOF
+    SciexTOF: SciexTOF
+    Fusion: Lumos
+    Eclipse: Lumos
+    Velos: Lumos # not important
+    Elite: Lumos # not important
+    OrbitrapTribrid: Lumos
+    ThermoTribrid: Lumos
+    QE+: QE
+    QEHF: QE
+    QEHFX: QE
+    Exploris: QE
+    Exploris480: QE
+  predict:
+    batch_size_ms2: 512
+    batch_size_rt_ccs: 1024
+    verbose: True
+    multiprocessing: True
+```
 
 The `model_mgr` section in the yaml defines the common settings for
 MS2/RT/CCS prediction.
@@ -447,66 +457,83 @@ file (exported by [export-settings](#export-settings)). All the
 essential settings are in the `library` section in the settings_yaml
 file:
 
-    library:
-      input:
-        infile_type: fasta
-        infile_type_choices:
-        - fasta
-        - sequence_table
-        - peptide_table
-        - precursor_table
-        infiles: 
-        - xxx.fasta
-        fasta:
-          protease: '([KR])'
-          protease_choices:
-          - 'trypsin/P'
-          - '([KR])'
-          - 'trypsin'
-          - '([KR](?=[^P]))'
-          - 'lys-c'
-          - 'K'
-          - 'lys-n'
-          - '\w(?=K)'
-          - 'chymotrypsin'
-          max_miss_cleave: 2
-        fix_mods: 
-        - Carbamidomethyl@C
-        var_mods:
-        - Acetyl@Protein N-term
-        - Oxidation@M
-        min_var_mod_num: 0
-        max_var_mod_num: 2
-        min_precursor_charge: 2
-        max_precursor_charge: 4
-        min_peptide_len: 7
-        max_peptide_len: 35
-        min_precursor_mz: 200.0
-        max_precursor_mz: 2000.0
-        decoy: pseudo_reverse
-        decoy_choices:
-        - pseudo_reverse
-        - diann
-        - None
-        max_frag_charge: 2
-        frag_types:
-        - b
-        - y
-      output_folder: "{PEPTDEEP_HOME}/spec_libs"
-      output_tsv:
-        enabled: False
-        min_fragment_mz: 200
-        max_fragment_mz: 2000
-        min_relative_intensity: 0.01
-        keep_higest_k_peaks: 12
-        translate_batch_size: 1000000
-        translate_mod_to_unimod_id: False
+```
+library:
+  infile_type: fasta
+  infile_type_choices:
+  - fasta
+  - sequence_table
+  - peptide_table # sequence with mods and mod_sites
+  - precursor_table # peptide with charge state
+  infiles: 
+  - xxx.fasta
+  fasta:
+    protease: 'trypsin'
+    protease_choices:
+    - 'trypsin'
+    - '([KR])'
+    - 'trypsin_not_P'
+    - '([KR](?=[^P]))'
+    - 'lys-c'
+    - 'K'
+    - 'lys-n'
+    - '\w(?=K)'
+    - 'chymotrypsin'
+    - 'asp-n'
+    - 'glu-c'
+    max_miss_cleave: 2
+    add_contaminants: False
+  fix_mods: 
+  - Carbamidomethyl@C
+  var_mods:
+  - Acetyl@Protein N-term
+  - Oxidation@M
+  special_mods: [] # normally for Phospho or GlyGly@K
+  special_mods_cannot_modify_pep_n_term: False
+  special_mods_cannot_modify_pep_c_term: False
+  labeling_channels: {}
+  # For example,
+  # labeling_channels:
+  #   0: ['Dimethyl@Any N-term','Dimethyl@K']
+  #   4: ['Dimethyl:2H(2)@Any N-term','Dimethyl:2H(2)@K']
+  #   8: [...]
+  min_var_mod_num: 0
+  max_var_mod_num: 2
+  min_special_mod_num: 0
+  max_special_mod_num: 1
+  min_precursor_charge: 2
+  max_precursor_charge: 4
+  min_peptide_len: 7
+  max_peptide_len: 35
+  min_precursor_mz: 200.0
+  max_precursor_mz: 2000.0
+  decoy: pseudo_reverse
+  decoy_choices:
+  - pseudo_reverse
+  - diann
+  - None
+  max_frag_charge: 2
+  frag_types:
+  - b
+  - y
+  rt_to_irt: True
+  generate_precursor_isotope: False
+  output_folder: "{PEPTDEEP_HOME}/spec_libs"
+  output_tsv:
+    enabled: False
+    min_fragment_mz: 200
+    max_fragment_mz: 2000
+    min_relative_intensity: 0.001
+    keep_higest_k_peaks: 12
+    translate_batch_size: 1000000
+    translate_mod_to_unimod_id: False
+```
 
-peptdeep will load sequence data based on `library:input:infile_type`
-and `library:input:infiles` for library prediction.
-`library:input:infiles` contains the list of files with
-`library:input:infile_type` defined in
-`library:input:infile_type_choices`:
+peptdeep will load sequence data based on `library:infile_type`
+and `library:infiles` for library prediction.
+`library:infiles` contains the list of files with
+`library:infile_type` defined in
+`library:infile_type_choices`:
 
 - fasta: Protein fasta files, peptdeep will digest the protein sequences
   into peptide sequences.
@@ -540,30 +567,12 @@ df = pd.DataFrame({
 df[['sequence']]
 ```
 
-<div>
-<table border="1" class="dataframe">
-  <thead>
-    <tr style="text-align: right;">
-      <th></th>
-      <th>sequence</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th>0</th>
-      <td>ACDEFGHIK</td>
-    </tr>
-    <tr>
-      <th>1</th>
-      <td>LMNPQRSTVK</td>
-    </tr>
-    <tr>
-      <th>2</th>
-      <td>WYVSTR</td>
-    </tr>
-  </tbody>
-</table>
-</div>
+|  | sequence |
+| --- | --- |
+| 0 | ACDEFGHIK |
+| 1 | LMNPQRSTVK |
+| 2 | WYVSTR |
+
 
 ##### peptide_table
 
@@ -571,38 +580,11 @@ df[['sequence']]
 df[['sequence','mods','mod_sites']]
 ```
 
-<div>
-<table border="1" class="dataframe">
-  <thead>
-    <tr style="text-align: right;">
-      <th></th>
-      <th>sequence</th>
-      <th>mods</th>
-      <th>mod_sites</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th>0</th>
-      <td>ACDEFGHIK</td>
-      <td>Carbamidomethyl@C</td>
-      <td>2</td>
-    </tr>
-    <tr>
-      <th>1</th>
-      <td>LMNPQRSTVK</td>
-      <td>Acetyl@Protein N-term;Phospho@S</td>
-      <td>0;7</td>
-    </tr>
-    <tr>
-      <th>2</th>
-      <td>WYVSTR</td>
-      <td></td>
-      <td></td>
-    </tr>
-  </tbody>
-</table>
-</div>
+|  | sequence | mods | mod_sites |
+| --- | --- | --- | --- |
+| 0 | ACDEFGHIK | Carbamidomethyl@C | 2 |
+| 1 | LMNPQRSTVK | Acetyl@Protein N-term;Phospho@S | 0;7 |
+| 2 | WYVSTR | | |
 
 ##### precursor_table
 
@@ -610,42 +592,11 @@ df[['sequence','mods','mod_sites']]
 df
 ```
 
-<div>
-<table border="1" class="dataframe">
-  <thead>
-    <tr style="text-align: right;">
-      <th></th>
-      <th>sequence</th>
-      <th>mods</th>
-      <th>mod_sites</th>
-      <th>charge</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th>0</th>
-      <td>ACDEFGHIK</td>
-      <td>Carbamidomethyl@C</td>
-      <td>2</td>
-      <td>2</td>
-    </tr>
-    <tr>
-      <th>1</th>
-      <td>LMNPQRSTVK</td>
-      <td>Acetyl@Protein N-term;Phospho@S</td>
-      <td>0;7</td>
-      <td>3</td>
-    </tr>
-    <tr>
-      <th>2</th>
-      <td>WYVSTR</td>
-      <td></td>
-      <td></td>
-      <td>1</td>
-    </tr>
-  </tbody>
-</table>
-</div>
+|  | sequence | mods | mod_sites | charge |
+| --- | --- | --- | --- | --- |
+| 0 | ACDEFGHIK | Carbamidomethyl@C | 2 | 2 | 
+| 1 | LMNPQRSTVK | Acetyl@Protein N-term;Phospho@S | 0;7 | 3 |
+| 2 | WYVSTR | | | 1 |
 
 > Columns of `proteins` and `genes` are optional for these txt/tsv/csv
 > files.
@@ -653,14 +604,15 @@ df
 peptdeep supports multiple files for library prediction, for example (in
 the yaml file):
 
-    library:
-      input:
-        ...
-        infile_type: fasta
-        infiles:
-        - /path/to/fasta/human.fasta
-        - /path/to/fasta/yeast.fasta
-        ...
+```
+library:
+  ...
+  infile_type: fasta
+  infiles:
+  - /path/to/fasta/human.fasta
+  - /path/to/fasta/yeast.fasta
+  ...
+```
 
 The library in HDF5 (.hdf) format will be saved into
 `library:output_folder`. If `library:output_tsv:enabled` is True, a TSV
@@ -680,54 +632,57 @@ based on `model_mgr:transfer:psm_files` and
 `model_mgr:transfer:psm_type`. All yaml settings (exported by
 [export-settings](#export-settings)) related to this command are:
 
-    model_mgr:
-      transfer:
-        model_output_folder: "{PEPTDEEP_HOME}/refined_models"
-        epoch_ms2: 20
-        warmup_epoch_ms2: 10
-        batch_size_ms2: 512
-        lr_ms2: 0.0001
-        epoch_rt_ccs: 40
-        warmup_epoch_rt_ccs: 10
-        batch_size_rt_ccs: 1024
-        lr_rt_ccs: 0.0001
-        verbose: False
-        grid_nce_search: True
-        grid_nce_first: 15.0
-        grid_nce_last: 45.0
-        grid_nce_step: 3.0
-        grid_instrument: ['Lumos']
-        psm_type: alphapept
-        psm_type_choices:
-          - alphapept
-          - pfind
-          - maxquant
-          - diann
-          - speclib_tsv
-        psm_files: []
-        ms_file_type: alphapept_hdf
-        ms_file_type_choices:
-          - alphapept_hdf
-          - thermo_raw
-          - mgf
-          - mzml
-        ms_files: []
-        psm_num_to_train_ms2: 100000000
-        psm_num_per_mod_to_train_ms2: 50
-        psm_num_to_train_rt_ccs: 100000000
-        psm_num_per_mod_to_train_rt_ccs: 50
-        top_n_mods_to_train: 10
-        other_modification_mapping: {} 
-        # alphabase mod to mods of other engines
-        # For example,
-        # other_modification_mapping:
-        #   Dimethyl@Any N-term: 
-        #     - _(Dimethyl-n-0)
-        #     - _(Dimethyl)
-        #   Dimethyl:2H(2)@K: 
-        #     - K(Dimethyl-K-2)
-        #   ...
-
+```
+model_mgr:
+  transfer:
+    model_output_folder: "{PEPTDEEP_HOME}/refined_models"
+    epoch_ms2: 20
+    warmup_epoch_ms2: 10
+    batch_size_ms2: 512
+    lr_ms2: 0.0001
+    epoch_rt_ccs: 40
+    warmup_epoch_rt_ccs: 10
+    batch_size_rt_ccs: 1024
+    lr_rt_ccs: 0.0001
+    verbose: False
+    grid_nce_search: False
+    grid_nce_first: 15.0
+    grid_nce_last: 45.0
+    grid_nce_step: 3.0
+    grid_instrument: ['Lumos']
+    psm_type: alphapept
+    psm_type_choices:
+      - alphapept
+      - pfind
+      - maxquant
+      - diann
+      - speclib_tsv
+    psm_files: []
+    ms_file_type: alphapept_hdf
+    ms_file_type_choices:
+      - alphapept_hdf
+      - thermo_raw
+      - mgf
+      - mzml
+    ms_files: []
+    psm_num_to_train_ms2: 100000000
+    psm_num_per_mod_to_train_ms2: 50
+    psm_num_to_test_ms2: 0
+    psm_num_to_train_rt_ccs: 100000000
+    psm_num_per_mod_to_train_rt_ccs: 50
+    psm_num_to_test_rt_ccs: 0
+    top_n_mods_to_train: 10
+    other_modification_mapping: {} 
+    # alphabase modification to modifications of other search engines
+    # For example,
+    # other_modification_mapping:
+    #   Dimethyl@Any N-term: 
+    #     - _(Dimethyl-n-0)
+    #     - _(Dimethyl)
+    #   Dimethyl:2H(2)@K: 
+    #     - K(Dimethyl-K-2)
+    #   ...
+```
 For DDA data, peptdeep can also extract MS2 intensities from the
 spectrum files from `model_mgr:transfer:ms_files` and
 `model_mgr:transfer:ms_file_type` for all PSMs. This will enable the
@@ -737,19 +692,21 @@ For DIA data, only RT and CCS (if timsTOF) models will be refined.
 
 For example of the settings yaml:
 
-    model_mgr:
-      transfer:
-        ...
-        psm_type: pfind
-        psm_files:
-        - /path/to/pFind.spectra
-        - /path/to/other/pFind.spectra
+```
+model_mgr:
+  transfer:
+    ...
+    psm_type: pfind
+    psm_files:
+    - /path/to/pFind.spectra
+    - /path/to/other/pFind.spectra
 
-        ms_file_type: thermo_raw
-        ms_files:
-        - /path/to/raw1.raw
-        - /path/to/raw2.raw
-        ...
+    ms_file_type: thermo_raw
+    ms_files:
+    - /path/to/raw1.raw
+    - /path/to/raw2.raw
+    ...
+```
 
 The refined models will be saved in
 `model_mgr:transfer:model_output_folder`. After transfer learning, users
@@ -768,71 +725,72 @@ This command will apply Percolator to rescore DDA PSMs in
 `percolator:input_files:psm_type`. All yaml settings (exported by
 [export-settings](#export-settings)) related to this command are:
 
-    percolator:
-      require_model_tuning: True
-      raw_num_to_tune: 8
+```
+percolator:
+  require_model_tuning: True
+  raw_num_to_tune: 8
 
-      require_raw_specific_tuning: True
-      raw_specific_ms2_tuning: False
-      psm_num_per_raw_to_tune: 200
-      epoch_per_raw_to_tune: 5
+  require_raw_specific_tuning: True
+  raw_specific_ms2_tuning: False
+  psm_num_per_raw_to_tune: 200
+  epoch_per_raw_to_tune: 5
 
-      multiprocessing: True
+  multiprocessing: True
 
-      top_k_frags_to_calc_spc: 10
-      calibrate_frag_mass_error: False
-      max_perc_train_sample: 1000000
-      min_perc_train_sample: 100
+  top_k_frags_to_calc_spc: 10
+  calibrate_frag_mass_error: False
+  max_perc_train_sample: 1000000
+  min_perc_train_sample: 100
 
-      percolator_backend: sklearn
-      percolator_backend_choices:
-        - sklearn
-        - pytorch
-      percolator_model: linear
-      percolator_model_choices:
-        pytorch_as_backend:
-          - linear # not fully tested, performance may be unstable
-          - mlp # not implemented yet
-        sklearn_as_backend:
-          - linear # logistic regression
-          - random_forest
-      lr_percolator_torch_model: 0.1 # learning rate, only used when percolator_backend==pytorch 
-      percolator_iter_num: 5 # percolator iteration number
-      cv_fold: 1
-      fdr: 0.01
-      fdr_level: psm
-      fdr_level_choices:
-        - psm
-        - precursor
-        - peptide
-        - sequence
-      use_fdr_for_each_raw: False
-      frag_types: ['b_z1','b_z2','y_z1','y_z2']
-      input_files:
-        psm_type: alphapept
-        psm_type_choices:
-          - alphapept
-          - pfind
-          - maxquant
-        psm_files: []
-        ms_file_type: alphapept_hdf
-        ms_file_type_choices:
-          - hdf
-          - thermo_raw
-          - mgf
-          - mzml
-        ms_files: []
-        other_score_column_mapping:
-          alphapept: {}
-          pfind: 
-            raw_score: Raw_Score
-          msfragger:
-            hyperscore: hyperscore
-            nextscore: nextscore
-          maxquant: {}
-      output_folder: "{PEPTDEEP_HOME}/rescore"
+  percolator_backend: sklearn
+  percolator_backend_choices:
+    - sklearn
+    - pytorch
+  percolator_model: linear
+  percolator_model_choices:
+    pytorch_as_backend:
+      - linear # not fully tested, performance may be unstable
+      - mlp # not implemented yet
+    sklearn_as_backend:
+      - linear # logistic regression
+      - random_forest
+  lr_percolator_torch_model: 0.1 # learning rate, only used when percolator_backend==pytorch 
+  percolator_iter_num: 5 # percolator iteration number
+  cv_fold: 1
+  fdr: 0.01
+  fdr_level: psm
+  fdr_level_choices:
+    - psm
+    - precursor
+    - peptide
+    - sequence
+  use_fdr_for_each_raw: False
+  frag_types: ['b_z1','b_z2','y_z1','y_z2']
+  input_files:
+    psm_type: alphapept
+    psm_type_choices:
+      - alphapept
+      - pfind
+    psm_files: []
+    ms_file_type: alphapept_hdf
+    ms_file_type_choices:
+      - alphapept_hdf
+      - thermo_raw # if alpharaw is installed
+      - mgf
+      - mzml
+    ms_files: []
+    other_score_column_mapping:
+      alphapept: {}
+      pfind: 
+        raw_score: Raw_Score
+      msfragger:
+        hyperscore: hyperscore
+        nextscore: nextscore
+      maxquant: {}
+  output_folder: "{PEPTDEEP_HOME}/rescore"
+```
 
-Transfer learning will be applied if `percolator:require_model_tuning`
+Transfer learning will be applied when rescoring if `percolator:require_model_tuning`
 is True.
 
 The corresponding MS files (`percolator:input_files:ms_files` and
@@ -844,7 +802,7 @@ experimental fragment intensities.
 #### install-models
 
 ``` bash
-peptdeep install-models --model-file url_or_local_model_zip --overwrite True
+peptdeep install-models [--model-file url_or_local_model_zip] --overwrite True
 ```
 
 Running peptdeep for the first time, it will download and install models
@@ -950,7 +908,7 @@ import peptdeep.model.generic_property_prediction # model shop
 
 Building new DL models for peptide property prediction is one of the key features of AlphaPeptDeep. The key functionalities are [`ModelInterface`](https://alphapeptdeep.readthedocs.io/en/latest/model/model_interface.html#peptdeep.model.model_interface.ModelInterface) and the pre-designed models and model interfaces in the model shop (module [`peptdeep.model.generic_property_prediction`](https://alphapeptdeep.readthedocs.io/en/latest/model/generic_property_prediction.html)).
 
-For example, we can built a HLA classifier that distinguishes HLA peptides from non-HLA peptides, see [tutorial_HLA_prediction.ipynb](https://github.com/MannLabs/alphapeptdeep/blob/main/docs/nbs/tutorial_HLA_prediction.ipynb) for details.
+For example, we can built a HLA classifier that distinguishes HLA peptides from non-HLA peptides, see https://github.com/MannLabs/PeptDeep-HLA for details.
 
 ------------------------------------------------------------------------
 

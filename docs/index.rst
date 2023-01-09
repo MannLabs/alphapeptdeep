@@ -1,7 +1,7 @@
 Documentation for AlphaPeptDeep (PeptDeep)
 =====================================
 
-The deep learning framework MS proteomics. 
+The deep learning framework for MS proteomics. 
 For more information, see AlphaPeptDeep on `GitHub <https://github.com/MannLabs/alphapeptdeep/>`_.
 
 .. toctree::
