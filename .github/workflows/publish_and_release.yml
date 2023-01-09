@@ -158,16 +158,16 @@ jobs:
         run: |
           cd release/pypi
           . ./prepare_pypi_wheel.sh
-      # - name: Publish distribution to Test PyPI
-      #   uses: pypa/gh-action-pypi-publish@release/v1
-      #   with:
-      #     password: ${{ secrets.TEST_PYPI_PEPTDEEP_API_TOKEN }}
-      #     repository_url: https://test.pypi.org/legacy/
-      # - name: Test PyPI test release
-      #   shell: bash -l {0}
-      #   run: |
-      #     cd release/pypi
-      #     . ./install_test_pypi_wheel.sh
+      - name: Publish distribution to Test PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          password: ${{ secrets.TEST_PYPI_PEPTDEEP_API_TOKEN }}
+          repository_url: https://test.pypi.org/legacy/
+      - name: Test PyPI test release
+        shell: bash -l {0}
+        run: |
+          cd release/pypi
+          . ./install_test_pypi_wheel.sh
       - name: Publish distribution to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
