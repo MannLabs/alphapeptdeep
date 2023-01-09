@@ -2,7 +2,7 @@
 
 Follow the changelog format from https://keepachangelog.com/en/1.0.0/.
 
-## 1.0.0 - 2023.01.08 (key changes of previous versions)
+## 1.0.0 - 2023.01.09 (key changes of previous versions)
 
 ### Changed
 
@@ -18,8 +18,11 @@ Follow the changelog format from https://keepachangelog.com/en/1.0.0/.
 - `other_modification_mapping` in `peptdeep/constants/global_settings.yaml` for CLI and GUI, it allows us to read arbitrary PTMs from other search engines.
 - `special_mods` in global_settings for special modifications like GlyGly@K or Phospho.
 - `labeling_channels` in global_settings.
-- TODO dimethyl models in pretrained_models.zip.
+- MS2/RT/CCS models for Dimethyl-labeled peptides, see https://github.com/MannLabs/alphapeptdeep/releases/tag/dimethyl-models.
 
+### Fixed
+
+- "No match found for given type params" for `IntPtr.__overloads__[Int64]` in `pythonnet>=3` for `DotNetArrayToNPArray()`, see https://github.com/MannLabs/alphapeptdeep/blob/main/peptdeep/legacy/thermo_raw/pyrawfilereader.py#L77
 
 ## 0.4.0 - 2022.12.28
 

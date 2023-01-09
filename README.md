@@ -59,8 +59,11 @@ For documentation, see [readthedocs](https://alphapeptdeep.readthedocs.io/en/lat
 
 ### Subsequent projects of AlphaPeptDeep
 
-- [**peptdeep_hla**](https://github.com/MannLabs/PeptDeep-HLA): DL
-  models that predict if a HLA peptide is present or not.
+- [**peptdeep_hla**](https://github.com/MannLabs/PeptDeep-HLA): the DL model that predict if a peptide is presented by indivudual HLA or not.
+
+### Other pre-trained MS2/RT/CCS models
+
+- [**Dimethyl**](https://github.com/MannLabs/alphapeptdeep/releases/tag/dimethyl-models): the MS2/RT/CCS models for Dimethyl-labeled peptides.
 
 ------------------------------------------------------------------------
 
