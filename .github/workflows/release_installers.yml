@@ -10,7 +10,7 @@ jobs:
       version: ${{ steps.master_version_bumped.outputs.version }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - uses: conda-incubator/setup-miniconda@v2
         with:
           auto-update-conda: true
@@ -21,7 +21,7 @@ jobs:
         run: |
           cd misc
           . ./get_version.sh
-          echo ::set-output name=version::$current_version
+          echo name=version::$current_version >> $GITHUB_OUTPUT
   Create_Draft_On_GitHub:
     runs-on: ubuntu-latest
     needs: Version_Bumped
@@ -43,7 +43,7 @@ jobs:
     needs: Create_Draft_On_GitHub
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - uses: conda-incubator/setup-miniconda@v2
         with:
           auto-update-conda: true
@@ -75,7 +75,7 @@ jobs:
     needs: Create_Draft_On_GitHub
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - uses: conda-incubator/setup-miniconda@v2
         with:
           auto-update-conda: true
@@ -107,7 +107,7 @@ jobs:
     needs: Create_Draft_On_GitHub
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - uses: conda-incubator/setup-miniconda@v2
         with:
           auto-update-conda: true

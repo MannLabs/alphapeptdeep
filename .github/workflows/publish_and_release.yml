@@ -13,7 +13,7 @@ jobs:
       version: ${{ steps.master_version_bumped.outputs.version }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - uses: conda-incubator/setup-miniconda@v2
         with:
           auto-update-conda: true
@@ -24,7 +24,7 @@ jobs:
         run: |
           cd misc
           . ./check_version.sh
-          echo ::set-output name=version::$current_version
+          echo name=version::$current_version >> $GITHUB_OUTPUT
   Create_Draft_On_GitHub:
     runs-on: ubuntu-latest
     needs: Version_Bumped
@@ -46,7 +46,7 @@ jobs:
     needs: Create_Draft_On_GitHub
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - uses: conda-incubator/setup-miniconda@v2
         with:
           auto-update-conda: true
@@ -78,7 +78,7 @@ jobs:
     needs: Create_Draft_On_GitHub
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - uses: conda-incubator/setup-miniconda@v2
         with:
           auto-update-conda: true
@@ -110,7 +110,7 @@ jobs:
     needs: Create_Draft_On_GitHub
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - uses: conda-incubator/setup-miniconda@v2
         with:
           auto-update-conda: true
@@ -145,7 +145,7 @@ jobs:
     needs: Version_Bumped
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - uses: conda-incubator/setup-miniconda@v2
         with:
           auto-update-conda: true
@@ -159,7 +159,7 @@ jobs:
           cd release/pypi
           . ./prepare_pypi_wheel.sh
       - name: Publish distribution to Test PyPI
-        uses: pypa/gh-action-pypi-publish@master
+        uses: pypa/gh-action-pypi-publish@release/v1
         with:
           password: ${{ secrets.TEST_PYPI_PEPTDEEP_API_TOKEN }}
           repository_url: https://test.pypi.org/legacy/
@@ -169,7 +169,7 @@ jobs:
           cd release/pypi
           . ./install_test_pypi_wheel.sh
       - name: Publish distribution to PyPI
-        uses: pypa/gh-action-pypi-publish@master
+        uses: pypa/gh-action-pypi-publish@release/v1
         with:
           password: ${{ secrets.PYPI_PEPTDEEP_API_TOKEN }}
   Test_PyPi_Release:
@@ -180,7 +180,7 @@ jobs:
       matrix:
         os: [ubuntu-latest, macOS-latest, windows-latest]
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: conda-incubator/setup-miniconda@v2
         with:
           auto-update-conda: true
