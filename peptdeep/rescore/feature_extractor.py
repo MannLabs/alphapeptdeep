@@ -873,7 +873,7 @@ class ScoreFeatureExtractor:
                 frag_types, ms2_ppm, ms2_tol
             )
 
-        logging.info('Extracting peptdeep features ...')
+        logging.info(f'Extracting peptdeep features for {len(psm_df)} PSMs ...')
         result_psm_list = []
         groupby = psm_df.groupby('raw_name')
         for raw_name, df in process_bar(groupby, groupby.ngroups):
@@ -1104,7 +1104,7 @@ class ScoreFeatureExtractorMP(ScoreFeatureExtractor):
                 )
 
         logging.info(
-            'Extracting peptdeep features with multiprocessing ...'
+            f'Extracting peptdeep features for {len(psm_df)} PSMs with multiprocessing ...'
         )
         df_groupby_raw = psm_df.groupby('raw_name')
         result_psm_list = []

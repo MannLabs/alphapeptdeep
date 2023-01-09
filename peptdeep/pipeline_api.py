@@ -358,7 +358,7 @@ def rescore():
             perc_settings['input_files']['psm_type']
         )
 
-        ms_file_dict = percolator.parse_ms_files_to_dict(
+        ms_file_dict = parse_ms_file_names_to_dict(
             perc_settings['input_files']['ms_files']
         )
 

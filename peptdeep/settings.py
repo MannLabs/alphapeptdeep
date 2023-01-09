@@ -31,6 +31,11 @@ def _refine_global_settings():
             PEPTDEEP_HOME=global_settings['PEPTDEEP_HOME']
         )
     )
+    global_settings['percolator']['output_folder']=(
+        global_settings['percolator']['output_folder'].format(
+            PEPTDEEP_HOME=global_settings['PEPTDEEP_HOME']
+        )
+    )
     for key, val in list(global_settings['model_mgr'][
         'instrument_group'
     ].items()):
