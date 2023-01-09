@@ -1,5 +1,5 @@
 cd ../..
-conda create -n peptdeep_pypi_wheel python=3.9
+conda create -n peptdeep_pypi_wheel python=3.10
 conda activate peptdeep_pypi_wheel
 pip install twine
 rm -rf dist

@@ -236,7 +236,7 @@ otherwise *dependancy conflicts can occur with already existing
 packages*.
 
 ``` bash
-conda create --name peptdeep python=3.9 -y
+conda create --name peptdeep python=3.10 -y
 conda activate peptdeep
 ```
 
