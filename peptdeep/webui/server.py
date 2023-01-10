@@ -4,7 +4,7 @@ from alphabase.yaml_utils import load_yaml
 import time
 import os
 import shutil
-import multiprocessing as mp
+import torch.multiprocessing as mp
 
 from peptdeep.pipeline_api import (
     generate_library, 
