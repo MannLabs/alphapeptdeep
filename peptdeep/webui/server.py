@@ -2,7 +2,7 @@ import time
 import os
 import sys
 import shutil
-import torch.multiprocessing as mp
+import multiprocessing as mp
 
 from peptdeep.pipeline_api import (
     generate_library, 
@@ -101,11 +101,7 @@ class PeptDeepServer:
 
     def start(self):
         if self.process is None:
-            # self.process = mp.get_context('spawn').Process(target=serve)
-            if sys.platform.lower().startswith('linux'):
-                self.process = mp.get_context('spawn').Process(target=serve)
-            else:
-                self.process = mp.Process(target=serve)
+            self.process = mp.Process(target=serve)
             self.process.start()
 
             with open(self._process_file, 'w') as f:
