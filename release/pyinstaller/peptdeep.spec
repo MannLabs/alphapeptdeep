@@ -105,32 +105,9 @@ gui_a = Analysis(
 	noarchive=False
 )
 
-cli_a = Analysis(
-	[cli_script],
-	pathex=[location],
-	binaries=binaries,
-	datas=datas,
-	hiddenimports=hidden_imports,
-	hookspath=[],
-	runtime_hooks=[],
-	excludes=[h for h in hidden_imports if "datashader" in h],
-	win_no_prefer_redirects=False,
-	win_private_assemblies=False,
-	cipher=block_cipher,
-	noarchive=False
-)
-
-MERGE( (gui_a, 'gui', 'gui'), (cli_a, 'cli', 'cli') )
-
-
 gui_pyz = PYZ(
 	gui_a.pure,
 	gui_a.zipped_data,
-	cipher=block_cipher
-)
-cli_pyz = PYZ(
-	cli_a.pure,
-	cli_a.zipped_data,
 	cipher=block_cipher
 )
 
@@ -150,22 +127,28 @@ if sys.platform[:5] == "linux":
 		upx_exclude=[],
 		icon=icon
 	)
-	cli_exe = EXE(
-		cli_pyz,
-		cli_a.scripts,
-		cli_a.binaries,
-		cli_a.zipfiles,
-		cli_a.datas,
-		name=bundle_name,
-		debug=False,
-		bootloader_ignore_signals=False,
-		strip=False,
-		upx=True,
-		console=True,
-		upx_exclude=[],
-		icon=icon
+elif sys.platform[:5] == 'win32':
+	cli_a = Analysis(
+		[cli_script],
+		pathex=[location],
+		binaries=binaries,
+		datas=datas,
+		hiddenimports=hidden_imports,
+		hookspath=[],
+		runtime_hooks=[],
+		excludes=[h for h in hidden_imports if "datashader" in h],
+		win_no_prefer_redirects=False,
+		win_private_assemblies=False,
+		cipher=block_cipher,
+		noarchive=False
 	)
-else:
+	cli_pyz = PYZ(
+		cli_a.pure,
+		cli_a.zipped_data,
+		cipher=block_cipher
+	)
+	MERGE( (gui_a, 'gui', 'gui'), (cli_a, 'cli', 'cli') )
+
 	gui_exe = EXE(
 		gui_pyz,
 		gui_a.scripts,
@@ -216,4 +199,30 @@ else:
 		upx=True,
 		upx_exclude=[],
 		name=cli_name
+	)
+else:
+	gui_exe = EXE(
+		gui_pyz,
+		gui_a.scripts,
+		# a.binaries,
+		gui_a.zipfiles,
+		# a.datas,
+		exclude_binaries=True,
+		name=gui_name,
+		debug=False,
+		bootloader_ignore_signals=False,
+		strip=False,
+		upx=True,
+		console=True,
+		icon=icon
+	)
+	gui_coll = COLLECT(
+		gui_exe,
+		gui_a.binaries,
+		# a.zipfiles,
+		gui_a.datas,
+		strip=False,
+		upx=True,
+		upx_exclude=[],
+		name=gui_name
 	)
