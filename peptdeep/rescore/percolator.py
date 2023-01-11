@@ -4,7 +4,7 @@ import torch
 import os
 import multiprocessing as mp
 
-# from sklearn.ensemble import RandomForestClassifier
+from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
 from tqdm import tqdm
 
@@ -224,8 +224,8 @@ class Percolator:
             self.model = LogisticRegression(
                 solver='liblinear'
             )
-        # elif percolator_model == 'random_forest':
-        #     self.model = RandomForestClassifier()
+        elif percolator_model == 'random_forest':
+            self.model = RandomForestClassifier()
         else:
             logging.info(
                 "[PERC] "

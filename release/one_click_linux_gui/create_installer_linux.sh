@@ -8,7 +8,7 @@ rm -rf dist
 rm -rf build
 
 # Creating a conda environment
-conda create -n peptdeep_installer python=3.9 -y
+conda create -n peptdeep_installer python=3.8 -y
 conda activate peptdeep_installer
 
 # Creating the wheel
