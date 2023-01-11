@@ -1,8 +1,6 @@
-from concurrent.futures import process
-from alphabase.yaml_utils import load_yaml
-
 import time
 import os
+import sys
 import shutil
 import multiprocessing as mp
 
@@ -103,8 +101,7 @@ class PeptDeepServer:
 
     def start(self):
         if self.process is None:
-            self.process = mp.get_context('spawn').Process(target=serve)
-            # self.process = mp.Process(target=serve)
+            self.process = mp.Process(target=serve)
             self.process.start()
 
             with open(self._process_file, 'w') as f:

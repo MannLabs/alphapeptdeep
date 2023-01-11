@@ -4,7 +4,7 @@ import torch
 import os
 import multiprocessing as mp
 
-from sklearn.ensemble import RandomForestClassifier
+# from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
 from tqdm import tqdm
 
@@ -211,7 +211,7 @@ class Percolator:
 
     def init_percolator_model(self, 
         percolator_model="linear", 
-        percolator_backend="pytorch"
+        percolator_backend="sklearn"
     ):
         self.percolator_model = percolator_model.lower()
         self.percolator_backend = percolator_backend.lower()
@@ -224,32 +224,19 @@ class Percolator:
             self.model = LogisticRegression(
                 solver='liblinear'
             )
-        elif percolator_model == 'random_forest':
-            self.model = RandomForestClassifier()
+        # elif percolator_model == 'random_forest':
+        #     self.model = RandomForestClassifier()
         else:
-            if torch.cuda.is_available():
-                logging.info(
-                    "[PERC] "
-                    f"Rescoring model '{percolator_model}' is not "
-                    "implemented, switch to pytorch 'linear' model."
-                )
-                self.model = NNRescore(
-                    len(self.feature_list),
-                    nn_model_type='linear'
-                )
-                self.percolator_model = 'linear'
-                self.percolator_backend = 'pytorch'
-            else:
-                logging.info(
-                    "[PERC] "
-                    f"Rescoring model '{percolator_model}' is not "
-                    "implemented, switch to sklearn 'linear' model."
-                )
-                self.model = LogisticRegression(
-                    solver='liblinear'
-                )
-                self.percolator_model = 'linear'
-                self.percolator_backend = 'sklearn'
+            logging.info(
+                "[PERC] "
+                f"Rescoring model '{percolator_model}' is not "
+                "implemented, switch to sklearn 'linear' model."
+            )
+            self.model = LogisticRegression(
+                solver='liblinear'
+            )
+            self.percolator_model = 'linear'
+            self.percolator_backend = 'sklearn'
 
     def enable_model_fine_tuning(self, flag=True):
         self.feature_extractor.require_model_tuning = flag

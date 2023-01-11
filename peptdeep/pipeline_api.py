@@ -33,9 +33,6 @@ from peptdeep.utils import parse_ms_file_names_to_dict
 
 from peptdeep.utils import process_bar
 
-#: The global models for pipeline APIs
-model_mgr:ModelManager = ModelManager()
-
 def import_psm_df(psm_files:list, psm_type:str)->pd.DataFrame:
     """Import PSM files of a search engine as a pd.DataFrame
 
@@ -194,6 +191,7 @@ def transfer_learn(verbose=True):
         show_platform_info()
         show_python_info()
 
+        model_mgr:ModelManager = ModelManager()
         model_mgr.reset_by_global_settings()
 
         logging.info('Loading PSMs and extracting fragments ...')
@@ -277,6 +275,7 @@ def generate_library():
         show_platform_info()
         show_python_info()
 
+        model_mgr:ModelManager = ModelManager()
         model_mgr.reset_by_global_settings()
 
         lib_maker = library_maker_provider.get_maker(
@@ -351,6 +350,8 @@ def rescore():
         )
         show_platform_info()
         show_python_info()
+
+        model_mgr:ModelManager = ModelManager()
         model_mgr.reset_by_global_settings()
         percolator = Percolator(model_mgr=model_mgr)
         psm_df = percolator.load_psms(
