@@ -96,9 +96,7 @@ There are three different types of installation possible:
 - [**One-click GUI installer:**](#one-click-gui) Choose this
   installation if you only want the GUI and/or keep things as simple as
   possible.
-- [**Pip installer:**](#pip) Choose this installation if you want to use
-  peptdeep as a Python package in an existing Python (recommended Python
-  3.8) environment (e.g. a Jupyter notebook). If needed, the GUI and CLI
+- [**Pip installer:**](#pip) Choose this installation if you want to use peptdeep as a Python package in an existing Python (recommended Python 3.8 or 3.9) environment (e.g. a Jupyter notebook). If needed, the GUI and CLI
   can be installed with pip as well.
 - [**Developer installer:**](#developer) Choose this installation if you
   are familiar with CLI tools, [conda](https://docs.conda.io/en/latest/)
@@ -162,7 +160,7 @@ cd release/one_click_windows_gui
 >
 > 3.  Install PythonNET with `pip install pythonnet`.
 
-peptdeep can be installed in an existing Python 3.8 environment with a
+peptdeep can be installed in an existing Python environment with a
 single `bash` command. *This `bash` command can also be run directly
 from within a Jupyter notebook by prepending it with a `!`*:
 
