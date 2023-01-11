@@ -22,10 +22,6 @@ from peptdeep.utils import process_bar, logging
 from peptdeep.settings import global_settings
 perc_settings = global_settings['percolator']
 
-from peptdeep.mass_spec.mass_calibration import (
-    MassCalibratorForRT_KNN
-)
-
 def match_one_raw(
     psm_df_one_raw,
     ms2_file,
@@ -50,6 +46,9 @@ def match_one_raw(
     )
 
     if calibrate_frag_mass_error:
+        from peptdeep.mass_spec.mass_calibration import (
+            MassCalibratorForRT_KNN
+        )
         frag_mass_calibrator = MassCalibratorForRT_KNN()
         _df_fdr = psm_df.query("fdr<0.01")
         

@@ -11,8 +11,10 @@ import peptdeep
 
 
 ##################### User definitions
-exe_name = 'peptdeep_gui'
-script_name = 'peptdeep_pyinstaller.py'
+gui_name = 'peptdeep_gui'
+gui_script = 'peptdeep_pyinstaller.py'
+cli_name = 'peptdeep'
+cli_script = 'peptdeep_cli_pyinstaller.py'
 if sys.platform[:6] == "darwin":
 	icon = '../logos/alpha_logo.icns'
 else:
@@ -88,8 +90,8 @@ if sys.platform[:5] == "win32":
 	if not os.path.exists(libssl_dll_path):
 		datas.append((libssl_lib_path, "."))
 
-a = Analysis(
-	[script_name],
+gui_a = Analysis(
+	[gui_script],
 	pathex=[location],
 	binaries=binaries,
 	datas=datas,
@@ -102,19 +104,20 @@ a = Analysis(
 	cipher=block_cipher,
 	noarchive=False
 )
-pyz = PYZ(
-	a.pure,
-	a.zipped_data,
+
+gui_pyz = PYZ(
+	gui_a.pure,
+	gui_a.zipped_data,
 	cipher=block_cipher
 )
 
-if sys.platform[:5] == "linux":
-	exe = EXE(
-		pyz,
-		a.scripts,
-		a.binaries,
-		a.zipfiles,
-		a.datas,
+if sys.platform.startswith("linux"):
+	gui_exe = EXE(
+		gui_pyz,
+		gui_a.scripts,
+		gui_a.binaries,
+		gui_a.zipfiles,
+		gui_a.datas,
 		name=bundle_name,
 		debug=False,
 		bootloader_ignore_signals=False,
@@ -124,15 +127,36 @@ if sys.platform[:5] == "linux":
 		upx_exclude=[],
 		icon=icon
 	)
-else:
-	exe = EXE(
-		pyz,
-		a.scripts,
+elif sys.platform.startswith('win32'):
+	cli_a = Analysis(
+		[cli_script],
+		pathex=[location],
+		binaries=binaries,
+		datas=datas,
+		hiddenimports=hidden_imports,
+		hookspath=[],
+		runtime_hooks=[],
+		excludes=[h for h in hidden_imports if "datashader" in h],
+		win_no_prefer_redirects=False,
+		win_private_assemblies=False,
+		cipher=block_cipher,
+		noarchive=False
+	)
+	cli_pyz = PYZ(
+		cli_a.pure,
+		cli_a.zipped_data,
+		cipher=block_cipher
+	)
+	MERGE( (gui_a, 'gui', 'gui'), (cli_a, 'cli', 'cli') )
+
+	gui_exe = EXE(
+		gui_pyz,
+		gui_a.scripts,
 		# a.binaries,
-		a.zipfiles,
+		gui_a.zipfiles,
 		# a.datas,
 		exclude_binaries=True,
-		name=exe_name,
+		name=gui_name,
 		debug=False,
 		bootloader_ignore_signals=False,
 		strip=False,
@@ -140,13 +164,65 @@ else:
 		console=True,
 		icon=icon
 	)
-	coll = COLLECT(
-		exe,
-		a.binaries,
+	gui_coll = COLLECT(
+		gui_exe,
+		gui_a.binaries,
 		# a.zipfiles,
-		a.datas,
+		gui_a.datas,
 		strip=False,
 		upx=True,
 		upx_exclude=[],
-		name=exe_name
+		name=gui_name
+	)
+
+	cli_exe = EXE(
+		cli_pyz,
+		cli_a.scripts,
+		# a.binaries,
+		cli_a.zipfiles,
+		# a.datas,
+		exclude_binaries=True,
+		name=cli_name,
+		debug=False,
+		bootloader_ignore_signals=False,
+		strip=False,
+		upx=True,
+		console=True,
+		icon=icon
+	)
+	cli_coll = COLLECT(
+		cli_exe,
+		cli_a.binaries,
+		# a.zipfiles,
+		cli_a.datas,
+		strip=False,
+		upx=True,
+		upx_exclude=[],
+		name=cli_name
+	)
+else:
+	gui_exe = EXE(
+		gui_pyz,
+		gui_a.scripts,
+		# a.binaries,
+		gui_a.zipfiles,
+		# a.datas,
+		exclude_binaries=True,
+		name=gui_name,
+		debug=False,
+		bootloader_ignore_signals=False,
+		strip=False,
+		upx=True,
+		console=True,
+		icon=icon
+	)
+	gui_coll = COLLECT(
+		gui_exe,
+		gui_a.binaries,
+		# a.zipfiles,
+		gui_a.datas,
+		strip=False,
+		upx=True,
+		upx_exclude=[],
+		name=gui_name
 	)
