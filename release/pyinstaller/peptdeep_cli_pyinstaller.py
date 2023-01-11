@@ -3,7 +3,7 @@ if __name__ == "__main__":
         import peptdeep.cli
         import multiprocessing
         multiprocessing.freeze_support()
-        peptdeep.cli._gui()
+        peptdeep.cli.run()
     except KeyboardInterrupt:
         pass
     except Exception:
