@@ -3,9 +3,6 @@ import pandas as pd
 import torch
 import os
 import multiprocessing as mp
-
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.linear_model import LogisticRegression
 from tqdm import tqdm
 
 from alphabase.peptide.fragment import get_charged_frag_types
@@ -213,6 +210,8 @@ class Percolator:
         percolator_model="linear", 
         percolator_backend="sklearn"
     ):
+        from sklearn.ensemble import RandomForestClassifier
+        from sklearn.linear_model import LogisticRegression
         self.percolator_model = percolator_model.lower()
         self.percolator_backend = percolator_backend.lower()
         if percolator_backend.lower() == 'pytorch':

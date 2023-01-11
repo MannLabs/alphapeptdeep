@@ -4,7 +4,9 @@ if __name__ == "__main__":
         import multiprocessing
         multiprocessing.freeze_support()
         peptdeep.gui.run()
-    except e:
+    except KeyboardInterrupt:
+        pass
+    except Exception:
         import traceback
         import sys
         exc_info = sys.exc_info()
