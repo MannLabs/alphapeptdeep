@@ -111,7 +111,7 @@ gui_pyz = PYZ(
 	cipher=block_cipher
 )
 
-if sys.platform[:5] == "linux":
+if sys.platform.startswith("linux"):
 	gui_exe = EXE(
 		gui_pyz,
 		gui_a.scripts,
@@ -127,7 +127,7 @@ if sys.platform[:5] == "linux":
 		upx_exclude=[],
 		icon=icon
 	)
-elif sys.platform[:5] == 'win32':
+elif sys.platform.startswith('win32'):
 	cli_a = Analysis(
 		[cli_script],
 		pathex=[location],
