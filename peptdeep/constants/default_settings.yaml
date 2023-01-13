@@ -23,6 +23,7 @@ thread_num: 8
 torch_device:
   device_type: gpu
   device_type_choices:
+    - get_available
     - gpu
     - mps
     - cpu
