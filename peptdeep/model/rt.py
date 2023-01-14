@@ -132,6 +132,7 @@ class AlphaRTModel(model_interface.ModelInterface):
         **kwargs,
     ):
         super().__init__(device=device)
+        self.model:Model_RT_LSTM_CNN = None
         self.build(
             model_class,
             dropout=dropout,
