@@ -253,6 +253,7 @@ library:
   max_precursor_mz: 2000.0
   decoy: pseudo_reverse
   decoy_choices:
+  - protein_reverse
   - pseudo_reverse
   - diann
   - None
@@ -260,7 +261,7 @@ library:
   frag_types:
   - b
   - y
-  rt_to_irt: True
+  rt_to_irt: False
   generate_precursor_isotope: False
   output_folder: "{PEPTDEEP_HOME}/spec_libs"
   output_tsv:
