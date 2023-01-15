@@ -11,7 +11,7 @@ except ImportError:
     pass
 
 __project__ = "peptdeep"
-__version__ = "1.0.0"
+__version__ = "1.0.1"
 __license__ = "Apache 2.0"
 __description__ = "The AlphaX Deep (PeptDeep) Learning Platform for Proteomics"
 __author__ = "Mann Labs"
