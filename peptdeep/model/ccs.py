@@ -145,6 +145,7 @@ class AlphaCCSModel(model_base.ModelInterface):
         **kwargs,
     ):
         super().__init__(device=device)
+        self.model:Model_CCS_LSTM = None
         self.build(
             model_class,
             dropout=dropout, 

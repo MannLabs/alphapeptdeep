@@ -174,7 +174,7 @@ def choose_precursor_mz():
 
 def add_decoy():
     global_settings['library']['decoy'] = st.selectbox(
-        label='Decoy method',
+        label='Decoy method (Protein-level decoy only works for fasta)',
         options=global_settings['library']['decoy_choices'],
         index = global_settings['library']['decoy_choices'].index(
             global_settings['library']['decoy']

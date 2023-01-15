@@ -20,7 +20,10 @@ from alphabase.yaml_utils import save_yaml, load_yaml
 from alphabase.peptide.precursor import is_precursor_sorted
 
 from peptdeep.settings import model_const
-from peptdeep.utils import logging, process_bar, get_device
+from peptdeep.utils import ( 
+    logging, process_bar, get_device,
+    get_available_device
+)
 from peptdeep.settings import global_settings
 
 from peptdeep.model.featurize import (
@@ -77,7 +80,7 @@ class ModelInterface(object):
         Parameters
         ----------
         device : str, optional
-            device type in 'cpu', 'mps', 'gpu' (or 'cuda'),
+            device type in 'get_available', 'cpu', 'mps', 'gpu' (or 'cuda'),
             by default 'gpu'
         
         fixed_sequence_len : int, optional
@@ -162,7 +165,10 @@ class ModelInterface(object):
         Parameters
         ----------
         device_type : str, optional
-            Device type, see `torch_device_dict`. 
+            Device type, see :data:`peptdeep.utils.torch_device_dict`.
+            It will check available devices using 
+            :meth:`peptdeep.utils.get_available_device()` 
+            if device_type=='get_available'.
             By default 'gpu'
 
         device_ids : list, optional
@@ -171,9 +177,12 @@ class ModelInterface(object):
         """
         self._device_ids = device_ids
 
-        self._device, self._device_type = get_device(
-            device_type, device_ids
-        )
+        if device_type == 'get_available':
+            self._device, self._device_type = get_available_device()
+        else:
+            self._device, self._device_type = get_device(
+                device_type, device_ids
+            )
 
         self._model_to_device()
 
