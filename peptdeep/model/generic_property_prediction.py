@@ -52,9 +52,7 @@ class Model_for_Generic_AASeq_Regression_Transformer(torch.nn.Module):
 
         self.dropout = torch.nn.Dropout(dropout)
 
-        self.input_nn =  torch.nn.Sequential(
-            building_block.ascii_embedding(hidden_dim),
-        )
+        self.input_nn = building_block.ascii_embedding(hidden_dim)
 
         self.output_attentions = output_attentions
         

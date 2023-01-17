@@ -200,15 +200,19 @@ class Hidden_HFace_Transformer(torch.nn.Module):
         )
         self.output_attentions = output_attentions
         self.bert = BertEncoder(self.config)
-    def forward(self, x:torch.Tensor)->tuple:
+    def forward(self, x:torch.Tensor, 
+        attention_mask:torch.Tensor=None,
+    )->tuple:
         """
         Returns:
-            (Tensor, [Tensor]): out[0] is the hidden layer output, 
-              and out[1] is the output attention 
-              if self.output_attentions==True
+        (Tensor, [Tensor])
+            out[0] is the hidden layer output, 
+            and out[1] is the output attention 
+            if self.output_attentions==True
         """
         return self.bert(
             x,
+            attention_mask=attention_mask,
             output_attentions=self.output_attentions,
             return_dict=False
         )
@@ -255,9 +259,11 @@ class HFace_Transformer_with_PositionalEncoder(torch.nn.Module):
             nheads=nheads, nlayers=nlayers, dropout=dropout,
             output_attentions=output_attentions
         )
-    def forward(self, x:torch.Tensor)->tuple:
+    def forward(self, 
+        x:torch.Tensor,
+        attention_mask:torch.Tensor=None,
+    )->tuple:
         """
-
         Parameters
         ----------
         x : torch.Tensor
@@ -270,7 +276,7 @@ class HFace_Transformer_with_PositionalEncoder(torch.nn.Module):
             [Tensor]: Attention tensor, returned only if output_attentions is True.
         """
         x = self.pos_encoder(x)
-        return self.bert(x)
+        return self.bert(x, attention_mask)
 
 class SeqLSTM(torch.nn.Module):
     """
@@ -805,7 +811,7 @@ class Encoder_AA_Mod_CNN_LSTM_AttnSum(torch.nn.Module):
 
 class Encoder_AA_Mod_Transformer(torch.nn.Module):
     """
-    AAs (128 ASCII codes) and modifications embedded by CNN and LSTM layers, 
+    AAs (128 ASCII codes) and modifications embedded by Bert, 
     then encoded by 'SeqAttentionSum'.
     """
     def __init__(self,out_features,
@@ -824,12 +830,15 @@ class Encoder_AA_Mod_Transformer(torch.nn.Module):
             out_features, nlayers=nlayers, dropout=dropout,
             output_attentions=output_attentions
         )
-    def forward(self, aa_indices, mod_x):
-        in_x = self.dropout(self.input_nn(
+    def forward(self, aa_indices, mod_x,
+        attention_mask=None
+    ):
+        x = self.input_nn(
             aa_indices, mod_x
-        ))
+        )
+        x = self.dropout(x)
 
-        x = self.encoder(in_x)
+        x = self.encoder(x, attention_mask)
         if self.output_attentions:
             self.attentions = x[1]
         else:
@@ -878,12 +887,15 @@ class Encoder_AA_Mod_Charge_Transformer(torch.nn.Module):
             out_features, nlayers=nlayers, dropout=dropout,
             output_attentions=output_attentions
         )
-    def forward(self, aa_indices, mod_x, charges):
-        in_x = self.dropout(self.input_nn(
+    def forward(self, aa_indices, mod_x, charges,
+        attention_mask=None,
+    ):
+        x = self.input_nn(
             aa_indices, mod_x, charges
-        ))
+        )
+        x = self.dropout(x)
 
-        x = self.encoder(in_x)
+        x = self.encoder(x, attention_mask)
         if self.output_attentions:
             self.attentions = x[1]
         else:
