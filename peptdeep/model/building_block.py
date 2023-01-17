@@ -38,6 +38,28 @@ def xavier_param(*shape):
     torch.nn.init.xavier_uniform_(x)
     return x
 
+def invert_attention_mask(
+    encoder_attention_mask:torch.Tensor,
+    dtype=torch.float32
+)->torch.FloatTensor:
+    """
+    See `invert_attention_mask()` in https://github.com/huggingface/transformers/blob/main/src/transformers/modeling_utils.py#L737.
+    Invert an attention mask (e.g., switches 0. and 1.).
+    Args:
+        encoder_attention_mask (`torch.Tensor`): An attention mask.
+    Returns:
+        `torch.Tensor`: The inverted attention mask.
+    """
+    if encoder_attention_mask.dim() == 3:
+        encoder_extended_attention_mask = encoder_attention_mask[:, None, :, :]
+    if encoder_attention_mask.dim() == 2:
+        encoder_extended_attention_mask = encoder_attention_mask[:, None, None, :]
+    encoder_extended_attention_mask = encoder_extended_attention_mask.to(dtype=dtype)  # fp16 compatibility
+    encoder_extended_attention_mask = (1.0 - encoder_extended_attention_mask) * torch.finfo(dtype).min
+
+    return encoder_extended_attention_mask
+
+
 init_state = xavier_param
 
 class SeqCNN_MultiKernel(torch.nn.Module):
@@ -204,12 +226,24 @@ class Hidden_HFace_Transformer(torch.nn.Module):
         attention_mask:torch.Tensor=None,
     )->tuple:
         """
-        Returns:
+        Parameters
+        ----------
+        x : torch.Tensor
+            shape = (batch, seq_len, dim)
+        attention_mask : torch.Tensor
+            shape = (batch, seq_len), [0,1] tensor , 1=enable
+
+        Returns
+        -------
         (Tensor, [Tensor])
             out[0] is the hidden layer output, 
             and out[1] is the output attention 
             if self.output_attentions==True
         """
+        if attention_mask is not None:
+            attention_mask = invert_attention_mask(
+                attention_mask, dtype=x.dtype
+            )
         return self.bert(
             x,
             attention_mask=attention_mask,
