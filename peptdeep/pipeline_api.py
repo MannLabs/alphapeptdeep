@@ -199,7 +199,7 @@ def transfer_learn(verbose=True):
             model_mgr.psm_num_to_train_ms2 > 0 and 
             len(mgr_settings['transfer']['ms_files'])>0
         ):
-            psm_df, frag_df = match_psms(global_settings)
+            psm_df, frag_df = match_psms()
         else:
             psm_df = import_psm_df(
                 mgr_settings['transfer']['psm_files'],
