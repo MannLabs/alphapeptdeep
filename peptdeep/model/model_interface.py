@@ -277,7 +277,7 @@ class ModelInterface(object):
         Train the model according to specifications.
         """
 
-        if verbose: print(
+        if verbose: logging.info(
             f"Training with fixed sequence length: {self.fixed_sequence_len}"
         )
 
