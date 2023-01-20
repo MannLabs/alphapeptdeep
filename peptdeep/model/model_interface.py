@@ -277,7 +277,7 @@ class ModelInterface(object):
         Train the model according to specifications.
         """
 
-        if verbose: print(
+        if verbose: logging.info(
             f"Training with fixed sequence length: {self.fixed_sequence_len}"
         )
 
@@ -724,6 +724,36 @@ class ModelInterface(object):
             ), 
             dtype=torch.long
         )
+        
+    def _get_features_from_batch_df(self,
+        batch_df:pd.DataFrame, **kwargs,
+    )->Union[torch.LongTensor, Tuple[torch.Tensor]]:
+        """
+        Any sub-class must re-implement this method:
+        
+        - Return `self._get_aa_features()` for sequence-level prediciton 
+        - Return `self._get_aa_mod_features()` for modified sequence-level
+
+        Parameters
+        ----------
+        batch_df : pd.DataFrame
+            Batch of precursor dataframe.
+
+        Returns
+        -------
+        Union[torch.LongTensor, Tuple[torch.Tensor]]: 
+            A LongTensor if the sub-class call `self._get_aa_features(batch_df)` (default).
+            Or a tuple of tensors if call `self._get_aa_mod_features(batch_df)`.
+        """
+        return self._get_aa_features(batch_df)
+
+    def _get_aa_mod_features(self,
+        batch_df:pd.DataFrame, **kwargs,
+    )->Tuple[torch.Tensor]:
+        return (
+            self._get_aa_features(batch_df),
+            self._get_mod_features(batch_df)
+        )
 
     def _get_mod_features(
         self, batch_df:pd.DataFrame
@@ -738,32 +768,11 @@ class ModelInterface(object):
             get_batch_mod_feature(batch_df)
         )
 
-    def _get_aa_mod_features(self,
-        batch_df:pd.DataFrame, **kwargs,
-    )->Tuple[torch.Tensor]:
-        return (
-            self._get_aa_indice_features(batch_df),
-            self._get_mod_features(batch_df)
-        )
-
-    def _get_features_from_batch_df(self,
-        batch_df:pd.DataFrame, **kwargs,
-    )->Union[torch.Tensor, Tuple[torch.Tensor]]:
+    def _get_aa_features(self, 
+        batch_df:pd.DataFrame
+    )->torch.LongTensor:
         """
-        Get input feature tensors of a batch of the precursor dataframe for the model. 
-        This will call `self._get_aa_indice_features(batch_df)` for sequence-level prediciton, 
-        or `self._get_aa_mod_features(batch_df)` for modified sequence-level.
-
-        Parameters
-        ----------
-        batch_df : pd.DataFrame
-            Batch of precursor dataframe.
-
-        Returns
-        -------
-        Union[torch.Tensor, Tuple[torch.Tensor]]: 
-            A feature tensor if call `self._get_aa_indice_features(batch_df)` (default).
-            Or a tuple of tensors if call `self._get_aa_mod_features(batch_df)`.
+        Get AA indices
         """
         if self.fixed_sequence_len == 0:
             return self._get_aa_indice_features(batch_df)

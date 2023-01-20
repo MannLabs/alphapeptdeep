@@ -38,6 +38,28 @@ def xavier_param(*shape):
     torch.nn.init.xavier_uniform_(x)
     return x
 
+def invert_attention_mask(
+    encoder_attention_mask:torch.Tensor,
+    dtype=torch.float32
+)->torch.FloatTensor:
+    """
+    See `invert_attention_mask()` in https://github.com/huggingface/transformers/blob/main/src/transformers/modeling_utils.py#L737.
+    Invert an attention mask (e.g., switches 0. and 1.).
+    Args:
+        encoder_attention_mask (`torch.Tensor`): An attention mask.
+    Returns:
+        `torch.Tensor`: The inverted attention mask.
+    """
+    if encoder_attention_mask.dim() == 3:
+        encoder_extended_attention_mask = encoder_attention_mask[:, None, :, :]
+    if encoder_attention_mask.dim() == 2:
+        encoder_extended_attention_mask = encoder_attention_mask[:, None, None, :]
+    encoder_extended_attention_mask = encoder_extended_attention_mask.to(dtype=dtype)  # fp16 compatibility
+    encoder_extended_attention_mask = (1.0 - encoder_extended_attention_mask) * torch.finfo(dtype).min
+
+    return encoder_extended_attention_mask
+
+
 init_state = xavier_param
 
 class SeqCNN_MultiKernel(torch.nn.Module):
@@ -200,15 +222,31 @@ class Hidden_HFace_Transformer(torch.nn.Module):
         )
         self.output_attentions = output_attentions
         self.bert = BertEncoder(self.config)
-    def forward(self, x:torch.Tensor)->tuple:
+    def forward(self, x:torch.Tensor, 
+        attention_mask:torch.Tensor=None,
+    )->tuple:
         """
-        Returns:
-            (Tensor, [Tensor]): out[0] is the hidden layer output, 
-              and out[1] is the output attention 
-              if self.output_attentions==True
+        Parameters
+        ----------
+        x : torch.Tensor
+            shape = (batch, seq_len, dim)
+        attention_mask : torch.Tensor
+            shape = (batch, seq_len), [0,1] tensor , 1=enable
+
+        Returns
+        -------
+        (Tensor, [Tensor])
+            out[0] is the hidden layer output, 
+            and out[1] is the output attention 
+            if self.output_attentions==True
         """
+        if attention_mask is not None:
+            attention_mask = invert_attention_mask(
+                attention_mask, dtype=x.dtype
+            )
         return self.bert(
             x,
+            attention_mask=attention_mask,
             output_attentions=self.output_attentions,
             return_dict=False
         )
@@ -255,9 +293,11 @@ class HFace_Transformer_with_PositionalEncoder(torch.nn.Module):
             nheads=nheads, nlayers=nlayers, dropout=dropout,
             output_attentions=output_attentions
         )
-    def forward(self, x:torch.Tensor)->tuple:
+    def forward(self, 
+        x:torch.Tensor,
+        attention_mask:torch.Tensor=None,
+    )->tuple:
         """
-
         Parameters
         ----------
         x : torch.Tensor
@@ -270,7 +310,7 @@ class HFace_Transformer_with_PositionalEncoder(torch.nn.Module):
             [Tensor]: Attention tensor, returned only if output_attentions is True.
         """
         x = self.pos_encoder(x)
-        return self.bert(x)
+        return self.bert(x, attention_mask)
 
 class SeqLSTM(torch.nn.Module):
     """
@@ -805,7 +845,7 @@ class Encoder_AA_Mod_CNN_LSTM_AttnSum(torch.nn.Module):
 
 class Encoder_AA_Mod_Transformer(torch.nn.Module):
     """
-    AAs (128 ASCII codes) and modifications embedded by CNN and LSTM layers, 
+    AAs (128 ASCII codes) and modifications embedded by Bert, 
     then encoded by 'SeqAttentionSum'.
     """
     def __init__(self,out_features,
@@ -824,12 +864,15 @@ class Encoder_AA_Mod_Transformer(torch.nn.Module):
             out_features, nlayers=nlayers, dropout=dropout,
             output_attentions=output_attentions
         )
-    def forward(self, aa_indices, mod_x):
-        in_x = self.dropout(self.input_nn(
+    def forward(self, aa_indices, mod_x,
+        attention_mask=None
+    ):
+        x = self.input_nn(
             aa_indices, mod_x
-        ))
+        )
+        x = self.dropout(x)
 
-        x = self.encoder(in_x)
+        x = self.encoder(x, attention_mask)
         if self.output_attentions:
             self.attentions = x[1]
         else:
@@ -878,12 +921,15 @@ class Encoder_AA_Mod_Charge_Transformer(torch.nn.Module):
             out_features, nlayers=nlayers, dropout=dropout,
             output_attentions=output_attentions
         )
-    def forward(self, aa_indices, mod_x, charges):
-        in_x = self.dropout(self.input_nn(
+    def forward(self, aa_indices, mod_x, charges,
+        attention_mask=None,
+    ):
+        x = self.input_nn(
             aa_indices, mod_x, charges
-        ))
+        )
+        x = self.dropout(x)
 
-        x = self.encoder(in_x)
+        x = self.encoder(x, attention_mask)
         if self.output_attentions:
             self.attentions = x[1]
         else:

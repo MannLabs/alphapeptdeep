@@ -12,6 +12,7 @@ class Model_for_Generic_AASeq_Regression_LSTM(torch.nn.Module):
     def __init__(self, 
         *,
         hidden_dim=256,
+        output_dim=1,
         nlayers=4,
         dropout=0.1,
         **kwargs,
@@ -31,7 +32,7 @@ class Model_for_Generic_AASeq_Regression_LSTM(torch.nn.Module):
             self.dropout,
             torch.nn.Linear(hidden_dim,64),
             torch.nn.GELU(),
-            torch.nn.Linear(64, 1),
+            torch.nn.Linear(64, output_dim),
         )
     def forward(self, aa_x):
         return self.nn(aa_x).squeeze(-1)
@@ -41,6 +42,7 @@ class Model_for_Generic_AASeq_Regression_Transformer(torch.nn.Module):
     def __init__(self,
         *,
         hidden_dim = 256,
+        output_dim = 1,
         nlayers = 4,
         output_attentions=False,
         dropout = 0.1,
@@ -50,9 +52,7 @@ class Model_for_Generic_AASeq_Regression_Transformer(torch.nn.Module):
 
         self.dropout = torch.nn.Dropout(dropout)
 
-        self.input_nn =  torch.nn.Sequential(
-            building_block.ascii_embedding(hidden_dim),
-        )
+        self.input_nn = building_block.ascii_embedding(hidden_dim)
 
         self.output_attentions = output_attentions
         
@@ -65,7 +65,7 @@ class Model_for_Generic_AASeq_Regression_Transformer(torch.nn.Module):
             building_block.SeqAttentionSum(hidden_dim),
             torch.nn.PReLU(),
             self.dropout,
-            torch.nn.Linear(hidden_dim, 1),
+            torch.nn.Linear(hidden_dim, output_dim),
         )
 
     @property
@@ -98,6 +98,7 @@ class ModelInterface_for_Generic_AASeq_Regression(ModelInterface):
         dropout=0.1,
         device:str='gpu',
         hidden_dim=256,
+        output_dim=1,
         nlayers=4,
         **kwargs,
     ):
@@ -106,6 +107,7 @@ class ModelInterface_for_Generic_AASeq_Regression(ModelInterface):
             model_class,
             dropout=dropout,
             hidden_dim=hidden_dim,
+            output_dim=output_dim,
             nlayers=nlayers,
             **kwargs
         )
@@ -119,6 +121,7 @@ class Model_for_Generic_ModAASeq_Regression_LSTM(torch.nn.Module):
     def __init__(self, 
         *,
         hidden_dim=256,
+        output_dim=1,
         nlayers=4,
         dropout=0.1,
         **kwargs,
@@ -134,7 +137,7 @@ class Model_for_Generic_ModAASeq_Regression_LSTM(torch.nn.Module):
             self.dropout,
             torch.nn.Linear(hidden_dim,64),
             torch.nn.GELU(),
-            torch.nn.Linear(64, 1),
+            torch.nn.Linear(64, output_dim),
         )
     def forward(self, aa_x, mod_x):
         x = self.encoder_nn(aa_x, mod_x)
@@ -145,6 +148,7 @@ class Model_for_Generic_ModAASeq_Regression_Transformer(torch.nn.Module):
     def __init__(self,
         *,
         hidden_dim = 256,
+        output_dim = 1,
         nlayers = 4,
         output_attentions=False,
         dropout = 0.1,
@@ -167,7 +171,7 @@ class Model_for_Generic_ModAASeq_Regression_Transformer(torch.nn.Module):
             building_block.SeqAttentionSum(hidden_dim),
             torch.nn.PReLU(),
             self.dropout,
-            torch.nn.Linear(hidden_dim, 1),
+            torch.nn.Linear(hidden_dim, output_dim),
         )
 
     @property
@@ -204,6 +208,7 @@ class ModelInterface_for_Generic_ModAASeq_Regression(ModelInterface):
         dropout=0.1,
         device:str='gpu',
         hidden_dim=256,
+        output_dim=1,
         nlayers=4,
         **kwargs,
     ):
@@ -212,6 +217,7 @@ class ModelInterface_for_Generic_ModAASeq_Regression(ModelInterface):
             model_class,
             dropout=dropout,
             hidden_dim=hidden_dim,
+            output_dim=output_dim,
             nlayers=nlayers,
             **kwargs
         )
@@ -233,12 +239,14 @@ class Model_for_Generic_AASeq_BinaryClassification_LSTM(
     def __init__(self, 
         *,
         hidden_dim=256,
+        output_dim=1,
         nlayers=4,
         dropout=0.1,
         **kwargs,
     ):
         super().__init__(
             hidden_dim=hidden_dim,
+            output_dim=output_dim,
             nlayers=nlayers,
             dropout=dropout,
         )
@@ -254,6 +262,7 @@ class Model_for_Generic_AASeq_BinaryClassification_Transformer(
     def __init__(self,
         *,
         hidden_dim = 256,
+        output_dim = 1,
         nlayers = 4,
         output_attentions=False,
         dropout = 0.1,
@@ -266,6 +275,7 @@ class Model_for_Generic_AASeq_BinaryClassification_Transformer(
         super().__init__(
             nlayers=nlayers,
             hidden_dim=hidden_dim,
+            output_dim=output_dim,
             output_attentions=output_attentions,
             dropout=dropout,
             **kwargs,
@@ -284,6 +294,7 @@ class ModelInterface_for_Generic_AASeq_BinaryClassification(ModelInterface):
         dropout=0.1,
         device:str='gpu',
         hidden_dim=256,
+        output_dim=1,
         nlayers=4,
         **kwargs,
     ):
@@ -295,6 +306,7 @@ class ModelInterface_for_Generic_AASeq_BinaryClassification(ModelInterface):
             model_class,
             dropout=dropout,
             hidden_dim=hidden_dim,
+            output_dim=output_dim,
             nlayers=nlayers,
             **kwargs
         )
@@ -309,12 +321,14 @@ class Model_for_Generic_ModAASeq_BinaryClassification_LSTM(
     def __init__(self, 
         *,
         hidden_dim=256,
+        output_dim=1,
         nlayers=4,
         dropout=0.1,
         **kwargs,
     ):
         super().__init__(
             hidden_dim=hidden_dim,
+            output_dim=output_dim,
             nlayers=nlayers,
             dropout=dropout,
             **kwargs,
@@ -332,6 +346,7 @@ class Model_for_Generic_ModAASeq_BinaryClassification_Transformer(
     def __init__(self,
         *,
         hidden_dim = 256,
+        output_dim = 1,
         nlayers = 4,
         output_attentions=False,
         dropout = 0.1,
@@ -340,6 +355,7 @@ class Model_for_Generic_ModAASeq_BinaryClassification_Transformer(
         super().__init__(
             nlayers=nlayers,
             hidden_dim=hidden_dim,
+            output_dim=output_dim,
             output_attentions=output_attentions,
             dropout=dropout,
             **kwargs
@@ -370,16 +386,20 @@ class ModelInterface_for_Generic_ModAASeq_BinaryClassification(ModelInterface):
         dropout=0.1,
         device:str='gpu',
         hidden_dim=256,
+        output_dim=1,
         nlayers=4,
         **kwargs,
     ):
         super().__init__(device=device)
         self.build(
             model_class,
+            hidden_dim=hidden_dim,
+            output_dim=output_dim,
+            nlayers=nlayers,
             dropout=dropout,
             **kwargs
         )
-        self.loss_func = torch.nn.BCELoss() # for regression
+        self.loss_func = torch.nn.BCELoss() # for classification
 
         self.target_column_to_predict = 'predicted_prob'
         self.target_column_to_train = 'detected_prob'
