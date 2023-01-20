@@ -2,11 +2,18 @@
 
 Follow the changelog format from https://keepachangelog.com/en/1.0.0/.
 
-## 1.0.1 - 2023.01.15
+## 1.0.1 - 2023.01.20
+
+### Fixed
+
+- Fatal: transfer learning failed in `match_psms()` with error `"... match_psms() takes 0 arguments but 1 were given ..."` in GUI and CLI.
 
 ### Added
 
 - 'protein_reverse' decoy, see https://alphabase.readthedocs.io/en/latest/protein/protein_level_decoy.html
+- Enabled multi-target prediction, all targets will store in one column as np.array object
+- Enabled `attention_mask` and fixed sequence length
+- Tested `torch.jit.trace` to compile the JIT model
 
 ## 1.0.0 - 2023.01.09 (key changes of previous versions)
 
