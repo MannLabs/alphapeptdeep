@@ -115,6 +115,7 @@ model_mgr:
       - maxquant
       - diann
       - speclib_tsv
+      - msfragger_pepxml
     psm_files: []
     ms_file_type: alphapept_hdf
     ms_file_type_choices:
