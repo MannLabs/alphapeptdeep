@@ -123,6 +123,7 @@ model_mgr:
       - thermo_raw
       - mgf
       - mzml
+      - speclib_tsv
     ms_files: []
     psm_num_to_train_ms2: 100000000
     psm_num_per_mod_to_train_ms2: 50

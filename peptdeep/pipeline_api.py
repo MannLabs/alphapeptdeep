@@ -13,6 +13,9 @@ from alphabase.peptide.fragment import (
     get_charged_frag_types,
     concat_precursor_fragment_dataframes
 )
+from alphabase.spectral_library.reader import (
+    SWATHLibraryReader
+)
 
 from peptdeep.spec_lib.translate import mod_to_unimod_dict
 from peptdeep.settings import global_settings
@@ -199,13 +202,27 @@ def transfer_learn(verbose=True):
             model_mgr.psm_num_to_train_ms2 > 0 and 
             len(mgr_settings['transfer']['ms_files'])>0
         ):
-            psm_df, frag_df = match_psms()
+                psm_df, frag_df = match_psms()
         else:
-            psm_df = import_psm_df(
-                mgr_settings['transfer']['psm_files'],
-                mgr_settings['transfer']['psm_type'],
-            )
-            frag_df = None
+            if (
+                mgr_settings['transfer']['ms_file_type'].lower()== 'speclib_tsv'  
+                and mgr_settings['transfer']['psm_type'].lower() == 'speclib_tsv'
+            ):
+                dfs = []
+                frag_inten_dfs = []
+                for psm_file in mgr_settings['transfer']['psm_files']:
+                    _lib = SWATHLibraryReader()
+                    dfs.append(_lib.import_file(psm_file))
+                    frag_inten_dfs.append(_lib.fragment_intensity_df)
+                psm_df, frag_df = concat_precursor_fragment_dataframes(
+                    dfs, frag_inten_dfs
+                )
+            else:
+                psm_df = import_psm_df(
+                    mgr_settings['transfer']['psm_files'],
+                    mgr_settings['transfer']['psm_type'],
+                )
+                frag_df = None
 
         logging.info("Training CCS model ...")
         model_mgr.train_ccs_model(psm_df)
