@@ -2,6 +2,12 @@
 
 Follow the changelog format from https://keepachangelog.com/en/1.0.0/.
 
+## 1.0.2
+
+### Added
+
+- Enable `speclib_tsv` for transfer learning in CLI and GUI.
+
 ## 1.0.1 - 2023.01.20
 
 ### Fixed

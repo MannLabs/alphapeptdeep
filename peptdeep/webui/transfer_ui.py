@@ -140,6 +140,7 @@ def show():
         "thermo_raw": ".raw",
         "mgf": ".mgf",
         "mzml": ".mzml",
+        "speclib_tsv": [".tsv", ".csv"]
     }
     global_settings['model_mgr']['transfer']['ms_file_type'] = ms_file_type
     select_files(
