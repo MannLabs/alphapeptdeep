@@ -16,7 +16,7 @@ from peptdeep.webui.server import queue_folder
 
 from peptdeep.constants._const import CONST_FOLDER
 
-from .ui_utils import global_ui_settings
+global_ui_settings = st.session_state.global_settings
 
 def mod_options():
     with st.form(key="Select modifications"):

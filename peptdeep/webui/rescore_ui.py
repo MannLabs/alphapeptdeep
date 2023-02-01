@@ -3,7 +3,8 @@ import pandas as pd
 import os
 import time
 
-from .ui_utils import files_in_folder_pandas, global_ui_settings
+from .ui_utils import files_in_folder_pandas
+global_ui_settings = st.session_state.global_settings
 
 def show():
     """Streamlit page that displays information on how to rescore."""

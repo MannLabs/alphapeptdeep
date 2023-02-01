@@ -7,12 +7,13 @@ from datetime import datetime
 from alphabase.yaml_utils import save_yaml
 from alphabase.constants.modification import MOD_DF
 
+from peptdeep.webui.server import queue_folder
 from peptdeep.webui.ui_utils import (
     get_posix, select_files, file_type_selectbox,
-    global_ui_settings
 )
 
-from peptdeep.webui.server import queue_folder
+
+global_ui_settings = st.session_state.global_settings
 
 
 def nce_search():

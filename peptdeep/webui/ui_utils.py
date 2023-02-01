@@ -12,7 +12,7 @@ import pathlib
 
 import copy
 from peptdeep.settings import global_settings
-global_ui_settings = copy.deepcopy(global_settings)
+st.session_state['global_settings'] = copy.deepcopy(global_settings)
 
 def get_posix(_path:str):
     return pathlib.PureWindowsPath(_path).as_posix()
