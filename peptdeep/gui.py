@@ -2,7 +2,7 @@
 import os
 
 def run(port=10077):
-    print('Starting PeptDeep Web Server ...')
+    print(f'Starting PeptDeep Web Server on port {port} ...')
 
     _this_file = __file__
     _this_directory = os.path.dirname(_this_file)
