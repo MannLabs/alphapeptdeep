@@ -28,6 +28,7 @@ def nce_search():
     global_settings['model_mgr']['transfer']['grid_instrument'] = grid_instrument
 
 def fine_tune():
+    st.write("#### Epochs and learning rates")
     epoch_ms2 = st.number_input(label='Epoch to train MS2 model', value = global_settings['model_mgr']['transfer']['epoch_ms2'])
     global_settings['model_mgr']['transfer']['epoch_ms2'] = epoch_ms2
     warmup_epoch_ms2 = st.number_input(label='Warmup epoch to train MS2 model', value = global_settings['model_mgr']['transfer']['warmup_epoch_ms2'], max_value=epoch_ms2)
@@ -155,6 +156,7 @@ def show():
     with training_expander:
         fine_tune()
 
+        st.write('#### PSM numbers for training and testing')
         global_settings['model_mgr']['transfer'][
             'psm_num_to_train_ms2'
         ] = st.number_input(
@@ -205,6 +207,8 @@ def show():
                 'psm_num_to_test_rt_ccs'
             ]), step = 1
         )
+        
+        st.write("#### Other hyper-parameters")
         global_settings['model_mgr']['transfer'][
             'top_n_mods_to_train'
         ] = st.number_input(
