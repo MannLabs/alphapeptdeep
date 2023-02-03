@@ -2,11 +2,13 @@ import os
 import numpy as np
 import pandas as pd
 from alphabase.io.hdf import HDF_File
+from utils import logging
 
 try:
     # should be replaced by AlphaRaw in the near future
     from peptdeep.legacy.thermo_raw.pyrawfilereader import RawFileReader
 except (ImportError,AttributeError):
+    logging.warn("Cannot import `RawFileReader`, check if PythonNet is installed. See https://github.com/MannLabs/alphapeptdeep#pip")
     RawFileReader = None
 
 class MSReaderBase:
@@ -240,7 +242,9 @@ class MSReaderProvider:
         self.reader_dict[ms2_type.lower()] = reader_class
 
     def get_reader(self, file_type)->MSReaderBase:
-        if file_type not in self.reader_dict: return None
+        if file_type not in self.reader_dict: 
+            logging.warn(f'"{file_type}" is not registered in `MSReaderProvider` yet.')
+            return None
         else: return self.reader_dict[file_type.lower()]()
 
 ms2_reader_provider = MSReaderProvider()
