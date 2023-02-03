@@ -272,5 +272,5 @@ library:
     max_fragment_mz: 2000
     min_relative_intensity: 0.001
     keep_higest_k_peaks: 12
-    translate_batch_size: 1000000
+    translate_batch_size: 100000
     translate_mod_to_unimod_id: False
