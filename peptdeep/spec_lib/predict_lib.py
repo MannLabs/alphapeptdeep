@@ -107,7 +107,8 @@ class PredictSpecLib(SpecLibBase):
         1. Predict RT/IM/MS2 for self._precursor_df
         2. Calculate isotope information in self._precursor_df
         """
-        self.calc_precursor_mz()
+        if 'precursor_mz' not in self.precursor_df.columns: 
+            self.calc_precursor_mz()
         if self.generate_precursor_isotope:
             if self.model_manager.verbose:
                 logging.info('Calculating precursor isotope distributions ...')
