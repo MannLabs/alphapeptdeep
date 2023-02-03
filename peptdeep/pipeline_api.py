@@ -254,10 +254,7 @@ def _get_delimiter(tsv_file:str):
 
 def read_peptide_table(tsv_file:str)->pd.DataFrame:
     sep = _get_delimiter(tsv_file)
-    df = pd.read_csv(tsv_file, sep=sep)
-    df.fillna('', inplace=True)
-    if 'mod_sites' in df.columns:
-        df['mod_sites'] = df.mod_sites.astype('U')
+    df = pd.read_csv(tsv_file, sep=sep, keep_default_na=False)
     return df
 
 def generate_library():
