@@ -2,7 +2,7 @@ import os
 import numpy as np
 import pandas as pd
 from alphabase.io.hdf import HDF_File
-from utils import logging
+from peptdeep.utils import logging
 
 try:
     # should be replaced by AlphaRaw in the near future
