@@ -3,12 +3,15 @@ import numpy as np
 import pandas as pd
 from alphabase.io.hdf import HDF_File
 from peptdeep.utils import logging
+from inspect import currentframe, getframeinfo
 
 try:
     # should be replaced by AlphaRaw in the near future
     from peptdeep.legacy.thermo_raw.pyrawfilereader import RawFileReader
-except (ImportError,AttributeError):
-    logging.warn("Cannot import `RawFileReader`, check if PythonNet is installed. See https://github.com/MannLabs/alphapeptdeep#pip")
+except (ImportError,AttributeError) as e:
+    raise e
+    frameinfo = getframeinfo(currentframe())
+    logging.warn(f"{frameinfo.filename}#L{frameinfo.lineno}: Cannot import `RawFileReader`, check if PythonNet is installed. See https://github.com/MannLabs/alphapeptdeep#pip")
     RawFileReader = None
 
 class MSReaderBase:
@@ -243,7 +246,8 @@ class MSReaderProvider:
 
     def get_reader(self, file_type)->MSReaderBase:
         if file_type not in self.reader_dict: 
-            logging.warn(f'"{file_type}" is not registered in `MSReaderProvider` yet.')
+            frameinfo = getframeinfo(currentframe())
+            logging.warn(f'{frameinfo.filename}#L{frameinfo.lineno}: "{file_type}" is not registered in `MSReaderProvider` yet.')
             return None
         else: return self.reader_dict[file_type.lower()]()
 
