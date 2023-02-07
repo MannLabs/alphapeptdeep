@@ -195,14 +195,6 @@ percolator:
       - mgf
       - mzml
     ms_files: []
-    other_score_column_mapping:
-      alphapept: {}
-      pfind: 
-        raw_score: Raw_Score
-      msfragger:
-        hyperscore: hyperscore
-        nextscore: nextscore
-      maxquant: {}
   output_folder: "{PEPTDEEP_HOME}/rescore"
 library:
   infile_type: fasta

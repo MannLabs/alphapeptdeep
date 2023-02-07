@@ -195,10 +195,6 @@ class Percolator:
             f for f in self.feature_extractor.score_feature_list
         ]
         self.feature_list += ['score','nAA','charge']
-        psm_type = perc_settings['input_files']['psm_type']
-        self.feature_list += list(perc_settings['input_files'][
-            'other_score_column_mapping'
-        ][psm_type].keys())
 
         self.max_train_sample = perc_settings['max_perc_train_sample']
         self.min_train_sample = perc_settings['min_perc_train_sample']
