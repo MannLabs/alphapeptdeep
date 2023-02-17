@@ -412,15 +412,22 @@ class ModelInterface_for_Generic_ModAASeq_BinaryClassification(ModelInterface):
 class ModelInterface_for_Generic_ModAASeq_MultiTargetClassification(
     ModelInterface_for_Generic_ModAASeq_BinaryClassification
 ):
-    def __init__(self, num_target_values:int=6):
+    def __init__(self, 
+        num_target_values:int=6,
+        model_class:torch.nn.Module=Model_for_Generic_AASeq_BinaryClassification_Transformer,
+        nlayers=4, hidden_dim=256, device='gpu',
+        dropout=0.1, **kwargs,
+    ):
         self.num_target_values = num_target_values
         super().__init__(
-            model_class=Model_for_Generic_AASeq_BinaryClassification_LSTM,
+            model_class=model_class,
             output_dim=self.num_target_values,
-            nlayers=3, hidden_dim=128,
+            nlayers=nlayers, hidden_dim=hidden_dim,
+            device=device, dropout=dropout,
+            **kwargs
         )
-        self.target_column_to_train = 'charge_probs'
-        self.target_column_to_predict = 'charge_probs_pred'
+        self.target_column_to_train = 'target_probs'
+        self.target_column_to_predict = 'target_probs_pred'
 
     def _get_targets_from_batch_df(self, batch_df, **kwargs):
         return self._as_tensor(
