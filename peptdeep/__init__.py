@@ -13,7 +13,7 @@ except ImportError:
 __project__ = "peptdeep"
 __version__ = "1.0.2"
 __license__ = "Apache 2.0"
-__description__ = "The AlphaX Deep (PeptDeep) Learning Platform for Proteomics"
+__description__ = "The AlphaX deep learning framework for Proteomics"
 __author__ = "Mann Labs"
 __author_email__ = "jalew.zwf@qq.com"
 __github__ = "https://github.com/MannLabs/peptdeep"
