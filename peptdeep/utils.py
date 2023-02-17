@@ -205,6 +205,11 @@ def show_python_info() -> None:
         logging.info(f"{key:<{max_len}} - {value}")
     logging.info("")
 
+_special_raw_suffices = [
+    '.ms_data.hdf',
+    '_hcdft.mgf',
+]
+
 def parse_ms_file_names_to_dict(
     ms_file_list:list
 )->dict:
@@ -225,10 +230,13 @@ def parse_ms_file_names_to_dict(
 
     spec_dict = {}
     for ms_file in ms_file_list:
-        raw_name = os.path.basename(ms_file)
-        if raw_name.endswith('.ms_data.hdf'):
-            raw_name = raw_name[:-len('.ms_data.hdf')]
-        else:
+        raw_filename = os.path.basename(ms_file)
+        raw_name = raw_filename.lower()
+        for raw_suff in _special_raw_suffices:
+            if raw_name.endswith(raw_suff):
+                raw_name = raw_filename[:-len(raw_suff)]
+                break
+        if len(raw_filename)==len(raw_name):
             raw_name = os.path.splitext(raw_name)[0]
         spec_dict[raw_name] = ms_file
     return spec_dict

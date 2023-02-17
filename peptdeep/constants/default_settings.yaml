@@ -115,6 +115,7 @@ model_mgr:
       - maxquant
       - diann
       - speclib_tsv
+      - msfragger_pepxml
     psm_files: []
     ms_file_type: alphapept_hdf
     ms_file_type_choices:
@@ -122,6 +123,7 @@ model_mgr:
       - thermo_raw
       - mgf
       - mzml
+      - speclib_tsv
     ms_files: []
     psm_num_to_train_ms2: 100000000
     psm_num_per_mod_to_train_ms2: 50
@@ -193,14 +195,6 @@ percolator:
       - mgf
       - mzml
     ms_files: []
-    other_score_column_mapping:
-      alphapept: {}
-      pfind: 
-        raw_score: Raw_Score
-      msfragger:
-        hyperscore: hyperscore
-        nextscore: nextscore
-      maxquant: {}
   output_folder: "{PEPTDEEP_HOME}/rescore"
 library:
   infile_type: fasta
@@ -270,5 +264,5 @@ library:
     max_fragment_mz: 2000
     min_relative_intensity: 0.001
     keep_higest_k_peaks: 12
-    translate_batch_size: 1000000
+    translate_batch_size: 100000
     translate_mod_to_unimod_id: False

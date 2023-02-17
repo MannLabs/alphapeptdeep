@@ -128,7 +128,7 @@ class PredictSpecLibFasta(SpecLibFasta, PredictSpecLib):
             Defaults to False
         
         rt_to_irt : bool, optional
-            If convert predicted RT to iRT values
+            If convert predicted RT to iRT values, by default False
         """
         SpecLibFasta.__init__(self,
             charged_frag_types=charged_frag_types,

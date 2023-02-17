@@ -9,10 +9,13 @@ from alphabase.constants.modification import (
 )
 
 from peptdeep.settings import (
-    global_settings,
     update_settings,
     add_user_defined_modifications,
 )
+
+import peptdeep.webui.ui_utils
+
+global_ui_settings = st.session_state.global_settings
 
 def add_user_mods():
     st.write("#### User-defined modifications")
@@ -33,18 +36,18 @@ def add_user_mods():
         ).strip()
 
         if mod_name:
-            global_settings['common']['user_defined_modifications'][mod_name] = {
+            global_ui_settings['common']['user_defined_modifications'][mod_name] = {
                 'composition': composition,
                 'modloss_composition': modloss_composition,
             }
 
         st.dataframe(pd.DataFrame().from_dict(
-            global_settings['common']['user_defined_modifications'],
+            global_ui_settings['common']['user_defined_modifications'],
             orient = 'index',
         ))
 
         def _clear_user_mods():
-            global_settings['common']['user_defined_modifications'] = {}
+            global_ui_settings['common']['user_defined_modifications'] = {}
             st.session_state.user_mod_name = ''
             st.session_state.user_mod_comp = ''
             st.session_state.user_mod_loss = ''
@@ -57,7 +60,7 @@ def add_user_mods():
             add_user_defined_modifications()
             st.write("Check last n+2 modifications:")
             st.dataframe(MOD_DF.tail(
-                len(global_settings['common'][
+                len(global_ui_settings['common'][
                     'user_defined_modifications'
                 ])+2
             ))
@@ -70,46 +73,46 @@ def show():
     
     add_user_mods()
 
-    ms2_ppm = st.checkbox(label='MS2 ppm (otherwise Da)', value=global_settings['peak_matching']['ms2_ppm'])
-    global_settings['peak_matching']['ms2_ppm'] = ms2_ppm
-    ms2_tol_value = st.number_input(label='MS2 tolerance', value = global_settings['peak_matching']['ms2_tol_value'], step = 1.0)
-    global_settings['peak_matching']['ms2_tol_value'] = ms2_tol_value
+    ms2_ppm = st.checkbox(label='MS2 ppm (otherwise Da)', value=global_ui_settings['peak_matching']['ms2_ppm'])
+    global_ui_settings['peak_matching']['ms2_ppm'] = ms2_ppm
+    ms2_tol_value = st.number_input(label='MS2 tolerance', value = global_ui_settings['peak_matching']['ms2_tol_value'], step = 1.0)
+    global_ui_settings['peak_matching']['ms2_tol_value'] = ms2_tol_value
 
-    ms1_ppm = st.checkbox(label='MS1 ppm (otherwise Da)', value=global_settings['peak_matching']['ms1_ppm'])
-    global_settings['peak_matching']['ms1_ppm'] = ms1_ppm
-    ms1_tol_value = st.number_input(label='MS1 tolerance', value = global_settings['peak_matching']['ms1_tol_value'], step = 1.0)
-    global_settings['peak_matching']['ms1_tol_value'] = ms1_tol_value
+    ms1_ppm = st.checkbox(label='MS1 ppm (otherwise Da)', value=global_ui_settings['peak_matching']['ms1_ppm'])
+    global_ui_settings['peak_matching']['ms1_ppm'] = ms1_ppm
+    ms1_tol_value = st.number_input(label='MS1 tolerance', value = global_ui_settings['peak_matching']['ms1_tol_value'], step = 1.0)
+    global_ui_settings['peak_matching']['ms1_tol_value'] = ms1_tol_value
     
     cpu_count = multiprocessing.cpu_count()
     thread_num = st.number_input(label='Thread number', 
-        value=global_settings['thread_num'] 
-          if global_settings['thread_num']<cpu_count 
+        value=global_ui_settings['thread_num'] 
+          if global_ui_settings['thread_num']<cpu_count 
           else cpu_count, 
         max_value=cpu_count, step=1
     )
-    global_settings['thread_num'] = thread_num
+    global_ui_settings['thread_num'] = thread_num
 
-    global_settings['torch_device']['device_type'] = st.selectbox(
+    global_ui_settings['torch_device']['device_type'] = st.selectbox(
         label='Computing devices',
-        options=global_settings['torch_device']['device_type_choices'],
-        index = global_settings['torch_device']['device_type_choices'].index(
-            global_settings['torch_device']['device_type']
+        options=global_ui_settings['torch_device']['device_type_choices'],
+        index = global_ui_settings['torch_device']['device_type_choices'].index(
+            global_ui_settings['torch_device']['device_type']
         )
     )
 
-    global_settings['log_level'] = st.selectbox(
+    global_ui_settings['log_level'] = st.selectbox(
         label='Log level', 
-        options=global_settings['log_level_choices'], 
-        index = global_settings['log_level_choices'].index(
-            global_settings['log_level']
+        options=global_ui_settings['log_level_choices'], 
+        index = global_ui_settings['log_level_choices'].index(
+            global_ui_settings['log_level']
         )
     )
 
-    global_settings['common']['modloss_importance_level'] = st.number_input(
+    global_ui_settings['common']['modloss_importance_level'] = st.number_input(
         'Modification loss importance level (for a PTM, fragment modloss mz=0 if modloss_importance<modloss_importance_level)', 
-        value=global_settings['common']['modloss_importance_level'], step=1.0,
+        value=global_ui_settings['common']['modloss_importance_level'], step=1.0,
     )
-    keep_modloss_by_importance(global_settings['common']['modloss_importance_level'])
+    keep_modloss_by_importance(global_ui_settings['common']['modloss_importance_level'])
 
     st.write("Modification modloss example (check the `modloss` column):")
     st.dataframe(MOD_DF.loc[
@@ -119,9 +122,9 @@ def show():
 
 def _update_st_session_state_after_loading_settings(
     state_dict:dict={
-        'select_psm_type': global_settings['model_mgr']['transfer']['psm_type'],
-        'select_ms_file_type': global_settings['model_mgr']['transfer']['ms_file_type'],
-        'lib_input_type': global_settings['library']['infile_type'],
+        'select_psm_type': global_ui_settings['model_mgr']['transfer']['psm_type'],
+        'select_ms_file_type': global_ui_settings['model_mgr']['transfer']['ms_file_type'],
+        'lib_input_type': global_ui_settings['library']['infile_type'],
     }
 ):
     for key, val in state_dict.items():
@@ -133,7 +136,7 @@ def load_settings_gui():
     if uploaded_file is not None:
         f = StringIO(uploaded_file.getvalue().decode("utf-8"))
         uploaded_settings = yaml.load(f, Loader=yaml.FullLoader)
-        update_settings(global_settings, uploaded_settings)
+        update_settings(global_ui_settings, uploaded_settings)
         st.write("Global settings have been updated")
 
 def save_settings_gui():
@@ -141,7 +144,7 @@ def save_settings_gui():
     st.write("The saved yaml file can be used in command line interface")
 
     f = StringIO()
-    yaml.dump(global_settings, f)
+    yaml.dump(global_ui_settings, f)
 
     st.download_button(
         label="Download settings as yaml",

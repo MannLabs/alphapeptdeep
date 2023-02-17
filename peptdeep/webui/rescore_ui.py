@@ -3,8 +3,8 @@ import pandas as pd
 import os
 import time
 
-from peptdeep.settings import global_settings
-from peptdeep.webui.ui_utils import files_in_folder_pandas
+from .ui_utils import files_in_folder_pandas
+global_ui_settings = st.session_state.global_settings
 
 def show():
     """Streamlit page that displays information on how to rescore."""

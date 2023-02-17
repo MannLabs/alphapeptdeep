@@ -570,7 +570,7 @@ class ModelManager(object):
             tr_df = []
         
         if self.psm_num_to_test_rt_ccs > 0:
-            if self.psm_num_to_train_rt_ccs > 0 and len(tr_df) > 0:
+            if len(tr_df) > 0:
                 test_psm_df = psm_df[
                     ~psm_df.sequence.isin(set(tr_df.sequence))
                 ]
