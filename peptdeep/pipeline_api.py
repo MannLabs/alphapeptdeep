@@ -115,12 +115,12 @@ def match_psms()->Tuple[pd.DataFrame,pd.DataFrame]:
     for raw_name, df in process_bar(
         df_groupby_raw, df_groupby_raw.ngroups
     ):
-        if raw_name not in ms2_file_dict:
+        if raw_name.lower() not in ms2_file_dict: #needs lower to match
             continue
         (
             df, _, inten_df, _
         ) = match_one_raw(
-            df, ms2_file_dict[raw_name],
+            df, ms2_file_dict[raw_name.lower()],
             mgr_settings['transfer']['ms_file_type'],
             charged_frag_types,
             global_settings['peak_matching']['ms2_ppm'], 
@@ -202,7 +202,24 @@ def transfer_learn(verbose=True):
             model_mgr.psm_num_to_train_ms2 > 0 and 
             len(mgr_settings['transfer']['ms_files'])>0
         ):
-                psm_df, frag_df = match_psms()
+            # in case transfer_learn is run multiple times (e.g. to test with different hyperparameters),
+            # psm_df and frag_df are already generated and ready to load
+            if 'previous_psm_files' not in mgr_settings['transfer'].keys() or \
+                'previous_ms_files' not in mgr_settings['transfer'].keys():
+                mgr_settings['transfer']['previous_psm_files'] = mgr_settings['transfer']['psm_files']
+                mgr_settings['transfer']['previous_ms_files'] = mgr_settings['transfer']['ms_files']
+            if 'psm_df' not in mgr_settings.keys() or 'frag_df' not in mgr_settings.keys() or \
+                    mgr_settings['transfer']['psm_files'] != mgr_settings['transfer']['previous_psm_files'] or \
+                    mgr_settings['transfer']['ms_files'] != mgr_settings['transfer']['previous_ms_files']:
+                    psm_df, frag_df = match_psms()
+                    mgr_settings['psm_df'] = psm_df
+                    mgr_settings['frag_df'] = frag_df
+                    mgr_settings['transfer']['previous_psm_files'] = mgr_settings['transfer']['psm_files']
+                    mgr_settings['transfer']['previous_ms_files'] = mgr_settings['transfer']['ms_files']
+            else:
+                logging.info('Reloading psm and frag df')
+                psm_df = mgr_settings['psm_df']
+                frag_df = mgr_settings['frag_df']
         else:
             if (
                 mgr_settings['transfer']['ms_file_type'].lower()== 'speclib_tsv'  
