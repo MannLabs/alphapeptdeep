@@ -511,6 +511,7 @@ class pDeepModel(model_interface.ModelInterface):
         lr = 1e-5,
         verbose=False, 
         verbose_each_epoch=False,
+        val_fraction=0.9,
         **kwargs
     ):
         return super().train_with_warmup(
@@ -522,6 +523,7 @@ class pDeepModel(model_interface.ModelInterface):
             lr=lr,
             verbose=verbose, 
             verbose_each_epoch=verbose_each_epoch,
+            val_fraction=val_fraction,
             **kwargs
         )
 
@@ -535,6 +537,7 @@ class pDeepModel(model_interface.ModelInterface):
         lr = 1e-5,
         verbose=False, 
         verbose_each_epoch=False,
+        val_fraction=0.9,
         **kwargs
     ):
         return super().train(
@@ -546,6 +549,7 @@ class pDeepModel(model_interface.ModelInterface):
             lr=lr,
             verbose=verbose, 
             verbose_each_epoch=verbose_each_epoch,
+            val_fraction=val_fraction,
             **kwargs
         )
 

@@ -103,6 +103,8 @@ model_mgr:
     batch_size_rt_ccs: 1024
     lr_rt_ccs: 0.0001
     verbose: False
+    val_fraction: 0.9
+    early_stopping: 0
     grid_nce_search: False
     grid_nce_first: 15.0
     grid_nce_last: 45.0

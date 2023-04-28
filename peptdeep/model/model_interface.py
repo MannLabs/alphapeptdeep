@@ -1,10 +1,13 @@
 import os
+from copy import deepcopy
+
 import numpy as np
 import pandas as pd
 import torch
 import yaml
 import inspect
 from tqdm import tqdm
+import sys
 
 import torch.multiprocessing as mp
 import functools
@@ -220,6 +223,50 @@ class ModelInterface(object):
         self._model_to_device()
         self._init_for_training()
 
+    def train_val_loop(self,
+       train_df: pd.DataFrame,
+       val_df: pd.DataFrame,
+       batch_size,
+       epoch,
+       verbose_each_epoch,
+       **kwargs
+       ):
+        """
+        This function is used by both train and train_with_warmup.
+        Returns the batch cost from both training and validation sets
+        """
+        self.model.train()  # put into training mode, in which weights are updated
+        if self.fixed_sequence_len == 0:
+            train_batch_cost = self._train_one_epoch(False,
+                train_df, epoch,
+                batch_size, verbose_each_epoch,
+                **kwargs
+            )
+
+            # validation set
+            self.model.eval()
+            val_batch_cost = self._train_one_epoch(True,
+                val_df, epoch,
+                batch_size, verbose_each_epoch,
+                **kwargs
+            )
+        else:
+            train_batch_cost = self._train_one_epoch_by_padding_zeros(False,
+                train_df, epoch,
+                batch_size, verbose_each_epoch,
+                **kwargs
+            )
+
+            # validation set
+            self.model.eval()
+            val_batch_cost = self._train_one_epoch_by_padding_zeros(True,
+                val_df, epoch,
+                batch_size, verbose_each_epoch,
+                **kwargs
+            )
+
+        return train_batch_cost, val_batch_cost
+
     def train_with_warmup(self,
         precursor_df: pd.DataFrame,
         *,
@@ -229,6 +276,7 @@ class ModelInterface(object):
         lr=1e-4,
         verbose=False,
         verbose_each_epoch=False,
+        val_fraction=0.9,
         **kwargs
     ):
         """
@@ -241,26 +289,42 @@ class ModelInterface(object):
             warmup_epoch, epoch
         )
 
+        # split into train-val split
+        train_df = precursor_df.sample(frac = val_fraction)
+        val_df = precursor_df.drop(train_df.index)
+        min_val_loss = sys.maxsize
+        best_epoch = 1
+        best_state_dict = self.model.state_dict()
+        epochs_since_improvement = 0
+        early_stopping = global_settings['model_mgr']['transfer']['early_stopping']
+
         for epoch in range(epoch):
-            if self.fixed_sequence_len == 0:
-                batch_cost = self._train_one_epoch(
-                    precursor_df, epoch,
-                    batch_size, verbose_each_epoch,
-                    **kwargs
-                )
-            else:
-                batch_cost = self._train_one_epoch_by_padding_zeros(
-                    precursor_df, epoch,
-                    batch_size, verbose_each_epoch,
-                    **kwargs
-                )
+            train_batch_cost, val_batch_cost = self.train_val_loop(train_df, val_df, batch_size, epoch,
+                                                                   verbose_each_epoch, **kwargs)
 
             lr_scheduler.step()
-            if verbose: print(
-                f'[Training] Epoch={epoch+1}, lr={lr_scheduler.get_last_lr()[0]}, loss={np.mean(batch_cost)}'
-            )
+            if verbose: logging.info(
+                f'[Training] Epoch={epoch + 1}, lr={lr_scheduler.get_last_lr()[0]},'
+                f'  train loss={np.mean(train_batch_cost)},'
+                f'  val loss={np.mean(val_batch_cost)}')
+
+            # save intermediate state_dict
+            # saves the best intermediate model, based on validation accuracy
+            if np.mean(val_batch_cost) < min_val_loss:
+                min_val_loss = np.mean(val_batch_cost)
+                best_state_dict = deepcopy(self.model.state_dict())
+                best_epoch = epoch + 1
+                epochs_since_improvement = 0
+            else:
+                if early_stopping > 0: #early stopping if validation accuracy not improving
+                    epochs_since_improvement += 1
+                    if epochs_since_improvement >= early_stopping:
+                        logging.info("Early stopping enabled")
+                        break
         
         torch.cuda.empty_cache()
+        logging.info(f'Best model was from epoch {best_epoch} with validation loss {min_val_loss}')
+        return best_state_dict
 
     def train(self,
         precursor_df: pd.DataFrame,
@@ -271,6 +335,7 @@ class ModelInterface(object):
         lr=1e-4,
         verbose=False,
         verbose_each_epoch=False,
+        val_fraction=0.9,
         **kwargs
     ):
         """
@@ -282,7 +347,7 @@ class ModelInterface(object):
         )
 
         if warmup_epoch > 0:
-            self.train_with_warmup(
+            best_state_dict = self.train_with_warmup(
                 precursor_df,
                 batch_size=batch_size,
                 epoch=epoch,
@@ -290,27 +355,45 @@ class ModelInterface(object):
                 lr=lr,
                 verbose=verbose,
                 verbose_each_epoch=verbose_each_epoch,
+                val_fraction=val_fraction,
                 **kwargs
             )
+            return best_state_dict
         else:
             self._prepare_training(precursor_df, lr, **kwargs)
 
+            # split into train-val split
+            train_df = precursor_df.sample(frac=val_fraction)
+            val_df = precursor_df.drop(train_df.index)
+            min_val_loss = sys.maxsize
+            best_epoch = 1
+            best_state_dict = self.model.state_dict()
+            epochs_since_improvement = 0
+            early_stopping = global_settings['model_mgr']['transfer']['early_stopping']
+
             for epoch in range(epoch):
-                if self.fixed_sequence_len == 0:
-                    batch_cost = self._train_one_epoch(
-                        precursor_df, epoch,
-                        batch_size, verbose_each_epoch,
-                        **kwargs
-                    )
+                train_batch_cost, val_batch_cost = self.train_val_loop(train_df, val_df, batch_size, epoch,
+                                                                       verbose_each_epoch, **kwargs)
+
+                if verbose: logging.info(
+                    f'[Training] Epoch={epoch + 1}, train loss={np.mean(train_batch_cost)},'
+                    f'  val loss={np.mean(val_batch_cost)}')
+
+                # save intermediate state_dict
+                if np.mean(val_batch_cost) < min_val_loss:
+                    min_val_loss = np.mean(val_batch_cost)
+                    best_state_dict = deepcopy(self.model.state_dict())
+                    best_epoch = epoch + 1
+                    epochs_since_improvement = 0
                 else:
-                    batch_cost = self._train_one_epoch_by_padding_zeros(
-                        precursor_df, epoch,
-                        batch_size, verbose_each_epoch,
-                        **kwargs
-                    )
-                if verbose: print(f'[Training] Epoch={epoch+1}, Mean Loss={np.mean(batch_cost)}')
-            
+                    if early_stopping > 0:
+                        epochs_since_improvement += 1
+                        if epochs_since_improvement >= early_stopping:
+                            break
+
             torch.cuda.empty_cache()
+            logging.info(f'Best model was from epoch {best_epoch} with validation loss {min_val_loss}')
+            return best_state_dict
 
     def predict(self,
         precursor_df:pd.DataFrame,
@@ -557,7 +640,7 @@ class ModelInterface(object):
         except (TypeError, ValueError, KeyError) as e:
             logging.info(f'Cannot save model source codes: {str(e)}')
 
-    def _train_one_epoch_by_padding_zeros(self, 
+    def _train_one_epoch_by_padding_zeros(self, val,
         precursor_df, epoch, batch_size, verbose_each_epoch, 
         **kwargs
     ):
@@ -580,11 +663,11 @@ class ModelInterface(object):
             )
             if isinstance(features, tuple):
                 batch_cost.append(
-                    self._train_one_batch(targets, *features)
+                    self._train_one_batch(val, targets, *features)
                 )
             else:
                 batch_cost.append(
-                    self._train_one_batch(targets, features)
+                    self._train_one_batch(val, targets, features)
                 )
                 
         if verbose_each_epoch:
@@ -593,7 +676,7 @@ class ModelInterface(object):
             )
         return batch_cost
 
-    def _train_one_epoch(self, 
+    def _train_one_epoch(self, val,
         precursor_df, epoch, batch_size, verbose_each_epoch, 
         **kwargs
     ):
@@ -620,11 +703,11 @@ class ModelInterface(object):
                 )
                 if isinstance(features, tuple):
                     batch_cost.append(
-                        self._train_one_batch(targets, *features)
+                        self._train_one_batch(val, targets, *features)
                     )
                 else:
                     batch_cost.append(
-                        self._train_one_batch(targets, features)
+                        self._train_one_batch(val, targets, features)
                     )
                 
             if verbose_each_epoch:
@@ -634,17 +717,20 @@ class ModelInterface(object):
         return batch_cost
 
     def _train_one_batch(
-        self, 
+        self,
+        val:bool,
         targets:torch.Tensor, 
         *features,
     ):
         """Training for a mini batch"""
-        self.optimizer.zero_grad()
+        if not val:
+            self.optimizer.zero_grad()
         predicts = self.model(*features)
         cost = self.loss_func(predicts, targets)
-        cost.backward()
-        torch.nn.utils.clip_grad_norm_(self.model.parameters(), 1.0)
-        self.optimizer.step()
+        if not val:
+            cost.backward()
+            torch.nn.utils.clip_grad_norm_(self.model.parameters(), 1.0)
+            self.optimizer.step()
         return cost.item()
 
     def _predict_one_batch(self,

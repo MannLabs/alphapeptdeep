@@ -378,6 +378,7 @@ class ModelManager(object):
         self.instrument = mgr_settings['default_instrument']
         self.verbose = mgr_settings['predict']['verbose']
         self.train_verbose = mgr_settings['transfer']['verbose']
+        self.val_fraction = mgr_settings['transfer']['val_fraction']
 
 
     @property
@@ -559,13 +560,15 @@ class ModelManager(object):
             if self._train_psm_logging:
                 logging.info(f"{len(tr_df)} PSMs for RT model training/transfer learning")
             if len(tr_df) > 0:
-                self.rt_model.train(tr_df, 
+                best_state_dict = self.rt_model.train(tr_df,
                     batch_size=self.batch_size_to_train_rt_ccs,
                     epoch=self.epoch_to_train_rt_ccs,
                     warmup_epoch=self.warmup_epoch_to_train_rt_ccs,
                     lr=self.lr_to_train_rt_ccs,
                     verbose=self.train_verbose,
+                    val_fraction=self.val_fraction
                 )
+                self.rt_model.model.load_state_dict(best_state_dict) #load in parameters of best intermediate model
         else:
             tr_df = []
         
@@ -582,12 +585,13 @@ class ModelManager(object):
                     test_psm_df = psm_df
             else:
                 test_psm_df = psm_df
-            
+
+            evaluate_df = evaluate_linear_regression(self.rt_model.predict(test_psm_df))
+            evaluate_df.to_csv(os.path.join(model_mgr_settings['transfer']['model_output_folder'], "evaluate_rt.csv"),
+                               index = False)
             logging.info(
                 "Testing refined RT model:\n" + 
-                str(evaluate_linear_regression(
-                    self.rt_model.predict(test_psm_df))
-                )
+                str(evaluate_df)
             )
 
     def train_ccs_model(self,
@@ -630,13 +634,15 @@ class ModelManager(object):
             if self._train_psm_logging:
                 logging.info(f"{len(tr_df)} PSMs for CCS model training/transfer learning")
             if len(tr_df) > 0:
-                self.ccs_model.train(tr_df, 
+                best_state_dict = self.ccs_model.train(tr_df,
                     batch_size=self.batch_size_to_train_rt_ccs,
                     epoch=self.epoch_to_train_rt_ccs,
                     warmup_epoch=self.warmup_epoch_to_train_rt_ccs,
                     lr=self.lr_to_train_rt_ccs,
                     verbose=self.train_verbose,
+                    val_fraction=self.val_fraction
                 )
+                self.ccs_model.model.load_state_dict(best_state_dict)
         else:
             tr_df = []
         
@@ -653,13 +659,16 @@ class ModelManager(object):
                     test_psm_df = psm_df
             else:
                 test_psm_df = psm_df
-            
-            logging.info(
-                "Testing refined CCS model:\n" + 
-                str(evaluate_linear_regression(
+
+            evaluate_df = evaluate_linear_regression(
                     self.ccs_model.predict(test_psm_df),
                     x = 'ccs_pred', y='ccs'
-                ))
+                )
+            evaluate_df.to_csv(os.path.join(model_mgr_settings['transfer']['model_output_folder'], "evaluate_ccs.csv"),
+                               index=False)
+            logging.info(
+                "Testing refined CCS model:\n" + 
+                str(evaluate_df)
             )
 
     def train_ms2_model(self,
@@ -723,14 +732,16 @@ class ModelManager(object):
                     self.set_default_nce_instrument(tr_df)
                 if self._train_psm_logging:
                     logging.info(f"{len(tr_df)} PSMs for MS2 model training/transfer learning")
-                self.ms2_model.train(tr_df, 
+                best_state_dict = self.ms2_model.train(tr_df,
                     fragment_intensity_df=tr_inten_df,
                     batch_size=self.batch_size_to_train_ms2,
                     epoch=self.epoch_to_train_ms2,
                     warmup_epoch=self.warmup_epoch_to_train_ms2,
                     lr=self.lr_to_train_ms2,
                     verbose=self.train_verbose,
+                    val_fraction=self.val_fraction
                 )
+                self.ms2_model.model.load_state_dict(best_state_dict)
         else:
             tr_df = []
 
@@ -752,15 +763,17 @@ class ModelManager(object):
                     else:
                         tr_inten_df[frag_type] = 0.0
             self.set_default_nce_instrument(test_psm_df)
-            logging.info(
-                "Testing refined MS2 model:\n"+
-                str(calc_ms2_similarity(
-                    test_psm_df, 
+            evaluate_df = calc_ms2_similarity(
+                    test_psm_df,
                     self.ms2_model.predict(
                         test_psm_df, reference_frag_df=matched_intensity_df
-                    ), 
+                    ),
                     fragment_intensity_df=matched_intensity_df
-                )[-1])
+                )[-1]
+            evaluate_df.to_csv(os.path.join(model_mgr_settings['transfer']['model_output_folder'], "evaluate_ms2.csv"))
+            logging.info(
+                "Testing refined MS2 model:\n"+
+                str(evaluate_df)
             )
             
 
