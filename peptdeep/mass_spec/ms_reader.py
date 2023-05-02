@@ -29,6 +29,7 @@ class MSReaderBase:
         scan_indices:np.ndarray,
         rt_list:list,
         mobility_list:list = None,
+        nce_list:list = None
     ):
         """Build spectrum_df by the given information
 
@@ -65,6 +66,8 @@ class MSReaderBase:
         set_col('rt', scan_list, rt_list, np.float64, np.nan)
         if mobility_list is not None:
             set_col('mobility', scan_list, mobility_list, np.float64, np.nan)
+        if nce_list is not None:
+            set_col('nce', scan_list, nce_list, np.float64, np.nan)
 
     def get_peaks(self, spec_idx:int):
         """Get peak (mz and intensity) values by `spec_idx`
@@ -156,13 +159,22 @@ class MZMLReader(MSReaderBase):
         intens_list = []
         scan_list = []
         rt_list = []
+        nce_list = []
         for entry in f:
             if entry["ms level"] != 2: #only care about MS2 scans
                 continue
             scan = int(entry["id"].split("scan=")[1])
-
             if scan in scanset:
                 continue
+            #accept only hcd and cid
+            filter_string = entry["scanList"]["scan"][0]["filter string"]
+            if "@hcd" in filter_string:
+                nce_list.append(filter_string.split("@hcd")[1].split(" ")[0])
+            elif "@cid" in filter_string:
+                nce_list.append(filter_string.split("@cid")[1].split(" ")[0])
+            else:
+                continue
+
             scanset.add(scan)
             scan_list.append(scan)
             masses_list.append(entry["m/z array"])
@@ -175,7 +187,8 @@ class MZMLReader(MSReaderBase):
         self.build_spectrum_df(
             scan_list,
             index_ragged_list(masses_list),
-            rt_list
+            rt_list,
+            nce_list=nce_list
         )
         self.peak_df['mz'] = np.concatenate(masses_list)
         self.peak_df['intensity'] = np.concatenate(intens_list)
