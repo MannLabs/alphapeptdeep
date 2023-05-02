@@ -291,6 +291,12 @@ class PepSpecMatch(object):
         ):
             add_spec_info_list.append('mobility')
 
+        if (
+            'nce' not in psm_df.columns and
+            'nce' in ms2_reader.spectrum_df.columns
+        ):
+            add_spec_info_list.append('nce')
+
         if len(add_spec_info_list) > 0:
             # pfind does not report RT in the result file
             psm_df = psm_df.reset_index().merge(
