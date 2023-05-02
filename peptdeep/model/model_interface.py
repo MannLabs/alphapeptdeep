@@ -25,7 +25,7 @@ from alphabase.peptide.precursor import is_precursor_sorted
 from peptdeep.settings import model_const
 from peptdeep.utils import ( 
     logging, process_bar, get_device,
-    get_available_device
+    get_available_device, count_mods
 )
 from peptdeep.settings import global_settings
 
@@ -292,6 +292,20 @@ class ModelInterface(object):
         # split into train-val split
         train_df = precursor_df.sample(frac = val_fraction)
         val_df = precursor_df.drop(train_df.index)
+        if verbose:
+            train_mods = count_mods(train_df, include_unmodified=True)
+            val_mods = count_mods(val_df, include_unmodified=True)
+            for i, row in val_mods.iterrows():
+                mod_idx = train_mods.loc[train_mods["mod"] == row["mod"], :].index
+                if len(mod_idx) == 0:
+                    train_mods.loc[len(train_mods)] = [row["mod"], 0, row["spec_count"]]
+                else:
+                    train_mods.at[mod_idx[0], 2] = row["spec_count"]
+            train_mods.columns = ["mod", "train_size", "validation_size"]
+            train_mods.fillna(0, inplace = True)
+            train_mods["validation_size"] = train_mods["validation_size"].astype(int)
+
+            logging.info(f'Training/validation PSMs:\n{train_mods}')
         min_val_loss = sys.maxsize
         best_epoch = 1
         best_state_dict = self.model.state_dict()
@@ -365,6 +379,23 @@ class ModelInterface(object):
             # split into train-val split
             train_df = precursor_df.sample(frac=val_fraction)
             val_df = precursor_df.drop(train_df.index)
+
+            #print mod information
+            if verbose:
+                train_mods = count_mods(train_df, include_unmodified=True)
+                val_mods = count_mods(val_df, include_unmodified=True)
+                for i, row in val_mods.iterrows():
+                    mod_idx = train_mods.loc[train_mods["mod"] == row["mod"], :].index
+                    if len(mod_idx) == 0:
+                        train_mods.loc[len(train_mods)] = [row["mod"], 0, row["spec_count"]]
+                    else:
+                        train_mods.at[mod_idx[0], 2] = row["spec_count"]
+                train_mods.columns = ["mod", "train_size", "validation_size"]
+                train_mods.fillna(0, inplace=True)
+                train_mods["validation_size"] = train_mods["validation_size"].astype(int)
+
+                logging.info(f'Training/validation PSMs:\n{train_mods}')
+
             min_val_loss = sys.maxsize
             best_epoch = 1
             best_state_dict = self.model.state_dict()

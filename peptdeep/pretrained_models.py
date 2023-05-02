@@ -30,7 +30,7 @@ from alphabase.peptide.mobility import (
 )
 
 from peptdeep.settings import global_settings
-from peptdeep.utils import logging, process_bar
+from peptdeep.utils import logging, process_bar, count_mods
 from peptdeep.settings import global_settings
 
 from peptdeep.model.ms2 import (
@@ -117,42 +117,26 @@ if not os.path.exists(model_zip):
 
 model_mgr_settings = global_settings['model_mgr']
 
-def count_mods(psm_df)->pd.DataFrame:
-    mods = psm_df[
-        psm_df.mods.str.len()>0
-    ].mods.apply(lambda x: x.split(';'))
-    mod_dict = {}
-    mod_dict['mutation'] = {}
-    mod_dict['mutation']['spec_count'] = 0
-    for one_mods in mods.values:
-        for mod in set(one_mods):
-            items = mod.split('->')
-            if (
-                len(items)==2 
-                and len(items[0])==3 
-                and len(items[1])==5
-            ):
-                mod_dict['mutation']['spec_count'] += 1
-            elif mod not in mod_dict:
-                mod_dict[mod] = {}
-                mod_dict[mod]['spec_count'] = 1
-            else:
-                mod_dict[mod]['spec_count'] += 1
-    return pd.DataFrame().from_dict(
-            mod_dict, orient='index'
-        ).reset_index(drop=False).rename(
-            columns={'index':'mod'}
-        ).sort_values(
-            'spec_count',ascending=False
-        ).reset_index(drop=True)
-
 def psm_sampling_with_important_mods(
-    psm_df, n_sample, 
+    psm_df, n_sample,
+    training_frac = None, train_mod_frac = None,
     top_n_mods = 10,
     n_sample_each_mod = 0, 
     uniform_sampling_column = None,
     random_state=1337,
 ):
+    """
+    Major suggestion here is that psm_num_to_train is misleading, since total PSMs used is that plus
+    psm_num_per_mod_to_train * top_n_mods.
+
+    Instead, I propose this:
+    If training_frac provided, use that to dictate training size. Else, use n_sample instead.
+    If train_mod_frac provided, use that to say what proportion of training set is dedicated to mods
+    """
+    if training_frac is not None: #train/test split. Fraction instead of hard number of PSMs
+        training_frac = min(training_frac, 1)
+        n_sample = int(len(psm_df) * training_frac)
+
     psm_df_list = []
     if uniform_sampling_column is None:
         def _sample(psm_df, n):
@@ -171,22 +155,47 @@ def psm_sampling_with_important_mods(
                 n_train = n, random_state=random_state
             )
 
-    psm_df_list.append(_sample(psm_df, n_sample))
-    if n_sample_each_mod > 0:
+    # no special consideration for mods, so all PSMs (modified or not) are sampled
+    if n_sample_each_mod == 0 and train_mod_frac is None:
+        psm_df_list.append(_sample(psm_df, n_sample))
+    else: #if n_sample_each_mod > 0:
+        num_mod_psms = 0
         mod_df = count_mods(psm_df)
-        mod_df = mod_df[mod_df['mod']!='mutation']
+        for m in ['mutation', 'Carbamidomethyl@C', 'Oxidation@M']:
+            mod_df = mod_df[mod_df['mod']!=m]
 
         if len(mod_df) > top_n_mods:
             mod_df = mod_df.iloc[:top_n_mods,:]
+        sum_mods = mod_df['spec_count'].sum()
         for mod in mod_df['mod'].values:
-            psm_df_list.append(
-                _sample(
-                    psm_df[psm_df.mods.str.contains(mod, regex=False)],
-                    n_sample_each_mod,
-                )
-            )
+            m_df = psm_df[psm_df.mods.str.contains(mod, regex=False)]
+            if train_mod_frac is not None: #proportion of each mod, rather than hard number of PSMs
+                train_mod_frac = min(train_mod_frac, 1)
+                n_sample_each_mod = int(n_sample * train_mod_frac * len(m_df) / sum_mods)
+            sampled_m_df = _sample(m_df, n_sample_each_mod)
+            psm_df.drop(sampled_m_df.index).copy() #don't allow resampling
+            psm_df_list.append(sampled_m_df)
+            num_mod_psms += len(psm_df_list[-1])
+
+        # don't consider modified PSMs besides ones already chosen
+        if n_sample > num_mod_psms:
+            #C57 and oxM are basically unmodified
+            psm_df['unmodified'] = [x.replace('Carbamidomethyl@C','').replace('Oxidation@M','')
+                                    for x in psm_df['mods']]
+            unmod_df = psm_df[psm_df.unmodified == '']
+            psm_df_list.append(_sample(unmod_df, min(n_sample - num_mod_psms, len(unmod_df))))
+
+            #not enough unmodified PSMs
+            if num_mod_psms + len(unmod_df) < n_sample:
+                psm_df_list.append(_sample(psm_df[psm_df['unmodified'] != ''], n_sample - (num_mod_psms + len(unmod_df))))
+
     if len(psm_df_list) > 0:
-        return pd.concat(psm_df_list, ignore_index=True)
+        return_df = pd.concat(psm_df_list, ignore_index=True)
+        if len(return_df) > n_sample:
+            return return_df.sample(n_sample, replace=False,
+                    random_state=random_state
+                ).copy()
+        return return_df
     else:
         return pd.DataFrame()
 
@@ -327,6 +336,9 @@ class ModelManager(object):
         self.psm_num_to_test_ms2 = mgr_settings[
             'transfer'
         ]["psm_num_to_test_ms2"]
+        self.psm_num_per_mod_to_test_ms2 = mgr_settings[
+            'transfer'
+        ]["psm_num_per_mod_to_test_ms2"]
         self.epoch_to_train_ms2 = mgr_settings[
             'transfer'
         ]['epoch_ms2']
@@ -341,13 +353,24 @@ class ModelManager(object):
                 'transfer'
             ]['lr_ms2']
         )
-
+        self.train_fraction = mgr_settings[
+            "transfer"
+        ]["train_fraction"]
+        self.train_mod_fraction = mgr_settings[
+            "transfer"
+        ]["train_mod_fraction"]
         self.psm_num_to_train_rt_ccs = mgr_settings[
             "transfer"
         ]["psm_num_to_train_rt_ccs"]
         self.psm_num_to_test_rt_ccs = mgr_settings[
             'transfer'
         ]["psm_num_to_test_rt_ccs"]
+        self.psm_num_per_mod_to_test_rt_ccs = mgr_settings[
+            'transfer'
+        ]["psm_num_per_mod_to_test_rt_ccs"]
+        self.ptm_specific_evaluation = mgr_settings[
+            'transfer'
+        ]["ptm_specific_evaluation"]
         self.epoch_to_train_rt_ccs = mgr_settings[
             'transfer'
         ]['epoch_rt_ccs']
@@ -543,6 +566,75 @@ class ModelManager(object):
         psm_df : pd.DataFrame
             Training psm_df which contains 'rt_norm' column.
         """
+
+        def evaluate(ptm_specific, output_prefix, test_psm_df = None):
+            '''
+            A function that creates a PSM df to evaluate and evaluates it. It takes a sample of maximum size
+            psm_num_to_test_rt_ccs. If psm_num_per_mod_to_test_rt_ccs is greater than 0, indicating that modified
+            PSMs should be given special consideration, ensures that at least that many PSMs with each modification
+            are present, unless there are fewer that that available. It then evaluates the performance on the
+            test_psm_df and saves the results. Similar functions are available for CCS and MS2
+            Args:
+                ptm_specific: Boolean
+                    If true, prints out individual performance for each modification. Because some peptides have
+                    multiple PTMs, some will be in multiple categories, and the number of times a peptide is predicted
+                    will not be the same as the size of the test_psm_df
+                output_prefix: string
+                    Either initial or refined based on when it is called to evaluate, before or after training
+                test_psm_df: None or pd.Dataframe
+                    Optionally pass it to skip the first step of this function. It can be saved from the initial
+                    run and reused on the refined run
+
+            Returns:
+                test_psm_df: df with PSMs tested on
+            '''
+            if self.psm_num_to_test_rt_ccs > 0:
+                logging.info(f"Testing {output_prefix} RT model ...")
+                if test_psm_df is None:
+                    test_psm_df = psm_df[
+                        ~psm_df.sequence.isin(set(tr_df.sequence))
+                    ].copy()
+                    if len(test_psm_df) > self.psm_num_to_test_rt_ccs:
+                        if self.psm_num_per_mod_to_test_rt_ccs > 0: #sample with mods
+                            test_psm_df = psm_sampling_with_important_mods(
+                                test_psm_df, self.psm_num_to_test_rt_ccs,
+                                n_sample_each_mod=self.psm_num_per_mod_to_test_rt_ccs
+                            )
+                        else:
+                            test_psm_df = test_psm_df.sample(
+                                n=self.psm_num_to_test_rt_ccs
+                            )
+                    elif len(test_psm_df) == 0:
+                        logging.info("Evaluating with training/validation sets")
+                        test_psm_df = psm_df.copy()
+
+                if ptm_specific:
+                    evaluate_df = pd.DataFrame()
+                    mod_df = count_mods(test_psm_df, include_unmodified=True)
+                    new_index = []
+                    for i, row in mod_df.iterrows():
+                        if row["spec_count"] > 20: #kurtosis requirement
+                            new_index.append(row["mod"])
+                            if row["mod"] == "unmodified":
+                                mod_psm_df = test_psm_df[test_psm_df["mods"] == ""].copy()
+                            else:
+                                mod_psm_df = test_psm_df[test_psm_df["mods"].str.contains(row["mod"])].copy()
+                            regress = evaluate_linear_regression(
+                                self.rt_model.predict(mod_psm_df)
+                            )
+                            evaluate_df = pd.concat([evaluate_df, regress], axis=0)
+                    evaluate_df.index = new_index
+                else:
+                    evaluate_df = evaluate_linear_regression(
+                        self.rt_model.predict(test_psm_df)
+                    )
+                evaluate_df.to_csv(
+                    os.path.join(model_mgr_settings['transfer']['model_output_folder'], f"{output_prefix}_rt.csv"),
+                    index=False)
+                logging.info(f'Results:\n{evaluate_df}')
+
+                return test_psm_df
+
         psm_df = psm_df.groupby(
             ['sequence','mods','mod_sites']
         )[['rt_norm']].median().reset_index(drop=False)
@@ -550,12 +642,13 @@ class ModelManager(object):
         if self.psm_num_to_train_rt_ccs > 0:
             if self.psm_num_to_train_rt_ccs < len(psm_df):
                 tr_df = psm_sampling_with_important_mods(
-                    psm_df, self.psm_num_to_train_rt_ccs,
+                    psm_df, self.psm_num_to_train_rt_ccs, self.train_fraction, self.train_mod_fraction,
                     self.top_n_mods_to_train,
                     self.psm_num_per_mod_to_train_rt_ccs,
                 )
             else:
                 tr_df = psm_df
+            test_psm_df = evaluate(self.ptm_specific_evaluation, "initial")
 
             if self._train_psm_logging:
                 logging.info(f"{len(tr_df)} PSMs for RT model training/transfer learning")
@@ -569,35 +662,14 @@ class ModelManager(object):
                     val_fraction=self.val_fraction
                 )
                 self.rt_model.model.load_state_dict(best_state_dict) #load in parameters of best intermediate model
+
+            evaluate(self.ptm_specific_evaluation, "refined", test_psm_df)
         else:
             tr_df = []
-        
-        if self.psm_num_to_test_rt_ccs > 0:
-            if len(tr_df) > 0:
-                test_psm_df = psm_df[
-                    ~psm_df.sequence.isin(set(tr_df.sequence))
-                ]
-                if len(test_psm_df) > self.psm_num_to_test_rt_ccs:
-                    test_psm_df = test_psm_df.sample(
-                        n=self.psm_num_to_test_rt_ccs
-                    ).copy()
-                elif len(test_psm_df) == 0:
-                    test_psm_df = psm_df
-            else:
-                test_psm_df = psm_df
-
-            evaluate_df = evaluate_linear_regression(self.rt_model.predict(test_psm_df))
-            evaluate_df.to_csv(os.path.join(model_mgr_settings['transfer']['model_output_folder'], "evaluate_rt.csv"),
-                               index = False)
-            logging.info(
-                "Testing refined RT model:\n" + 
-                str(evaluate_df)
-            )
-
     def train_ccs_model(self,
         psm_df:pd.DataFrame,
     ):
-        """ 
+        """
         Train/fine-tune the CCS model. The fine-tuning will be skipped
         if `self.psm_num_to_train_rt_ccs` is zero.
 
@@ -606,6 +678,55 @@ class ModelManager(object):
         psm_df : pd.DataFrame
             Training psm_df which contains 'ccs' or 'mobility' column.
         """
+
+        def evaluate(ptm_specific, output_prefix, test_psm_df = None):
+            if self.psm_num_to_test_rt_ccs > 0:
+                logging.info(f'Testing {output_prefix} CCS model ...')
+                if test_psm_df is None:
+                    test_psm_df = psm_df[
+                        ~psm_df.sequence.isin(set(tr_df.sequence))
+                    ].copy()
+                    if len(test_psm_df) > self.psm_num_to_test_rt_ccs:
+                        if self.psm_num_per_mod_to_test_rt_ccs > 0:  # sample with mods
+                            test_psm_df = psm_sampling_with_important_mods(
+                                test_psm_df, self.psm_num_to_test_rt_ccs,
+                                n_sample_each_mod=self.psm_num_per_mod_to_test_rt_ccs
+                            )
+                        else:
+                            test_psm_df = test_psm_df.sample(
+                                n=self.psm_num_to_test_rt_ccs
+                            )
+                    elif len(test_psm_df) == 0:
+                        logging.info("Evaluating with training/validation sets")
+                        test_psm_df = psm_df.copy()
+
+                if ptm_specific:
+                    evaluate_df = pd.DataFrame()
+                    mod_df = count_mods(test_psm_df, include_unmodified=True)
+                    new_index = []
+                    for i, row in mod_df.iterrows():
+                        if row["spec_count"] > 20:
+                            new_index.append(row["mod"])
+                            if row["mod"] == "unmodified":
+                                mod_psm_df = test_psm_df[test_psm_df["mods"] == ""].copy()
+                            else:
+                                mod_psm_df = test_psm_df[test_psm_df["mods"].str.contains(row["mod"])].copy()
+                            regress = evaluate_linear_regression(
+                                self.rt_model.predict(mod_psm_df)
+                            )
+                            evaluate_df = pd.concat([evaluate_df, regress], axis=0)
+                        evaluate_df.index = new_index
+                else:
+                    evaluate_df = evaluate_linear_regression(
+                        self.ccs_model.predict(test_psm_df),
+                        x='ccs_pred', y='ccs'
+                    )
+                evaluate_df.to_csv(
+                    os.path.join(model_mgr_settings['transfer']['model_output_folder'], f"{output_prefix}_ccs.csv"),
+                    index=False)
+                logging.info(f'Results:\n{evaluate_df}')
+
+                return test_psm_df
 
         if 'mobility' not in psm_df.columns or 'ccs' not in psm_df.columns:
             return
@@ -625,12 +746,15 @@ class ModelManager(object):
         if self.psm_num_to_train_rt_ccs > 0:
             if self.psm_num_to_train_rt_ccs < len(psm_df):
                 tr_df = psm_sampling_with_important_mods(
-                    psm_df, self.psm_num_to_train_rt_ccs,
+                    psm_df, self.psm_num_to_train_rt_ccs, self.train_fraction, self.train_mod_fraction,
                     self.top_n_mods_to_train,
                     self.psm_num_per_mod_to_train_rt_ccs,
                 )
             else:
                 tr_df = psm_df
+
+            test_psm_df = evaluate(self.ptm_specific_evaluation, "initial")
+
             if self._train_psm_logging:
                 logging.info(f"{len(tr_df)} PSMs for CCS model training/transfer learning")
             if len(tr_df) > 0:
@@ -643,33 +767,10 @@ class ModelManager(object):
                     val_fraction=self.val_fraction
                 )
                 self.ccs_model.model.load_state_dict(best_state_dict)
+
+            evaluate(self.ptm_specific_evaluation, "refined", test_psm_df)
         else:
             tr_df = []
-        
-        if self.psm_num_to_test_rt_ccs > 0:
-            if len(tr_df) > 0:
-                test_psm_df = psm_df[
-                    ~psm_df.sequence.isin(set(tr_df.sequence))
-                ]
-                if len(test_psm_df) > self.psm_num_to_test_rt_ccs:
-                    test_psm_df = test_psm_df.sample(
-                        n=self.psm_num_to_test_rt_ccs
-                    ).copy()
-                elif len(test_psm_df) == 0:
-                    test_psm_df = psm_df
-            else:
-                test_psm_df = psm_df
-
-            evaluate_df = evaluate_linear_regression(
-                    self.ccs_model.predict(test_psm_df),
-                    x = 'ccs_pred', y='ccs'
-                )
-            evaluate_df.to_csv(os.path.join(model_mgr_settings['transfer']['model_output_folder'], "evaluate_ccs.csv"),
-                               index=False)
-            logging.info(
-                "Testing refined CCS model:\n" + 
-                str(evaluate_df)
-            )
 
     def train_ms2_model(self,
         psm_df: pd.DataFrame,
@@ -690,10 +791,68 @@ class ModelManager(object):
         matched_intensity_df : pd.DataFrame
             The matched fragment intensities for `psm_df`.
         """
+        def evaluate(ptm_specific, output_prefix, test_psm_df = None):
+            if self.psm_num_to_test_ms2 > 0:
+                logging.info(f'Testing {output_prefix} MS2 model ...')
+                if test_psm_df is None:
+                    test_psm_df = psm_df[
+                        ~psm_df.sequence.isin(set(tr_df.sequence))
+                    ].copy()
+                    if len(test_psm_df) > self.psm_num_to_test_ms2:
+                        if self.psm_num_per_mod_to_test_ms2 > 0:  # sample with mods
+                            test_psm_df = psm_sampling_with_important_mods(
+                                test_psm_df, self.psm_num_to_test_ms2,
+                                n_sample_each_mod=self.psm_num_per_mod_to_test_ms2
+                            )
+                        else:
+                            test_psm_df = test_psm_df.sample(
+                                n=self.psm_num_to_test_ms2
+                            )
+                    elif len(test_psm_df) == 0:
+                        logging.info("Evaluating with training/validation sets")
+                        test_psm_df = tr_df.copy()
+
+                    self.set_default_nce_instrument(test_psm_df)
+
+                if ptm_specific:
+                    evaluate_df = pd.DataFrame()
+                    mod_df = count_mods(test_psm_df, include_unmodified=True)
+                    new_header = []
+                    for i, row in mod_df.iterrows():
+                        if row["spec_count"] > 0:
+                            new_header.append(row["mod"])
+                            if row["mod"] == "unmodified":
+                                mod_psm_df = test_psm_df[test_psm_df["mods"] == ""].copy()
+                            else:
+                                mod_psm_df = test_psm_df[test_psm_df["mods"].str.contains(row["mod"])].copy()
+                            cos = calc_ms2_similarity(
+                                mod_psm_df,
+                                self.ms2_model.predict(
+                                    mod_psm_df, reference_frag_df=matched_intensity_df
+                                ),
+                                fragment_intensity_df=matched_intensity_df
+                            )[-1]
+                            evaluate_df = pd.concat([evaluate_df, cos["COS"]], axis = 1)
+                    evaluate_df.columns = new_header
+                else:
+                    evaluate_df = calc_ms2_similarity(
+                        test_psm_df,
+                        self.ms2_model.predict(
+                            test_psm_df, reference_frag_df=matched_intensity_df
+                        ),
+                        fragment_intensity_df=matched_intensity_df
+                    )[-1]
+
+                evaluate_df.to_csv(
+                    os.path.join(model_mgr_settings['transfer']['model_output_folder'], f'{output_prefix}_ms2.csv'))
+                logging.info(f'Results:\n{evaluate_df}')
+
+                return test_psm_df #want to be able to reuse this
+
         if self.psm_num_to_train_ms2 > 0:
             if self.psm_num_to_train_ms2 < len(psm_df):
                 tr_df = psm_sampling_with_important_mods(
-                    psm_df, self.psm_num_to_train_ms2,
+                    psm_df, self.psm_num_to_train_ms2, self.train_fraction, self.train_mod_fraction,
                     self.top_n_mods_to_train,
                     self.psm_num_per_mod_to_train_ms2
                 )
@@ -730,52 +889,25 @@ class ModelManager(object):
                     tr_df['instrument'] = self.instrument
                 else:
                     self.set_default_nce_instrument(tr_df)
-                if self._train_psm_logging:
-                    logging.info(f"{len(tr_df)} PSMs for MS2 model training/transfer learning")
-                best_state_dict = self.ms2_model.train(tr_df,
-                    fragment_intensity_df=tr_inten_df,
-                    batch_size=self.batch_size_to_train_ms2,
-                    epoch=self.epoch_to_train_ms2,
-                    warmup_epoch=self.warmup_epoch_to_train_ms2,
-                    lr=self.lr_to_train_ms2,
-                    verbose=self.train_verbose,
-                    val_fraction=self.val_fraction
-                )
-                self.ms2_model.model.load_state_dict(best_state_dict)
+
+            test_psm_df = evaluate(self.ptm_specific_evaluation, "initial")
+
+            if self._train_psm_logging:
+                logging.info(f"{len(tr_df)} PSMs for MS2 model training/transfer learning")
+            best_state_dict = self.ms2_model.train(tr_df,
+                fragment_intensity_df=tr_inten_df,
+                batch_size=self.batch_size_to_train_ms2,
+                epoch=self.epoch_to_train_ms2,
+                warmup_epoch=self.warmup_epoch_to_train_ms2,
+                lr=self.lr_to_train_ms2,
+                verbose=self.train_verbose,
+                val_fraction=self.val_fraction
+            )
+            self.ms2_model.model.load_state_dict(best_state_dict)
+
+            evaluate(self.ptm_specific_evaluation, "refined", test_psm_df)
         else:
             tr_df = []
-
-        if self.psm_num_to_test_ms2 > 0:
-            if len(tr_df) > 0:
-                test_psm_df = psm_df[
-                    ~psm_df.sequence.isin(set(tr_df.sequence))
-                ].copy()
-                if len(test_psm_df) > self.psm_num_to_test_ms2:
-                    test_psm_df = test_psm_df.sample(n=self.psm_num_to_test_ms2)
-                elif len(test_psm_df) == 0:
-                    test_psm_df = psm_df.copy()
-            else:
-                test_psm_df = psm_df.copy()
-                tr_inten_df = pd.DataFrame()
-                for frag_type in self.ms2_model.charged_frag_types:
-                    if frag_type in matched_intensity_df.columns:
-                        tr_inten_df[frag_type] = matched_intensity_df[frag_type]
-                    else:
-                        tr_inten_df[frag_type] = 0.0
-            self.set_default_nce_instrument(test_psm_df)
-            evaluate_df = calc_ms2_similarity(
-                    test_psm_df,
-                    self.ms2_model.predict(
-                        test_psm_df, reference_frag_df=matched_intensity_df
-                    ),
-                    fragment_intensity_df=matched_intensity_df
-                )[-1]
-            evaluate_df.to_csv(os.path.join(model_mgr_settings['transfer']['model_output_folder'], "evaluate_ms2.csv"))
-            logging.info(
-                "Testing refined MS2 model:\n"+
-                str(evaluate_df)
-            )
-            
 
     def predict_ms2(self, precursor_df:pd.DataFrame, 
         *, 

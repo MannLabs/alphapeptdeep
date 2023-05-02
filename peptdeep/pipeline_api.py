@@ -36,7 +36,7 @@ from peptdeep.utils import parse_ms_file_names_to_dict
 
 from peptdeep.utils import process_bar
 
-def import_psm_df(psm_files:list, psm_type:str)->pd.DataFrame:
+def import_psm_df(psm_files:list, psm_type:str, fdr:float)->pd.DataFrame:
     """Import PSM files of a search engine as a pd.DataFrame
 
     Parameters
@@ -54,9 +54,10 @@ def import_psm_df(psm_files:list, psm_type:str)->pd.DataFrame:
     """
     psm_reader = psm_reader_provider.get_reader(
         psm_type, 
-        modificatin_mapping=global_settings[
+        modification_mapping=global_settings[ #typo in modification
             'model_mgr']['transfer'
-        ]['other_modification_mapping']
+        ]['other_modification_mapping'],
+        fdr=fdr
     )
     psm_df_list = []
     for psm_file in psm_files:
@@ -103,6 +104,7 @@ def match_psms()->Tuple[pd.DataFrame,pd.DataFrame]:
     psm_df = import_psm_df(
         mgr_settings['transfer']['psm_files'],
         mgr_settings['transfer']['psm_type'],
+        mgr_settings['transfer']['fdr']
     )
 
     ms2_file_dict = parse_ms_file_names_to_dict(
@@ -205,17 +207,23 @@ def transfer_learn(verbose=True):
             # in case transfer_learn is run multiple times (e.g. to test with different hyperparameters),
             # psm_df and frag_df are already generated and ready to load
             if 'previous_psm_files' not in mgr_settings['transfer'].keys() or \
-                'previous_ms_files' not in mgr_settings['transfer'].keys():
+                'previous_ms_files' not in mgr_settings['transfer'].keys() or \
+                'previous_fdr' not in mgr_settings['transfer'].keys():
                 mgr_settings['transfer']['previous_psm_files'] = mgr_settings['transfer']['psm_files']
                 mgr_settings['transfer']['previous_ms_files'] = mgr_settings['transfer']['ms_files']
+                mgr_settings['transfer']['previous_fdr'] = mgr_settings['transfer']['fdr']
             if 'psm_df' not in mgr_settings.keys() or 'frag_df' not in mgr_settings.keys() or \
                     mgr_settings['transfer']['psm_files'] != mgr_settings['transfer']['previous_psm_files'] or \
-                    mgr_settings['transfer']['ms_files'] != mgr_settings['transfer']['previous_ms_files']:
+                    mgr_settings['transfer']['ms_files'] != mgr_settings['transfer']['previous_ms_files'] or \
+                    mgr_settings['transfer']['fdr'] != mgr_settings['transfer']['previous_fdr']:
                     psm_df, frag_df = match_psms()
                     mgr_settings['psm_df'] = psm_df
                     mgr_settings['frag_df'] = frag_df
+
+                    #checking for consistence with prior run
                     mgr_settings['transfer']['previous_psm_files'] = mgr_settings['transfer']['psm_files']
                     mgr_settings['transfer']['previous_ms_files'] = mgr_settings['transfer']['ms_files']
+                    mgr_settings['transfer']['previous_fdr'] = mgr_settings['transfer']['fdr']
             else:
                 logging.info('Reloading psm and frag df')
                 psm_df = mgr_settings['psm_df']
@@ -238,6 +246,7 @@ def transfer_learn(verbose=True):
                 psm_df = import_psm_df(
                     mgr_settings['transfer']['psm_files'],
                     mgr_settings['transfer']['psm_type'],
+                    mgr_settings['transfer']['fdr']
                 )
                 frag_df = None
 

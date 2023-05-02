@@ -440,3 +440,36 @@ def evaluate_linear_regression_plot(
         data=df, x=x, y=y, color='r', ci=ci, 
         scatter_kws={'s':0.05, 'alpha':alpha, 'color':'b'}
     )
+
+def count_mods(psm_df, include_unmodified = False)->pd.DataFrame:
+    mods = psm_df[
+        psm_df.mods.str.len()>0
+    ].mods.apply(lambda x: x.split(';'))
+    mod_dict = {}
+    mod_dict['mutation'] = {}
+    mod_dict['mutation']['spec_count'] = 0
+    if include_unmodified: #just to know how many unmodified PSMs there are
+        mod_dict['unmodified'] = {}
+        mod_dict['unmodified']['spec_count'] = len(psm_df[psm_df.mods.str.len()==0])
+
+    for one_mods in mods.values:
+        for mod in set(one_mods):
+            items = mod.split('->')
+            if (
+                len(items)==2
+                and len(items[0])==3
+                and len(items[1])==5
+            ):
+                mod_dict['mutation']['spec_count'] += 1
+            elif mod not in mod_dict:
+                mod_dict[mod] = {}
+                mod_dict[mod]['spec_count'] = 1
+            else:
+                mod_dict[mod]['spec_count'] += 1
+    return pd.DataFrame().from_dict(
+            mod_dict, orient='index'
+        ).reset_index(drop=False).rename(
+            columns={'index':'mod'}
+        ).sort_values(
+            'spec_count',ascending=False
+        ).reset_index(drop=True)

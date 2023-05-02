@@ -103,8 +103,11 @@ model_mgr:
     batch_size_rt_ccs: 1024
     lr_rt_ccs: 0.0001
     verbose: False
+    train_fraction: None
+    train_mod_fraction: None
     val_fraction: 0.9
     early_stopping: 0
+    fdr: 0.01
     grid_nce_search: False
     grid_nce_first: 15.0
     grid_nce_last: 45.0
@@ -130,10 +133,13 @@ model_mgr:
     psm_num_to_train_ms2: 100000000
     psm_num_per_mod_to_train_ms2: 50
     psm_num_to_test_ms2: 0
+    psm_num_per_mod_to_test_ms2: 0
     psm_num_to_train_rt_ccs: 100000000
     psm_num_per_mod_to_train_rt_ccs: 50
     psm_num_to_test_rt_ccs: 0
+    psm_num_per_mod_to_test_rt_ccs: 0
     top_n_mods_to_train: 10
+    ptm_specific_evaluation: False
     other_modification_mapping: {} 
     # alphabase modification to modifications of other search engines
     # For example,
