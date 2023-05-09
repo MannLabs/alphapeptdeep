@@ -4,10 +4,11 @@ import psutil
 
 import numpy as np
 import pandas as pd
+from deepdiff import DeepDiff
 
 from typing import Tuple
 
-from alphabase.yaml_utils import save_yaml
+from alphabase.yaml_utils import save_yaml, load_yaml
 from alphabase.io.psm_reader import psm_reader_provider
 from alphabase.peptide.fragment import (
     get_charged_frag_types,
@@ -35,6 +36,8 @@ from peptdeep.rescore.feature_extractor import match_one_raw
 from peptdeep.utils import parse_ms_file_names_to_dict
 
 from peptdeep.utils import process_bar
+
+from peptdeep.constants._const import CONST_FOLDER
 
 def import_psm_df(psm_files:list, psm_type:str, fdr:float)->pd.DataFrame:
     """Import PSM files of a search engine as a pd.DataFrame
@@ -97,6 +100,8 @@ def match_psms()->Tuple[pd.DataFrame,pd.DataFrame]:
         for _type in global_settings['model']['frag_types']:
             if 'modloss' not in _type:
                 frag_types.append(_type)
+    else:
+        frag_types = global_settings['model']['frag_types']
 
     max_charge = global_settings['model']['max_frag_charge']
     charged_frag_types = get_charged_frag_types(frag_types, max_charge)
@@ -206,28 +211,61 @@ def transfer_learn(verbose=True):
         ):
             # in case transfer_learn is run multiple times (e.g. to test with different hyperparameters),
             # psm_df and frag_df are already generated and ready to load
-            if 'previous_psm_files' not in mgr_settings['transfer'].keys() or \
-                'previous_ms_files' not in mgr_settings['transfer'].keys() or \
-                'previous_fdr' not in mgr_settings['transfer'].keys():
-                mgr_settings['transfer']['previous_psm_files'] = mgr_settings['transfer']['psm_files']
-                mgr_settings['transfer']['previous_ms_files'] = mgr_settings['transfer']['ms_files']
-                mgr_settings['transfer']['previous_fdr'] = mgr_settings['transfer']['fdr']
             if 'psm_df' not in mgr_settings.keys() or 'frag_df' not in mgr_settings.keys() or \
-                    mgr_settings['transfer']['psm_files'] != mgr_settings['transfer']['previous_psm_files'] or \
-                    mgr_settings['transfer']['ms_files'] != mgr_settings['transfer']['previous_ms_files'] or \
-                    mgr_settings['transfer']['fdr'] != mgr_settings['transfer']['previous_fdr']:
+                    not os.path.exists(os.path.join(CONST_FOLDER, 'tmp.yaml')):
+                psm_df, frag_df = match_psms()
+                save_yaml(os.path.join(CONST_FOLDER, 'tmp.yaml'), mgr_settings)  # save for comparison later
+                mgr_settings['psm_df'] = psm_df
+                mgr_settings['frag_df'] = frag_df
+            else:
+                reload = True
+
+                tmp_yaml = load_yaml(os.path.join(CONST_FOLDER, 'tmp.yaml'))
+                ddiff = DeepDiff(mgr_settings, tmp_yaml, ignore_order=True)
+
+                #check what is different and if that is ok
+                if "values_changed" in ddiff.keys():
+                    allowed_changes = ["root['transfer']['model_output_folder']",
+                                       "root['transfer']['epoch_ms2']",
+                                       "root['transfer']['warmup_epoch_ms2']",
+                                       "root['transfer']['batch_size_ms2']",
+                                       "root['transfer']['lr_ms2']",
+                                       "root['transfer']['epoch_rt_ccs']",
+                                       "root['transfer']['warmup_epoch_rt_ccs']",
+                                       "root['transfer']['batch_size_rt_ccs']",
+                                       "root['transfer']['lr_rt_ccs']",
+                                       "root['transfer']['verbose']",
+                                       "root['transfer']['train_fraction']",
+                                       "root['transfer']['train_mod_fraction']",
+                                       "root['transfer']['val_fraction']",
+                                       "root['transfer']['early_stopping']",
+                                       "root['transfer']['psm_num_to_train_ms2']",
+                                       "root['transfer']['psm_num_per_mod_to_train_ms2']",
+                                       "root['transfer']['psm_num_to_test_ms2']",
+                                       "root['transfer']['psm_num_per_mod_to_test_ms2']",
+                                       "root['transfer']['psm_num_to_train_rt_ccs']",
+                                       "root['transfer']['psm_num_per_mod_to_train_rt_ccs']",
+                                       "root['transfer']['psm_num_to_test_rt_ccs']",
+                                       "root['transfer']['psm_num_per_mod_to_test_rt_ccs']",
+                                       "root['transfer']['top_n_mods_to_train']",
+                                       "root['transfer']['ptm_specific_evaluation']",
+                                       ] #TODO add onto here
+                    for k in ddiff["values_changed"].keys():
+                        if k not in allowed_changes:
+                            reload = False
+                            break
+                if reload:
+                    logging.info('Reloading psm and frag df')
+                    psm_df = mgr_settings['psm_df']
+                    frag_df = mgr_settings['frag_df']
+                else:
+                    logging.info(ddiff)
+                    del mgr_settings['psm_df']
+                    del mgr_settings['frag_df']
                     psm_df, frag_df = match_psms()
+                    save_yaml(os.path.join(CONST_FOLDER, 'tmp.yaml'), mgr_settings)  # save for comparison later
                     mgr_settings['psm_df'] = psm_df
                     mgr_settings['frag_df'] = frag_df
-
-                    #checking for consistence with prior run
-                    mgr_settings['transfer']['previous_psm_files'] = mgr_settings['transfer']['psm_files']
-                    mgr_settings['transfer']['previous_ms_files'] = mgr_settings['transfer']['ms_files']
-                    mgr_settings['transfer']['previous_fdr'] = mgr_settings['transfer']['fdr']
-            else:
-                logging.info('Reloading psm and frag df')
-                psm_df = mgr_settings['psm_df']
-                frag_df = mgr_settings['frag_df']
         else:
             if (
                 mgr_settings['transfer']['ms_file_type'].lower()== 'speclib_tsv'  
