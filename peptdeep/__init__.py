@@ -2,11 +2,11 @@
 
 try:
     from . import (
-        model, rescore, spec_lib
+        model, spec_lib
     )
 
     from . import protein # rely on spec_lib, import after
-except ImportError:
+except (ImportError,RuntimeError, OSError):
     # happends when installation
     pass
 

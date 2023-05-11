@@ -14,7 +14,7 @@ from alphabase.peptide.fragment import (
     concat_precursor_fragment_dataframes
 )
 from alphabase.spectral_library.reader import (
-    SWATHLibraryReader
+    LibraryReaderBase
 )
 
 from peptdeep.spec_lib.translate import mod_to_unimod_dict
@@ -211,7 +211,7 @@ def transfer_learn(verbose=True):
                 dfs = []
                 frag_inten_dfs = []
                 for psm_file in mgr_settings['transfer']['psm_files']:
-                    _lib = SWATHLibraryReader()
+                    _lib = LibraryReaderBase()
                     dfs.append(_lib.import_file(psm_file))
                     frag_inten_dfs.append(_lib.fragment_intensity_df)
                 psm_df, frag_df = concat_precursor_fragment_dataframes(
