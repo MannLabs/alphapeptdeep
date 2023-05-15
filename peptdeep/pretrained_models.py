@@ -29,9 +29,8 @@ from alphabase.peptide.mobility import (
     ccs_to_mobility_for_df
 )
 
-from peptdeep.settings import global_settings
+from peptdeep.settings import load_global_settings, update_modifications
 from peptdeep.utils import logging, process_bar, count_mods
-from peptdeep.settings import global_settings
 
 from peptdeep.model.ms2 import (
     pDeepModel, normalize_fragment_intensities,
@@ -1007,6 +1006,10 @@ class ModelManager(object):
 
     def _predict_func_for_mp(self, arg_dict):
         """Internal function, for multiprocessing"""
+        if 'settings_yaml' in arg_dict:
+            load_global_settings(arg_dict['settings_yaml'])
+            update_modifications()
+            arg_dict.pop('settings_yaml')
         return self.predict_all(
             multiprocessing=False, **arg_dict
         )
@@ -1015,10 +1018,11 @@ class ModelManager(object):
         *,
         predict_items:list = [
             'rt' ,'mobility' ,'ms2'
-        ], 
+        ],
         frag_types:list =  None,
         process_num:int = 8,
         mp_batch_size:int = 100000,
+        settings_yaml: str = None
     ):
         self.ms2_model.model.share_memory()
         self.rt_model.model.share_memory()
@@ -1040,6 +1044,7 @@ class ModelManager(object):
                         'precursor_df': df.iloc[i:i+mp_batch_size,:],
                         'predict_items': predict_items,
                         'frag_types': frag_types,
+                        'settings_yaml': settings_yaml
                     }
 
         precursor_df_list = []
@@ -1059,9 +1064,9 @@ class ModelManager(object):
         with mp.get_context('spawn').Pool(process_num) as p:
             for ret_dict in process_bar(
                 p.imap_unordered(
-                    self._predict_func_for_mp, 
+                    self._predict_func_for_mp,
                     mp_param_generator(df_groupby)
-                ), 
+                ),
                 get_batch_num_mp(df_groupby)
             ):
                 precursor_df_list.append(ret_dict['precursor_df'])
@@ -1082,46 +1087,47 @@ class ModelManager(object):
                 fragment_mz_df_list,
                 fragment_intensity_df_list,
             )
-            
+
             return {
-                'precursor_df': precursor_df, 
+                'precursor_df': precursor_df,
                 'fragment_mz_df': fragment_mz_df,
-                'fragment_intensity_df': fragment_intensity_df, 
+                'fragment_intensity_df': fragment_intensity_df,
             }
         else:
             precursor_df = pd.concat(precursor_df_list)
             precursor_df.reset_index(drop=True, inplace=True)
-            
-            return {'precursor_df': precursor_df} 
+
+            return {'precursor_df': precursor_df}
 
     def predict_all(self, precursor_df:pd.DataFrame,
-        *, 
+        *,
         predict_items:list = [
             'rt' ,'mobility' ,'ms2'
-        ], 
+        ],
         frag_types:list =  None,
         multiprocessing:bool = True,
         min_required_precursor_num_for_mp:int = 3000,
         process_num:int = 8,
         mp_batch_size:int = 100000,
+        settings_yaml:str = None,
     )->Dict[str, pd.DataFrame]:
-        """ 
-        Predict all items defined by `predict_items`, 
-        which may include rt, mobility, fragment_mz 
+        """
+        Predict all items defined by `predict_items`,
+        which may include rt, mobility, fragment_mz
         and fragment_intensity.
 
         Parameters
         ----------
         precursor_df : pd.DataFrame
-            Precursor dataframe contains `sequence`, `mods`, `mod_sites`, `charge` ... columns. 
+            Precursor dataframe contains `sequence`, `mods`, `mod_sites`, `charge` ... columns.
 
         predict_items : list, optional
             items ('rt', 'mobility', 'ms2') to predict.
             Defaults to ['rt' ,'mobility' ,'ms2'].
 
         frag_types : list, optional
-            Fragment types to predict. 
-            If it is None, it then depends on `self.ms2_model.charged_frag_types` and 
+            Fragment types to predict.
+            If it is None, it then depends on `self.ms2_model.charged_frag_types` and
             `self.ms2_model.model._mask_modloss`.
             Defaults to None.
 
@@ -1133,14 +1139,14 @@ class ModelManager(object):
             Defaults to 4
 
         min_required_precursor_num_for_mp : int, optional
-            It will not use multiprocessing when the number of precursors in precursor_df 
-            is lower than this value. 
+            It will not use multiprocessing when the number of precursors in precursor_df
+            is lower than this value.
             Defaults to 3000.
 
         mp_batch_size : int, optional
-            Splitting data into batches for multiprocessing. 
+            Splitting data into batches for multiprocessing.
             Defaults to 100000.
-              
+
         Returns
         -------
         Dict[str, pd.DataFrame]
@@ -1177,7 +1183,7 @@ class ModelManager(object):
         ):
             refine_df(precursor_df)
             if 'rt' in predict_items:
-                self.predict_rt(precursor_df, 
+                self.predict_rt(precursor_df,
                     batch_size=model_mgr_settings['predict']['batch_size_rt_ccs']
                 )
             if 'mobility' in predict_items:
@@ -1192,7 +1198,7 @@ class ModelManager(object):
                 precursor_df.drop(
                     columns=['frag_start_idx'], inplace=True
                 )
-                
+
                 fragment_intensity_df = self.predict_ms2(
                     precursor_df,
                     batch_size=model_mgr_settings['predict']['batch_size_ms2']
@@ -1210,18 +1216,19 @@ class ModelManager(object):
                 )
 
                 return {
-                    'precursor_df': precursor_df, 
+                    'precursor_df': precursor_df,
                     'fragment_mz_df': fragment_mz_df,
-                    'fragment_intensity_df': fragment_intensity_df, 
+                    'fragment_intensity_df': fragment_intensity_df,
                 }
             else:
                 return {'precursor_df': precursor_df}
         else:
             logging.info(f"Using multiprocessing with {process_num} processes ...")
             return self.predict_all_mp(
-                precursor_df, 
+                precursor_df,
                 predict_items=predict_items,
                 process_num = process_num,
                 mp_batch_size=mp_batch_size,
+                settings_yaml=settings_yaml
             )
 
