@@ -1,14 +1,14 @@
 #!python
 
-try:
-    from . import (
-        model, spec_lib
-    )
+# try:
+#     from . import (
+#         model, spec_lib
+#     )
 
-    from . import protein # rely on spec_lib, import after
-except (ImportError,RuntimeError, OSError):
-    # happends when installation
-    pass
+#     from . import protein # rely on spec_lib, import after
+# except (ImportError,RuntimeError, OSError):
+#     # happends when installation
+#     pass
 
 __project__ = "peptdeep"
 __version__ = "1.0.2"
