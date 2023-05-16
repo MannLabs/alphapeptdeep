@@ -7,10 +7,7 @@ import os
 from alphabase.yaml_utils import save_yaml
 
 import peptdeep
-from peptdeep.pipeline_api import (
-    rescore, generate_library, 
-    transfer_learn
-)
+
 from peptdeep.settings import global_settings, load_global_settings
 
 @click.group(
@@ -90,6 +87,7 @@ _help_str = (
 )
 @click.argument("settings_yaml", type=str)
 def _rescore(settings_yaml:str):
+    from peptdeep.pipeline_api import rescore
     load_global_settings(settings_yaml)
     rescore()
 
@@ -98,6 +96,7 @@ def _rescore(settings_yaml:str):
 )
 @click.argument("settings_yaml", type=str)
 def _library(settings_yaml:str):
+    from peptdeep.pipeline_api import generate_library
     load_global_settings(settings_yaml)
     generate_library()
 
@@ -106,6 +105,7 @@ def _library(settings_yaml:str):
 )
 @click.argument("settings_yaml", type=str)
 def _transfer(settings_yaml:str):
+    from peptdeep.pipeline_api import transfer_learn
     load_global_settings(settings_yaml)
     transfer_learn()
 
