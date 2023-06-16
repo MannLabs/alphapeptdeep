@@ -96,6 +96,8 @@ def match_psms()->Tuple[pd.DataFrame,pd.DataFrame]:
         for _type in global_settings['model']['frag_types']:
             if 'modloss' not in _type:
                 frag_types.append(_type)
+    else:
+        frag_types = global_settings['model']['frag_types']
 
     max_charge = global_settings['model']['max_frag_charge']
     charged_frag_types = get_charged_frag_types(frag_types, max_charge)
