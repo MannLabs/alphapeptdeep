@@ -115,12 +115,12 @@ def match_psms()->Tuple[pd.DataFrame,pd.DataFrame]:
     for raw_name, df in process_bar(
         df_groupby_raw, df_groupby_raw.ngroups
     ):
-        if raw_name not in ms2_file_dict:
+        if raw_name.lower() not in ms2_file_dict: #needs lower to match
             continue
         (
             df, _, inten_df, _
         ) = match_one_raw(
-            df, ms2_file_dict[raw_name],
+            df, ms2_file_dict[raw_name.lower()],
             mgr_settings['transfer']['ms_file_type'],
             charged_frag_types,
             global_settings['peak_matching']['ms2_ppm'], 
