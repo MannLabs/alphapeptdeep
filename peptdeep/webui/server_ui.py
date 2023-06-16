@@ -23,7 +23,7 @@ def display_tasks():
         if 'task_type' in _dict:
             task_type = _dict['task_type']
         else:
-            task_type = 'library'
+            task_type = ['library']
         tasks.append(task_type)
 
     df['Task Type'] = tasks

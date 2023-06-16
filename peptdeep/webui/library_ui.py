@@ -371,7 +371,7 @@ def show():
     task_name = st.text_input(label="Task name", value=f"peptdeep_library_{current_time}")
 
     if st.button(label='Submit for library prediction'):
-        global_ui_settings['task_type'] = 'library'
+        global_ui_settings['task_type'] = ['library']
 
         if not os.path.exists(output_folder):
             os.makedirs(output_folder)

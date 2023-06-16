@@ -14,12 +14,12 @@ local_model_zip_name: "pretrained_models.zip"
 # overwritable config
 model_url: "https://github.com/MannLabs/alphapeptdeep/releases/download/pre-trained-models/pretrained_models.zip"
 
-task_type: library
+task_type: [library]
 task_type_choices:
   - library
   - train
   - rescore
-thread_num: 8
+thread_num: 16
 torch_device:
   device_type: gpu
   device_type_choices:
@@ -266,3 +266,8 @@ library:
     keep_higest_k_peaks: 12
     translate_batch_size: 100000
     translate_mod_to_unimod_id: False
+
+command_line_args:
+  task_type: 'AlphaPeptDeep task types. List, example: [train,library]'
+  thread_num: 'Number of threads. Int.'
+  torch_device: 'Torch device. Str, example: "GPU"'
