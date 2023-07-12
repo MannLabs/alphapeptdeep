@@ -11,10 +11,29 @@ from peptdeep.settings import global_settings, load_global_settings
 
 import argparse
 
+argparse_dict_level_sep="-"
+argparse_prefix="apd"
+
+def convert_dict_to_argparse(
+    settings:dict, 
+    prefix_key=argparse_prefix,
+    dict_level_sep=argparse_dict_level_sep,
+):
+    if isinstance(settings, dict):
+        ret = []
+        for key, val in settings.items():
+            ret += convert_dict_to_argparse(
+                val, prefix_key=prefix_key+dict_level_sep+key
+            )
+        return ret
+    else:
+        return [(prefix_key, settings)]
+
 def parse_args(args):
     parser = argparse.ArgumentParser()
     parser.add_argument("")
-    parser.parse_args(args)
+    parser.parse_known_args(args)
+    return parser
 
 @click.group(
     context_settings=dict(
@@ -101,7 +120,7 @@ def _rescore(ctx:click.Context, settings_yaml:str):
 @run.command("library", help=
     "Predict library for DIA search."+_help_str
 )
-@click.argument("settings_yaml", type=str)
+@click.option("--settings_yaml", type=str, default=None, show_default=True)
 @click.pass_context
 def _library(ctx:click.Context, settings_yaml:str):
     from peptdeep.pipeline_api import generate_library
@@ -111,15 +130,26 @@ def _library(ctx:click.Context, settings_yaml:str):
 @run.command("transfer", help=
     "Transfer learning for different data types."+_help_str
 )
-@click.argument("settings_yaml", type=str)
+@click.option("--settings_yaml", type=str, default=None, show_default=True)
 @click.pass_context
 def _transfer(ctx:click.Context, settings_yaml:str):
     from peptdeep.pipeline_api import transfer_learn
     load_global_settings(settings_yaml)
     transfer_learn()
 
+@run.command("transfer_library", help="Run `transfer` and then `library`")
+@click.option("--settings_yaml", type=str, default="", show_default=True)
+@click.pass_context
+def _transfer_library(ctx:click.Context, settings_yaml:str):
+    from peptdeep.pipeline_api import transfer_learn
+    from peptdeep.pipeline_api import generate_library
+    if settings_yaml:
+        load_global_settings(settings_yaml)
+    transfer_learn()
+    generate_library()
+
 @run.command("export-settings", help="Export the default settings to a yaml file. It can be used as the template setting.")
-@click.argument("yaml_file", type=str)
+@click.option("--yaml_file", type=str, default=None, show_default=True)
 @click.pass_context
 def _export_settings(ctx:click.Context, yaml_file:str):
     save_yaml(yaml_file, global_settings)

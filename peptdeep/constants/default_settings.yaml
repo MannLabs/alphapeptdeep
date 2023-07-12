@@ -14,7 +14,7 @@ local_model_zip_name: "pretrained_models.zip"
 # overwritable config
 model_url: "https://github.com/MannLabs/alphapeptdeep/releases/download/pre-trained-models/pretrained_models.zip"
 
-task_type: [library]
+task_type: library
 task_type_choices:
   - library
   - train
@@ -42,12 +42,12 @@ common:
   user_defined_modifications: {}
   # For example,
   # user_defined_modifications:
-  #   "Dimethyl2@Any N-term": 
+  #   "Dimethyl2@Any_N-term": 
   #     composition: "H(2)2H(2)C(2)"
-  #     modloss_composition: "H(0)" # can be without if no modloss
+  #     modloss_composition: "H(0)" # can be missing if no modloss
   #   "Dimethyl2@K":
   #     composition: "H(2)2H(2)C(2)"
-  #   "Dimethyl6@Any N-term":
+  #   "Dimethyl6@Any_N-term":
   #     composition: "2H(4)13C(2)"
   #   "Dimethyl6@K":
   #     composition: "2H(4)13C(2)"
@@ -224,7 +224,7 @@ library:
   fix_mods: 
   - Carbamidomethyl@C
   var_mods:
-  - Acetyl@Protein N-term
+  - Acetyl@Protein_N-term
   - Oxidation@M
   special_mods: [] # normally for Phospho or GlyGly@K
   special_mods_cannot_modify_pep_n_term: False
@@ -232,8 +232,8 @@ library:
   labeling_channels: {}
   # For example,
   # labeling_channels:
-  #   0: ['Dimethyl@Any N-term','Dimethyl@K']
-  #   4: ['Dimethyl:2H(2)@Any N-term','Dimethyl:2H(2)@K']
+  #   0: ['Dimethyl@Any_N-term','Dimethyl@K']
+  #   4: ['Dimethyl:2H(2)@Any_N-term','Dimethyl:2H(2)@K']
   #   8: [...]
   min_var_mod_num: 0
   max_var_mod_num: 2
@@ -266,8 +266,3 @@ library:
     keep_higest_k_peaks: 12
     translate_batch_size: 100000
     translate_mod_to_unimod_id: False
-
-command_line_args:
-  task_type: 'AlphaPeptDeep task types. List, example: [train,library]'
-  thread_num: 'Number of threads. Int.'
-  torch_device: 'Torch device. Str, example: "GPU"'

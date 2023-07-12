@@ -51,13 +51,13 @@ def serve():
 
             try:
                 load_global_settings(yaml_file)
-                if global_settings['task_type'][0] == 'train':
+                if global_settings['task_type'] == 'train':
                     print("[PeptDeep] Transfer learning ... ")
                     transfer_learn()
-                elif global_settings['task_type'][0] == 'library':
+                elif global_settings['task_type'] == 'library':
                     print("[PeptDeep] Predicting library ... ")
                     generate_library()
-                elif global_settings['task_type'][0] == 'rescore':
+                elif global_settings['task_type'] == 'rescore':
                     print("[PeptDeep] Rescoring PSMs ... ")
                     rescore()
                 else:
