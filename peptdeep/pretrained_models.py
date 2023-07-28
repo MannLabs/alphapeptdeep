@@ -375,6 +375,8 @@ class ModelManager(object):
         ]["top_n_mods_to_train"]
 
         self.nce = mgr_settings['default_nce']
+        if self.nce == "read":
+            self.use_grid_nce_search = False
         self.instrument = mgr_settings['default_instrument']
         self.verbose = mgr_settings['predict']['verbose']
         self.train_verbose = mgr_settings['transfer']['verbose']

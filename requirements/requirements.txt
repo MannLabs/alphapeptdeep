@@ -14,5 +14,6 @@ scikit-learn
 streamlit
 streamlit-aggrid
 lxml
+pyteomics
 
 alphabase
