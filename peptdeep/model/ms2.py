@@ -658,14 +658,15 @@ def normalize_fragment_intensities(
         Fragment intensity DataFrame to be normalized. 
         Intensities will be normalzied inplace.
     """
+    frag_intensity_df_np = frag_intensity_df.to_numpy()
     for i, (frag_start_idx, frag_stop_idx) in enumerate(
         psm_df[['frag_start_idx','frag_stop_idx']].values
     ):
-        intens = frag_intensity_df.values[frag_start_idx:frag_stop_idx]
+        intens = frag_intensity_df_np[frag_start_idx:frag_stop_idx]
         max_inten = np.max(intens)
         if max_inten > 0:
             intens /= max_inten
-        frag_intensity_df.values[frag_start_idx:frag_stop_idx,:] = intens
+        frag_intensity_df.iloc[frag_start_idx:frag_stop_idx,:] = intens
 
 
 
