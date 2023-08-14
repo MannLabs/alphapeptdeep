@@ -214,10 +214,8 @@ def transfer_learn(verbose=True):
             psm_df, frag_df = concat_precursor_fragment_dataframes(
                 dfs, frag_inten_dfs
             )
-        elif (
-            len(mgr_settings['transfer']['ms_files'])>0
-        ):
-                psm_df, frag_df = match_psms()
+        elif len(mgr_settings['transfer']['ms_files'])>0:
+            psm_df, frag_df = match_psms()
         else:
             psm_df = import_psm_df(
                 mgr_settings['transfer']['psm_files'],
