@@ -13,9 +13,9 @@ from peptdeep.settings import (
     add_user_defined_modifications,
 )
 
-import peptdeep.webui.ui_utils
+from peptdeep.settings import global_settings
 
-global_ui_settings = st.session_state.global_settings
+global_ui_settings = global_settings
 
 def add_user_mods():
     st.write("#### User-defined modifications")
