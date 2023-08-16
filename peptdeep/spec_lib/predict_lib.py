@@ -109,6 +109,7 @@ class PredictSpecLib(SpecLibBase):
         """
         if 'precursor_mz' not in self.precursor_df.columns: 
             self.calc_precursor_mz()
+            self.clip_by_precursor_mz_()
         if self.generate_precursor_isotope:
             if self.model_manager.verbose:
                 logging.info('Calculating precursor isotope distributions ...')
