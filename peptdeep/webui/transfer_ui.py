@@ -12,8 +12,9 @@ from peptdeep.webui.ui_utils import (
     get_posix, select_files, file_type_selectbox,
 )
 
+from peptdeep.settings import global_settings
 
-global_ui_settings = st.session_state.global_settings
+global_ui_settings = global_settings
 
 
 def nce_search():

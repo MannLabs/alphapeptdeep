@@ -96,6 +96,8 @@ def match_psms()->Tuple[pd.DataFrame,pd.DataFrame]:
         for _type in global_settings['model']['frag_types']:
             if 'modloss' not in _type:
                 frag_types.append(_type)
+    else:
+        frag_types = global_settings['model']['frag_types']
 
     max_charge = global_settings['model']['max_frag_charge']
     charged_frag_types = get_charged_frag_types(frag_types, max_charge)
@@ -115,12 +117,12 @@ def match_psms()->Tuple[pd.DataFrame,pd.DataFrame]:
     for raw_name, df in process_bar(
         df_groupby_raw, df_groupby_raw.ngroups
     ):
-        if raw_name not in ms2_file_dict:
+        if raw_name.lower() not in ms2_file_dict: #needs lower to match
             continue
         (
             df, _, inten_df, _
         ) = match_one_raw(
-            df, ms2_file_dict[raw_name],
+            df, ms2_file_dict[raw_name.lower()],
             mgr_settings['transfer']['ms_file_type'],
             charged_frag_types,
             global_settings['peak_matching']['ms2_ppm'], 
@@ -198,31 +200,31 @@ def transfer_learn(verbose=True):
         model_mgr.reset_by_global_settings()
 
         logging.info('Loading PSMs and extracting fragments ...')
+        
         if (
-            model_mgr.psm_num_to_train_ms2 > 0 and 
-            len(mgr_settings['transfer']['ms_files'])>0
+            mgr_settings['transfer']['ms_file_type'].lower()== 'speclib_tsv'  
+            and mgr_settings['transfer']['psm_type'].lower() == 'speclib_tsv'
         ):
-                psm_df, frag_df = match_psms()
+            dfs = []
+            frag_inten_dfs = []
+            for psm_file in mgr_settings['transfer']['psm_files']:
+                _lib = LibraryReaderBase()
+                dfs.append(_lib.import_file(psm_file))
+                frag_inten_dfs.append(_lib.fragment_intensity_df)
+            psm_df, frag_df = concat_precursor_fragment_dataframes(
+                dfs, frag_inten_dfs
+            )
+        elif len(mgr_settings['transfer']['ms_files'])>0:
+            psm_df, frag_df = match_psms()
         else:
-            if (
-                mgr_settings['transfer']['ms_file_type'].lower()== 'speclib_tsv'  
-                and mgr_settings['transfer']['psm_type'].lower() == 'speclib_tsv'
-            ):
-                dfs = []
-                frag_inten_dfs = []
-                for psm_file in mgr_settings['transfer']['psm_files']:
-                    _lib = LibraryReaderBase()
-                    dfs.append(_lib.import_file(psm_file))
-                    frag_inten_dfs.append(_lib.fragment_intensity_df)
-                psm_df, frag_df = concat_precursor_fragment_dataframes(
-                    dfs, frag_inten_dfs
-                )
-            else:
-                psm_df = import_psm_df(
-                    mgr_settings['transfer']['psm_files'],
-                    mgr_settings['transfer']['psm_type'],
-                )
-                frag_df = None
+            psm_df = import_psm_df(
+                mgr_settings['transfer']['psm_files'],
+                mgr_settings['transfer']['psm_type'],
+            )
+            frag_df = None
+        
+        if model_mgr.psm_num_to_train_ms2 <= 0:
+            frag_df = None
 
         logging.info("Training CCS model ...")
         model_mgr.train_ccs_model(psm_df)

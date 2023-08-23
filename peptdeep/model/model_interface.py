@@ -8,11 +8,12 @@ from tqdm import tqdm
 
 import torch.multiprocessing as mp
 import functools
+import math
 
 from types import ModuleType
 
-# from torch.optim.lr_scheduler import LambdaLR
-from transformers.optimization import get_cosine_schedule_with_warmup
+from torch.optim.lr_scheduler import LambdaLR
+# from transformers.optimization import get_cosine_schedule_with_warmup
 
 from zipfile import ZipFile
 from typing import IO, Tuple, List, Union
@@ -31,27 +32,50 @@ from peptdeep.model.featurize import (
     get_batch_mod_feature
 )
 
-# def get_cosine_schedule_with_warmup(
-#     optimizer, num_warmup_steps, 
-#     num_training_steps, num_cycles=0.5, 
-#     last_epoch=-1
-# ):
-#     """
-#     Create a schedule with a learning rate that decreases following the
-#     values of the cosine function between 0 and `pi * cycles` after a warmup
-#     period during which it increases linearly between 0 and 1.
-#     """
-#     def lr_lambda(current_step):
-#         if current_step < num_warmup_steps:
-#             return float(current_step) / max(1, num_warmup_steps)
-#         progress = float(
-#             current_step - num_warmup_steps
-#         ) / max(1, num_training_steps - num_warmup_steps)
-#         return max(0.0, 0.5 * (
-#             1.0 + np.cos(np.pi * num_cycles * 2.0 * progress)
-#         ))
+# `transformers.optimization.get_cosine_schedule_with_warmup` will import tensorflow,
+# resulting in some package version issues.
+# Here we copy the code from transformers.optimization
+def _get_cosine_schedule_with_warmup_lr_lambda(
+    current_step: int, *, num_warmup_steps: int, num_training_steps: int, num_cycles: float
+):
+    if current_step < num_warmup_steps:
+        return float(current_step) / float(max(1, num_warmup_steps))
+    progress = float(current_step - num_warmup_steps) / float(max(1, num_training_steps - num_warmup_steps))
+    return max(0.0, 0.5 * (1.0 + math.cos(math.pi * float(num_cycles) * 2.0 * progress)))
 
-#     return LambdaLR(optimizer, lr_lambda, last_epoch)
+
+def get_cosine_schedule_with_warmup(
+    optimizer, num_warmup_steps: int, num_training_steps: int, num_cycles: float = 0.5, last_epoch: int = -1
+):
+    """
+    Create a schedule with a learning rate that decreases following the values of the cosine function between the
+    initial lr set in the optimizer to 0, after a warmup period during which it increases linearly between 0 and the
+    initial lr set in the optimizer.
+
+    Args:
+        optimizer ([`~torch.optim.Optimizer`]):
+            The optimizer for which to schedule the learning rate.
+        num_warmup_steps (`int`):
+            The number of steps for the warmup phase.
+        num_training_steps (`int`):
+            The total number of training steps.
+        num_cycles (`float`, *optional*, defaults to 0.5):
+            The number of waves in the cosine schedule (the defaults is to just decrease from the max value to 0
+            following a half-cosine).
+        last_epoch (`int`, *optional*, defaults to -1):
+            The index of the last epoch when resuming training.
+
+    Return:
+        `torch.optim.lr_scheduler.LambdaLR` with the appropriate schedule.
+    """
+
+    lr_lambda = functools.partial(
+        _get_cosine_schedule_with_warmup_lr_lambda,
+        num_warmup_steps=num_warmup_steps,
+        num_training_steps=num_training_steps,
+        num_cycles=num_cycles,
+    )
+    return LambdaLR(optimizer, lr_lambda, last_epoch)
 
 def append_nAA_column_if_missing(precursor_df):
     """

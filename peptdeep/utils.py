@@ -208,6 +208,8 @@ def show_python_info() -> None:
 _special_raw_suffices = [
     '.ms_data.hdf',
     '_hcdft.mgf',
+    '.mzml'
+    '.mgf'
 ]
 
 def parse_ms_file_names_to_dict(
