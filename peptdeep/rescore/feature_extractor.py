@@ -20,7 +20,7 @@ from peptdeep.mass_spec.match import PepSpecMatch
 from peptdeep.rescore.fdr import calc_fdr_for_df
 from peptdeep.utils import process_bar, logging
 from peptdeep.settings import global_settings
-perc_settings = global_settings['percolator']
+# perc_settings = global_settings['percolator']
 
 def match_one_raw(
     psm_df_one_raw,

@@ -9,7 +9,7 @@ from inspect import currentframe, getframeinfo
 try:
     # should be replaced by AlphaRaw in the near future
     from peptdeep.legacy.thermo_raw.pyrawfilereader import RawFileReader
-except (ImportError,AttributeError) as e:
+except (ImportError,AttributeError,RuntimeError) as e:
     frameinfo = getframeinfo(currentframe())
     logging.warn(f"{frameinfo.filename}#L{frameinfo.lineno}: Cannot import `RawFileReader`, check if PythonNet is installed. See https://github.com/MannLabs/alphapeptdeep#pip")
     RawFileReader = None

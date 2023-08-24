@@ -20,11 +20,11 @@ def display_tasks():
     tasks = []
     for _yml in yamls:
         _dict = load_yaml(_yml)
-        if 'task_type' in _dict:
-            task_type = _dict['task_type']
+        if 'task_workflow' in _dict:
+            task_workflow = _dict['task_workflow']
         else:
-            task_type = 'library'
-        tasks.append(task_type)
+            task_workflow = ['library']
+        tasks.append(task_workflow)
 
     df['Task Type'] = tasks
 

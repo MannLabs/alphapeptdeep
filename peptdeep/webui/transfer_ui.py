@@ -235,7 +235,7 @@ def show():
     task_name = st.text_input(label="Task name", value=f"peptdeep_transfer_{current_time}")
     
     if st.button(label='Submit for transfer learning'):
-        global_ui_settings['task_type'] = 'train'
+        global_ui_settings['task_workflow'] = 'train'
 
         if not os.path.exists(model_output_folder):
             os.makedirs(model_output_folder)
