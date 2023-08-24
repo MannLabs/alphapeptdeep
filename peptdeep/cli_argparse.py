@@ -1,155 +1,96 @@
 #!python
 
-import click
 import os
-
-from alphabase.yaml_utils import save_yaml
-
-import peptdeep
 
 from peptdeep.settings import global_settings, load_global_settings
 
 import argparse
 
-argparse_dict_level_sep="-"
-argparse_prefix="apd"
+__argparse_dict_level_sep="--" # do not change
 
 def convert_dict_to_argparse(
     settings:dict, 
-    prefix_key=argparse_prefix,
-    dict_level_sep=argparse_dict_level_sep,
+    prefix_key="",
+    dict_level_sep=__argparse_dict_level_sep,
 ):
     if isinstance(settings, dict):
+        if len(settings) == 0:
+            return [(prefix_key, settings)]
         ret = []
         for key, val in settings.items():
             ret += convert_dict_to_argparse(
-                val, prefix_key=prefix_key+dict_level_sep+key
+                val, prefix_key=(prefix_key+dict_level_sep+key) if prefix_key else key
             )
         return ret
     else:
         return [(prefix_key, settings)]
+    
+def _set_dict_val(_dict, keys, val):
+    if len(keys) < 1: return
+    elif len(keys) == 1:
+        if keys[0] == "labeling_channels":
+            def _get(x):
+                x = x.split(":")
+                k = int(x[0]) if x[0].isdigit() else x[0]
+                v = x[1].split(";")
+                return k,v
+            val = dict([_get(s) for s in val])
+        elif keys[0] == "other_modification_mapping":
+            def _get(x):
+                x = x.split(":")
+                return x[0], x[1].split(";")
+            val = dict([_get(s) for s in val])
+        elif keys[0] == "user_defined_modifications":
+            def _get(x):
+                x = x.split(":")
+                items = x[1].split(";")
+                if len(items) == 1:
+                    return x[0], {"composition":items[0]}
+                else:
+                    return x[0], {"composition": items[0], "modloss_composition": items[1]}
+            val = dict([_get(s) for s in val])
+        _dict[keys[0]] = val
+    else: _set_dict_val(_dict[keys[0]], keys[1:], val)
 
-def parse_args(args):
+def get_parser():
     parser = argparse.ArgumentParser()
-    parser.add_argument("")
-    parser.parse_known_args(args)
+    parser.add_argument(
+        "--settings_yaml", type=str, default="", 
+        help="The yaml file for saved settings (default: %(default)s)"
+    )
+    arg_settings = convert_dict_to_argparse(global_settings)
+    for arg, val in arg_settings:
+        arg = "--"+arg
+        if isinstance(val, (list,dict,set)):
+            parser.add_argument(arg, nargs="+", default=val, help="(default: %(default)s)")
+        else:
+            if isinstance(val, bool):
+                _type = bool
+                _dt = "r"
+            elif isinstance(val, int):
+                _type = int
+                _dt = "d"
+            elif isinstance(val, float):
+                _type = float
+                _dt = "f"
+            else:
+                _type = str
+                _dt = "s"
+            parser.add_argument(arg, type=_type, default=val, help=f"(default: %(default){_dt})")
     return parser
 
-@click.group(
-    context_settings=dict(
-        help_option_names=['-h', '--help'],
-    ),
-    invoke_without_command=True
-)
-@click.pass_context
-@click.version_option(peptdeep.__version__, "-v", "--version")
-def run(ctx, **kwargs):
-    click.echo(
-r'''
-     ____             __  ____                
-    / __ \___  ____  / /_/ __ \___  ___  ____ 
-   / /_/ / _ \/ __ \/ __/ / / / _ \/ _ \/ __ \
-  / ____/  __/ /_/ / /_/ /_/ /  __/  __/ /_/ /
- /_/    \___/ .___/\__/_____/\___/\___/ .___/ 
-           /_/                       /_/      
-....................................................
-.{version}.
-.{url}.
-.{license}.
-....................................................
-'''.format(
-        version=peptdeep.__version__.center(50),
-        url=peptdeep.__github__.center(50), 
-        license=peptdeep.__license__.center(50),
-    )
-)
-    if ctx.invoked_subcommand is None:
-        click.echo(run.get_help(ctx))
-
-@run.command("gui", help="Start graphical user interface.")
-@click.option("--port", default=10077, type=int,
-    show_default=True, help="The web server port."
-)
-@click.option("--settings_yaml", default='', type=str,
-    show_default=True, help="Load default settings yaml file."
-)
-def _gui(port, settings_yaml):
-    import peptdeep.gui
-    from peptdeep.webui.server import _server
-    if os.path.isfile(settings_yaml):
-        load_global_settings(settings_yaml)
-    # start the server to run tasks
-    _server.start()
-    peptdeep.gui.run(port)
-
-@run.command("install-models", help="Install or update peptdeep pre-trained models.")
-@click.option("--model-file", default=None, type=str,
-    show_default=True, help="The model .zip file to install. "
-    "If not set, peptdeep will download the model file from GitHub."
-)
-@click.option("--overwrite", default=True, type=bool,
-    show_default=True, help="If overwrite existing model file."
-)
-def _install_model(model_file, overwrite):
-    from peptdeep.pretrained_models import (
-        download_models, model_url
-    )
-    if not model_file:
-        download_models(model_url, overwrite=overwrite)
-    else:
-        download_models(model_file, overwrite=overwrite)
-
-_help_str = (
-    "\n\nTo get the settings_yaml file,"
-    " you can either export from the GUI,"
-    " or use `peptdeep export-settings`."
-    " Visit https://github.com/mannlabs/alphapeptdeep/#cli" 
-    " for detailed usages."
-)
-
-@run.command("rescore", help=
-    "Rescore PSMs using Percolator."+_help_str
-)
-@click.argument("settings_yaml", type=str)
-@click.pass_context
-def _rescore(ctx:click.Context, settings_yaml:str):
-    from peptdeep.pipeline_api import rescore
-    load_global_settings(settings_yaml)
-    rescore()
-
-@run.command("library", help=
-    "Predict library for DIA search."+_help_str
-)
-@click.option("--settings_yaml", type=str, default=None, show_default=True)
-@click.pass_context
-def _library(ctx:click.Context, settings_yaml:str):
-    from peptdeep.pipeline_api import generate_library
-    load_global_settings(settings_yaml)
-    generate_library()
-
-@run.command("transfer", help=
-    "Transfer learning for different data types."+_help_str
-)
-@click.option("--settings_yaml", type=str, default=None, show_default=True)
-@click.pass_context
-def _transfer(ctx:click.Context, settings_yaml:str):
-    from peptdeep.pipeline_api import transfer_learn
-    load_global_settings(settings_yaml)
-    transfer_learn()
-
-@run.command("transfer_library", help="Run `transfer` and then `library`")
-@click.option("--settings_yaml", type=str, default="", show_default=True)
-@click.pass_context
-def _transfer_library(ctx:click.Context, settings_yaml:str):
-    from peptdeep.pipeline_api import transfer_learn
-    from peptdeep.pipeline_api import generate_library
-    if settings_yaml:
-        load_global_settings(settings_yaml)
-    transfer_learn()
-    generate_library()
-
-@run.command("export-settings", help="Export the default settings to a yaml file. It can be used as the template setting.")
-@click.option("--yaml_file", type=str, default=None, show_default=True)
-@click.pass_context
-def _export_settings(ctx:click.Context, yaml_file:str):
-    save_yaml(yaml_file, global_settings)
+def parse_args_to_global_settings(parser, args):
+    args, extras = parser.parse_known_args(args)
+    args_dict = vars(args)
+    if "settings_yaml" in args_dict:
+        if os.path.isfile(
+            args_dict["settings_yaml"]
+        ):
+            load_global_settings(
+                args_dict["settings_yaml"]
+            )
+    args_dict.pop("settings_yaml")
+    for key, val in vars(args).items():
+        keys = key.split("__")
+        _set_dict_val(global_settings, keys, val)
+    return global_settings

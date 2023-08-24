@@ -23,7 +23,7 @@ from peptdeep.utils import (
     logging, set_logger, 
     show_platform_info, show_python_info
 )
-from peptdeep.rescore.percolator import Percolator
+# from peptdeep.rescore.percolator import Percolator
 from peptdeep.spec_lib.library_factory import (
     library_maker_provider
 )
@@ -335,72 +335,72 @@ def generate_library():
         logging.error(traceback.format_exc())
         raise e
 
-def rescore():
-    """Generate/predict a spectral library.
+# def rescore():
+#     """Generate/predict a spectral library.
     
-    All required information in global_settings:
+#     All required information in global_settings:
     
-    ```python
-    perc_settings = global_settings['percolator']
-    output_folder = perc_settings['output_folder'] # str. Output folder of the rescored results
-    perc_settings['input_files']['psm_files'] # list of str. all PSM files (at 100% FDR and including decoys) from the search engines
-    perc_settings['input_files']['psm_type'] # str. PSM or search engine type, e.g. pfind, alphapept, maxquant
-    perc_settings['input_files']['ms_file_type'] # str. Could be alphapept_hdf, thermo, ...
-    perc_settings['input_files']['ms_files'] # list of str. MS file list to match MS2 peaks
-    ```
+#     ```python
+#     perc_settings = global_settings['percolator']
+#     output_folder = perc_settings['output_folder'] # str. Output folder of the rescored results
+#     perc_settings['input_files']['psm_files'] # list of str. all PSM files (at 100% FDR and including decoys) from the search engines
+#     perc_settings['input_files']['psm_type'] # str. PSM or search engine type, e.g. pfind, alphapept, maxquant
+#     perc_settings['input_files']['ms_file_type'] # str. Could be alphapept_hdf, thermo, ...
+#     perc_settings['input_files']['ms_files'] # list of str. MS file list to match MS2 peaks
+#     ```
 
-    Raises
-    ------
-    Exception
-        Any kinds of exception if the pipeline fails.
-    """
-    try:
-        perc_settings = global_settings['percolator']
-        output_folder = os.path.expanduser(
-            perc_settings['output_folder']
-        )
-        if not os.path.exists(output_folder):
-            os.makedirs(output_folder)
-        set_logger(
-            log_file_name=os.path.join(output_folder, 'peptdeep_rescore.log'),
-            log_level=global_settings['log_level'],
-            overwrite=True, stream=True, 
-        )
-        show_platform_info()
-        show_python_info()
+#     Raises
+#     ------
+#     Exception
+#         Any kinds of exception if the pipeline fails.
+#     """
+#     try:
+#         perc_settings = global_settings['percolator']
+#         output_folder = os.path.expanduser(
+#             perc_settings['output_folder']
+#         )
+#         if not os.path.exists(output_folder):
+#             os.makedirs(output_folder)
+#         set_logger(
+#             log_file_name=os.path.join(output_folder, 'peptdeep_rescore.log'),
+#             log_level=global_settings['log_level'],
+#             overwrite=True, stream=True, 
+#         )
+#         show_platform_info()
+#         show_python_info()
 
-        model_mgr:ModelManager = ModelManager()
-        model_mgr.reset_by_global_settings()
-        percolator = Percolator(model_mgr=model_mgr)
-        psm_df = percolator.load_psms(
-            perc_settings['input_files']['psm_files'],
-            perc_settings['input_files']['psm_type']
-        )
+#         model_mgr:ModelManager = ModelManager()
+#         model_mgr.reset_by_global_settings()
+#         percolator = Percolator(model_mgr=model_mgr)
+#         psm_df = percolator.load_psms(
+#             perc_settings['input_files']['psm_files'],
+#             perc_settings['input_files']['psm_type']
+#         )
 
-        ms_file_dict = parse_ms_file_names_to_dict(
-            perc_settings['input_files']['ms_files']
-        )
+#         ms_file_dict = parse_ms_file_names_to_dict(
+#             perc_settings['input_files']['ms_files']
+#         )
 
-        psm_df = percolator.extract_features(
-            psm_df, ms_file_dict, 
-            perc_settings['input_files']['ms_file_type']
-        )
+#         psm_df = percolator.extract_features(
+#             psm_df, ms_file_dict, 
+#             perc_settings['input_files']['ms_file_type']
+#         )
 
-        df_fdr = psm_df[
-            (psm_df.fdr<0.01)&(psm_df.decoy==0)
-        ]
-        df_fdr.to_csv(
-            os.path.join(output_folder, 'peptdeep_fdr.tsv'), 
-            sep='\t', index=False
-        )
+#         df_fdr = psm_df[
+#             (psm_df.fdr<0.01)&(psm_df.decoy==0)
+#         ]
+#         df_fdr.to_csv(
+#             os.path.join(output_folder, 'peptdeep_fdr.tsv'), 
+#             sep='\t', index=False
+#         )
         
-        psm_df = percolator.re_score(psm_df)
-        psm_df.to_csv(
-            os.path.join(output_folder, 'peptdeep.tsv'), 
-            sep='\t', index=False
-        )
-    except Exception as e:
-        logging.error(traceback.format_exc())
-        raise e
+#         psm_df = percolator.re_score(psm_df)
+#         psm_df.to_csv(
+#             os.path.join(output_folder, 'peptdeep.tsv'), 
+#             sep='\t', index=False
+#         )
+#     except Exception as e:
+#         logging.error(traceback.format_exc())
+#         raise e
 
 

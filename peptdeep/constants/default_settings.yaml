@@ -14,11 +14,11 @@ local_model_zip_name: "pretrained_models.zip"
 # overwritable config
 model_url: "https://github.com/MannLabs/alphapeptdeep/releases/download/pre-trained-models/pretrained_models.zip"
 
-task_type: library
-task_type_choices:
-  - library
+task_workflow: [library]
+task_choices:
   - train
-  - rescore
+  - library
+  # - rescore
 thread_num: 16
 torch_device:
   device_type: gpu
@@ -142,60 +142,60 @@ model_mgr:
     #   Dimethyl:2H(2)@K: 
     #     - K(Dimethyl-K-2)
     #   ...
-percolator:
-  require_model_tuning: True
-  raw_num_to_tune: 8
+# percolator:
+#   require_model_tuning: True
+#   raw_num_to_tune: 8
 
-  require_raw_specific_tuning: True
-  raw_specific_ms2_tuning: False
-  psm_num_per_raw_to_tune: 200
-  epoch_per_raw_to_tune: 5
+#   require_raw_specific_tuning: True
+#   raw_specific_ms2_tuning: False
+#   psm_num_per_raw_to_tune: 200
+#   epoch_per_raw_to_tune: 5
 
-  multiprocessing: True
+#   multiprocessing: True
 
-  top_k_frags_to_calc_spc: 10
-  calibrate_frag_mass_error: False
-  max_perc_train_sample: 1000000
-  min_perc_train_sample: 100
+#   top_k_frags_to_calc_spc: 10
+#   calibrate_frag_mass_error: False
+#   max_perc_train_sample: 1000000
+#   min_perc_train_sample: 100
 
-  percolator_backend: sklearn
-  percolator_backend_choices:
-    - sklearn
-    - pytorch
-  percolator_model: linear
-  percolator_model_choices:
-    pytorch_as_backend:
-      - linear # not fully tested, performance may be unstable
-      - mlp # not implemented yet
-    sklearn_as_backend:
-      - linear # logistic regression
-      - random_forest
-  lr_percolator_torch_model: 0.1 # learning rate, only used when percolator_backend==pytorch 
-  percolator_iter_num: 5 # percolator iteration number
-  cv_fold: 1
-  fdr: 0.01
-  fdr_level: psm
-  fdr_level_choices:
-    - psm
-    - precursor
-    - peptide
-    - sequence
-  use_fdr_for_each_raw: False
-  frag_types: ['b_z1','b_z2','y_z1','y_z2']
-  input_files:
-    psm_type: alphapept
-    psm_type_choices:
-      - alphapept
-      - pfind
-    psm_files: []
-    ms_file_type: alphapept_hdf
-    ms_file_type_choices:
-      - alphapept_hdf
-      - thermo_raw # if alpharaw is installed
-      - mgf
-      - mzml
-    ms_files: []
-  output_folder: "{PEPTDEEP_HOME}/rescore"
+#   percolator_backend: sklearn
+#   percolator_backend_choices:
+#     - sklearn
+#     - pytorch
+#   percolator_model: linear
+#   percolator_model_choices:
+#     pytorch_as_backend:
+#       - linear # not fully tested, performance may be unstable
+#       - mlp # not implemented yet
+#     sklearn_as_backend:
+#       - linear # logistic regression
+#       - random_forest
+#   lr_percolator_torch_model: 0.1 # learning rate, only used when percolator_backend==pytorch 
+#   percolator_iter_num: 5 # percolator iteration number
+#   cv_fold: 1
+#   fdr: 0.01
+#   fdr_level: psm
+#   fdr_level_choices:
+#     - psm
+#     - precursor
+#     - peptide
+#     - sequence
+#   use_fdr_for_each_raw: False
+#   frag_types: ['b_z1','b_z2','y_z1','y_z2']
+#   input_files:
+#     psm_type: alphapept
+#     psm_type_choices:
+#       - alphapept
+#       - pfind
+#     psm_files: []
+#     ms_file_type: alphapept_hdf
+#     ms_file_type_choices:
+#       - alphapept_hdf
+#       - thermo_raw # if alpharaw is installed
+#       - mgf
+#       - mzml
+#     ms_files: []
+#   output_folder: "{PEPTDEEP_HOME}/rescore"
 library:
   infile_type: fasta
   infile_type_choices:

@@ -5,10 +5,13 @@ import click
 import os
 
 from alphabase.yaml_utils import save_yaml
+from click.core import Context
+from click.formatting import HelpFormatter
 
 import peptdeep
 
 from peptdeep.settings import global_settings, load_global_settings
+from .cli_argparse import get_parser, parse_args_to_global_settings
 
 @click.group(
     context_settings=dict(
@@ -82,14 +85,14 @@ _help_str = (
     " for detailed usages."
 )
 
-@run.command("rescore", help=
-    "Rescore PSMs using Percolator."+_help_str
-)
-@click.argument("settings_yaml", type=str)
-def _rescore(settings_yaml:str):
-    from peptdeep.pipeline_api import rescore
-    load_global_settings(settings_yaml)
-    rescore()
+# @run.command("rescore", help=
+#     "Rescore PSMs using Percolator."+_help_str
+# )
+# @click.argument("settings_yaml", type=str)
+# def _rescore(settings_yaml:str):
+#     from peptdeep.pipeline_api import rescore
+#     load_global_settings(settings_yaml)
+#     rescore()
 
 @run.command("library", help=
     "Predict library for DIA search."+_help_str
@@ -113,3 +116,48 @@ def _transfer(settings_yaml:str):
 @click.argument("yaml_file", type=str)
 def _export_settings(yaml_file:str):
     save_yaml(yaml_file, global_settings)
+
+class ParserHelper(click.Command):
+    def format_help(self, ctx: Context, formatter: HelpFormatter) -> None:
+        parser = get_parser()
+        formatter.write(parser.format_help())
+
+@run.command("cmd-flow", 
+    help="Using command line arguments to control the settings",
+    cls=ParserHelper,
+    context_settings=dict(
+    ignore_unknown_options=True,
+    allow_extra_args=True,
+))
+@click.pass_context
+def _cmd_flow(ctx):
+    parser = get_parser()
+    if len(ctx.args) == 0: 
+        parser.print_help()
+    else:
+        parse_args_to_global_settings(parser, ctx.args)
+        if "train" in global_settings["task_workflow"]:
+            from peptdeep.pipeline_api import transfer_learn
+            transfer_learn()
+            if os.path.isfile(os.path.join(
+                global_settings["transfer"]["model_output_folder"], "ms2.pth"
+            )):
+                global_settings["model_mgr"]["external_ms2_model"] = os.path.join(
+                    global_settings["transfer"]["model_output_folder"], "ms2.pth"
+                )
+            if os.path.isfile(os.path.join(
+                global_settings["transfer"]["model_output_folder"], "rt.pth"
+            )):
+                global_settings["model_mgr"]["external_rt_model"] = os.path.join(
+                    global_settings["transfer"]["model_output_folder"], "rt.pth"
+                )
+            if os.path.isfile(os.path.join(
+                global_settings["transfer"]["model_output_folder"], "ccs.pth"
+            )):
+                global_settings["model_mgr"]["external_ccs_model"] = os.path.join(
+                    global_settings["transfer"]["model_output_folder"], "ccs.pth"
+                )
+        if "library" in global_settings["task_workflow"]:
+            from peptdeep.pipeline_api import generate_library
+            generate_library()
+    
