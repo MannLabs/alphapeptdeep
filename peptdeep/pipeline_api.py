@@ -30,7 +30,8 @@ from peptdeep.spec_lib.library_factory import (
 
 from peptdeep.pretrained_models import ModelManager
 
-from peptdeep.rescore.feature_extractor import match_one_raw
+# from peptdeep.rescore.feature_extractor import match_one_raw
+from alpharaw.match.psm_match import PepSpecMatch, PepSpecMatch_DIA
 
 from peptdeep.utils import parse_ms_file_names_to_dict
 
@@ -107,35 +108,41 @@ def match_psms()->Tuple[pd.DataFrame,pd.DataFrame]:
         mgr_settings['transfer']['psm_type'],
     )
 
-    ms2_file_dict = parse_ms_file_names_to_dict(
-        mgr_settings['transfer']['ms_files']
-    )
-    
-    psm_df_list = []
-    matched_intensity_df_list = []
-    df_groupby_raw = psm_df.groupby('raw_name')
-    for raw_name, df in process_bar(
-        df_groupby_raw, df_groupby_raw.ngroups
-    ):
-        if raw_name.lower() not in ms2_file_dict: #needs lower to match
-            continue
-        (
-            df, _, inten_df, _
-        ) = match_one_raw(
-            df, ms2_file_dict[raw_name.lower()],
-            mgr_settings['transfer']['ms_file_type'],
-            charged_frag_types,
-            global_settings['peak_matching']['ms2_ppm'], 
-            global_settings['peak_matching']['ms2_tol_value'],
-            calibrate_frag_mass_error=False,
-        )
-        psm_df_list.append(df)
-        matched_intensity_df_list.append(inten_df)
+    ms2_file_list = mgr_settings['transfer']['ms_files']
 
-    return concat_precursor_fragment_dataframes(
-        psm_df_list,
-        matched_intensity_df_list
+    if (
+        mgr_settings['transfer']['psm_type'].lower()
+        in mgr_settings['transfer']['dda_psm_types'] 
+    ):
+        psm_match = PepSpecMatch(
+            charged_frag_types=charged_frag_types,
+            use_ppm=global_settings['peak_matching']['ms2_ppm'], 
+            tol_value=global_settings['peak_matching']['ms2_tol_value'],
+        )
+    else:
+        psm_match = PepSpecMatch_DIA(
+            charged_frag_types=charged_frag_types,
+            use_ppm=global_settings['peak_matching']['ms2_ppm'], 
+            tol_value=global_settings['peak_matching']['ms2_tol_value'],
+        )
+
+
+    thread_num = global_settings["thread_num"]
+    if len(ms2_file_list) > thread_num:
+        psm_match.ms_loader_thread_num = 1
+    else:
+        psm_match.ms_loader_thread_num = thread_num//len(ms2_file_dict)
+        thread_num = len(ms2_file_list)
+
+    (
+        psm_df, frag_mz_df,
+        frag_inten_df, frag_mz_err_df,
+    ) = psm_match.match_ms2_multi_raw(
+        psm_df=psm_df,
+        ms_files=ms2_file_list,
+        process_num=thread_num,
     )
+    return psm_df, frag_inten_df
 
 def transfer_learn(verbose=True):
     """Transfer learn / refine the RT/CCS(/MS2) models.
@@ -202,8 +209,7 @@ def transfer_learn(verbose=True):
         logging.info('Loading PSMs and extracting fragments ...')
         
         if (
-            mgr_settings['transfer']['ms_file_type'].lower()== 'speclib_tsv'  
-            and mgr_settings['transfer']['psm_type'].lower() == 'speclib_tsv'
+            mgr_settings['transfer']['psm_type'].lower() == 'speclib_tsv'
         ):
             dfs = []
             frag_inten_dfs = []
