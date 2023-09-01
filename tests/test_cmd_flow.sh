@@ -1,4 +1,25 @@
 peptdeep cmd-flow \
+--task_workflow train library \
+--peak_matching--ms2_ppm True
+--peak_matching--ms2_tol_value 10.0
+--model_mgr--transfer--model_output_folder /Users/wenfengzeng/data/orbi_dia/hla/refined-models \
+--model_mgr--transfer--epoch_ms2 2 \
+--model_mgr--transfer--warmup_epoch_ms2 1 \
+--model_mgr--transfer--epoch_rt_ccs 2 \
+--model_mgr--transfer--warmup_epoch_rt_ccs 1 \
+--model_mgr--transfer--psm_type diann \
+--model_mgr--transfer--psm_files /Users/wenfengzeng/data/orbi_dia/hla/20200317_QE_HFX2_LC3_DIA_RA957_R01.tsv \
+--model_mgr--transfer--ms_file_type thermo_raw \
+--model_mgr--transfer--ms_files /Users/wenfengzeng/data/orbi_dia/hla/20200317_QE_HFX2_LC3_DIA_RA957_R01.raw \
+--model_mgr--transfer--psm_num_to_train_ms2 10000 \
+--model_mgr--transfer--psm_num_to_test_ms2 10000 \
+--model_mgr--transfer--psm_num_to_train_rt_ccs 10000 \
+--model_mgr--transfer--psm_num_to_test_rt_ccs 10000 \
+--model_mgr--external_ms2_model /Users/wenfengzeng/data/orbi_dia/hla/refined-models/ms2.pth \
+--model_mgr--external_rt_model /Users/wenfengzeng/data/orbi_dia/hla/refined-models/rt.pth \
+--model_mgr--external_ccs_model /Users/wenfengzeng/data/orbi_dia/hla/refined-models/ccs.pth \
+--library--output_folder /Users/wenfengzeng/data/orbi_dia/hla/apd_speclib \
 --library--infiles /Users/wenfengzeng/data/test_protein.fasta \
---library--decoy None --library--output_tsv--enabled True \
---library--labeling_channels "0:Dimethyl@Any_N-term;Dimethyl@K"
+--library--decoy None \
+--library--output_tsv--enabled True \
+--library--labeling_channels "0:Dimethyl@Any_N-term;Dimethyl@K" \
