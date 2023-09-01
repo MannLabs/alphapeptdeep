@@ -1,7 +1,7 @@
 peptdeep cmd-flow \
 --task_workflow train library \
---peak_matching--ms2_ppm True
---peak_matching--ms2_tol_value 10.0
+--peak_matching--ms2_ppm True \
+--peak_matching--ms2_tol_value 10.0 \
 --model_mgr--transfer--model_output_folder /Users/wenfengzeng/data/orbi_dia/hla/refined-models \
 --model_mgr--transfer--epoch_ms2 2 \
 --model_mgr--transfer--warmup_epoch_ms2 1 \
@@ -19,7 +19,9 @@ peptdeep cmd-flow \
 --model_mgr--external_rt_model /Users/wenfengzeng/data/orbi_dia/hla/refined-models/rt.pth \
 --model_mgr--external_ccs_model /Users/wenfengzeng/data/orbi_dia/hla/refined-models/ccs.pth \
 --library--output_folder /Users/wenfengzeng/data/orbi_dia/hla/apd_speclib \
---library--infiles /Users/wenfengzeng/data/test_protein.fasta \
+--library--infile_type diann \
+--library--infiles /Users/wenfengzeng/data/orbi_dia/hla/20200317_QE_HFX2_LC3_DIA_RA957_R01.tsv \
 --library--decoy None \
 --library--output_tsv--enabled True \
+--library--rt_to_irt True \
 --library--labeling_channels "0:Dimethyl@Any_N-term;Dimethyl@K" \

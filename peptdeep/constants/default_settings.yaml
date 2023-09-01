@@ -128,7 +128,6 @@ model_mgr:
       - thermo_raw
       - mgf
       - mzml
-      - speclib_tsv
     ms_files: []
     psm_num_to_train_ms2: 100000000
     psm_num_per_mod_to_train_ms2: 50
@@ -207,6 +206,7 @@ library:
   - sequence_table
   - peptide_table # sequence with mods and mod_sites
   - precursor_table # peptide with charge state
+  - all_other_psm_reader_types # see psm_type_choices in model_mgr section
   infiles: 
   - xxx.fasta
   fasta:

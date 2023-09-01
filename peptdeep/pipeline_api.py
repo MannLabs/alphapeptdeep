@@ -258,20 +258,6 @@ def transfer_learn(verbose=True):
         logging.error(traceback.format_exc())
         raise e
 
-def _get_delimiter(tsv_file:str):
-    with open(tsv_file, "r") as f:
-        line = f.readline().strip()
-        if '\t' in line: return '\t'
-        elif ',' in line: return ','
-        else: return '\t'
-
-def read_peptide_table(tsv_file:str)->pd.DataFrame:
-    sep = _get_delimiter(tsv_file)
-    df = pd.read_csv(tsv_file, sep=sep, keep_default_na=False)
-    if 'mod_sites' in df.columns:
-        df['mod_sites'] = df.mod_sites.astype('U')
-    return df
-
 def generate_library():
     """Generate/predict a spectral library.
     
@@ -313,14 +299,10 @@ def generate_library():
             model_manager=model_mgr
         )
 
-        if lib_settings['infile_type'] == 'fasta':
+        if lib_settings['infile_type'].lower() in library_maker_provider.library_maker_dict:
             lib_maker.make_library(lib_settings['infiles'])
-        else:
-            df_list = []
-            for file_path in lib_settings['infiles']:
-                df_list.append(read_peptide_table(file_path))
-            df = pd.concat(df_list, ignore_index=True)
-            lib_maker.make_library(df)
+        else: # PSMReaderLibraryMaker
+            lib_maker.make_library((lib_settings['infile_type'],lib_settings['infiles']))
         
         save_yaml(
             os.path.join(output_folder, 'peptdeep_settings.yaml'),

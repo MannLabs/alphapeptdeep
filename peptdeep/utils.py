@@ -37,6 +37,19 @@ log_level_dict = {
     'critical': logging.CRITICAL,
 }
 
+def _get_delimiter(tsv_file:str):
+    with open(tsv_file, "r") as f:
+        line = f.readline().strip()
+        if '\t' in line: return '\t'
+        elif ',' in line: return ','
+        else: return '\t'
+def read_peptide_table(tsv_file:str)->pd.DataFrame:
+    sep = _get_delimiter(tsv_file)
+    df = pd.read_csv(tsv_file, sep=sep, keep_default_na=False)
+    if 'mod_sites' in df.columns:
+        df['mod_sites'] = df.mod_sites.astype('U')
+    return df
+
 def set_logger(
     *,
     log_file_name="",
