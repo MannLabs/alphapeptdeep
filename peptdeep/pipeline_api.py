@@ -131,7 +131,7 @@ def match_psms()->Tuple[pd.DataFrame,pd.DataFrame]:
     if len(ms2_file_list) > thread_num:
         psm_match.ms_loader_thread_num = 1
     else:
-        psm_match.ms_loader_thread_num = thread_num//len(ms2_file_dict)
+        psm_match.ms_loader_thread_num = thread_num//len(ms2_file_list)
         thread_num = len(ms2_file_list)
 
     (
@@ -140,6 +140,7 @@ def match_psms()->Tuple[pd.DataFrame,pd.DataFrame]:
     ) = psm_match.match_ms2_multi_raw(
         psm_df=psm_df,
         ms_files=ms2_file_list,
+        ms_file_type=mgr_settings['transfer']['ms_file_type'],
         process_num=thread_num,
     )
     return psm_df, frag_inten_df
@@ -200,6 +201,7 @@ def transfer_learn(verbose=True):
             log_level=global_settings['log_level'],
             overwrite=True, stream=True, 
         )
+        logging.info("[PeptDeep] Running train task ...")
         show_platform_info()
         show_python_info()
 
@@ -228,13 +230,16 @@ def transfer_learn(verbose=True):
                 mgr_settings['transfer']['psm_type'],
             )
             frag_df = None
+
+        logging.info(f"{len(psm_df)} PSMs loaded.")
         
         if model_mgr.psm_num_to_train_ms2 <= 0:
             frag_df = None
 
-        logging.info("Training CCS model ...")
-        model_mgr.train_ccs_model(psm_df)
-        logging.info("Finished training CCS model")
+        if "ccs" in psm_df.columns and (psm_df.ccs!=0).all():
+            logging.info("Training CCS model ...")
+            model_mgr.train_ccs_model(psm_df)
+            logging.info("Finished training CCS model")
 
         logging.info("Training RT model ...")
         model_mgr.train_rt_model(psm_df)
@@ -296,6 +301,7 @@ def generate_library():
             log_level=global_settings['log_level'],
             overwrite=True, stream=True, 
         )
+        logging.info("[PeptDeep] Running library task ...")
         show_platform_info()
         show_python_info()
 
@@ -306,6 +312,7 @@ def generate_library():
             lib_settings['infile_type'],
             model_manager=model_mgr
         )
+
         if lib_settings['infile_type'] == 'fasta':
             lib_maker.make_library(lib_settings['infiles'])
         else:
@@ -314,6 +321,7 @@ def generate_library():
                 df_list.append(read_peptide_table(file_path))
             df = pd.concat(df_list, ignore_index=True)
             lib_maker.make_library(df)
+        
         save_yaml(
             os.path.join(output_folder, 'peptdeep_settings.yaml'),
             global_settings

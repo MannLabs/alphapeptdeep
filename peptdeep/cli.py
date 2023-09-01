@@ -140,22 +140,22 @@ def _cmd_flow(ctx):
             from peptdeep.pipeline_api import transfer_learn
             transfer_learn()
             if os.path.isfile(os.path.join(
-                global_settings["transfer"]["model_output_folder"], "ms2.pth"
+                global_settings["model_mgr"]["transfer"]["model_output_folder"], "ms2.pth"
             )):
                 global_settings["model_mgr"]["external_ms2_model"] = os.path.join(
-                    global_settings["transfer"]["model_output_folder"], "ms2.pth"
+                    global_settings["model_mgr"]["transfer"]["model_output_folder"], "ms2.pth"
                 )
             if os.path.isfile(os.path.join(
-                global_settings["transfer"]["model_output_folder"], "rt.pth"
+                global_settings["model_mgr"]["transfer"]["model_output_folder"], "rt.pth"
             )):
                 global_settings["model_mgr"]["external_rt_model"] = os.path.join(
-                    global_settings["transfer"]["model_output_folder"], "rt.pth"
+                    global_settings["model_mgr"]["transfer"]["model_output_folder"], "rt.pth"
                 )
             if os.path.isfile(os.path.join(
-                global_settings["transfer"]["model_output_folder"], "ccs.pth"
+                global_settings["model_mgr"]["transfer"]["model_output_folder"], "ccs.pth"
             )):
                 global_settings["model_mgr"]["external_ccs_model"] = os.path.join(
-                    global_settings["transfer"]["model_output_folder"], "ccs.pth"
+                    global_settings["model_mgr"]["transfer"]["model_output_folder"], "ccs.pth"
                 )
         if "library" in global_settings["task_workflow"]:
             from peptdeep.pipeline_api import generate_library

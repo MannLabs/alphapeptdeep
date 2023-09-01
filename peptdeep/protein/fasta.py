@@ -8,7 +8,7 @@ class PredictSpecLibFasta(SpecLibFasta, PredictSpecLib):
     Predicted spec lib from fasta files or other peptide files.
     """
     def __init__(self,
-        model_manager:ModelManager = None,
+        model_manager:ModelManager,
         *,
         charged_frag_types:list = ['b_z1','b_z2','y_z1','y_z2'],
         protease:str = 'trypsin',
@@ -164,3 +164,11 @@ class PredictSpecLibFasta(SpecLibFasta, PredictSpecLib):
             generate_precursor_isotope=generate_precursor_isotope,
             rt_to_irt=rt_to_irt,
         )
+
+        if self.model_manager is None:
+            if model_manager is None:
+                self.model_manager = ModelManager()
+                self.model_manager.reset_by_global_settings()
+            else:
+                print("Oops, `PredictSpecLibFasta.model_manager` is None, while it should not happen")
+                self.model_manager = model_manager
