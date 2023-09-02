@@ -118,6 +118,7 @@ instruments:
 - Lumos
 - timsTOF
 - SciexTOF
+- ThermoTOF
 # DO NOT change values below, unless you know how to deal with them
 max_instrument_num: 8
 aa_embedding_size: 27

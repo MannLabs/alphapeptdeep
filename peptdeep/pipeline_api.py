@@ -131,6 +131,7 @@ def match_psms()->Tuple[pd.DataFrame,pd.DataFrame]:
             use_ppm=global_settings['peak_matching']['ms2_ppm'], 
             tol_value=global_settings['peak_matching']['ms2_tol_value'],
         )
+        psm_match.max_spec_per_query = 5
 
     thread_num = global_settings["thread_num"]
     if len(ms2_file_list) > thread_num:
@@ -150,24 +151,33 @@ def match_psms()->Tuple[pd.DataFrame,pd.DataFrame]:
     )
 
     if isinstance(psm_match, PepSpecMatch_DIA):
-        _frag_df = frag_inten_df.mask(frag_mz_df>=psm_match.min_frag_mz, 0.0)
-        metrics_list = []
+        _frag_df = frag_inten_df.mask(frag_mz_df<psm_match.min_frag_mz, 0.0)
         frag_len = len(_frag_df)//psm_match.max_spec_per_query
-        _df = psm_df.iloc[:len(psm_df)//psm_match.max_spec_per_query].copy()
+        psm_len = len(psm_df)//psm_match.max_spec_per_query
+        _df = psm_df.iloc[:psm_len].copy()
+        psm_df["median_pcc"] = 0.0
+        metrics_list = []
         for i in range(psm_match.max_spec_per_query):
-            for j in range(i+1,psm_match.max_spec_per_query):
+            pcc_list = []
+            for j in range(psm_match.max_spec_per_query):
+                if i == j: continue
                 _df,metrics_df = calc_ms2_similarity(
                     _df,
                     _frag_df[i*frag_len:(i+1)*frag_len],
                     _frag_df[j*frag_len:(j+1)*frag_len],
                 )
-            metrics_list.append(metrics_df)
+                pcc_list.append(_df.PCC.values)
+                metrics_list.append(metrics_df)
+            pccs = np.median(np.array(pcc_list),axis=0)
+            psm_df.median_pcc.values[i*psm_len:(i+1)*psm_len] = pccs
+
         logging.info(
-            f"Average MS2 similarity metrics among {psm_match.max_spec_per_query} DIA scans at frag_mz >= {psm_match.min_frag_mz}:\n" 
+            f"Average MS2 similarity metrics among {psm_match.max_spec_per_query} DIA scans at frag_mz>={psm_match.min_frag_mz}:\n" 
             f"{str(sum(metrics_list)/len(metrics_list))}"
         )
 
-        psm_df = psm_df.query("score>=6")
+        psm_df = psm_df.query("score>=6 and median_pcc>=0.9")
+        logging.info(f"Kept {len(psm_df)} PSMs at ion_count>=6 and median_pcc>=0.9 for training/testing.")
 
     return psm_df, frag_inten_df
 
@@ -257,7 +267,7 @@ def transfer_learn(verbose=True):
             )
             frag_df = None
 
-        logging.info(f"{len(psm_df)} PSMs loaded.")
+        logging.info(f"Loaded {len(psm_df)} PSMs.")
         
         if model_mgr.psm_num_to_train_ms2 <= 0:
             frag_df = None
