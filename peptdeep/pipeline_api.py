@@ -111,8 +111,6 @@ def match_psms()->Tuple[pd.DataFrame,pd.DataFrame]:
         mgr_settings['transfer']['psm_type'],
     )
 
-    logging.info(f"Loaded {len(psm_df)} PSMs.")
-
     ms2_file_list = mgr_settings['transfer']['ms_files']
     for _ms_file in ms2_file_list:
         if not os.path.isfile(_ms_file):
@@ -151,6 +149,8 @@ def match_psms()->Tuple[pd.DataFrame,pd.DataFrame]:
         ms_file_type=mgr_settings['transfer']['ms_file_type'],
         process_num=thread_num,
     )
+
+    logging.info(f"Loaded {len(psm_df)} PSMs.")
 
     if isinstance(psm_match, PepSpecMatch_DIA):
         _frag_df = frag_inten_df.mask(frag_mz_df<psm_match.min_frag_mz, 0.0)
