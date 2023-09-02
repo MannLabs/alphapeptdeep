@@ -112,6 +112,9 @@ def match_psms()->Tuple[pd.DataFrame,pd.DataFrame]:
     )
 
     ms2_file_list = mgr_settings['transfer']['ms_files']
+    for _ms_file in ms2_file_list:
+        if not os.path.isfile(_ms_file):
+            logging.warn(f"`{_ms_file}` is invalid, please check the paths of `ms_files`")
 
     if (
         mgr_settings['transfer']['psm_type'].lower()
@@ -147,19 +150,20 @@ def match_psms()->Tuple[pd.DataFrame,pd.DataFrame]:
     )
 
     if isinstance(psm_match, PepSpecMatch_DIA):
+        _frag_df = frag_inten_df.mask(frag_mz_df>=psm_match.min_frag_mz, 0.0)
         metrics_list = []
-        frag_len = len(frag_inten_df)//psm_match.max_spec_per_query
+        frag_len = len(_frag_df)//psm_match.max_spec_per_query
         _df = psm_df.iloc[:len(psm_df)//psm_match.max_spec_per_query].copy()
         for i in range(psm_match.max_spec_per_query):
             for j in range(i+1,psm_match.max_spec_per_query):
                 _df,metrics_df = calc_ms2_similarity(
                     _df,
-                    frag_inten_df[i*frag_len:(i+1)*frag_len],
-                    frag_inten_df[j*frag_len:(j+1)*frag_len],
+                    _frag_df[i*frag_len:(i+1)*frag_len],
+                    _frag_df[j*frag_len:(j+1)*frag_len],
                 )
             metrics_list.append(metrics_df)
         logging.info(
-            f"Average MS2 similarities among {psm_match.max_spec_per_query} DIA scans:\n" 
+            f"Average MS2 similarity metrics among {psm_match.max_spec_per_query} DIA scans at frag_mz >= {psm_match.min_frag_mz}:\n" 
             f"{str(sum(metrics_list)/len(metrics_list))}"
         )
 
