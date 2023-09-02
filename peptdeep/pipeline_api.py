@@ -60,7 +60,7 @@ def import_psm_df(psm_files:list, psm_type:str)->pd.DataFrame:
         psm_type, 
         modificatin_mapping=global_settings[
             'model_mgr']['transfer'
-        ]['other_modification_mapping']
+        ]['psm_modification_mapping']
     )
     psm_df_list = []
     for psm_file in psm_files:

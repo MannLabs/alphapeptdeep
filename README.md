@@ -677,10 +677,10 @@ model_mgr:
     psm_num_per_mod_to_train_rt_ccs: 50
     psm_num_to_test_rt_ccs: 0
     top_n_mods_to_train: 10
-    other_modification_mapping: {} 
+    psm_modification_mapping: {} 
     # alphabase modification to modifications of other search engines
     # For example,
-    # other_modification_mapping:
+    # psm_modification_mapping:
     #   Dimethyl@Any N-term: 
     #     - _(Dimethyl-n-0)
     #     - _(Dimethyl)

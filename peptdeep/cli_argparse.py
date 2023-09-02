@@ -35,7 +35,7 @@ def _set_dict_val(_dict, keys, val):
                 v = x[1].split(";")
                 return k,v
             val = dict([_get(s) for s in val])
-        elif keys[0] == "other_modification_mapping":
+        elif keys[0] == "psm_modification_mapping":
             def _get(x):
                 x = x.split(":")
                 return x[0], x[1].split(";")

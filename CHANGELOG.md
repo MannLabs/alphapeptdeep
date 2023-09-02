@@ -2,6 +2,12 @@
 
 Follow the changelog format from https://keepachangelog.com/en/1.0.0/.
 
+## 1.1.0
+
+### Changed
+
+- `other_modification_mapping` to `psm_modification_mapping` in yaml
+
 ## 1.0.2
 
 ### Added

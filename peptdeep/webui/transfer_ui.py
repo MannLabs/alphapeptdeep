@@ -66,19 +66,19 @@ def add_other_psm_reader_mods():
 
         if st.button("Add a modification mapping"):
             global_ui_settings['model_mgr']['transfer'][
-                'other_modification_mapping'
+                'psm_modification_mapping'
             ][mod_name] = other_mods.split(';')
 
         st.dataframe(pd.DataFrame().from_dict(
             global_ui_settings['model_mgr']['transfer'][
-                'other_modification_mapping'
+                'psm_modification_mapping'
             ],
             orient = 'index',
         ))
 
         def _clear_user_mods():
             global_ui_settings['model_mgr']['transfer'][
-                'other_modification_mapping'
+                'psm_modification_mapping'
             ] = {}
             st.session_state.other_reader_mods = ''
 
