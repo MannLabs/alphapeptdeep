@@ -37,6 +37,9 @@ from peptdeep.utils import parse_ms_file_names_to_dict
 
 from peptdeep.utils import process_bar
 
+from peptdeep.model.ms2 import calc_ms2_similarity
+
+
 def import_psm_df(psm_files:list, psm_type:str)->pd.DataFrame:
     """Import PSM files of a search engine as a pd.DataFrame
 
@@ -126,7 +129,6 @@ def match_psms()->Tuple[pd.DataFrame,pd.DataFrame]:
             tol_value=global_settings['peak_matching']['ms2_tol_value'],
         )
 
-
     thread_num = global_settings["thread_num"]
     if len(ms2_file_list) > thread_num:
         psm_match.ms_loader_thread_num = 1
@@ -143,6 +145,26 @@ def match_psms()->Tuple[pd.DataFrame,pd.DataFrame]:
         ms_file_type=mgr_settings['transfer']['ms_file_type'],
         process_num=thread_num,
     )
+
+    if isinstance(psm_match, PepSpecMatch_DIA):
+        metrics_list = []
+        frag_len = len(frag_inten_df)//psm_match.max_spec_per_query
+        _df = psm_df.iloc[:len(psm_df)//psm_match.max_spec_per_query].copy()
+        for i in range(psm_match.max_spec_per_query):
+            for j in range(i+1,psm_match.max_spec_per_query):
+                _df,metrics_df = calc_ms2_similarity(
+                    _df,
+                    frag_inten_df[i*frag_len:(i+1)*frag_len],
+                    frag_inten_df[j*frag_len:(j+1)*frag_len],
+                )
+            metrics_list.append(metrics_df)
+        logging.info(
+            f"Average MS2 similarities among {psm_match.max_spec_per_query} DIA scans:\n" 
+            f"{str(sum(metrics_list)/len(metrics_list))}"
+        )
+
+        psm_df = psm_df.query("score>=6")
+
     return psm_df, frag_inten_df
 
 def transfer_learn(verbose=True):
