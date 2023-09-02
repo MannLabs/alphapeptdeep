@@ -111,6 +111,8 @@ def match_psms()->Tuple[pd.DataFrame,pd.DataFrame]:
         mgr_settings['transfer']['psm_type'],
     )
 
+    logging.info(f"Loaded {len(psm_df)} PSMs.")
+
     ms2_file_list = mgr_settings['transfer']['ms_files']
     for _ms_file in ms2_file_list:
         if not os.path.isfile(_ms_file):
@@ -266,8 +268,6 @@ def transfer_learn(verbose=True):
                 mgr_settings['transfer']['psm_type'],
             )
             frag_df = None
-
-        logging.info(f"Loaded {len(psm_df)} PSMs.")
         
         if model_mgr.psm_num_to_train_ms2 <= 0:
             frag_df = None
