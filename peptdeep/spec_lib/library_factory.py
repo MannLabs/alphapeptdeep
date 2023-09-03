@@ -209,14 +209,14 @@ class PrecursorLibraryMaker(PredictLibraryMakerBase):
             df = infiles
         else:
             df = load_dfs(infiles)
+        if 'charge' not in self.spec_lib.precursor_df.columns:
+            raise KeyError('self.spec_lib.precursor_df must contain the "charge" column.')
         df.drop_duplicates(["sequence","mods","mod_sites","charge"],inplace=True)
         self.spec_lib._precursor_df = df
         self.spec_lib.add_peptide_labeling()
         self.spec_lib.append_decoy_sequence()
     
     def _check_df(self):
-        if 'charge' not in self.spec_lib.precursor_df.columns:
-            raise ValueError('self.spec_lib.precursor_df must contain the "charge" column.')
         (
             self.spec_lib.precursor_df['charge']
         ) = self.spec_lib.precursor_df['charge'].astype(np.int8)
