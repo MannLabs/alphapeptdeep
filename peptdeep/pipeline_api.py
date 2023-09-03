@@ -344,6 +344,7 @@ def generate_library():
             overwrite=True, stream=True, 
         )
         logging.info("[PeptDeep] Running library task ...")
+        logging.info(f"Input files ({lib_settings['infile_type']}): " + str(lib_settings['infiles']))
         show_platform_info()
         show_python_info()
 
