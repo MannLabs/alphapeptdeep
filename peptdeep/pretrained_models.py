@@ -295,22 +295,26 @@ class ModelManager(object):
         self.rt_model:AlphaRTModel = AlphaRTModel(device=device)
         self.ccs_model:AlphaCCSModel = AlphaCCSModel(device=device)
         self.load_installed_models()
+        self.reset_by_global_settings(reload_models=False)
 
-    def reset_by_global_settings(self):
+    def reset_by_global_settings(self,
+        reload_models=True,
+    ):
         mgr_settings = global_settings['model_mgr']
-        self.load_installed_models(mgr_settings['model_type'])
-        self.load_external_models(
-            ms2_model_file = mgr_settings['external_ms2_model'],
-            rt_model_file = mgr_settings['external_rt_model'],
-            ccs_model_file = mgr_settings['external_ccs_model'],
-        )
+        if reload_models:
+            self.load_installed_models(mgr_settings['model_type'])
+            self.load_external_models(
+                ms2_model_file = mgr_settings['external_ms2_model'],
+                rt_model_file = mgr_settings['external_rt_model'],
+                ccs_model_file = mgr_settings['external_ccs_model'],
+            )
 
-        self.ms2_model.model._mask_modloss = global_settings['model_mgr']['mask_modloss']
-        
-        device = global_settings['torch_device']['device_type']
-        self.ms2_model.set_device(device)
-        self.rt_model.set_device(device)
-        self.ccs_model.set_device(device)
+            self.ms2_model.model._mask_modloss = global_settings['model_mgr']['mask_modloss']
+            
+            device = global_settings['torch_device']['device_type']
+            self.ms2_model.set_device(device)
+            self.rt_model.set_device(device)
+            self.ccs_model.set_device(device)
 
         self.use_grid_nce_search = mgr_settings[
             'transfer'
@@ -370,7 +374,7 @@ class ModelManager(object):
         ]["top_n_mods_to_train"]
 
         self.nce = mgr_settings['default_nce']
-        if self.nce == "read":
+        if self.nce == "from_ms_file":
             self.use_grid_nce_search = False
         self.instrument = mgr_settings['default_instrument']
         self.verbose = mgr_settings['predict']['verbose']
