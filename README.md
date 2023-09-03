@@ -454,7 +454,11 @@ MS2/RT/CCS prediction.
 
 ### cmd-flow
 
-All settings in [global_settings](peptdeep/constants/default_settings.yaml) are converted to CLI parameters using `--` as the dict level indicator, for example, `global_settings["library"]["var_mods"]` corresponds to `--library--var_mods`. See [test_cmd_flow.sh](tests/test_cmd_flow.sh) for example.
+``` bash
+peptdeep cmd-flow ...
+```
+
+Support CLI parameters to control `global_settings` for CLI users. It supports three workflows: `train`, `library` or `train library`, controlled by CLI parameter `--task_workflow`, for example, `--task_workflow train library`. All settings in [global_settings](peptdeep/constants/default_settings.yaml) are converted to CLI parameters using `--` as the dict level indicator, for example, `global_settings["library"]["var_mods"]` corresponds to `--library--var_mods`. See [test_cmd_flow.sh](tests/test_cmd_flow.sh) for example.
 
 There are three kinds of parameter types:
   1. value type (int, float, bool, str): The CLI parameter only has a single value, for instance: `--model_mgr--default_instrument 30.0`. 
