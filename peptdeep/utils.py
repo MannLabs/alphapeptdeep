@@ -223,7 +223,7 @@ _special_raw_suffices = [
     '_hcdft.mgf',
     '.mzml'
     '.mgf'
-]
+]   
 
 def parse_ms_file_names_to_dict(
     ms_file_list:list

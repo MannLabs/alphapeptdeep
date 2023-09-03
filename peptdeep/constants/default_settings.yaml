@@ -266,8 +266,8 @@ library:
   output_folder: "{PEPTDEEP_HOME}/spec_libs"
   output_tsv:
     enabled: False
-    min_fragment_mz: 200
-    max_fragment_mz: 2000
+    min_fragment_mz: 200.0
+    max_fragment_mz: 2000.0
     min_relative_intensity: 0.001
     keep_higest_k_peaks: 12
     translate_batch_size: 100000

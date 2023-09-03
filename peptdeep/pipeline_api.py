@@ -70,6 +70,40 @@ def import_psm_df(psm_files:list, psm_type:str)->pd.DataFrame:
         psm_df_list.append(psm_reader.psm_df)
     return pd.concat(psm_df_list).reset_index(drop=True)
 
+def get_median_pccs_for_dia_psms(
+    psm_match:PepSpecMatch_DIA,
+    psm_df:pd.DataFrame, 
+    fragment_mz_df:pd.DataFrame,
+    fragment_intensity_df:pd.DataFrame,
+):
+    _frag_df = fragment_intensity_df.mask(
+        fragment_mz_df<psm_match.min_frag_mz, 0.0
+    )
+    frag_len = len(_frag_df)//psm_match.max_spec_per_query
+    psm_len = len(psm_match.psm_df)//psm_match.max_spec_per_query
+    _df = psm_match.psm_df.iloc[:psm_len].copy()
+    median_pccs = np.zeros(len(psm_df))
+    metrics_list = []
+    for i in range(psm_match.max_spec_per_query):
+        pcc_list = []
+        for j in range(psm_match.max_spec_per_query):
+            if i == j: continue
+            _df,metrics_df = calc_ms2_similarity(
+                _df,
+                _frag_df[i*frag_len:(i+1)*frag_len],
+                _frag_df[j*frag_len:(j+1)*frag_len],
+            )
+            pcc_list.append(_df.PCC.values)
+            metrics_list.append(metrics_df)
+        pccs = np.median(np.array(pcc_list),axis=0)
+        median_pccs[i*psm_len:(i+1)*psm_len] = pccs
+
+    logging.info(
+        f"Average MS2 similarity metrics among {psm_match.max_spec_per_query} DIA scans at frag_mz>={psm_match.min_frag_mz}:\n" 
+        f"{str(sum(metrics_list)/len(metrics_list))}"
+    )
+    return median_pccs
+
 def match_psms()->Tuple[pd.DataFrame,pd.DataFrame]:
     """
     Match the PSMs against the MS files.
@@ -132,6 +166,7 @@ def match_psms()->Tuple[pd.DataFrame,pd.DataFrame]:
             tol_value=global_settings['peak_matching']['ms2_tol_value'],
         )
         psm_match.max_spec_per_query = 5
+        psm_match.min_frag_mz = global_settings["library"]["output_tsv"]["min_fragment_mz"]
 
     thread_num = global_settings["thread_num"]
     if len(ms2_file_list) > thread_num:
@@ -150,32 +185,12 @@ def match_psms()->Tuple[pd.DataFrame,pd.DataFrame]:
         process_num=thread_num,
     )
 
-    logging.info(f"Loaded {len(psm_df)} PSMs.")
+    logging.info(f"Extracted {len(psm_df)} PSMs.")
 
     if isinstance(psm_match, PepSpecMatch_DIA):
-        _frag_df = frag_inten_df.mask(frag_mz_df<psm_match.min_frag_mz, 0.0)
-        frag_len = len(_frag_df)//psm_match.max_spec_per_query
-        psm_len = len(psm_df)//psm_match.max_spec_per_query
-        _df = psm_df.iloc[:psm_len].copy()
-        psm_df["median_pcc"] = 0.0
-        metrics_list = []
-        for i in range(psm_match.max_spec_per_query):
-            pcc_list = []
-            for j in range(psm_match.max_spec_per_query):
-                if i == j: continue
-                _df,metrics_df = calc_ms2_similarity(
-                    _df,
-                    _frag_df[i*frag_len:(i+1)*frag_len],
-                    _frag_df[j*frag_len:(j+1)*frag_len],
-                )
-                pcc_list.append(_df.PCC.values)
-                metrics_list.append(metrics_df)
-            pccs = np.median(np.array(pcc_list),axis=0)
-            psm_df.median_pcc.values[i*psm_len:(i+1)*psm_len] = pccs
-
-        logging.info(
-            f"Average MS2 similarity metrics among {psm_match.max_spec_per_query} DIA scans at frag_mz>={psm_match.min_frag_mz}:\n" 
-            f"{str(sum(metrics_list)/len(metrics_list))}"
+        psm_df["median_pcc"] = get_median_pccs_for_dia_psms(
+            psm_match, psm_df,
+            frag_mz_df, frag_inten_df
         )
 
         psm_df = psm_df.query("score>=6 and median_pcc>=0.9")

@@ -2,7 +2,7 @@ peptdeep cmd-flow \
 --peak_matching--ms2_ppm True \
 --peak_matching--ms2_tol_value 10.0 \
 --model_mgr--default_nce 25.0 \
---model_mgr--default_instrument QE \
+--model_mgr--default_instrument ThermoTOF \
 --model_mgr--external_ms2_model /xxx/ms2.pth \
 --model_mgr--external_rt_model /xxx/rt.pth \
 --model_mgr--external_ccs_model /xxx/ccs.pth \
