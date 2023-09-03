@@ -118,6 +118,7 @@ model_mgr:
       - diann
       - speclib_tsv
       - msfragger_pepxml
+      - spectronaut_report
     dda_psm_types: # otherwise DIA
       - alphapept
       - pfind
