@@ -304,6 +304,11 @@ def transfer_learn(verbose=True):
         model_mgr.ccs_model.save(os.path.join(output_folder, 'ccs.pth'))
         model_mgr.rt_model.save(os.path.join(output_folder, 'rt.pth'))
         model_mgr.ms2_model.save(os.path.join(output_folder, 'ms2.pth'))
+        
+        save_yaml(
+            os.path.join(output_folder, 'peptdeep_settings.yaml'),
+            global_settings
+        )
         logging.info(f"Models were saved in {output_folder}")
     except Exception as e:
         logging.error(traceback.format_exc())
