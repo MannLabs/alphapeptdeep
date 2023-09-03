@@ -1,4 +1,5 @@
 peptdeep cmd-flow \
+--settings_yaml "/xx/peptdeep.yaml" \
 --peak_matching--ms2_ppm True \
 --peak_matching--ms2_tol_value 10.0 \
 --model_mgr--default_nce 25.0 \
