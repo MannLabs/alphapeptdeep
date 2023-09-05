@@ -425,6 +425,8 @@ model_mgr:
   external_rt_model: ''
   external_ccs_model: ''
   instrument_group:
+    ThermoTOF: ThermoTOF
+    Astral: ThermoTOF
     Lumos: Lumos
     QE: QE
     timsTOF: timsTOF

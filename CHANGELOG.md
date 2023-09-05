@@ -8,6 +8,7 @@ Follow the changelog format from https://keepachangelog.com/en/1.0.0/.
 
 - Support transfer learning based on DIA search results.
 - Add `peptdeep cmd-flow` CLI command for CLI users, see README for details.
+- Add `ThermoTOF` and `Astral` instrument type for Astral
 
 ### Changed
 

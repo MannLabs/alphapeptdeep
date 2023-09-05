@@ -731,16 +731,6 @@ class ModelManager(object):
                     tr_df['instrument'] = self.instrument
                 else:
                     self.set_default_nce_instrument(tr_df)
-                if self._train_psm_logging:
-                    logging.info(f"{len(tr_df)} PSMs for MS2 model training/transfer learning")
-                self.ms2_model.train(tr_df, 
-                    fragment_intensity_df=tr_inten_df,
-                    batch_size=self.batch_size_to_train_ms2,
-                    epoch=self.epoch_to_train_ms2,
-                    warmup_epoch=self.warmup_epoch_to_train_ms2,
-                    lr=self.lr_to_train_ms2,
-                    verbose=self.train_verbose,
-                )
         else:
             tr_df = []
 
@@ -762,14 +752,38 @@ class ModelManager(object):
                     else:
                         tr_inten_df[frag_type] = 0.0
             self.set_default_nce_instrument(test_psm_df)
+
+        if len(test_psm_df) > 0:
+            logging.info(
+                "Testing pretrained MS2 model:\n"+
+                str(calc_ms2_similarity(
+                    test_psm_df, 
+                    self.ms2_model.predict(
+                        test_psm_df, reference_frag_df=tr_inten_df
+                    ), 
+                    fragment_intensity_df=tr_inten_df
+                )[-1])
+            )
+        if len(tr_df) > 0:
+            if self._train_psm_logging:
+                logging.info(f"{len(tr_df)} PSMs for MS2 model training/transfer learning")
+            self.ms2_model.train(tr_df, 
+                fragment_intensity_df=tr_inten_df,
+                batch_size=self.batch_size_to_train_ms2,
+                epoch=self.epoch_to_train_ms2,
+                warmup_epoch=self.warmup_epoch_to_train_ms2,
+                lr=self.lr_to_train_ms2,
+                verbose=self.train_verbose,
+            )
+        if len(test_psm_df) > 0:
             logging.info(
                 "Testing refined MS2 model:\n"+
                 str(calc_ms2_similarity(
                     test_psm_df, 
                     self.ms2_model.predict(
-                        test_psm_df, reference_frag_df=matched_intensity_df
+                        test_psm_df, reference_frag_df=tr_inten_df
                     ), 
-                    fragment_intensity_df=matched_intensity_df
+                    fragment_intensity_df=tr_inten_df
                 )[-1])
             )
             

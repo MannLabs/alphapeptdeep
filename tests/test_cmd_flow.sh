@@ -1,4 +1,5 @@
 peptdeep cmd-flow \
+--task_workflow train library \
 --settings_yaml "/xx/peptdeep.yaml" \
 --peak_matching--ms2_ppm True \
 --peak_matching--ms2_tol_value 10.0 \
@@ -39,7 +40,6 @@ peptdeep cmd-flow \
 --library--decoy None \
 --library--output_tsv--enabled True \
 --library--rt_to_irt True \
---task_workflow train library \
 # --library--labeling_channels "0:Dimethyl@Any_N-term;Dimethyl@K" \
 # In windows/powershell, use replace " \" with " `" 
 # End of the `peptdeep cmd-flow`
