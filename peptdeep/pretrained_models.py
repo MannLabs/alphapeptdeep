@@ -530,14 +530,20 @@ class ModelManager(object):
 
         if isinstance(ms2_model_file, str) and ms2_model_file:
             logging.info(f"Using external ms2 model: '{ms2_model_file}'")
+            if not os.path.isfile(ms2_model_file):
+                logging.info(" -- This model file does not exist")
         _load_file(self.ms2_model, ms2_model_file)
 
         if isinstance(rt_model_file, str) and rt_model_file:
             logging.info(f"Using external rt model: '{rt_model_file}'")
+            if not os.path.isfile(rt_model_file):
+                logging.info(" -- This model file does not exist")
         _load_file(self.rt_model, rt_model_file)
         
         if isinstance(ccs_model_file, str) and ccs_model_file:
             logging.info(f"Using external ccs model: '{ccs_model_file}'")
+            if not os.path.isfile(ccs_model_file):
+                logging.info(" -- This model file does not exist")
         _load_file(self.ccs_model, ccs_model_file)
 
     def train_rt_model(self,

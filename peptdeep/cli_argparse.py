@@ -89,6 +89,8 @@ def parse_args_to_global_settings(parser, args):
             load_global_settings(
                 args_dict["settings_yaml"]
             )
+        else:
+            print(f"Settings.yaml `{args_dict['settings_yaml']}` does not exist.")
     args_dict.pop("settings_yaml")
     for key, val in vars(args).items():
         keys = key.split("__")
