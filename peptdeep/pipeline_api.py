@@ -39,6 +39,12 @@ from peptdeep.utils import process_bar
 
 from peptdeep.model.ms2 import calc_ms2_similarity
 
+def _check_is_file(fname):
+    if not os.path.isfile(fname):
+        logging.info(f" -- File `{fname}` does not exist.")
+        return False
+    else:
+        return True
 
 def import_psm_df(psm_files:list, psm_type:str)->pd.DataFrame:
     """Import PSM files of a search engine as a pd.DataFrame
@@ -64,7 +70,7 @@ def import_psm_df(psm_files:list, psm_type:str)->pd.DataFrame:
     )
     psm_df_list = []
     for psm_file in psm_files:
-        if not os.path.isfile(psm_file): continue
+        if not _check_is_file(psm_file): continue
         psm_reader.import_file(psm_file)
 
         psm_df_list.append(psm_reader.psm_df)
@@ -270,6 +276,7 @@ def transfer_learn(verbose=True):
             frag_inten_dfs = []
             for psm_file in mgr_settings['transfer']['psm_files']:
                 _lib = LibraryReaderBase()
+                if not _check_is_file(psm_file): continue
                 dfs.append(_lib.import_file(psm_file))
                 frag_inten_dfs.append(_lib.fragment_intensity_df)
             psm_df, frag_df = concat_precursor_fragment_dataframes(

@@ -7,7 +7,6 @@ bumpversion
 pipdeptree
 ipykernel
 tqdm
-psutil
 wget
 nbdev
 pyinstaller
@@ -15,7 +14,6 @@ pyinstaller
 click
 pandas
 numpy
-statsmodels
 seaborn
 matplotlib
 numba

@@ -62,7 +62,7 @@ def get_parser():
     for arg, val in arg_settings:
         arg = "--"+arg
         if isinstance(val, (list,dict,set)):
-            parser.add_argument(arg, nargs="+", default=val, help="(default: %(default)s)")
+            parser.add_argument(arg, nargs="*", default=val, help="(default: %(default)s)")
         else:
             if isinstance(val, bool):
                 _type = bool
