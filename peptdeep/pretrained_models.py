@@ -1068,12 +1068,14 @@ class ModelManager(object):
                     batch_size=model_mgr_settings['predict']['batch_size_rt_ccs']
                 )
             if 'ms2' in predict_items:
+                if 'frag_start_idx' in precursor_df.columns:
+                    precursor_df.drop(
+                        columns=['frag_start_idx','frag_stop_idx'], 
+                        inplace=True
+                    )
+
                 fragment_mz_df = create_fragment_mz_dataframe(
                     precursor_df, frag_types
-                )
-
-                precursor_df.drop(
-                    columns=['frag_start_idx'], inplace=True
                 )
                 
                 fragment_intensity_df = self.predict_ms2(
