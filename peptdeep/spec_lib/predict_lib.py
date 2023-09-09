@@ -54,18 +54,13 @@ class PredictSpecLib(SpecLibBase):
         generate_precursor_isotope : bool, optional
             Generate precursor isotopes, defaults to False
         """
-        super().__init__(
+        SpecLibBase.__init__(self,
             charged_frag_types,
             precursor_mz_min=precursor_mz_min,
             precursor_mz_max=precursor_mz_max,
             decoy = decoy
         )
-        if model_manager is None:
-            self.model_manager = ModelManager(
-                mask_modloss=True
-            )
-        else:
-            self.model_manager = model_manager
+        self.model_manager = model_manager
 
         self._precursor_df = pd.DataFrame()
         self._fragment_intensity_df = pd.DataFrame()
@@ -109,6 +104,7 @@ class PredictSpecLib(SpecLibBase):
         """
         if 'precursor_mz' not in self.precursor_df.columns: 
             self.calc_precursor_mz()
+            self.clip_by_precursor_mz_()
         if self.generate_precursor_isotope:
             if self.model_manager.verbose:
                 logging.info('Calculating precursor isotope distributions ...')

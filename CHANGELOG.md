@@ -2,6 +2,19 @@
 
 Follow the changelog format from https://keepachangelog.com/en/1.0.0/.
 
+## 1.1.0
+
+### Added
+
+- Support transfer learning based on DIA search results.
+- Add `peptdeep cmd-flow` CLI command for CLI users, see README for details.
+- Add `ThermoTOF` and `Astral` instrument type for Astral
+
+### Changed
+
+- `other_modification_mapping` to `psm_modification_mapping` in yaml.
+- Removed `rescore` in CLI and removed `percolator` in global_settings.
+
 ## 1.0.2
 
 ### Added

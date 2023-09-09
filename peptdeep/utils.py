@@ -37,6 +37,19 @@ log_level_dict = {
     'critical': logging.CRITICAL,
 }
 
+def _get_delimiter(tsv_file:str):
+    with open(tsv_file, "r") as f:
+        line = f.readline().strip()
+        if '\t' in line: return '\t'
+        elif ',' in line: return ','
+        else: return '\t'
+def read_peptide_table(tsv_file:str)->pd.DataFrame:
+    sep = _get_delimiter(tsv_file)
+    df = pd.read_csv(tsv_file, sep=sep, keep_default_na=False)
+    if 'mod_sites' in df.columns:
+        df['mod_sites'] = df.mod_sites.astype('U')
+    return df
+
 def set_logger(
     *,
     log_file_name="",
@@ -208,7 +221,9 @@ def show_python_info() -> None:
 _special_raw_suffices = [
     '.ms_data.hdf',
     '_hcdft.mgf',
-]
+    '.mzml'
+    '.mgf'
+]   
 
 def parse_ms_file_names_to_dict(
     ms_file_list:list
@@ -395,31 +410,32 @@ def regional_sampling(psm_df:pd.DataFrame,
 #legacy
 uniform_sampling = regional_sampling
 
+def linear_regression(x, y):
+    coeffs = np.polyfit(x, y, 1)
+    w, b = coeffs.tolist()
+    yhat = np.poly1d(coeffs)(x)
+    ybar = np.sum(y)/len(y)
+    ssreg = np.sum((yhat-ybar)**2)
+    sstot = np.sum((y-ybar)**2)
+    R_square = ssreg/sstot
+    return dict(
+        R_square=[R_square],
+        R=[np.sqrt(R_square)],
+        slope=[w],
+        intercept=[b],
+    )
+
 def evaluate_linear_regression(
     df:pd.DataFrame, x='rt_pred', y='rt_norm', 
     ci=95, n_sample=10000000
 ):
-    import statsmodels.api as sm
     if len(df) > n_sample:
         df = df.sample(n_sample, replace=False)
-    gls = sm.GLS(df[y], sm.add_constant(df[x]))
-    res = gls.fit()
-    summary = res.summary(alpha=1-ci/100.0)
-    dfs = []
-    results_as_html = summary.tables[0].as_html()
-    dfs.append(pd.read_html(results_as_html, index_col=None)[0])
-    results_as_html = summary.tables[1].as_html()
-    dfs.append(pd.read_html(results_as_html, index_col=None)[0])
-    summary = pd.concat(dfs, ignore_index=True)
-    R_square = float(summary.loc[0,3])
-    R = np.sqrt(R_square)
-    n,b,w = summary.loc[[5,10,11],1].values.astype(float)
-    return pd.DataFrame(
-        dict(
-            R_square=[R_square],R=[R],
-            slope=[w],intercept=[b],test_num=[n]
-        )
-    )
+
+    regs = linear_regression(df[x].values, df[y].values)
+    regs["test_num"] = len(df)
+
+    return pd.DataFrame(regs)
 
 def evaluate_linear_regression_plot(
     df:pd.DataFrame, x='rt_pred', y='rt_norm', 

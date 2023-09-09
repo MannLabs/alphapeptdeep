@@ -334,6 +334,7 @@ parameters by using the `-h` flag. AlphaPeptDeep provides several
 commands for different tasks:
 
 - [**export-settings**](#export-settings)
+- [**cmd-flow**](#cmd-flow)
 - [**library**](#library)
 - [**transfer**](#transfer)
 - [**rescore**](#rescore)
@@ -424,6 +425,8 @@ model_mgr:
   external_rt_model: ''
   external_ccs_model: ''
   instrument_group:
+    ThermoTOF: ThermoTOF
+    Astral: ThermoTOF
     Lumos: Lumos
     QE: QE
     timsTOF: timsTOF
@@ -450,6 +453,22 @@ The `model_mgr` section in the yaml defines the common settings for
 MS2/RT/CCS prediction.
 
 ------------------------------------------------------------------------
+
+### cmd-flow
+
+``` bash
+peptdeep cmd-flow ...
+```
+
+Support CLI parameters to control `global_settings` for CLI users. It supports three workflows: `train`, `library` or `train library`, controlled by CLI parameter `--task_workflow`, for example, `--task_workflow train library`. All settings in [global_settings](peptdeep/constants/default_settings.yaml) are converted to CLI parameters using `--` as the dict level indicator, for example, `global_settings["library"]["var_mods"]` corresponds to `--library--var_mods`. See [test_cmd_flow.sh](tests/test_cmd_flow.sh) for example.
+
+There are three kinds of parameter types:
+  1. value type (int, float, bool, str): The CLI parameter only has a single value, for instance: `--model_mgr--default_instrument 30.0`. 
+  2. list type (list): The CLI parameter has a list of values seperated by a space, for instance `--library--var_mods "Oxidation@M" "Acetyl@Protein_N-term"`.
+  3. dict type (dict): Only three parameters are `dict type`, `--library--labeling_channels`, `--model_mgr--transfer--psm_modification_mapping`, and `--common--user_defined_modifications`. Here are the examples:
+    - `--library--labeling_channels`: labeling channels for the library. Example: `--library--labeling_channels "0:Dimethyl@Any_N-term;Dimethyl@K" "4:xx@Any_N-term;xx@K"`
+    - `--model_mgr--transfer--psm_modification_mapping`: converting other search engines' modification names to alphabase modifications for transfer learning. Example: `--model_mgr--transfer--psm_modification_mapping "Dimethyl@Any_N-term:_(Dimethyl-n-0);_(Dimethyl)" "Dimethyl@K:K(Dimethyl-K-0);K(Dimethyl)"`. Note that `X(UniMod:id)` format can directly be recognized by alphabase.
+    - `--common--user_defined_modification`: user defined modifications. Example:`--common--user_defined_modification "NewMod1@Any_N-term:H(2)2H(2)C(2)" "NewMod2@K:H(100)O(2)C(2)"`
 
 #### library
 
@@ -677,10 +696,10 @@ model_mgr:
     psm_num_per_mod_to_train_rt_ccs: 50
     psm_num_to_test_rt_ccs: 0
     top_n_mods_to_train: 10
-    other_modification_mapping: {} 
+    psm_modification_mapping: {} 
     # alphabase modification to modifications of other search engines
     # For example,
-    # other_modification_mapping:
+    # psm_modification_mapping:
     #   Dimethyl@Any N-term: 
     #     - _(Dimethyl-n-0)
     #     - _(Dimethyl)
@@ -811,14 +830,11 @@ peptdeep install-models [--model-file url_or_local_model_zip] --overwrite True
 ```
 
 Running peptdeep for the first time, it will download and install models
-from [models on
-github](https://github.com/MannLabs/alphapeptdeep/releases/download/pre-trained-models/pretrained_models.zip)
+from [models on github](https://github.com/MannLabs/alphapeptdeep/releases/download/pre-trained-models/pretrained_models.zip)
 defined in ‘model_url’ in the default yaml settings. This command will
-update `pretrained_models.zip` from
-`--model-file url_or_local_model_zip`.
+update `pretrained_models.zip` from `--model-file url_or_local_model_zip`.
 
-It is also possible to use other models instead of the pretrained_models
-by providing `model_mgr:external_ms2_model`,
+It is also possible to use other models instead of the pretrained_models by providing `model_mgr:external_ms2_model`,
 `model_mgr:external_rt_model` and `model_mgr:external_ccs_model`.
 
 ------------------------------------------------------------------------

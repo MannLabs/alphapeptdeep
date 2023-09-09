@@ -164,3 +164,11 @@ class PredictSpecLibFasta(SpecLibFasta, PredictSpecLib):
             generate_precursor_isotope=generate_precursor_isotope,
             rt_to_irt=rt_to_irt,
         )
+
+        if self.model_manager is None:
+            if model_manager is None:
+                self.model_manager = ModelManager()
+                self.model_manager.reset_by_global_settings()
+            else:
+                print("Oops, `PredictSpecLibFasta.model_manager` is None, while it should not happen")
+                self.model_manager = model_manager

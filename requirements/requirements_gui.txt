@@ -15,4 +15,5 @@ streamlit
 streamlit-aggrid
 lxml
 
-alphabase
+alphabase>=1.1.0
+alpharaw>=0.2.0

@@ -1,17 +1,17 @@
 #!python
 
-try:
-    from . import (
-        model, rescore, spec_lib
-    )
+# try:
+#     from . import (
+#         model, spec_lib
+#     )
 
-    from . import protein # rely on spec_lib, import after
-except ImportError:
-    # happends when installation
-    pass
+#     from . import protein # rely on spec_lib, import after
+# except (ImportError,RuntimeError, OSError):
+#     # happends when installation
+#     pass
 
 __project__ = "peptdeep"
-__version__ = "1.0.2"
+__version__ = "1.1.0"
 __license__ = "Apache 2.0"
 __description__ = "The AlphaX deep learning framework for Proteomics"
 __author__ = "Mann Labs"

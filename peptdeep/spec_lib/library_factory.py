@@ -3,9 +3,10 @@ import psutil
 
 import pandas as pd
 import numpy as np
-from typing import Union
+from typing import Union, Tuple
 
 from alphabase.peptide.fragment import get_charged_frag_types
+from alphabase.psm_reader import psm_reader_provider
 
 from peptdeep.settings import global_settings
 from peptdeep.protein.fasta import PredictSpecLibFasta
@@ -15,7 +16,7 @@ from peptdeep.spec_lib.translate import (
 )
 
 from peptdeep.pretrained_models import ModelManager
-from peptdeep.utils import logging
+from peptdeep.utils import logging,read_peptide_table
 
 class PredictLibraryMakerBase(object):
     """
@@ -59,7 +60,7 @@ class PredictLibraryMakerBase(object):
     def _check_df(self)->str:
         pass
 
-    def _input(self, _input):
+    def _input(self, infiles):
         """Virtual method to be re-implemented by sub-classes"""
         raise NotImplementedError("All sub-classes must re-implement '_input()' method")
 
@@ -78,11 +79,11 @@ class PredictLibraryMakerBase(object):
     def fragment_mz_df(self)->pd.DataFrame:
         return self.spec_lib.fragment_mz_df
 
-    def make_library(self, _input):
-        """Predict a library for the `_input`, 
+    def make_library(self, infiles:Union[str,list,pd.DataFrame]):
+        """Predict a library for the `infiles`, 
         this function runs the following methods.
 
-        - self._input(_input)
+        - self._input(infiles)
         - self._check_df()
         - self._predict()
 
@@ -98,7 +99,7 @@ class PredictLibraryMakerBase(object):
         """
         logging.info("Generating the spectral library ...")
         try:
-            self._input(_input)
+            self._input(infiles)
             self._check_df()
             self._predict()
 
@@ -173,16 +174,49 @@ class PredictLibraryMakerBase(object):
             ],
         )
 
+def load_dfs(infiles):
+    if isinstance(infiles,str): infiles = [infiles] 
+    df_list = []
+    for file_path in infiles:
+        df_list.append(read_peptide_table(file_path))
+    return pd.concat(df_list, ignore_index=True)
+
+class PSMReaderLibraryMaker(PredictLibraryMakerBase):
+    def _input(self, psm_type_infiles:Tuple[str,Union[str,list]]):
+        psm_type, infiles = psm_type_infiles
+        if isinstance(infiles, str): infiles = [infiles]
+        psm_reader = psm_reader_provider.get_reader(psm_type)
+        df = psm_reader.import_files(infiles)
+        df.drop_duplicates(["sequence","mods","mod_sites","charge"],inplace=True)
+        df.drop(columns=[x for x in df.columns.values if x not in
+            ["sequence","mods","mod_sites","charge","proteins","genes","nAA"]
+        ], inplace=True)
+        df["sequence"] = df.sequence.astype('U')
+        df["mods"] = df.mods.astype('U')
+        df["mod_sites"] = df.mod_sites.astype('U')
+        if "proteins" in df.columns:
+            df["proteins"] = df.proteins.astype('U')
+        if "genes" in df.columns:
+            df["genes"] = df.genes.astype('U')
+        self.spec_lib._precursor_df = df
+        self.spec_lib.append_decoy_sequence()
+        self.spec_lib.add_peptide_labeling()
+
 class PrecursorLibraryMaker(PredictLibraryMakerBase):
     """For input dataframe of charged modified sequences"""
-    def _input(self, precursor_df:pd.DataFrame):
-        self.spec_lib._precursor_df = precursor_df
+    def _input(self, infiles:Union[str,list,pd.DataFrame]):
+        if isinstance(infiles, pd.DataFrame):
+            df = infiles
+        else:
+            df = load_dfs(infiles)
+        if 'charge' not in self.spec_lib.precursor_df.columns:
+            raise KeyError('self.spec_lib.precursor_df must contain the "charge" column.')
+        df.drop_duplicates(["sequence","mods","mod_sites","charge"],inplace=True)
+        self.spec_lib._precursor_df = df
         self.spec_lib.add_peptide_labeling()
         self.spec_lib.append_decoy_sequence()
     
     def _check_df(self):
-        if 'charge' not in self.spec_lib.precursor_df.columns:
-            raise ValueError('self.spec_lib.precursor_df must contain the "charge" column.')
         (
             self.spec_lib.precursor_df['charge']
         ) = self.spec_lib.precursor_df['charge'].astype(np.int8)
@@ -196,25 +230,35 @@ class PrecursorLibraryMaker(PredictLibraryMakerBase):
         else:
             (
                 self.spec_lib.precursor_df['mods']
-            ) = self.spec_lib.precursor_df['mods'].astype(str)
+            ) = self.spec_lib.precursor_df['mods'].astype('U')
             (
                 self.spec_lib.precursor_df['mod_sites']
-            ) = self.spec_lib.precursor_df['mod_sites'].astype(str)
+            ) = self.spec_lib.precursor_df['mod_sites'].astype('U')
 
         self.spec_lib.protein_df = pd.DataFrame()
 
 class PeptideLibraryMaker(PrecursorLibraryMaker):
     """For input dataframe of modified sequences"""
-    def _input(self, peptide_df:pd.DataFrame):
-        self.spec_lib._precursor_df = peptide_df
+    def _input(self, infiles:Union[str,list,pd.DataFrame]):
+        if isinstance(infiles, pd.DataFrame):
+            df = infiles
+        else:
+            df = load_dfs(infiles)
+        df.drop_duplicates(["sequence","mods","mod_sites"],inplace=True)
+        self.spec_lib._precursor_df = df
         self.spec_lib.append_decoy_sequence()
         self.spec_lib.add_peptide_labeling()
         self.spec_lib.add_charge()
 
 class SequenceLibraryMaker(PeptideLibraryMaker):
     """For input dataframe of AA sequences"""
-    def _input(self, sequence_df:pd.DataFrame):
-        self.spec_lib._precursor_df = sequence_df
+    def _input(self, infiles:Union[str,list,pd.DataFrame]):
+        if isinstance(infiles, pd.DataFrame):
+            df = infiles
+        else:
+            df = load_dfs(infiles)
+        df.drop_duplicates(["sequence"],inplace=True)
+        self.spec_lib._precursor_df = df
         self.spec_lib.append_decoy_sequence()
         self.spec_lib.add_modifications()
         self.spec_lib.add_special_modifications()
@@ -247,8 +291,10 @@ class LibraryMakerProvider:
         maker_name = maker_name.lower()
         if maker_name in self.library_maker_dict:
             return self.library_maker_dict[maker_name](model_manager)
+        elif maker_name in psm_reader_provider.reader_dict:
+            return PSMReaderLibraryMaker(model_manager)
         else:
-            raise ValueError(f'library maker "{maker_name}" is not registered.')
+            raise KeyError(f'Library maker `{maker_name}` is not registered.')
 
 library_maker_provider = LibraryMakerProvider()
 library_maker_provider.register_maker('precursor_table', PrecursorLibraryMaker)

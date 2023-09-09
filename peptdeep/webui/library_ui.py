@@ -16,7 +16,9 @@ from peptdeep.webui.server import queue_folder
 
 from peptdeep.constants._const import CONST_FOLDER
 
-global_ui_settings = st.session_state.global_settings
+from peptdeep.settings import global_settings
+
+global_ui_settings = global_settings
 
 def mod_options():
     with st.form(key="Select modifications"):
@@ -371,7 +373,7 @@ def show():
     task_name = st.text_input(label="Task name", value=f"peptdeep_library_{current_time}")
 
     if st.button(label='Submit for library prediction'):
-        global_ui_settings['task_type'] = 'library'
+        global_ui_settings['task_workflow'] = ['library']
 
         if not os.path.exists(output_folder):
             os.makedirs(output_folder)

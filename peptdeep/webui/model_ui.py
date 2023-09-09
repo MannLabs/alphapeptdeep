@@ -1,6 +1,8 @@
 import streamlit as st
-import peptdeep.webui.ui_utils
-global_ui_settings = st.session_state.global_settings
+
+from peptdeep.settings import global_settings
+
+global_ui_settings = global_settings
 
 def predict():
     batch_size_ms2 = st.number_input(label='Batch size to predict MS2', value = global_ui_settings['model_mgr']['predict']['batch_size_ms2'])

@@ -13,7 +13,7 @@ import torch.multiprocessing as mp
 from typing import Dict
 from zipfile import ZipFile
 from tarfile import TarFile
-from typing import Tuple
+from typing import Tuple, Union
 
 from alphabase.peptide.fragment import (
     create_fragment_mz_dataframe,
@@ -273,8 +273,8 @@ class ModelManager(object):
         Defaults to global_settings['model_mgr']['transfer']['grid_nce_search'].
     """
     def __init__(self, 
-        mask_modloss:bool=True,
-        device:str='gpu',
+        mask_modloss:bool=False,
+        device:str="gpu",
     ):
         """
         Parameters
@@ -294,28 +294,27 @@ class ModelManager(object):
         self.ms2_model:pDeepModel = pDeepModel(mask_modloss=mask_modloss, device=device)
         self.rt_model:AlphaRTModel = AlphaRTModel(device=device)
         self.ccs_model:AlphaCCSModel = AlphaCCSModel(device=device)
+        self.load_installed_models()
+        self.reset_by_global_settings(reload_models=False)
 
-        self.reset_by_global_settings(False, False)
-
-    def reset_by_global_settings(self, 
-        set_mask_modloss:bool=True, 
-        set_device:bool=True,
+    def reset_by_global_settings(self,
+        reload_models=True,
     ):
         mgr_settings = global_settings['model_mgr']
-        self.load_installed_models(mgr_settings['model_type'])
-        self.load_external_models(
-            ms2_model_file = mgr_settings['external_ms2_model'],
-            rt_model_file = mgr_settings['external_rt_model'],
-            ccs_model_file = mgr_settings['external_ccs_model'],
-        )
+        if reload_models:
+            self.load_installed_models(mgr_settings['model_type'])
+            self.load_external_models(
+                ms2_model_file = mgr_settings['external_ms2_model'],
+                rt_model_file = mgr_settings['external_rt_model'],
+                ccs_model_file = mgr_settings['external_ccs_model'],
+            )
 
-        if set_mask_modloss:
-            self.ms2_model.model._mask_modloss = mgr_settings['mask_modloss']
-        
-        if set_device:
-            self.ms2_model.set_device(global_settings['torch_device']['device_type'])
-            self.rt_model.set_device(global_settings['torch_device']['device_type'])
-            self.ccs_model.set_device(global_settings['torch_device']['device_type'])
+            self.ms2_model.model._mask_modloss = global_settings['model_mgr']['mask_modloss']
+            
+            device = global_settings['torch_device']['device_type']
+            self.ms2_model.set_device(device)
+            self.rt_model.set_device(device)
+            self.ccs_model.set_device(device)
 
         self.use_grid_nce_search = mgr_settings[
             'transfer'
@@ -375,6 +374,8 @@ class ModelManager(object):
         ]["top_n_mods_to_train"]
 
         self.nce = mgr_settings['default_nce']
+        if self.nce == "from_ms_file":
+            self.use_grid_nce_search = False
         self.instrument = mgr_settings['default_instrument']
         self.verbose = mgr_settings['predict']['verbose']
         self.train_verbose = mgr_settings['transfer']['verbose']
@@ -493,9 +494,9 @@ class ModelManager(object):
 
     def load_external_models(self,
         *,
-        ms2_model_file: Tuple[str, io.BytesIO]='',
-        rt_model_file: Tuple[str, io.BytesIO]='',
-        ccs_model_file: Tuple[str, io.BytesIO]='',
+        ms2_model_file: Union[str, io.BytesIO]='',
+        rt_model_file: Union[str, io.BytesIO]='',
+        ccs_model_file: Union[str, io.BytesIO]='',
     ):
         """Load external MS2/RT/CCS models.
 
@@ -522,12 +523,27 @@ class ModelManager(object):
                         model.load(model_file)
                     else:
                         return
-                model.load(model_file)
+                else:
+                    model.load(model_file)
             except (UnpicklingError, TypeError, ValueError, KeyError) as e:
                 logging.info(f"Cannot load {model_file} as {model.__class__} model, peptdeep will use the pretrained model instead.")
 
+        if isinstance(ms2_model_file, str) and ms2_model_file:
+            logging.info(f"Using external ms2 model: '{ms2_model_file}'")
+            if not os.path.isfile(ms2_model_file):
+                logging.info(" -- This model file does not exist")
         _load_file(self.ms2_model, ms2_model_file)
+
+        if isinstance(rt_model_file, str) and rt_model_file:
+            logging.info(f"Using external rt model: '{rt_model_file}'")
+            if not os.path.isfile(rt_model_file):
+                logging.info(" -- This model file does not exist")
         _load_file(self.rt_model, rt_model_file)
+        
+        if isinstance(ccs_model_file, str) and ccs_model_file:
+            logging.info(f"Using external ccs model: '{ccs_model_file}'")
+            if not os.path.isfile(ccs_model_file):
+                logging.info(" -- This model file does not exist")
         _load_file(self.ccs_model, ccs_model_file)
 
     def train_rt_model(self,
@@ -552,7 +568,7 @@ class ModelManager(object):
                     psm_df, self.psm_num_to_train_rt_ccs,
                     self.top_n_mods_to_train,
                     self.psm_num_per_mod_to_train_rt_ccs,
-                )
+                ).copy()
             else:
                 tr_df = psm_df
 
@@ -573,7 +589,7 @@ class ModelManager(object):
             if len(tr_df) > 0:
                 test_psm_df = psm_df[
                     ~psm_df.sequence.isin(set(tr_df.sequence))
-                ]
+                ].copy()
                 if len(test_psm_df) > self.psm_num_to_test_rt_ccs:
                     test_psm_df = test_psm_df.sample(
                         n=self.psm_num_to_test_rt_ccs
@@ -624,7 +640,7 @@ class ModelManager(object):
                     psm_df, self.psm_num_to_train_rt_ccs,
                     self.top_n_mods_to_train,
                     self.psm_num_per_mod_to_train_rt_ccs,
-                )
+                ).copy()
             else:
                 tr_df = psm_df
             if self._train_psm_logging:
@@ -644,7 +660,7 @@ class ModelManager(object):
             if len(tr_df) > 0:
                 test_psm_df = psm_df[
                     ~psm_df.sequence.isin(set(tr_df.sequence))
-                ]
+                ].copy()
                 if len(test_psm_df) > self.psm_num_to_test_rt_ccs:
                     test_psm_df = test_psm_df.sample(
                         n=self.psm_num_to_test_rt_ccs
@@ -687,7 +703,7 @@ class ModelManager(object):
                     psm_df, self.psm_num_to_train_ms2,
                     self.top_n_mods_to_train,
                     self.psm_num_per_mod_to_train_ms2
-                )
+                ).copy()
             else:
                 tr_df = psm_df
             if len(tr_df) > 0:
@@ -721,16 +737,6 @@ class ModelManager(object):
                     tr_df['instrument'] = self.instrument
                 else:
                     self.set_default_nce_instrument(tr_df)
-                if self._train_psm_logging:
-                    logging.info(f"{len(tr_df)} PSMs for MS2 model training/transfer learning")
-                self.ms2_model.train(tr_df, 
-                    fragment_intensity_df=tr_inten_df,
-                    batch_size=self.batch_size_to_train_ms2,
-                    epoch=self.epoch_to_train_ms2,
-                    warmup_epoch=self.warmup_epoch_to_train_ms2,
-                    lr=self.lr_to_train_ms2,
-                    verbose=self.train_verbose,
-                )
         else:
             tr_df = []
 
@@ -752,14 +758,40 @@ class ModelManager(object):
                     else:
                         tr_inten_df[frag_type] = 0.0
             self.set_default_nce_instrument(test_psm_df)
+        else:
+            test_psm_df = pd.DataFrame()
+
+        if len(test_psm_df) > 0:
+            logging.info(
+                "Testing pretrained MS2 model:\n"+
+                str(calc_ms2_similarity(
+                    test_psm_df, 
+                    self.ms2_model.predict(
+                        test_psm_df, reference_frag_df=tr_inten_df
+                    ), 
+                    fragment_intensity_df=tr_inten_df
+                )[-1])
+            )
+        if len(tr_df) > 0:
+            if self._train_psm_logging:
+                logging.info(f"{len(tr_df)} PSMs for MS2 model training/transfer learning")
+            self.ms2_model.train(tr_df, 
+                fragment_intensity_df=tr_inten_df,
+                batch_size=self.batch_size_to_train_ms2,
+                epoch=self.epoch_to_train_ms2,
+                warmup_epoch=self.warmup_epoch_to_train_ms2,
+                lr=self.lr_to_train_ms2,
+                verbose=self.train_verbose,
+            )
+        if len(test_psm_df) > 0:
             logging.info(
                 "Testing refined MS2 model:\n"+
                 str(calc_ms2_similarity(
                     test_psm_df, 
                     self.ms2_model.predict(
-                        test_psm_df, reference_frag_df=matched_intensity_df
+                        test_psm_df, reference_frag_df=tr_inten_df
                     ), 
-                    fragment_intensity_df=matched_intensity_df
+                    fragment_intensity_df=tr_inten_df
                 )[-1])
             )
             
@@ -1038,12 +1070,14 @@ class ModelManager(object):
                     batch_size=model_mgr_settings['predict']['batch_size_rt_ccs']
                 )
             if 'ms2' in predict_items:
+                if 'frag_start_idx' in precursor_df.columns:
+                    precursor_df.drop(
+                        columns=['frag_start_idx','frag_stop_idx'], 
+                        inplace=True
+                    )
+
                 fragment_mz_df = create_fragment_mz_dataframe(
                     precursor_df, frag_types
-                )
-
-                precursor_df.drop(
-                    columns=['frag_start_idx'], inplace=True
                 )
                 
                 fragment_intensity_df = self.predict_ms2(

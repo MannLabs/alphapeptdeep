@@ -12,8 +12,9 @@ from peptdeep.webui.ui_utils import (
     get_posix, select_files, file_type_selectbox,
 )
 
+from peptdeep.settings import global_settings
 
-global_ui_settings = st.session_state.global_settings
+global_ui_settings = global_settings
 
 
 def nce_search():
@@ -65,19 +66,19 @@ def add_other_psm_reader_mods():
 
         if st.button("Add a modification mapping"):
             global_ui_settings['model_mgr']['transfer'][
-                'other_modification_mapping'
+                'psm_modification_mapping'
             ][mod_name] = other_mods.split(';')
 
         st.dataframe(pd.DataFrame().from_dict(
             global_ui_settings['model_mgr']['transfer'][
-                'other_modification_mapping'
+                'psm_modification_mapping'
             ],
             orient = 'index',
         ))
 
         def _clear_user_mods():
             global_ui_settings['model_mgr']['transfer'][
-                'other_modification_mapping'
+                'psm_modification_mapping'
             ] = {}
             st.session_state.other_reader_mods = ''
 
@@ -234,7 +235,7 @@ def show():
     task_name = st.text_input(label="Task name", value=f"peptdeep_transfer_{current_time}")
     
     if st.button(label='Submit for transfer learning'):
-        global_ui_settings['task_type'] = 'train'
+        global_ui_settings['task_workflow'] = 'train'
 
         if not os.path.exists(model_output_folder):
             os.makedirs(model_output_folder)

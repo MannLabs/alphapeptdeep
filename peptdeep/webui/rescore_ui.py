@@ -4,7 +4,9 @@ import os
 import time
 
 from .ui_utils import files_in_folder_pandas
-global_ui_settings = st.session_state.global_settings
+from peptdeep.settings import global_settings
+
+global_ui_settings = global_settings
 
 def show():
     """Streamlit page that displays information on how to rescore."""

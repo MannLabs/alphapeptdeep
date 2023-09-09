@@ -51,17 +51,17 @@ def serve():
 
             try:
                 load_global_settings(yaml_file)
-                if global_settings['task_type'] == 'train':
+                if global_settings['task_workflow'][0] == 'train':
                     print("[PeptDeep] Transfer learning ... ")
                     transfer_learn()
-                elif global_settings['task_type'] == 'library':
+                elif global_settings['task_workflow'][0] == 'library':
                     print("[PeptDeep] Predicting library ... ")
                     generate_library()
-                elif global_settings['task_type'] == 'rescore':
+                elif global_settings['task_workflow'] == 'rescore':
                     print("[PeptDeep] Rescoring PSMs ... ")
                     rescore()
                 else:
-                    logging.warning(f"[PeptDeep] Unknown task type `{global_settings['task_type']}`, skip ... ")
+                    logging.warning(f"[PeptDeep] Unknown task type `{global_settings['task_workflow']}`, skip ... ")
                     continue
                 if os.path.isfile(yaml_file):
                     shutil.move(
