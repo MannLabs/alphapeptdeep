@@ -33,14 +33,10 @@ from peptdeep.pretrained_models import ModelManager
 # from peptdeep.rescore.feature_extractor import match_one_raw
 from alpharaw.match.psm_match import PepSpecMatch, PepSpecMatch_DIA
 
-from peptdeep.utils import parse_ms_file_names_to_dict
-
-from peptdeep.utils import process_bar
-
 from peptdeep.model.ms2 import calc_ms2_similarity
 
 def _check_is_file(fname):
-    if not os.path.isfile(fname):
+    if isinstance(fname, str) and not os.path.isfile(fname):
         logging.info(f" -- File `{fname}` does not exist.")
         return False
     else:
