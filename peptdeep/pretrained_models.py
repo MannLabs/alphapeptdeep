@@ -758,6 +758,8 @@ class ModelManager(object):
                     else:
                         tr_inten_df[frag_type] = 0.0
             self.set_default_nce_instrument(test_psm_df)
+        else:
+            test_psm_df = pd.DataFrame()
 
         if len(test_psm_df) > 0:
             logging.info(
