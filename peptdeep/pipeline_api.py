@@ -290,6 +290,8 @@ def transfer_learn(verbose=True):
         if model_mgr.psm_num_to_train_ms2 <= 0:
             frag_df = None
 
+        logging.info(f"Loaded {len(psm_df)} PSMs for training and testing")
+
         if "ccs" in psm_df.columns and (psm_df.ccs!=0).all():
             logging.info("Training CCS model ...")
             model_mgr.train_ccs_model(psm_df)

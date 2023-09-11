@@ -769,7 +769,7 @@ def calc_ms2_similarity(
         batch_tqdm = _grouped
 
     for met in metrics:
-        psm_df[met] = 0
+        psm_df[met] = 0.0
 
     for nAA, df_group in batch_tqdm:
         for i in range(0, len(df_group), batch_size):   
