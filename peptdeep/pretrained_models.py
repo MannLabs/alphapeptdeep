@@ -783,7 +783,7 @@ class ModelManager(object):
                 lr=self.lr_to_train_ms2,
                 verbose=self.train_verbose,
             )
-        logging.info(
+            logging.info(
                 "Testing refined MS2 model on training df:\n"+
                 str(calc_ms2_similarity(
                     tr_df, 
