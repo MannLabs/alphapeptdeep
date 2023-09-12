@@ -152,6 +152,7 @@ class AlphaRTModel(model_interface.ModelInterface):
     def add_irt_column_to_precursor_df(self,
         precursor_df: pd.DataFrame
     ):
+        print(f"Predict RT for {len(IRT_PEPTIDE_DF)} iRT precursors.")
         self.predict(IRT_PEPTIDE_DF)
         # simple linear regression
         rt_pred_mean = IRT_PEPTIDE_DF.rt_pred.mean()
