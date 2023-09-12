@@ -257,6 +257,8 @@ class SequenceLibraryMaker(PeptideLibraryMaker):
             df = infiles
         else:
             df = load_dfs(infiles)
+        if "sequence" not in df.columns:
+            raise KeyError("`SequenceLibraryMaker` must contain `sequence` column")
         df.drop_duplicates(["sequence"],inplace=True)
         self.spec_lib._precursor_df = df
         self.spec_lib.append_decoy_sequence()
