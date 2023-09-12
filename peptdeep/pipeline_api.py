@@ -147,6 +147,8 @@ def match_psms()->Tuple[pd.DataFrame,pd.DataFrame]:
         mgr_settings['transfer']['psm_type'],
     )
 
+    logging.info(f"Loaded {len(psm_df)} PSMs for fragment extraction.")
+
     ms2_file_list = mgr_settings['transfer']['ms_files']
     for _ms_file in ms2_file_list:
         if not os.path.isfile(_ms_file):
