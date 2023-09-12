@@ -763,7 +763,7 @@ class ModelManager(object):
 
         if len(test_psm_df) > 0:
             logging.info(
-                "Testing pretrained MS2 model:\n"+
+                "Testing pretrained MS2 model on testing df:\n"+
                 str(calc_ms2_similarity(
                     test_psm_df, 
                     self.ms2_model.predict(
@@ -783,9 +783,19 @@ class ModelManager(object):
                 lr=self.lr_to_train_ms2,
                 verbose=self.train_verbose,
             )
+        logging.info(
+                "Testing refined MS2 model on training df:\n"+
+                str(calc_ms2_similarity(
+                    tr_df, 
+                    self.ms2_model.predict(
+                        test_psm_df, reference_frag_df=tr_inten_df
+                    ), 
+                    fragment_intensity_df=tr_inten_df
+                )[-1])
+            )
         if len(test_psm_df) > 0:
             logging.info(
-                "Testing refined MS2 model:\n"+
+                "Testing refined MS2 model on testing df:\n"+
                 str(calc_ms2_similarity(
                     test_psm_df, 
                     self.ms2_model.predict(
