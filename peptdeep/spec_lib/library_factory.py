@@ -100,6 +100,7 @@ class PredictLibraryMakerBase(object):
         logging.info("Generating the spectral library ...")
         try:
             self._input(infiles)
+            logging.info(f"Loaded {len(self.spec_lib.precursor_df)} precursors.")
             self._check_df()
             self._predict()
 

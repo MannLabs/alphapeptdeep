@@ -30,7 +30,7 @@ def _set_dict_val(_dict, keys, val):
     elif len(keys) == 1:
         if keys[0] == "labeling_channels":
             def _get(x:str):
-                i = x.find(":", x.find("@"))
+                i = x.find(":")
                 k,v = x[:i], x[i+1:]
                 k = int(k) if k.isdigit() else k
                 v = v.split(";")
