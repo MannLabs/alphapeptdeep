@@ -29,8 +29,8 @@ def _set_dict_val(_dict, keys, val):
     if len(keys) < 1: return
     elif len(keys) == 1:
         if keys[0] == "labeling_channels":
-            def _get(x):
-                i = x.find(":")
+            def _get(x:str):
+                i = x.find(":", x.find("@"))
                 k,v = x[:i], x[i+1:]
                 k = int(k) if k.isdigit() else k
                 v = v.split(";")
@@ -38,13 +38,13 @@ def _set_dict_val(_dict, keys, val):
             val = dict([_get(s) for s in val])
         elif keys[0] == "psm_modification_mapping":
             def _get(x):
-                i = x.find(":")
+                i = x.find(":", x.find("@"))
                 k,v = x[:i], x[i+1:]
                 return k, v.split(";")
             val = dict([_get(s) for s in val])
         elif keys[0] == "user_defined_modifications":
             def _get(x):
-                i = x.find(":")
+                i = x.find(":", x.find("@"))
                 k,v = x[:i], x[i+1:]
                 items = v.split(";")
                 if len(items) == 1:

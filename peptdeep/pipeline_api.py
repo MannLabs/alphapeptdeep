@@ -60,7 +60,7 @@ def import_psm_df(psm_files:list, psm_type:str)->pd.DataFrame:
     """
     psm_reader = psm_reader_provider.get_reader(
         psm_type, 
-        modificatin_mapping=global_settings[
+        modification_mapping=global_settings[
             'model_mgr']['transfer'
         ]['psm_modification_mapping']
     )
