@@ -402,10 +402,10 @@ class ModelManager(object):
         with self.nce and self.instrument
         """
         if 'nce' not in df.columns and 'instrument' not in df.columns:
-            df['nce'] = self.nce
+            df['nce'] = float(self.nce)
             df['instrument'] = self.instrument
         elif 'nce' not in df.columns:
-            df['nce'] = self.nce
+            df['nce'] = float(self.nce)
         elif 'instrument' not in df.columns:
             df['instrument'] = self.instrument
 

@@ -263,6 +263,8 @@ library:
   - b
   - y
   rt_to_irt: False
+  irt_library: xxx/library.tsv
+  irt_library_type: speclib_tsv
   generate_precursor_isotope: False
   output_folder: "{PEPTDEEP_HOME}/spec_libs"
   output_tsv:

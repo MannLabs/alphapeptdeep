@@ -34,6 +34,7 @@ from peptdeep.pretrained_models import ModelManager
 from alpharaw.match.psm_match import PepSpecMatch, PepSpecMatch_DIA
 
 from peptdeep.model.ms2 import calc_ms2_similarity
+import peptdeep.model.rt as rt_module
 
 def _check_is_file(fname):
     if isinstance(fname, str) and not os.path.isfile(fname):
@@ -362,6 +363,19 @@ def generate_library():
             lib_settings['infile_type'],
             model_manager=model_mgr
         )
+
+        if os.path.isfile(lib_settings["irt_library"]):
+            logging.info(f"Use `{lib_settings['irt_library']}` to translate irt")
+            irt_reader = psm_reader_provider.get_reader(
+                lib_settings["irt_library_type"],
+                modification_mapping=global_settings[
+                    'model_mgr']['transfer'
+                ]['psm_modification_mapping']
+            )
+            rt_module.IRT_PEPTIDE_DF = irt_reader.import_file(lib_settings["irt_library"])
+            rt_module.IRT_PEPTIDE_DF["irt"] = rt_module.IRT_PEPTIDE_DF["rt"]
+        else:
+            logging.info(f"{lib_settings['irt_library']} does not exist, use default IRT_PEPTIDE_DF to translate irt")
 
         if lib_settings['infile_type'].lower() in library_maker_provider.library_maker_dict:
             lib_maker.make_library(lib_settings['infiles'])
