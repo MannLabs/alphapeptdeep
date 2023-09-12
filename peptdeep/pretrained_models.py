@@ -788,7 +788,7 @@ class ModelManager(object):
                 str(calc_ms2_similarity(
                     tr_df, 
                     self.ms2_model.predict(
-                        test_psm_df, reference_frag_df=tr_inten_df
+                        tr_df, reference_frag_df=tr_inten_df
                     ), 
                     fragment_intensity_df=tr_inten_df
                 )[-1])
