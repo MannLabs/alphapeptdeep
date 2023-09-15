@@ -107,8 +107,7 @@ class Model_RT_LSTM_CNN(torch.nn.Module):
         )
 
         self.rt_decoder = building_block.Decoder_Linear(
-            hidden,
-            1
+            hidden, 1
         )
 
     def forward(self, 

@@ -7,7 +7,7 @@ import multiprocessing as mp
 from peptdeep.pipeline_api import (
     generate_library, 
     transfer_learn, 
-    rescore
+    # rescore
 )
 from peptdeep.settings import global_settings, load_global_settings
 from peptdeep.utils import logging
@@ -57,9 +57,9 @@ def serve():
                 elif global_settings['task_workflow'][0] == 'library':
                     print("[PeptDeep] Predicting library ... ")
                     generate_library()
-                elif global_settings['task_workflow'] == 'rescore':
-                    print("[PeptDeep] Rescoring PSMs ... ")
-                    rescore()
+                # elif global_settings['task_workflow'] == 'rescore':
+                #     print("[PeptDeep] Rescoring PSMs ... ")
+                #     rescore()
                 else:
                     logging.warning(f"[PeptDeep] Unknown task type `{global_settings['task_workflow']}`, skip ... ")
                     continue
