@@ -595,7 +595,11 @@ class ModelManager(object):
                         n=self.psm_num_to_test_rt_ccs
                     ).copy()
                 elif len(test_psm_df) == 0:
-                    logging.info("No enough PSMs for testing RT models, please reduce the `psm_num_to_train_rt_ccs` value according to overall peptide numbers.")
+                    logging.info("No enough PSMs for testing RT models, "
+                                 "please reduce the `psm_num_to_train_rt_ccs` "
+                                 "value according to overall peptide numbers. "
+                                 "Use train_df for testing."
+                    )
                     test_psm_df = psm_df
             else:
                 test_psm_df = psm_df
@@ -667,7 +671,11 @@ class ModelManager(object):
                         n=self.psm_num_to_test_rt_ccs
                     ).copy()
                 elif len(test_psm_df) == 0:
-                    logging.info("No enough PSMs for testing CCS models, please reduce the `psm_num_to_train_rt_ccs` value according to overall precursor numbers.")
+                    logging.info("No enough PSMs for testing CCS models, "
+                                 "please reduce the `psm_num_to_train_rt_ccs` "
+                                 "value according to overall precursor numbers. "
+                                 "Use train_df for testing."
+                    )
                     test_psm_df = psm_df
             else:
                 test_psm_df = psm_df
@@ -750,7 +758,11 @@ class ModelManager(object):
                 if len(test_psm_df) > self.psm_num_to_test_ms2:
                     test_psm_df = test_psm_df.sample(n=self.psm_num_to_test_ms2)
                 elif len(test_psm_df) == 0:
-                    logging.info("No enough PSMs for testing MS2 models, please reduce the `psm_num_to_train_ms2` value according to overall PSM numbers.")
+                    logging.info("No enough PSMs for testing MS2 models, "
+                                 "please reduce the `psm_num_to_train_ms2` "
+                                 "value according to overall PSM numbers. "
+                                 "Use train_df for testing."
+                    )
                     test_psm_df = psm_df.copy()
             else:
                 test_psm_df = psm_df.copy()
