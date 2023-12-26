@@ -11,7 +11,7 @@
 #     pass
 
 __project__ = "peptdeep"
-__version__ = "1.1.0"
+__version__ = "1.1.1"
 __license__ = "Apache 2.0"
 __description__ = "The AlphaX deep learning framework for Proteomics"
 __author__ = "Mann Labs"
