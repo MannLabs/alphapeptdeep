@@ -441,7 +441,6 @@ def evaluate_linear_regression_plot(
     df:pd.DataFrame, x='rt_pred', y='rt_norm', 
     ci=95, n_sample=100000
 ):
-
     import seaborn as sns
     if len(df) > n_sample:
         df = df.sample(n_sample)

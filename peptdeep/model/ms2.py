@@ -666,9 +666,8 @@ def normalize_fragment_intensities(
         max_inten = np.max(intens)
         if max_inten > 0:
             intens /= max_inten
-        frag_intensity_df.iloc[frag_start_idx:frag_stop_idx,:] = intens
-
-
+        frag_intensity_df_np[frag_start_idx:frag_stop_idx,:] = intens
+    frag_intensity_df.loc[:] = frag_intensity_df_np
 
 def pearson_correlation(x:torch.Tensor, y:torch.Tensor):
     """Compute pearson correlation between 2 batches of 1-D tensors
@@ -769,7 +768,7 @@ def calc_ms2_similarity(
         batch_tqdm = _grouped
 
     for met in metrics:
-        psm_df[met] = 0
+        psm_df[met] = 0.0
 
     for nAA, df_group in batch_tqdm:
         for i in range(0, len(df_group), batch_size):   

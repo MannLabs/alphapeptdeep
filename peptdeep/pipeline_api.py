@@ -34,6 +34,7 @@ from peptdeep.pretrained_models import ModelManager
 from alpharaw.match.psm_match import PepSpecMatch, PepSpecMatch_DIA
 
 from peptdeep.model.ms2 import calc_ms2_similarity
+import peptdeep.model.rt as rt_module
 
 def _check_is_file(fname):
     if isinstance(fname, str) and not os.path.isfile(fname):
@@ -60,7 +61,7 @@ def import_psm_df(psm_files:list, psm_type:str)->pd.DataFrame:
     """
     psm_reader = psm_reader_provider.get_reader(
         psm_type, 
-        modificatin_mapping=global_settings[
+        modification_mapping=global_settings[
             'model_mgr']['transfer'
         ]['psm_modification_mapping']
     )
@@ -147,10 +148,13 @@ def match_psms()->Tuple[pd.DataFrame,pd.DataFrame]:
         mgr_settings['transfer']['psm_type'],
     )
 
-    ms2_file_list = mgr_settings['transfer']['ms_files']
-    for _ms_file in ms2_file_list:
+    logging.info(f"Loaded {len(psm_df)} PSMs for fragment extraction.")
+
+    ms2_file_list:list = mgr_settings['transfer']['ms_files']
+    for _ms_file in [f for f in ms2_file_list]:
         if not os.path.isfile(_ms_file):
             logging.warn(f"`{_ms_file}` is invalid, please check the paths of `ms_files`")
+            ms2_file_list.remove(_ms_file)
 
     if (
         mgr_settings['transfer']['psm_type'].lower()
@@ -290,6 +294,8 @@ def transfer_learn(verbose=True):
         if model_mgr.psm_num_to_train_ms2 <= 0:
             frag_df = None
 
+        logging.info(f"Loaded {len(psm_df)} PSMs for training and testing")
+
         if "ccs" in psm_df.columns and (psm_df.ccs!=0).all():
             logging.info("Training CCS model ...")
             model_mgr.train_ccs_model(psm_df)
@@ -358,6 +364,19 @@ def generate_library():
             lib_settings['infile_type'],
             model_manager=model_mgr
         )
+
+        if os.path.isfile(lib_settings["irt_library"]):
+            logging.info(f"Use `{lib_settings['irt_library']}` to translate irt")
+            irt_reader = psm_reader_provider.get_reader(
+                lib_settings["irt_library_type"],
+                modification_mapping=global_settings[
+                    'model_mgr']['transfer'
+                ]['psm_modification_mapping']
+            )
+            rt_module.IRT_PEPTIDE_DF = irt_reader.import_file(lib_settings["irt_library"])
+            rt_module.IRT_PEPTIDE_DF["irt"] = rt_module.IRT_PEPTIDE_DF["rt"]
+        else:
+            logging.info(f"{lib_settings['irt_library']} does not exist, use default IRT_PEPTIDE_DF to translate irt")
 
         if lib_settings['infile_type'].lower() in library_maker_provider.library_maker_dict:
             lib_maker.make_library(lib_settings['infiles'])

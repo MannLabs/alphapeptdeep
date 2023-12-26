@@ -100,6 +100,7 @@ class PredictLibraryMakerBase(object):
         logging.info("Generating the spectral library ...")
         try:
             self._input(infiles)
+            logging.info(f"Loaded {len(self.spec_lib.precursor_df)} precursors.")
             self._check_df()
             self._predict()
 
@@ -257,6 +258,8 @@ class SequenceLibraryMaker(PeptideLibraryMaker):
             df = infiles
         else:
             df = load_dfs(infiles)
+        if "sequence" not in df.columns:
+            raise KeyError("`SequenceLibraryMaker` must contain `sequence` column")
         df.drop_duplicates(["sequence"],inplace=True)
         self.spec_lib._precursor_df = df
         self.spec_lib.append_decoy_sequence()

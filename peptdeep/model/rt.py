@@ -11,6 +11,7 @@ from peptdeep.settings import model_const
 
 import peptdeep.model.model_interface as model_interface
 import peptdeep.model.building_block as building_block
+from peptdeep.utils import evaluate_linear_regression
 
 mod_feature_size = len(model_const['mod_elements'])
 
@@ -106,8 +107,7 @@ class Model_RT_LSTM_CNN(torch.nn.Module):
         )
 
         self.rt_decoder = building_block.Decoder_Linear(
-            hidden,
-            1
+            hidden, 1
         )
 
     def forward(self, 
@@ -152,15 +152,21 @@ class AlphaRTModel(model_interface.ModelInterface):
     def add_irt_column_to_precursor_df(self,
         precursor_df: pd.DataFrame
     ):
+        print(f"Predict RT for {len(IRT_PEPTIDE_DF)} iRT precursors.")
         self.predict(IRT_PEPTIDE_DF)
+        eval_df = evaluate_linear_regression(IRT_PEPTIDE_DF, "rt_pred", y="irt")
+        print("Linear regression of `rt_pred` to `irt`:")
+        print(eval_df)
         # simple linear regression
-        rt_pred_mean = IRT_PEPTIDE_DF.rt_pred.mean()
-        irt_mean = IRT_PEPTIDE_DF.irt.mean()
-        x = IRT_PEPTIDE_DF.rt_pred.values - rt_pred_mean
-        y = IRT_PEPTIDE_DF.irt.values - irt_mean
-        slope = np.sum(x*y)/np.sum(x*x)
-        intercept = irt_mean - slope*rt_pred_mean
+        # rt_pred_mean = IRT_PEPTIDE_DF.rt_pred.mean()
+        # irt_mean = IRT_PEPTIDE_DF.irt.mean()
+        # x = IRT_PEPTIDE_DF.rt_pred.values - rt_pred_mean
+        # y = IRT_PEPTIDE_DF.irt.values - irt_mean
+        # slope = np.sum(x*y)/np.sum(x*x)
+        # intercept = irt_mean - slope*rt_pred_mean
         # end linear regression
+        slope = eval_df.slope.values[0]
+        intercept = eval_df.intercept.values[0]
         precursor_df['irt_pred'] = precursor_df.rt_pred*slope + intercept
         return precursor_df
 

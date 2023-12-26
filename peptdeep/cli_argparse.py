@@ -29,25 +29,28 @@ def _set_dict_val(_dict, keys, val):
     if len(keys) < 1: return
     elif len(keys) == 1:
         if keys[0] == "labeling_channels":
-            def _get(x):
-                x = x.split(":")
-                k = int(x[0]) if x[0].isdigit() else x[0]
-                v = x[1].split(";")
+            def _get(x:str):
+                i = x.find(":")
+                k,v = x[:i], x[i+1:]
+                k = int(k) if k.isdigit() else k
+                v = v.split(";")
                 return k,v
             val = dict([_get(s) for s in val])
         elif keys[0] == "psm_modification_mapping":
             def _get(x):
-                x = x.split(":")
-                return x[0], x[1].split(";")
+                i = x.find(":", x.find("@"))
+                k,v = x[:i], x[i+1:]
+                return k, v.split(";")
             val = dict([_get(s) for s in val])
         elif keys[0] == "user_defined_modifications":
             def _get(x):
-                x = x.split(":")
-                items = x[1].split(";")
+                i = x.find(":", x.find("@"))
+                k,v = x[:i], x[i+1:]
+                items = v.split(";")
                 if len(items) == 1:
-                    return x[0], {"composition":items[0]}
+                    return k, {"composition":items[0]}
                 else:
-                    return x[0], {"composition": items[0], "modloss_composition": items[1]}
+                    return k, {"composition": items[0], "modloss_composition": items[1]}
             val = dict([_get(s) for s in val])
         _dict[keys[0]] = val
     else: _set_dict_val(_dict[keys[0]], keys[1:], val)

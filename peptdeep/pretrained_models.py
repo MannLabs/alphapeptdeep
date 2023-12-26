@@ -402,10 +402,10 @@ class ModelManager(object):
         with self.nce and self.instrument
         """
         if 'nce' not in df.columns and 'instrument' not in df.columns:
-            df['nce'] = self.nce
+            df['nce'] = float(self.nce)
             df['instrument'] = self.instrument
         elif 'nce' not in df.columns:
-            df['nce'] = self.nce
+            df['nce'] = float(self.nce)
         elif 'instrument' not in df.columns:
             df['instrument'] = self.instrument
 
@@ -595,6 +595,11 @@ class ModelManager(object):
                         n=self.psm_num_to_test_rt_ccs
                     ).copy()
                 elif len(test_psm_df) == 0:
+                    logging.info("No enough PSMs for testing RT models, "
+                                 "please reduce the `psm_num_to_train_rt_ccs` "
+                                 "value according to overall peptide numbers. "
+                                 "Use train_df for testing."
+                    )
                     test_psm_df = psm_df
             else:
                 test_psm_df = psm_df
@@ -666,6 +671,11 @@ class ModelManager(object):
                         n=self.psm_num_to_test_rt_ccs
                     ).copy()
                 elif len(test_psm_df) == 0:
+                    logging.info("No enough PSMs for testing CCS models, "
+                                 "please reduce the `psm_num_to_train_rt_ccs` "
+                                 "value according to overall precursor numbers. "
+                                 "Use train_df for testing."
+                    )
                     test_psm_df = psm_df
             else:
                 test_psm_df = psm_df
@@ -748,6 +758,11 @@ class ModelManager(object):
                 if len(test_psm_df) > self.psm_num_to_test_ms2:
                     test_psm_df = test_psm_df.sample(n=self.psm_num_to_test_ms2)
                 elif len(test_psm_df) == 0:
+                    logging.info("No enough PSMs for testing MS2 models, "
+                                 "please reduce the `psm_num_to_train_ms2` "
+                                 "value according to overall PSM numbers. "
+                                 "Use train_df for testing."
+                    )
                     test_psm_df = psm_df.copy()
             else:
                 test_psm_df = psm_df.copy()
@@ -763,7 +778,7 @@ class ModelManager(object):
 
         if len(test_psm_df) > 0:
             logging.info(
-                "Testing pretrained MS2 model:\n"+
+                "Testing pretrained MS2 model on testing df:\n"+
                 str(calc_ms2_similarity(
                     test_psm_df, 
                     self.ms2_model.predict(
@@ -783,9 +798,19 @@ class ModelManager(object):
                 lr=self.lr_to_train_ms2,
                 verbose=self.train_verbose,
             )
+            logging.info(
+                "Testing refined MS2 model on training df:\n"+
+                str(calc_ms2_similarity(
+                    tr_df, 
+                    self.ms2_model.predict(
+                        tr_df, reference_frag_df=tr_inten_df
+                    ), 
+                    fragment_intensity_df=tr_inten_df
+                )[-1])
+            )
         if len(test_psm_df) > 0:
             logging.info(
-                "Testing refined MS2 model:\n"+
+                "Testing refined MS2 model on testing df:\n"+
                 str(calc_ms2_similarity(
                     test_psm_df, 
                     self.ms2_model.predict(
