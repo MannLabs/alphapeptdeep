@@ -90,6 +90,7 @@ datas = [d for d in datas if ("__pycache__" not in d[0]) and (d[1] not in [".", 
 #	if not os.path.exists(libssl_dll_path):
 #		datas.append((libssl_lib_path, "."))
 
+datas += copy_metadata('regex')
 gui_a = Analysis(
 	[gui_script],
 	pathex=[location],
