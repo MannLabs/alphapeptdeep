@@ -20,6 +20,7 @@ task_choices:
   - library
   # - rescore
 thread_num: 16
+MAX_THREADS: 60
 torch_device:
   device_type: gpu
   device_type_choices:
