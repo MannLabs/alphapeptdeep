@@ -210,7 +210,7 @@ def match_psms()->Tuple[pd.DataFrame,pd.DataFrame]:
 
     if isinstance(psm_match, PepSpecMatch_DIA):
         if "score" in psm_df.columns:
-            psm_df.rename(columns={"score":"ion_count"})
+            psm_df.rename(columns={"score":"ion_count"}, inplace=True)
         else:
             psm_df["ion_count"] = get_ion_count_scores(
                 frag_mz_df.values, frag_inten_df.values,
