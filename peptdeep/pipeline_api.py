@@ -38,6 +38,8 @@ from alpharaw.match.psm_match import (
 from peptdeep.model.ms2 import calc_ms2_similarity
 import peptdeep.model.rt as rt_module
 
+DIA_max_spec_per_query = 3
+
 def _check_is_file(fname):
     if isinstance(fname, str) and not os.path.isfile(fname):
         logging.info(f" -- File `{fname}` does not exist.")
@@ -171,7 +173,7 @@ def match_psms()->Tuple[pd.DataFrame,pd.DataFrame]:
             use_ppm=global_settings['peak_matching']['ms2_ppm'], 
             tol_value=global_settings['peak_matching']['ms2_tol_value'],
         )
-        psm_match.max_spec_per_query = 5
+        psm_match.max_spec_per_query = DIA_max_spec_per_query
         psm_match.min_frag_mz = global_settings["library"]["output_tsv"]["min_fragment_mz"]
 
     thread_num = global_settings["thread_num"]
@@ -204,13 +206,13 @@ def match_psms()->Tuple[pd.DataFrame,pd.DataFrame]:
     logging.info(f"Extracted {len(psm_df)} PSMs.")
 
     if isinstance(psm_match, PepSpecMatch_DIA):
-        psm_df["median_pcc"] = get_median_pccs_for_dia_psms(
-            psm_match, psm_df,
-            frag_mz_df, frag_inten_df
-        )
-
-        psm_df = psm_df.query("score>=6 and median_pcc>=0.9")
-        logging.info(f"Kept {len(psm_df)} PSMs at ion_count>=6 and median_pcc>=0.9 for training/testing.")
+        if psm_match.max_spec_per_query > 1:
+            psm_df["median_pcc"] = get_median_pccs_for_dia_psms(
+                psm_match, psm_df,
+                frag_mz_df, frag_inten_df
+            )
+            psm_df = psm_df.query("score>=6 and median_pcc>=0.9")
+            logging.info(f"Kept {len(psm_df)} PSMs at ion_count>=6 and median_pcc>=0.9 for training/testing.")
 
     return psm_df, frag_inten_df
 
