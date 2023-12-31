@@ -78,6 +78,26 @@ def import_psm_df(psm_files:list, psm_type:str)->pd.DataFrame:
         psm_df_list.append(psm_reader.psm_df)
     return pd.concat(psm_df_list).reset_index(drop=True)
 
+def get_ion_count_for_psms(
+    psm_df:pd.DataFrame, 
+    fragment_mz_df:pd.DataFrame,
+    fragment_intensity_df:pd.DataFrame,
+    min_frag_mz = 0,
+):
+    _frag_df = fragment_intensity_df.mask(
+        fragment_mz_df<min_frag_mz, 0.0
+    )
+    def get_frag_count(start, stop):
+        return np.count_nonzero(
+            _frag_df.values[start:stop,:]
+        )
+    
+    return psm_df[
+        ["frag_start_idx", "frag_stop_idx"]
+    ].apply(
+        lambda x: get_frag_count(*x), axis=1
+    )
+
 def get_median_pccs_for_dia_psms(
     psm_match:PepSpecMatch_DIA,
     psm_df:pd.DataFrame, 
@@ -207,15 +227,22 @@ def match_psms()->Tuple[pd.DataFrame,pd.DataFrame]:
     logging.info(f"Extracted {len(psm_df)} PSMs.")
 
     if isinstance(psm_match, PepSpecMatch_DIA):
+        psm_df["ion_count"] = get_ion_count_for_psms(
+            psm_df, frag_mz_df, frag_inten_df,
+            psm_match.min_frag_mz,
+        )
         if psm_match.max_spec_per_query > 1:
             psm_df["median_pcc"] = get_median_pccs_for_dia_psms(
                 psm_match, psm_df,
                 frag_mz_df, frag_inten_df
             )
-            psm_df = psm_df.query(f"score>={DIA_min_ion_count} and median_pcc>=0.9")
-            logging.info(f"Kept {len(psm_df)} PSMs at ion_count>=6 and median_pcc>=0.9 for training/testing.")
+            psm_df = psm_df.query(f"ion_count>={DIA_min_ion_count} and median_pcc>=0.9")
+            logging.info(
+                f"Kept {len(psm_df)} PSMs at ion_count>={DIA_min_ion_count} "
+                 "and median_pcc>=0.9 for training/testing."
+                )
         else:
-            psm_df = psm_df.query(f"score>={DIA_min_ion_count}")
+            psm_df = psm_df.query(f"ion_count>={DIA_min_ion_count}")
 
     return psm_df, frag_inten_df
 
