@@ -39,6 +39,7 @@ from peptdeep.model.ms2 import calc_ms2_similarity
 import peptdeep.model.rt as rt_module
 
 DIA_max_spec_per_query = 3
+DIA_min_ion_count = 6
 
 def _check_is_file(fname):
     if isinstance(fname, str) and not os.path.isfile(fname):
@@ -211,8 +212,10 @@ def match_psms()->Tuple[pd.DataFrame,pd.DataFrame]:
                 psm_match, psm_df,
                 frag_mz_df, frag_inten_df
             )
-            psm_df = psm_df.query("score>=6 and median_pcc>=0.9")
+            psm_df = psm_df.query(f"score>={DIA_min_ion_count} and median_pcc>=0.9")
             logging.info(f"Kept {len(psm_df)} PSMs at ion_count>=6 and median_pcc>=0.9 for training/testing.")
+        else:
+            psm_df = psm_df.query(f"score>={DIA_min_ion_count}")
 
     return psm_df, frag_inten_df
 
