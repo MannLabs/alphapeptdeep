@@ -209,15 +209,12 @@ def match_psms()->Tuple[pd.DataFrame,pd.DataFrame]:
     logging.info(f"Extracted {len(psm_df)} PSMs.")
 
     if isinstance(psm_match, PepSpecMatch_DIA):
-        if "score" in psm_df.columns:
-            psm_df.rename(columns={"score":"ion_count"}, inplace=True)
-        else:
-            psm_df["ion_count"] = get_ion_count_scores(
-                frag_mz_df.values, frag_inten_df.values,
-                psm_df.frag_start_idx.values,
-                psm_df.frag_stop_idx.values,
-                DIA_min_frag_mz,
-            )
+        psm_df["ion_count"] = get_ion_count_scores(
+            frag_mz_df.values, frag_inten_df.values,
+            psm_df.frag_start_idx.values,
+            psm_df.frag_stop_idx.values,
+            DIA_min_frag_mz,
+        )
         if psm_match.max_spec_per_query > 1:
             psm_df["median_pcc"] = get_median_pccs_for_dia_psms(
                 psm_match, psm_df,
