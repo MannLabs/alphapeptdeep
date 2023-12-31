@@ -32,7 +32,8 @@ from peptdeep.pretrained_models import ModelManager
 
 # from peptdeep.rescore.feature_extractor import match_one_raw
 from alpharaw.match.psm_match import (
-    PepSpecMatch, PepSpecMatch_DIA, parse_ms_files_to_dict
+    PepSpecMatch, PepSpecMatch_DIA, 
+    parse_ms_files_to_dict, get_ion_count_scores
 )
 
 from peptdeep.model.ms2 import calc_ms2_similarity
@@ -40,6 +41,7 @@ import peptdeep.model.rt as rt_module
 
 DIA_max_spec_per_query = 3
 DIA_min_ion_count = 6
+DIA_min_frag_mz = 200.0
 
 def _check_is_file(fname):
     if isinstance(fname, str) and not os.path.isfile(fname):
@@ -77,26 +79,6 @@ def import_psm_df(psm_files:list, psm_type:str)->pd.DataFrame:
 
         psm_df_list.append(psm_reader.psm_df)
     return pd.concat(psm_df_list).reset_index(drop=True)
-
-def get_ion_count_for_psms(
-    psm_df:pd.DataFrame, 
-    fragment_mz_df:pd.DataFrame,
-    fragment_intensity_df:pd.DataFrame,
-    min_frag_mz = 0,
-):
-    _frag_df = fragment_intensity_df.mask(
-        fragment_mz_df<min_frag_mz, 0.0
-    )
-    def get_frag_count(start, stop):
-        return np.count_nonzero(
-            _frag_df.values[start:stop,:]
-        )
-    
-    return psm_df[
-        ["frag_start_idx", "frag_stop_idx"]
-    ].apply(
-        lambda x: get_frag_count(*x), axis=1
-    )
 
 def get_median_pccs_for_dia_psms(
     psm_match:PepSpecMatch_DIA,
@@ -227,10 +209,15 @@ def match_psms()->Tuple[pd.DataFrame,pd.DataFrame]:
     logging.info(f"Extracted {len(psm_df)} PSMs.")
 
     if isinstance(psm_match, PepSpecMatch_DIA):
-        psm_df["ion_count"] = get_ion_count_for_psms(
-            psm_df, frag_mz_df, frag_inten_df,
-            psm_match.min_frag_mz,
-        )
+        if "score" in psm_df.columns:
+            psm_df.rename(columns={"score":"ion_count"})
+        else:
+            psm_df["ion_count"] = get_ion_count_scores(
+                frag_mz_df.values, frag_inten_df.values,
+                psm_df.frag_start_idx.values,
+                psm_df.frag_stop_idx.values,
+                DIA_min_frag_mz,
+            )
         if psm_match.max_spec_per_query > 1:
             psm_df["median_pcc"] = get_median_pccs_for_dia_psms(
                 psm_match, psm_df,
