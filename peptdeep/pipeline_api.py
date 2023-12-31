@@ -31,7 +31,9 @@ from peptdeep.spec_lib.library_factory import (
 from peptdeep.pretrained_models import ModelManager
 
 # from peptdeep.rescore.feature_extractor import match_one_raw
-from alpharaw.match.psm_match import PepSpecMatch, PepSpecMatch_DIA
+from alpharaw.match.psm_match import (
+    PepSpecMatch, PepSpecMatch_DIA, parse_ms_files_to_dict
+)
 
 from peptdeep.model.ms2 import calc_ms2_similarity
 import peptdeep.model.rt as rt_module
@@ -148,8 +150,6 @@ def match_psms()->Tuple[pd.DataFrame,pd.DataFrame]:
         mgr_settings['transfer']['psm_type'],
     )
 
-    logging.info(f"Loaded {len(psm_df)} PSMs for fragment extraction.")
-
     ms2_file_list:list = mgr_settings['transfer']['ms_files']
     for _ms_file in [f for f in ms2_file_list]:
         if not os.path.isfile(_ms_file):
@@ -181,12 +181,22 @@ def match_psms()->Tuple[pd.DataFrame,pd.DataFrame]:
         psm_match.ms_loader_thread_num = thread_num//len(ms2_file_list)
         thread_num = len(ms2_file_list)
 
+    ms2_file_dict = parse_ms_files_to_dict(
+        ms2_file_list
+    )
+
+    psm_df = psm_df[
+        psm_df.raw_name.isin(ms2_file_dict)
+    ].reset_index(drop=True)
+
+    logging.info(f"Loaded {len(psm_df)} PSMs for fragment extraction.")
+
     (
         psm_df, frag_mz_df,
         frag_inten_df, frag_mz_err_df,
     ) = psm_match.match_ms2_multi_raw(
         psm_df=psm_df,
-        ms_files=ms2_file_list,
+        ms_files=ms2_file_dict,
         ms_file_type=mgr_settings['transfer']['ms_file_type'],
         process_num=thread_num,
     )
