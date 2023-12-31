@@ -244,6 +244,28 @@ class ModelInterface(object):
         self._model_to_device()
         self._init_for_training()
 
+    def set_bert_trainable(self,
+        trainable=False,  
+        bert_layer_name="hidden_nn",
+        bert_layer_idxes=[1,2,3], 
+    ):
+        self.set_layer_trainable(
+            trainable=trainable,
+            layer_names=[
+                f"{bert_layer_name}.bert.layer.{layer}"
+                for layer in bert_layer_idxes
+            ]
+        )
+    
+    def set_layer_trainable(self, 
+        trainable=False, 
+        layer_names=[],
+    ):
+        for layer in layer_names:
+            self.model.get_submodule(
+                layer
+            ).requires_grad_(trainable)
+
     def train_with_warmup(self,
         precursor_df: pd.DataFrame,
         *,

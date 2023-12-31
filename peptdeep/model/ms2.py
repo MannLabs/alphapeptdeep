@@ -209,7 +209,6 @@ class ModelMS2Bert(torch.nn.Module):
         NCEs:torch.Tensor,
         instrument_indices,
     ):
-
         in_x = self.dropout(self.input_nn(
             aa_indices, mod_x
         ))
