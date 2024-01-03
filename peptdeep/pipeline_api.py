@@ -114,7 +114,9 @@ def get_median_pccs_for_dia_psms(
     )
     return median_pccs
 
-def match_psms()->Tuple[pd.DataFrame,pd.DataFrame]:
+def match_psms()->Tuple[
+    pd.DataFrame,pd.DataFrame,pd.DataFrame
+]:
     """
     Match the PSMs against the MS files.
 
@@ -228,7 +230,7 @@ def match_psms()->Tuple[pd.DataFrame,pd.DataFrame]:
         else:
             psm_df = psm_df.query(f"ion_count>={DIA_min_ion_count}")
 
-    return psm_df, frag_inten_df
+    return psm_df, frag_mz_df, frag_inten_df
 
 def transfer_learn(verbose=True):
     """Transfer learn / refine the RT/CCS(/MS2) models.
