@@ -141,6 +141,18 @@ class AlphaRTModel(model_interface.ModelInterface):
         self.target_column_to_predict = 'rt_pred'
         self.target_column_to_train = 'rt_norm'
 
+    def test(self, 
+        precursor_df: pd.DataFrame, 
+        *,
+        batch_size:int = 1024,
+    ):
+        return evaluate_linear_regression(
+            self.predict(
+                precursor_df, batch_size=batch_size
+            ),
+            x="rt_pred", y="rt_norm"
+        )
+
     def _get_features_from_batch_df(self, 
         batch_df: pd.DataFrame,
     ):
