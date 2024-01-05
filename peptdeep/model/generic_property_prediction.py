@@ -408,9 +408,10 @@ class ModelInterface_for_Generic_ModAASeq_BinaryClassification(ModelInterface):
         batch_df: pd.DataFrame,
     ):
         return self._get_aa_mod_features(batch_df)
+    
 
-class ModelInterface_for_Generic_ModAASeq_MultiTargetClassification(
-    ModelInterface_for_Generic_ModAASeq_BinaryClassification
+class ModelInterface_for_Generic_AASeq_MultiTargetClassification(
+    ModelInterface_for_Generic_AASeq_BinaryClassification
 ):
     def __init__(self, 
         num_target_values:int=6,
@@ -442,7 +443,52 @@ class ModelInterface_for_Generic_ModAASeq_MultiTargetClassification(
         self.predict_df = precursor_df
 
     def _set_batch_predict_data(self, batch_df, predict_values, **kwargs):
-        predict_values[predict_values<self._min_pred_value] = self._min_pred_value
+        if self._predict_in_order:
+            self.predict_df.loc[:,self.target_column_to_predict].values[
+                batch_df.index.values[0]:batch_df.index.values[-1]+1
+            ] = list(predict_values)
+        else:
+            # self.predict_df.loc[
+            #     batch_df.index,self.target_column_to_predict
+            # ] = [val.tolist() for val in predict_values]
+
+            # fail to assign list of list/ndarray by .loc, use for loop instead (slow)
+            for idx,val in zip(batch_df.index.values,predict_values):
+                self.predict_df.loc[idx,self.target_column_to_predict] = val
+
+class ModelInterface_for_Generic_ModAASeq_MultiTargetClassification(
+    ModelInterface_for_Generic_ModAASeq_BinaryClassification
+):
+    def __init__(self, 
+        num_target_values:int=6,
+        model_class:torch.nn.Module=Model_for_Generic_ModAASeq_BinaryClassification_Transformer,
+        nlayers=4, hidden_dim=256, device='gpu',
+        dropout=0.1, **kwargs,
+    ):
+        self.num_target_values = num_target_values
+        super().__init__(
+            model_class=model_class,
+            output_dim=self.num_target_values,
+            nlayers=nlayers, hidden_dim=hidden_dim,
+            device=device, dropout=dropout,
+            **kwargs
+        )
+        self.target_column_to_train = 'target_probs'
+        self.target_column_to_predict = 'target_probs_pred'
+
+    def _get_targets_from_batch_df(self, batch_df, **kwargs):
+        return self._as_tensor(
+            np.stack(batch_df[self.target_column_to_train].values), 
+            dtype=torch.float32
+        )
+
+    def _prepare_predict_data_df(self, precursor_df, **kwargs):
+        precursor_df[self.target_column_to_predict] = [
+            [0]*self.num_target_values
+        ]*len(precursor_df)
+        self.predict_df = precursor_df
+
+    def _set_batch_predict_data(self, batch_df, predict_values, **kwargs):
         if self._predict_in_order:
             self.predict_df.loc[:,self.target_column_to_predict].values[
                 batch_df.index.values[0]:batch_df.index.values[-1]+1
