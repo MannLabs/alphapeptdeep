@@ -1,6 +1,7 @@
 import torch
 import pandas as pd
 import numpy as np
+import typing
 
 from tqdm import tqdm
 
@@ -19,6 +20,7 @@ from peptdeep.model.featurize import (
 from peptdeep.settings import model_const
 
 import peptdeep.model.base as model_base
+from peptdeep.utils import evaluate_linear_regression
 
 
 class Model_CCS_Bert(torch.nn.Module):
@@ -155,6 +157,20 @@ class AlphaCCSModel(model_base.ModelInterface):
 
         self.target_column_to_predict = 'ccs_pred'
         self.target_column_to_train = 'ccs'
+
+    def test(self, 
+        precursor_df: pd.DataFrame, 
+        *,
+        x:typing.Literal["ccs_pred","mobility_pred"]="ccs_pred", 
+        y:typing.Literal["ccs","mobility"]="ccs",
+        batch_size:int = 1024,
+    ):
+        return evaluate_linear_regression(
+            self.predict(
+                precursor_df, batch_size=batch_size
+            ),
+            x=x, y=y
+        )
 
     def _get_features_from_batch_df(self, 
         batch_df: pd.DataFrame,

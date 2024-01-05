@@ -18,6 +18,10 @@ it controls all functionalities of PeptDeep.
 """
 
 def _refine_global_settings():
+    global_settings["thread_num"] = min(
+        global_settings["thread_num"],
+        global_settings["MAX_THREADS"]
+    )
     global_settings['PEPTDEEP_HOME'] = os.path.expanduser(
         global_settings['PEPTDEEP_HOME']
     )

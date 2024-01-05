@@ -85,10 +85,15 @@ def show():
     
     cpu_count = multiprocessing.cpu_count()
     thread_num = st.number_input(label='Thread number', 
-        value=global_ui_settings['thread_num'] 
-          if global_ui_settings['thread_num']<cpu_count 
-          else cpu_count, 
-        max_value=cpu_count, step=1
+        value=min(
+            global_ui_settings['thread_num'], 
+            cpu_count, 
+            global_settings['MAX_THREADS']
+        ), 
+        max_value=min(
+            cpu_count, global_settings['MAX_THREADS']
+        ), 
+        step=1
     )
     global_ui_settings['thread_num'] = thread_num
 

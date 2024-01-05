@@ -209,7 +209,6 @@ class ModelMS2Bert(torch.nn.Module):
         NCEs:torch.Tensor,
         instrument_indices,
     ):
-
         in_x = self.dropout(self.input_nn(
             aa_indices, mod_x
         ))
@@ -524,6 +523,28 @@ class pDeepModel(model_interface.ModelInterface):
             verbose_each_epoch=verbose_each_epoch,
             **kwargs
         )
+    
+    def test(self, 
+        precursor_df:pd.DataFrame,
+        fragment_intensity_df:pd.DataFrame,
+        default_instrument:str = "Lumos",
+        default_nce:float = 30.0,
+    )->pd.DataFrame:
+        if "instrument" not in precursor_df.columns:
+            precursor_df["instrument"] = default_instrument
+        if "nce" not in precursor_df.columns:
+            precursor_df["nce"] = default_nce
+        columns = np.intersect1d(
+            self.charged_frag_types,
+            fragment_intensity_df.columns.values,
+        )
+        return calc_ms2_similarity(
+            precursor_df, 
+            self.predict(
+                precursor_df, reference_frag_df=fragment_intensity_df
+            )[columns], 
+            fragment_intensity_df=fragment_intensity_df[columns]
+        )[-1]
 
     def train(self, 
         precursor_df: pd.DataFrame, 

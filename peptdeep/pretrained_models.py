@@ -574,14 +574,6 @@ class ModelManager(object):
 
             if self._train_psm_logging:
                 logging.info(f"{len(tr_df)} PSMs for RT model training/transfer learning")
-            if len(tr_df) > 0:
-                self.rt_model.train(tr_df, 
-                    batch_size=self.batch_size_to_train_rt_ccs,
-                    epoch=self.epoch_to_train_rt_ccs,
-                    warmup_epoch=self.warmup_epoch_to_train_rt_ccs,
-                    lr=self.lr_to_train_rt_ccs,
-                    verbose=self.train_verbose,
-                )
         else:
             tr_df = []
         
@@ -598,17 +590,32 @@ class ModelManager(object):
                     logging.info("No enough PSMs for testing RT models, "
                                  "please reduce the `psm_num_to_train_rt_ccs` "
                                  "value according to overall peptide numbers. "
-                                 "Use train_df for testing."
                     )
-                    test_psm_df = psm_df
+                    test_psm_df = []
             else:
                 test_psm_df = psm_df
-            
+        else:
+            test_psm_df = []
+
+        if len(test_psm_df) > 0:    
+            logging.info(
+                "Testing pretrained RT model:\n" + 
+                str(self.rt_model.test(test_psm_df))
+            )
+        
+        if len(tr_df) > 0:
+            self.rt_model.train(tr_df, 
+                batch_size=self.batch_size_to_train_rt_ccs,
+                epoch=self.epoch_to_train_rt_ccs,
+                warmup_epoch=self.warmup_epoch_to_train_rt_ccs,
+                lr=self.lr_to_train_rt_ccs,
+                verbose=self.train_verbose,
+            )
+        
+        if len(test_psm_df) > 0:    
             logging.info(
                 "Testing refined RT model:\n" + 
-                str(evaluate_linear_regression(
-                    self.rt_model.predict(test_psm_df))
-                )
+                str(self.rt_model.test(test_psm_df))
             )
 
     def train_ccs_model(self,
@@ -650,14 +657,6 @@ class ModelManager(object):
                 tr_df = psm_df
             if self._train_psm_logging:
                 logging.info(f"{len(tr_df)} PSMs for CCS model training/transfer learning")
-            if len(tr_df) > 0:
-                self.ccs_model.train(tr_df, 
-                    batch_size=self.batch_size_to_train_rt_ccs,
-                    epoch=self.epoch_to_train_rt_ccs,
-                    warmup_epoch=self.warmup_epoch_to_train_rt_ccs,
-                    lr=self.lr_to_train_rt_ccs,
-                    verbose=self.train_verbose,
-                )
         else:
             tr_df = []
         
@@ -674,18 +673,32 @@ class ModelManager(object):
                     logging.info("No enough PSMs for testing CCS models, "
                                  "please reduce the `psm_num_to_train_rt_ccs` "
                                  "value according to overall precursor numbers. "
-                                 "Use train_df for testing."
                     )
-                    test_psm_df = psm_df
+                    test_psm_df = []
             else:
                 test_psm_df = psm_df
-            
+        else:
+            test_psm_df = []
+
+        if len(test_psm_df) > 0:
+            logging.info(
+                "Testing pretrained CCS model:\n" + 
+                str(self.ccs_model.test(test_psm_df))
+            )
+
+        if len(tr_df) > 0:
+            self.ccs_model.train(tr_df, 
+                batch_size=self.batch_size_to_train_rt_ccs,
+                epoch=self.epoch_to_train_rt_ccs,
+                warmup_epoch=self.warmup_epoch_to_train_rt_ccs,
+                lr=self.lr_to_train_rt_ccs,
+                verbose=self.train_verbose,
+            )
+          
+        if len(test_psm_df) > 0:  
             logging.info(
                 "Testing refined CCS model:\n" + 
-                str(evaluate_linear_regression(
-                    self.ccs_model.predict(test_psm_df),
-                    x = 'ccs_pred', y='ccs'
-                ))
+                str(self.ccs_model.test(test_psm_df))
             )
 
     def train_ms2_model(self,
@@ -761,9 +774,8 @@ class ModelManager(object):
                     logging.info("No enough PSMs for testing MS2 models, "
                                  "please reduce the `psm_num_to_train_ms2` "
                                  "value according to overall PSM numbers. "
-                                 "Use train_df for testing."
                     )
-                    test_psm_df = psm_df.copy()
+                    test_psm_df = []
             else:
                 test_psm_df = psm_df.copy()
                 tr_inten_df = pd.DataFrame()
@@ -774,18 +786,12 @@ class ModelManager(object):
                         tr_inten_df[frag_type] = 0.0
             self.set_default_nce_instrument(test_psm_df)
         else:
-            test_psm_df = pd.DataFrame()
+            test_psm_df = []
 
         if len(test_psm_df) > 0:
             logging.info(
                 "Testing pretrained MS2 model on testing df:\n"+
-                str(calc_ms2_similarity(
-                    test_psm_df, 
-                    self.ms2_model.predict(
-                        test_psm_df, reference_frag_df=tr_inten_df
-                    ), 
-                    fragment_intensity_df=tr_inten_df
-                )[-1])
+                str(self.ms2_model.test(test_psm_df, tr_inten_df))
             )
         if len(tr_df) > 0:
             if self._train_psm_logging:
@@ -800,26 +806,14 @@ class ModelManager(object):
             )
             logging.info(
                 "Testing refined MS2 model on training df:\n"+
-                str(calc_ms2_similarity(
-                    tr_df, 
-                    self.ms2_model.predict(
-                        tr_df, reference_frag_df=tr_inten_df
-                    ), 
-                    fragment_intensity_df=tr_inten_df
-                )[-1])
+                str(self.ms2_model.test(tr_df, tr_inten_df))
             )
         if len(test_psm_df) > 0:
             logging.info(
                 "Testing refined MS2 model on testing df:\n"+
-                str(calc_ms2_similarity(
-                    test_psm_df, 
-                    self.ms2_model.predict(
-                        test_psm_df, reference_frag_df=tr_inten_df
-                    ), 
-                    fragment_intensity_df=tr_inten_df
-                )[-1])
+                str(self.ms2_model.test(test_psm_df, tr_inten_df))
             )
-            
+
 
     def predict_ms2(self, precursor_df:pd.DataFrame, 
         *, 

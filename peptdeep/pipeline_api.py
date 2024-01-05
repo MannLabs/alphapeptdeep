@@ -31,10 +31,17 @@ from peptdeep.spec_lib.library_factory import (
 from peptdeep.pretrained_models import ModelManager
 
 # from peptdeep.rescore.feature_extractor import match_one_raw
-from alpharaw.match.psm_match import PepSpecMatch, PepSpecMatch_DIA
+from alpharaw.match.psm_match import (
+    PepSpecMatch, PepSpecMatch_DIA, 
+    parse_ms_files_to_dict, get_ion_count_scores
+)
 
 from peptdeep.model.ms2 import calc_ms2_similarity
 import peptdeep.model.rt as rt_module
+
+DIA_max_spec_per_query = 3
+DIA_min_ion_count = 6
+DIA_min_frag_mz = 200.0
 
 def _check_is_file(fname):
     if isinstance(fname, str) and not os.path.isfile(fname):
@@ -107,7 +114,9 @@ def get_median_pccs_for_dia_psms(
     )
     return median_pccs
 
-def match_psms()->Tuple[pd.DataFrame,pd.DataFrame]:
+def match_psms()->Tuple[
+    pd.DataFrame,pd.DataFrame,pd.DataFrame
+]:
     """
     Match the PSMs against the MS files.
 
@@ -148,8 +157,6 @@ def match_psms()->Tuple[pd.DataFrame,pd.DataFrame]:
         mgr_settings['transfer']['psm_type'],
     )
 
-    logging.info(f"Loaded {len(psm_df)} PSMs for fragment extraction.")
-
     ms2_file_list:list = mgr_settings['transfer']['ms_files']
     for _ms_file in [f for f in ms2_file_list]:
         if not os.path.isfile(_ms_file):
@@ -171,7 +178,7 @@ def match_psms()->Tuple[pd.DataFrame,pd.DataFrame]:
             use_ppm=global_settings['peak_matching']['ms2_ppm'], 
             tol_value=global_settings['peak_matching']['ms2_tol_value'],
         )
-        psm_match.max_spec_per_query = 5
+        psm_match.max_spec_per_query = DIA_max_spec_per_query
         psm_match.min_frag_mz = global_settings["library"]["output_tsv"]["min_fragment_mz"]
 
     thread_num = global_settings["thread_num"]
@@ -181,12 +188,22 @@ def match_psms()->Tuple[pd.DataFrame,pd.DataFrame]:
         psm_match.ms_loader_thread_num = thread_num//len(ms2_file_list)
         thread_num = len(ms2_file_list)
 
+    ms2_file_dict = parse_ms_files_to_dict(
+        ms2_file_list
+    )
+
+    psm_df = psm_df[
+        psm_df.raw_name.isin(ms2_file_dict)
+    ].reset_index(drop=True)
+
+    logging.info(f"Loaded {len(psm_df)} PSMs for fragment extraction.")
+
     (
         psm_df, frag_mz_df,
         frag_inten_df, frag_mz_err_df,
     ) = psm_match.match_ms2_multi_raw(
         psm_df=psm_df,
-        ms_files=ms2_file_list,
+        ms_files=ms2_file_dict,
         ms_file_type=mgr_settings['transfer']['ms_file_type'],
         process_num=thread_num,
     )
@@ -194,15 +211,26 @@ def match_psms()->Tuple[pd.DataFrame,pd.DataFrame]:
     logging.info(f"Extracted {len(psm_df)} PSMs.")
 
     if isinstance(psm_match, PepSpecMatch_DIA):
-        psm_df["median_pcc"] = get_median_pccs_for_dia_psms(
-            psm_match, psm_df,
-            frag_mz_df, frag_inten_df
+        psm_df["ion_count"] = get_ion_count_scores(
+            frag_mz_df.values, frag_inten_df.values,
+            psm_df.frag_start_idx.values,
+            psm_df.frag_stop_idx.values,
+            DIA_min_frag_mz,
         )
+        if psm_match.max_spec_per_query > 1:
+            psm_df["median_pcc"] = get_median_pccs_for_dia_psms(
+                psm_match, psm_df,
+                frag_mz_df, frag_inten_df
+            )
+            psm_df = psm_df.query(f"ion_count>={DIA_min_ion_count} and median_pcc>=0.9")
+            logging.info(
+                f"Kept {len(psm_df)} PSMs at ion_count>={DIA_min_ion_count} "
+                 "and median_pcc>=0.9 for training/testing."
+                )
+        else:
+            psm_df = psm_df.query(f"ion_count>={DIA_min_ion_count}")
 
-        psm_df = psm_df.query("score>=6 and median_pcc>=0.9")
-        logging.info(f"Kept {len(psm_df)} PSMs at ion_count>=6 and median_pcc>=0.9 for training/testing.")
-
-    return psm_df, frag_inten_df
+    return psm_df, frag_mz_df, frag_inten_df
 
 def transfer_learn(verbose=True):
     """Transfer learn / refine the RT/CCS(/MS2) models.
