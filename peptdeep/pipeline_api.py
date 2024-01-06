@@ -18,7 +18,7 @@ from alphabase.spectral_library.reader import (
 )
 
 from peptdeep.spec_lib.translate import mod_to_unimod_dict
-from peptdeep.settings import global_settings
+from peptdeep.settings import global_settings, add_user_defined_modifications
 from peptdeep.utils import (
     logging, set_logger, 
     show_platform_info, show_python_info
@@ -267,6 +267,7 @@ def transfer_learn(verbose=True):
         Any kinds of exception if the pipeline fails.
     """
     try:
+        add_user_defined_modifications()
         mgr_settings = global_settings['model_mgr']
         mgr_settings['transfer']['verbose'] = verbose
 
@@ -303,7 +304,11 @@ def transfer_learn(verbose=True):
             dfs = []
             frag_inten_dfs = []
             for psm_file in mgr_settings['transfer']['psm_files']:
-                _lib = LibraryReaderBase()
+                _lib = LibraryReaderBase(
+                    modification_mapping=mgr_settings[
+                        'transfer']['psm_modification_mapping'
+                    ]
+                )
                 if not _check_is_file(psm_file): continue
                 dfs.append(_lib.import_file(psm_file))
                 frag_inten_dfs.append(_lib.fragment_intensity_df)
@@ -369,6 +374,7 @@ def generate_library():
         Any kinds of exception if the pipeline fails.
     """
     try:
+        add_user_defined_modifications()
         lib_settings = global_settings['library']
         output_folder = os.path.expanduser(
             lib_settings['output_folder']
