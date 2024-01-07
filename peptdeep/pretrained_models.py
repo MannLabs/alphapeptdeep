@@ -29,7 +29,7 @@ from alphabase.peptide.mobility import (
     ccs_to_mobility_for_df
 )
 
-from peptdeep.settings import global_settings
+from peptdeep.settings import global_settings, add_user_defined_modifications
 from peptdeep.utils import logging, process_bar
 from peptdeep.settings import global_settings
 
@@ -43,7 +43,7 @@ from peptdeep.utils import (
     uniform_sampling, evaluate_linear_regression
 )
 
-from peptdeep.settings import global_settings
+from peptdeep.settings import global_settings, update_global_settings
 
 pretrain_dir = os.path.join(
     os.path.join(
@@ -909,8 +909,9 @@ class ModelManager(object):
             precursor_df
         )
 
-    def _predict_func_for_mp(self, arg_dict):
+    def _predict_func_for_mp(self, arg_dict:dict):
         """Internal function, for multiprocessing"""
+        update_global_settings(arg_dict.pop("mp_global_settings"))
         return self.predict_all(
             multiprocessing=False, **arg_dict
         )
@@ -930,6 +931,10 @@ class ModelManager(object):
 
         df_groupby = precursor_df.groupby('nAA')
 
+        mgr = mp.Manager()
+        mp_global_settings = mgr.dict()
+        mp_global_settings.update(global_settings)
+
         def get_batch_num_mp(df_groupby):
             batch_num = 0
             for group_len in df_groupby.size().values:
@@ -944,6 +949,7 @@ class ModelManager(object):
                         'precursor_df': df.iloc[i:i+mp_batch_size,:],
                         'predict_items': predict_items,
                         'frag_types': frag_types,
+                        'mp_global_settings': mp_global_settings
                     }
 
         precursor_df_list = []
@@ -1076,7 +1082,8 @@ class ModelManager(object):
             update_precursor_mz(precursor_df)
 
         if (
-            self.ms2_model.device_type!='cpu' or not multiprocessing
+            self.ms2_model.device_type!='cpu' 
+            or not multiprocessing or process_num <= 1
             or len(precursor_df) < min_required_precursor_num_for_mp
         ):
             refine_df(precursor_df)

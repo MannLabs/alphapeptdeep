@@ -1,35 +1,11 @@
 import numpy as np
 import pandas as pd
 from typing import List, Union
-from alphabase.constants.modification import MOD_DF
 
-from peptdeep.settings import model_const
-
-mod_elements = model_const['mod_elements']
-mod_feature_size = len(mod_elements)
-
-mod_elem_to_idx = dict(zip(mod_elements, range(mod_feature_size)))
-
-def _parse_mod_formula(formula):
-    '''
-    Parse a modification formula to a feature vector
-    '''
-    feature = np.zeros(mod_feature_size)
-    elems = formula.strip(')').split(')')
-    for elem in elems:
-        chem, num = elem.split('(')
-        num  = int(num)
-        if chem in mod_elem_to_idx:
-            feature[mod_elem_to_idx[chem]] = num
-        else:
-            feature[-1] += num
-    return feature
-
-MOD_TO_FEATURE = {}
-def update_all_mod_features():
-    for modname, formula in MOD_DF[['mod_name','composition']].values:
-        MOD_TO_FEATURE[modname] = _parse_mod_formula(formula)
-update_all_mod_features()
+from peptdeep.settings import (
+    model_const, mod_feature_size, 
+    MOD_TO_FEATURE
+)
 
 def parse_mod_feature(
     nAA:int, 
