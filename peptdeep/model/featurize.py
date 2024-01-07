@@ -3,8 +3,9 @@ import pandas as pd
 from typing import List, Union
 
 from peptdeep.settings import (
-    model_const, mod_feature_size, 
-    MOD_TO_FEATURE
+    model_const, mod_feature_size, MOD_TO_FEATURE, 
+    mod_elements, mod_elem_to_idx,
+    _parse_mod_formula, update_all_mod_features,
 )
 
 def parse_mod_feature(
