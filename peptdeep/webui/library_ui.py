@@ -41,7 +41,7 @@ def mod_options():
         st.dataframe(MOD_DF.loc[fixmod+varmod,[
             'mod_name','classification','composition','mass',
             'modloss_composition','modloss','modloss_importance'
-        ]])
+        ]], hide_index=True)
 
     varmod_range()
 
@@ -81,7 +81,7 @@ def specialmod_options():
                     'mod_name','classification','composition','mass',
                     'modloss_composition','modloss','modloss_importance'
                 ]
-            ])
+            ], hide_index=True)
 
         specialmod_range()
 
@@ -156,7 +156,10 @@ def labeling_options():
 
             st.form_submit_button(label="Add selected labeling")
             st.write("Selected labeling modifications:")
-            st.dataframe(_concat_df_dict(global_ui_settings['library']['labeling_channels']))
+            st.dataframe(
+                _concat_df_dict(global_ui_settings['library']['labeling_channels']),
+                hide_index=True
+            )
         st.button(label='Clear all labeling', on_click=_clear_all)
 
 def choose_precursor_charge():
@@ -288,11 +291,11 @@ def show():
         infile_expander = st.expander("Input file examples")
         with infile_expander:
             st.write('`sequence_table`:')
-            st.dataframe(df[['sequence']])
+            st.dataframe(df[['sequence']], hide_index=True)
             st.write('`peptide_table` with alphabase PTMs:')
-            st.dataframe(df[['sequence','mods','mod_sites']])
+            st.dataframe(df[['sequence','mods','mod_sites']], hide_index=True)
             st.write('`precursor_table` with alphabase PTMs:')
-            st.dataframe(df[['sequence','mods','mod_sites','charge']])
+            st.dataframe(df[['sequence','mods','mod_sites','charge']], hide_index=True)
 
     infile_ext_dict = {
         'fasta': ['.fasta','.fa'],
