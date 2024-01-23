@@ -253,7 +253,7 @@ library:
   max_peptide_len: 35
   min_precursor_mz: 200.0
   max_precursor_mz: 2000.0
-  decoy: pseudo_reverse
+  decoy: None
   decoy_choices:
   - protein_reverse
   - pseudo_reverse
