@@ -12,7 +12,7 @@ import ssl
 from pickle import UnpicklingError
 import torch.multiprocessing as mp
 if sys.platform.lower().startswith("linux"):
-    # to prevent `too many open files` bug
+    # to prevent `too many open files` bug on Linux
     mp.set_sharing_strategy("file_system")
 
 from typing import Dict
