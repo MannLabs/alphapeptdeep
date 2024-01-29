@@ -9,6 +9,8 @@ from peptdeep.model.generic_property_prediction import (
 )
 
 class ChargeModelInterface:
+    def __init__(self):
+        raise TypeError("The abstract interface class cannot be initialized")
     def predict_charges_as_prob(self,
         pep_df:pd.DataFrame, 
         min_precursor_charge:int,
@@ -32,6 +34,18 @@ class ChargeModelInterface:
         df["charge"] = df.charge.astype(np.int8)
         df["charge_prob"] = df.charge_prob.astype(np.float32)
         return df
+    
+    def predict_prob_for_charge(self,
+        precursor_df:pd.DataFrame,
+    ):
+        if "charge" not in precursor_df.columns:
+            raise KeyError("precursor_df must contain `charge` column")
+        precursor_df = self.predict(precursor_df)
+        precursor_df["charge_prob"] = precursor_df[["charge_probs","charge"]].apply(
+            lambda x: x.iloc[0][x.iloc[1]-self.min_predict_charge], axis=1
+        ).astype(np.float32)
+        precursor_df.drop(columns="charge_probs", inplace=True)
+        return precursor_df
 
     def predict_and_clip_charges(self, 
         pep_df:pd.DataFrame, 
