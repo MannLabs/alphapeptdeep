@@ -9,6 +9,7 @@ import socket
 import logging
 import shutil
 import ssl
+import typing
 from pickle import UnpicklingError
 import torch.multiprocessing as mp
 if sys.platform.lower().startswith("linux"):
@@ -43,6 +44,7 @@ from peptdeep.model.ms2 import (
 )
 from peptdeep.model.rt import AlphaRTModel
 from peptdeep.model.ccs import AlphaCCSModel
+from peptdeep.model.charge import ChargeModelForAASeq, ChargeModelForModAASeq
 from peptdeep.utils import (
     uniform_sampling, evaluate_linear_regression
 )
@@ -299,12 +301,25 @@ class ModelManager(object):
         self.rt_model:AlphaRTModel = AlphaRTModel(device=device)
         self.ccs_model:AlphaCCSModel = AlphaCCSModel(device=device)
         self.load_installed_models()
+
+        self.charge_model:typing.Union[ChargeModelForAASeq,ChargeModelForModAASeq] = None
+
         self.reset_by_global_settings(reload_models=False)
 
     def reset_by_global_settings(self,
         reload_models=True,
     ):
         mgr_settings = global_settings['model_mgr']
+
+        if os.path.isfile(mgr_settings['charge_model_file']):
+            if mgr_settings['charge_model_type'] == 'modseq':
+                self.charge_model = ChargeModelForModAASeq()
+            else:
+                self.charge_model = ChargeModelForAASeq()
+            self.charge_model.load(mgr_settings['charge_model_file'])
+        self.charge_prob_cutoff = mgr_settings['charge_prob_cutoff']
+        self.use_predicted_charge_in_speclib = mgr_settings['use_predicted_charge_in_speclib']
+
         if reload_models:
             self.load_installed_models(mgr_settings['model_type'])
             self.load_external_models(
@@ -1141,4 +1156,3 @@ class ModelManager(object):
                 process_num = process_num,
                 mp_batch_size=mp_batch_size,
             )
-

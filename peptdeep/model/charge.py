@@ -1,16 +1,60 @@
 import pandas as pd
 import numpy as np
 
-
 from peptdeep.model.generic_property_prediction import (
     ModelInterface_for_Generic_AASeq_MultiLabelClassification,
     Model_for_Generic_AASeq_BinaryClassification_Transformer,
     ModelInterface_for_Generic_ModAASeq_MultiLabelClassification,
     Model_for_Generic_ModAASeq_BinaryClassification_Transformer,
 )
+
+class ChargeModelInterface:
+    def predict_charges_as_prob(self,
+        pep_df:pd.DataFrame, 
+        min_precursor_charge:int,
+        max_precursor_charge:int,
+    ):
+        df = self.predict(pep_df.copy())
+        df.rename(columns={"charge_probs":"charge_prob"}, inplace=True)
+        df["charge"] = [self.charge_range[
+            min_precursor_charge-self.min_predict_charge:
+            max_precursor_charge-self.min_predict_charge+1
+        ]]*len(df)
+        df["charge_prob"] = df.charge_prob.apply(
+            lambda x: x[
+                min_precursor_charge-self.min_predict_charge:
+                max_precursor_charge-self.min_predict_charge+1
+            ]
+        )
+        df = df.explode(
+            ["charge","charge_prob"], ignore_index=True
+        ).dropna(subset=["charge"])
+        df["charge"] = df.charge.astype(np.int8)
+        df["charge_prob"] = df.charge_prob.astype(np.float32)
+        return df
+
+    def predict_and_clip_charges(self, 
+        pep_df:pd.DataFrame, 
+        charge_prob_cutoff:float,
+    ):
+        df = self.predict(pep_df.copy())
+        df.rename(columns={"charge_probs":"charge_prob"}, inplace=True)
+        df["charge"] = df.charge_prob.apply(
+            lambda x: self.charge_range[x>charge_prob_cutoff]
+        )
+        df["charge_prob"] = df.charge_prob.apply(
+            lambda x: x[x>charge_prob_cutoff]
+        )
+        df = df.explode(
+            ["charge","charge_prob"], ignore_index=True
+        ).dropna(subset=["charge"])
+        df["charge"] = df.charge.astype(np.int8)
+        df["charge_prob"] = df.charge_prob.astype(np.float32)
+        return df
     
 class ChargeModelForModAASeq(
-    ModelInterface_for_Generic_ModAASeq_MultiLabelClassification
+    ModelInterface_for_Generic_ModAASeq_MultiLabelClassification,
+    ChargeModelInterface
 ):
     """
     ModelInterface for charge prediction for modified peptides
@@ -24,29 +68,15 @@ class ChargeModelForModAASeq(
 
         self.target_column_to_predict = "charge_probs"
         self.target_column_to_train = "charge_indicators"
-        self.min_charge = min_charge
-        self.max_charge = max_charge
+        self.min_predict_charge = min_charge
+        self.max_predict_charge = max_charge
         self.charge_range = np.arange(
             min_charge, max_charge+1, dtype=np.int8
         )
-        
-    def predict_charges_for_pep_df(self, 
-        pep_df:pd.DataFrame, 
-        charge_prob=0.3,
-        drop_probs_column=True
-    ):
-        df = self.predict(pep_df)
-        df["charge"] = df.charge_probs.apply(
-            lambda x: self.charge_range[x>charge_prob]
-        )
-        df = df.explode("charge").dropna(subset=["charge"])
-        if drop_probs_column:
-            df.drop(columns="charge_probs", inplace=True)
-        df["charge"] = df.charge.astype(np.int8)
-        return df
 
 class ChargeModelForAASeq(
-    ModelInterface_for_Generic_AASeq_MultiLabelClassification
+    ModelInterface_for_Generic_AASeq_MultiLabelClassification,
+    ChargeModelInterface
 ):
     """
     ModelInterface for charge prediction for amino acid sequence
@@ -60,24 +90,11 @@ class ChargeModelForAASeq(
 
         self.target_column_to_predict = "charge_probs"
         self.target_column_to_train = "charge_indicators"
-        self.min_charge = min_charge
-        self.max_charge = max_charge
-        self.charge_range = np.arange(min_charge, max_charge+1, dtype=np.int8)
-        
-    def predict_charges_for_pep_df(self, 
-        pep_df:pd.DataFrame, 
-        charge_prob=0.3,
-        drop_probs_column=True
-    ):
-        df = self.predict(pep_df)
-        df["charge"] = df.charge_probs.apply(
-            lambda x: self.charge_range[x>charge_prob]
+        self.min_predict_charge = min_charge
+        self.max_predict_charge = max_charge
+        self.charge_range = np.arange(
+            min_charge, max_charge+1, dtype=np.int8
         )
-        df = df.explode("charge").dropna(subset=["charge"])
-        if drop_probs_column:
-            df.drop(columns="charge_probs", inplace=True)
-        df["charge"] = df.charge.astype(np.int8)
-        return df
 
 def group_psm_df_by_sequence(
     psm_df: pd.DataFrame,
