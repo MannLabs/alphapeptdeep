@@ -8,14 +8,17 @@ from peptdeep.model.generic_property_prediction import (
     ModelInterface_for_Generic_ModAASeq_MultiLabelClassification,
     Model_for_Generic_ModAASeq_BinaryClassification_Transformer,
 )
-
-class ChargeModelForAASeq(
-    ModelInterface_for_Generic_AASeq_MultiLabelClassification
+    
+class ChargeModelForModAASeq(
+    ModelInterface_for_Generic_ModAASeq_MultiLabelClassification
 ):
-    def __init__(self, min_charge:int, max_charge:int):
+    """
+    ModelInterface for charge prediction for modified peptides
+    """
+    def __init__(self, min_charge:int=1, max_charge:int=6):
         super().__init__(
             num_target_values=max_charge-min_charge+1,
-            model_class=Model_for_Generic_AASeq_BinaryClassification_Transformer,
+            model_class=Model_for_Generic_ModAASeq_BinaryClassification_Transformer,
             nlayers=4, hidden_dim=128, dropout=0.1
         )
 
@@ -23,7 +26,9 @@ class ChargeModelForAASeq(
         self.target_column_to_train = "charge_indicators"
         self.min_charge = min_charge
         self.max_charge = max_charge
-        self.charge_range = np.arange(min_charge, max_charge+1, dtype=np.int8)
+        self.charge_range = np.arange(
+            min_charge, max_charge+1, dtype=np.int8
+        )
         
     def predict_charges_for_pep_df(self, 
         pep_df:pd.DataFrame, 
@@ -39,14 +44,17 @@ class ChargeModelForAASeq(
             df.drop(columns="charge_probs", inplace=True)
         df["charge"] = df.charge.astype(np.int8)
         return df
-    
-class ChargeModelForModAASeq(
-    ModelInterface_for_Generic_ModAASeq_MultiLabelClassification
+
+class ChargeModelForAASeq(
+    ModelInterface_for_Generic_AASeq_MultiLabelClassification
 ):
-    def __init__(self, min_charge:int, max_charge:int):
+    """
+    ModelInterface for charge prediction for amino acid sequence
+    """
+    def __init__(self, min_charge:int=1, max_charge:int=6):
         super().__init__(
             num_target_values=max_charge-min_charge+1,
-            model_class=Model_for_Generic_ModAASeq_BinaryClassification_Transformer,
+            model_class=Model_for_Generic_AASeq_BinaryClassification_Transformer,
             nlayers=4, hidden_dim=128, dropout=0.1
         )
 
@@ -54,9 +62,7 @@ class ChargeModelForModAASeq(
         self.target_column_to_train = "charge_indicators"
         self.min_charge = min_charge
         self.max_charge = max_charge
-        self.charge_range = np.arange(
-            min_charge, max_charge+1, dtype=np.int8
-        )
+        self.charge_range = np.arange(min_charge, max_charge+1, dtype=np.int8)
         
     def predict_charges_for_pep_df(self, 
         pep_df:pd.DataFrame, 
