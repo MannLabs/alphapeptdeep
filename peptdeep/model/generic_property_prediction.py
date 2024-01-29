@@ -410,7 +410,7 @@ class ModelInterface_for_Generic_ModAASeq_BinaryClassification(ModelInterface):
         return self._get_aa_mod_features(batch_df)
     
 
-class ModelInterface_for_Generic_AASeq_MultiTargetClassification(
+class ModelInterface_for_Generic_AASeq_MultiLabelClassification(
     ModelInterface_for_Generic_AASeq_BinaryClassification
 ):
     def __init__(self, 
@@ -456,7 +456,7 @@ class ModelInterface_for_Generic_AASeq_MultiTargetClassification(
             for idx,val in zip(batch_df.index.values,predict_values):
                 self.predict_df.loc[idx,self.target_column_to_predict] = val
 
-class ModelInterface_for_Generic_ModAASeq_MultiTargetClassification(
+class ModelInterface_for_Generic_ModAASeq_MultiLabelClassification(
     ModelInterface_for_Generic_ModAASeq_BinaryClassification
 ):
     def __init__(self, 
@@ -501,3 +501,7 @@ class ModelInterface_for_Generic_ModAASeq_MultiTargetClassification(
             # fail to assign list of list/ndarray by .loc, use for loop instead (slow)
             for idx,val in zip(batch_df.index.values,predict_values):
                 self.predict_df.loc[idx,self.target_column_to_predict] = val
+
+# alias
+ModelInterface_for_Generic_AASeq_MultiTargetClassification = ModelInterface_for_Generic_AASeq_MultiLabelClassification
+ModelInterface_for_Generic_ModAASeq_MultiTargetClassification = ModelInterface_for_Generic_ModAASeq_MultiLabelClassification

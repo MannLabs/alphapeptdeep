@@ -1,6 +1,7 @@
 import os
 import pathlib
 import io
+import sys
 import pandas as pd
 import torch
 import urllib
@@ -10,9 +11,12 @@ import shutil
 import ssl
 from pickle import UnpicklingError
 import torch.multiprocessing as mp
+if sys.platform.lower().startswith("linux"):
+    # to prevent `too many open files` bug on Linux
+    mp.set_sharing_strategy("file_system")
+
 from typing import Dict
 from zipfile import ZipFile
-from tarfile import TarFile
 from typing import Tuple, Union
 
 from alphabase.peptide.fragment import (

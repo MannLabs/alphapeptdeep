@@ -63,7 +63,7 @@ def add_user_mods():
                 len(global_ui_settings['common'][
                     'user_defined_modifications'
                 ])+2
-            ))
+            ), hide_index=True)
 
 def show():
     load_settings_gui()
@@ -123,7 +123,7 @@ def show():
     st.dataframe(MOD_DF.loc[
         ['Carbamidomethyl@C','Oxidation@M','Phospho@S'],
         ['mod_name','classification','mass','modloss','modloss_original','modloss_importance']
-    ])
+    ], hide_index=True)
 
 def _update_st_session_state_after_loading_settings(
     state_dict:dict={

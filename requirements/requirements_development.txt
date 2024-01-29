@@ -19,7 +19,6 @@ matplotlib
 numba
 psutil
 biopython
-streamlit
 streamlit-aggrid # df interact
 transformers
 scikit-learn
@@ -37,5 +36,6 @@ furo
 #--extra-index-url https://download.pytorch.org/whl/cu116
 torch
 
+streamlit>=1.23.0
 alphabase>=1.1.0
 alpharaw>=0.2.0
