@@ -28,18 +28,18 @@ class ChargeModelForModAASeq(
         self.charge_range = np.arange(
             min_charge, max_charge+1, dtype=np.int8
         )
+        self.predict_batch_size = 1024
+        self.predict_verbose = False
 
     def predict_charges_as_prob(self,
         pep_df:pd.DataFrame, 
         min_precursor_charge:int,
         max_precursor_charge:int,
-        batch_size=1024,
-        verbose=False,
     ):
         df = self.predict(
             pep_df.copy(), 
-            batch_size=batch_size,
-            verbose=verbose,
+            batch_size=self.predict_batch_size,
+            verbose=self.predict_verbose,
         )
         df.rename(columns={"charge_probs":"charge_prob"}, inplace=True)
         df["charge"] = [self.charge_range[
@@ -61,14 +61,13 @@ class ChargeModelForModAASeq(
     
     def predict_prob_for_charge(self,
         precursor_df:pd.DataFrame,
-        batch_size=1024,
-        verbose=False,
     ):
         if "charge" not in precursor_df.columns:
             raise KeyError("precursor_df must contain `charge` column")
-        precursor_df = self.predict(precursor_df,
-            batch_size=batch_size,
-            verbose=verbose,
+        precursor_df = self.predict(
+            precursor_df,
+            batch_size=self.predict_batch_size,
+            verbose=self.predict_verbose,
         )
         precursor_df["charge_prob"] = precursor_df[["charge_probs","charge"]].apply(
             lambda x: x.iloc[0][x.iloc[1]-self.min_predict_charge], axis=1
@@ -79,12 +78,11 @@ class ChargeModelForModAASeq(
     def predict_and_clip_charges(self, 
         pep_df:pd.DataFrame, 
         charge_prob_cutoff:float,
-        batch_size=1024,
-        verbose=False,
     ):
-        df = self.predict(pep_df.copy(),
-            batch_size=batch_size,
-            verbose=verbose,
+        df = self.predict(
+            pep_df.copy(),
+            batch_size=self.predict_batch_size,
+            verbose=self.predict_verbose,
         )
         df.rename(columns={"charge_probs":"charge_prob"}, inplace=True)
         df["charge"] = df.charge_prob.apply(
@@ -120,17 +118,18 @@ class ChargeModelForAASeq(
         self.charge_range = np.arange(
             min_charge, max_charge+1, dtype=np.int8
         )
+        self.predict_batch_size = 1024
+        self.predict_verbose = False
 
     def predict_charges_as_prob(self,
         pep_df:pd.DataFrame, 
         min_precursor_charge:int,
         max_precursor_charge:int,
-        batch_size=1024,
-        verbose=False,
     ):
-        df = self.predict(pep_df.copy(),
-            batch_size=batch_size,
-            verbose=verbose,
+        df = self.predict(
+            pep_df.copy(),
+            batch_size=self.predict_batch_size,
+            verbose=self.predict_verbose,
         )
         df.rename(columns={"charge_probs":"charge_prob"}, inplace=True)
         df["charge"] = [self.charge_range[
@@ -152,14 +151,13 @@ class ChargeModelForAASeq(
     
     def predict_prob_for_charge(self,
         precursor_df:pd.DataFrame,
-        batch_size=1024,
-        verbose=False,
     ):
         if "charge" not in precursor_df.columns:
             raise KeyError("precursor_df must contain `charge` column")
-        precursor_df = self.predict(precursor_df,
-            batch_size=batch_size,
-            verbose=verbose,
+        precursor_df = self.predict(
+            precursor_df,
+            batch_size=self.predict_batch_size,
+            verbose=self.predict_verbose,
         )
         precursor_df["charge_prob"] = precursor_df[["charge_probs","charge"]].apply(
             lambda x: x.iloc[0][x.iloc[1]-self.min_predict_charge], axis=1
@@ -170,12 +168,11 @@ class ChargeModelForAASeq(
     def predict_and_clip_charges(self, 
         pep_df:pd.DataFrame, 
         charge_prob_cutoff:float,
-        batch_size=1024,
-        verbose=False,
     ):
-        df = self.predict(pep_df.copy(),
-            batch_size=batch_size,
-            verbose=verbose,
+        df = self.predict(
+            pep_df.copy(),
+            batch_size=self.predict_batch_size,
+            verbose=self.predict_verbose,
         )
         df.rename(columns={"charge_probs":"charge_prob"}, inplace=True)
         df["charge"] = df.charge_prob.apply(
