@@ -36,7 +36,7 @@ class ChargeModelForModAASeq(
         drop_probs_column=True
     ):
         df = self.predict(pep_df)
-        df["charge"] = self.charge_probs.apply(
+        df["charge"] = df.charge_probs.apply(
             lambda x: self.charge_range[x>charge_prob]
         )
         df = df.explode("charge").dropna(subset=["charge"])
@@ -70,7 +70,7 @@ class ChargeModelForAASeq(
         drop_probs_column=True
     ):
         df = self.predict(pep_df)
-        df["charge"] = self.charge_probs.apply(
+        df["charge"] = df.charge_probs.apply(
             lambda x: self.charge_range[x>charge_prob]
         )
         df = df.explode("charge").dropna(subset=["charge"])
