@@ -317,6 +317,7 @@ class ModelManager(object):
             else:
                 self.charge_model = ChargeModelForAASeq()
             self.charge_model.load(mgr_settings['charge_model_file'])
+            self.charge_model.predict_batch_size = mgr_settings['predict']['batch_size_charge']
         self.charge_prob_cutoff = mgr_settings['charge_prob_cutoff']
         self.use_predicted_charge_in_speclib = mgr_settings['use_predicted_charge_in_speclib']
 

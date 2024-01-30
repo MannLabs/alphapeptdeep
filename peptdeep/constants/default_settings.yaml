@@ -100,6 +100,7 @@ model_mgr:
   predict:
     batch_size_ms2: 512
     batch_size_rt_ccs: 1024
+    batch_size_charge: 1024
     verbose: True
     multiprocessing: True
   transfer:
