@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 
 import peptdeep.model.building_block as building_block
-from peptdeep.model.model_interface import ModelInterface
+from peptdeep.model.model_interface import ModelInterface, is_precursor_sorted
 
 ASCII_NUM=128
 
@@ -435,6 +435,12 @@ class ModelInterface_for_Generic_AASeq_MultiLabelClassification(
             np.stack(batch_df[self.target_column_to_train].values), 
             dtype=torch.float32
         )
+    
+    def _check_predict_in_order(self, precursor_df:pd.DataFrame):
+        if not is_precursor_sorted(precursor_df):
+            # multilabel prediction can only predict in order
+            precursor_df.sort_values("nAA", inplace=True)
+            precursor_df.reset_index(drop=True, inplace=True)
 
     def _prepare_predict_data_df(self, precursor_df, **kwargs):
         precursor_df[self.target_column_to_predict] = [
@@ -443,18 +449,9 @@ class ModelInterface_for_Generic_AASeq_MultiLabelClassification(
         self.predict_df = precursor_df
 
     def _set_batch_predict_data(self, batch_df, predict_values, **kwargs):
-        if self._predict_in_order:
-            self.predict_df.loc[:,self.target_column_to_predict].values[
-                batch_df.index.values[0]:batch_df.index.values[-1]+1
-            ] = list(predict_values)
-        else:
-            # self.predict_df.loc[
-            #     batch_df.index,self.target_column_to_predict
-            # ] = [val.tolist() for val in predict_values]
-
-            # fail to assign list of list/ndarray by .loc, use for loop instead (slow)
-            for idx,val in zip(batch_df.index.values,predict_values):
-                self.predict_df.loc[idx,self.target_column_to_predict] = val
+        self.predict_df.loc[:,self.target_column_to_predict].values[
+            batch_df.index.values[0]:batch_df.index.values[-1]+1
+        ] = list(predict_values)
 
 class ModelInterface_for_Generic_ModAASeq_MultiLabelClassification(
     ModelInterface_for_Generic_ModAASeq_BinaryClassification
@@ -481,6 +478,12 @@ class ModelInterface_for_Generic_ModAASeq_MultiLabelClassification(
             np.stack(batch_df[self.target_column_to_train].values), 
             dtype=torch.float32
         )
+    
+    def _check_predict_in_order(self, precursor_df:pd.DataFrame):
+        if not is_precursor_sorted(precursor_df):
+            # multilabel prediction can only predict in order
+            precursor_df.sort_values("nAA", inplace=True)
+            precursor_df.reset_index(drop=True, inplace=True)
 
     def _prepare_predict_data_df(self, precursor_df, **kwargs):
         precursor_df[self.target_column_to_predict] = [
@@ -489,18 +492,9 @@ class ModelInterface_for_Generic_ModAASeq_MultiLabelClassification(
         self.predict_df = precursor_df
 
     def _set_batch_predict_data(self, batch_df, predict_values, **kwargs):
-        if self._predict_in_order:
-            self.predict_df.loc[:,self.target_column_to_predict].values[
-                batch_df.index.values[0]:batch_df.index.values[-1]+1
-            ] = list(predict_values)
-        else:
-            # self.predict_df.loc[
-            #     batch_df.index,self.target_column_to_predict
-            # ] = [val.tolist() for val in predict_values]
-
-            # fail to assign list of list/ndarray by .loc, use for loop instead (slow)
-            for idx,val in zip(batch_df.index.values,predict_values):
-                self.predict_df.loc[idx,self.target_column_to_predict] = val
+        self.predict_df.loc[:,self.target_column_to_predict].values[
+            batch_df.index.values[0]:batch_df.index.values[-1]+1
+        ] = list(predict_values)
 
 # alias
 ModelInterface_for_Generic_AASeq_MultiTargetClassification = ModelInterface_for_Generic_AASeq_MultiLabelClassification

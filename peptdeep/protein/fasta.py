@@ -172,3 +172,20 @@ class PredictSpecLibFasta(SpecLibFasta, PredictSpecLib):
             else:
                 print("Oops, `PredictSpecLibFasta.model_manager` is None, while it should not happen")
                 self.model_manager = model_manager
+
+    def add_charge(self):
+        if self.model_manager.charge_model is None:
+            super().add_charge()
+        else:
+            print("Predicting charge states ...")
+            if self.model_manager.use_predicted_charge_in_speclib:
+                self._precursor_df = self.model_manager.charge_model.predict_and_clip_charges(
+                    self.precursor_df, 
+                    charge_prob_cutoff=self.model_manager.charge_prob_cutoff
+                )
+            else:
+                self._precursor_df = self.model_manager.charge_model.predict_charges_as_prob(
+                    self.precursor_df, 
+                    min_precursor_charge=self.min_precursor_charge,
+                    max_precursor_charge=self.max_precursor_charge
+                )

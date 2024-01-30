@@ -421,7 +421,7 @@ class ModelInterface(object):
             return self.predict(
                 precursor_df, 
                 batch_size=batch_size,
-                verbose=False,
+                verbose=True,
                 **kwargs
             )
             
