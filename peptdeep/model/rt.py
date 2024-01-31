@@ -162,18 +162,23 @@ class AlphaRTModel(model_interface.ModelInterface):
         )
 
     def add_irt_column_to_precursor_df(self,
-        precursor_df: pd.DataFrame
+        precursor_df: pd.DataFrame,
+        irt_pep_df:pd.DataFrame = None,
     ):
-        print(f"Predict RT for {len(IRT_PEPTIDE_DF)} iRT precursors.")
-        self.predict(IRT_PEPTIDE_DF)
-        eval_df = evaluate_linear_regression(IRT_PEPTIDE_DF, "rt_pred", y="irt")
+        if irt_pep_df is None:
+            irt_pep_df = IRT_PEPTIDE_DF
+        print(f"Predict RT for {len(irt_pep_df)} iRT precursors.")
+        self.predict(irt_pep_df)
+        if "irt" not in irt_pep_df.columns:
+            irt_pep_df["irt"] = irt_pep_df["rt"]
+        eval_df = evaluate_linear_regression(irt_pep_df, "rt_pred", y="irt")
         print("Linear regression of `rt_pred` to `irt`:")
         print(eval_df)
         # simple linear regression
-        # rt_pred_mean = IRT_PEPTIDE_DF.rt_pred.mean()
-        # irt_mean = IRT_PEPTIDE_DF.irt.mean()
-        # x = IRT_PEPTIDE_DF.rt_pred.values - rt_pred_mean
-        # y = IRT_PEPTIDE_DF.irt.values - irt_mean
+        # rt_pred_mean = irt_pep_df.rt_pred.mean()
+        # irt_mean = irt_pep_df.irt.mean()
+        # x = irt_pep_df.rt_pred.values - rt_pred_mean
+        # y = irt_pep_df.irt.values - irt_mean
         # slope = np.sum(x*y)/np.sum(x*x)
         # intercept = irt_mean - slope*rt_pred_mean
         # end linear regression
