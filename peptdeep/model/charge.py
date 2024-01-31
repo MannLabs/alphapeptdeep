@@ -55,6 +55,8 @@ class _ChargeModelInterface:
 
     def predict_and_clip_charges(self, 
         pep_df:pd.DataFrame, 
+        min_precursor_charge:int,
+        max_precursor_charge:int,
         charge_prob_cutoff:float,
     ):
         df = self.predict_mp(
@@ -69,9 +71,12 @@ class _ChargeModelInterface:
             lambda x: x[x>charge_prob_cutoff]
         )
         df = df.explode(
-            ["charge","charge_prob"], ignore_index=True
+            ["charge","charge_prob"]
         ).dropna(subset=["charge"])
         df["charge"] = df.charge.astype(np.int8)
+        df = df.query(
+            f"charge>={min_precursor_charge} and charge<={max_precursor_charge}"
+        ).reset_index(drop=True)
         df["charge_prob"] = df.charge_prob.astype(np.float32)
         return df
     

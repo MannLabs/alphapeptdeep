@@ -181,6 +181,8 @@ class PredictSpecLibFasta(SpecLibFasta, PredictSpecLib):
             if self.model_manager.use_predicted_charge_in_speclib:
                 self._precursor_df = self.model_manager.charge_model.predict_and_clip_charges(
                     self.precursor_df, 
+                    min_precursor_charge=self.min_precursor_charge,
+                    max_precursor_charge=self.max_precursor_charge,
                     charge_prob_cutoff=self.model_manager.charge_prob_cutoff
                 )
             else:
