@@ -192,6 +192,15 @@ def match_psms()->Tuple[
         ms2_file_list
     )
 
+    logging.info(
+        f"{len(ms2_file_dict)} MS files for fragment extraction: \n" +
+        "\n".join([
+            f"  - {raw_name} : {_path}" for raw_name, _path 
+            in ms2_file_dict.items()
+        ])
+        + "\n"
+    )
+
     psm_df = psm_df[
         psm_df.raw_name.isin(ms2_file_dict)
     ].reset_index(drop=True)
