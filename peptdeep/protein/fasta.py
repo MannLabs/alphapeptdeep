@@ -177,7 +177,7 @@ class PredictSpecLibFasta(SpecLibFasta, PredictSpecLib):
         if self.model_manager.charge_model is None:
             super().add_charge()
         else:
-            print("Predicting charge states ...")
+            print(f"Predicting charge states for {len(self.precursor_df)} peptides ...")
             if self.model_manager.use_predicted_charge_in_speclib:
                 self._precursor_df = self.model_manager.charge_model.predict_and_clip_charges(
                     self.precursor_df, 
