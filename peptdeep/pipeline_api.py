@@ -326,7 +326,7 @@ def transfer_learn(verbose=True):
                 dfs, frag_inten_dfs
             )
         elif len(mgr_settings['transfer']['ms_files'])>0:
-            psm_df, _, frag_df = match_psms()
+            psm_df, frag_mz_df, frag_df = match_psms()
         else:
             psm_df = import_psm_df(
                 mgr_settings['transfer']['psm_files'],
