@@ -17,7 +17,7 @@ python setup.py sdist bdist_wheel
 # Setting up the local package
 cd release/one_click_linux_gui
 # Make sure you include the required extra packages and always use the stable or very-stable options!
-pip install "../../dist/peptdeep-1.1.5-py3-none-any.whl[stable]"
+pip install "../../dist/peptdeep-1.1.6-py3-none-any.whl[stable]"
 
 if [ "$1" == "CPU" ]; then
     pip install torch -U --extra-index-url https://download.pytorch.org/whl/cpu
