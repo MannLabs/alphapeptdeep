@@ -135,8 +135,9 @@ def match_psms()->Tuple[
 
     Returns
     -------
-    Tuple[pd.DataFrame,pd.DataFrame]
-        pd.DataFrame: the PSM DataFrame, and
+    Tuple[pd.DataFrame,pd.DataFrame,pd.DataFrame]
+        pd.DataFrame: the PSM DataFrame
+        pd.DataFrame: the fragment mz DataFrame
         pd.DataFrame: the matched fragment intensity DataFrame
     """
     mgr_settings = global_settings['model_mgr']
@@ -325,7 +326,7 @@ def transfer_learn(verbose=True):
                 dfs, frag_inten_dfs
             )
         elif len(mgr_settings['transfer']['ms_files'])>0:
-            psm_df, frag_df = match_psms()
+            psm_df, _, frag_df = match_psms()
         else:
             psm_df = import_psm_df(
                 mgr_settings['transfer']['psm_files'],
