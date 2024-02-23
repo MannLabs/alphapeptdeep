@@ -90,9 +90,11 @@ class PredictSpecLib(SpecLibBase):
             if col not in self.charged_frag_types
         ], inplace=True)
 
-    def translate_rt_to_irt_pred(self):
+    def translate_rt_to_irt_pred(self, irt_pep_df:pd.DataFrame = None):
         """ Add 'irt_pred' into columns based on 'rt_pred' """
-        return self.model_manager.rt_model.add_irt_column_to_precursor_df(self._precursor_df)
+        return self.model_manager.rt_model.add_irt_column_to_precursor_df(
+            self._precursor_df, irt_pep_df=irt_pep_df
+        )
 
     def predict_all(self, 
         min_required_precursor_num_for_mp:int=2000,

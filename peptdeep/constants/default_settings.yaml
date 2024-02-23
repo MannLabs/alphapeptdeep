@@ -72,6 +72,13 @@ model_mgr:
   external_ms2_model: ''
   external_rt_model: ''
   external_ccs_model: ''
+  charge_model_type: seq
+  charge_model_choices:
+  - seq
+  - modseq
+  charge_model_file: ''
+  charge_prob_cutoff: 0.3
+  use_predicted_charge_in_speclib: True # if True, it ignores min/max_precursor_charge in `library`
   instrument_group:
     ThermoTOF: ThermoTOF
     Astral: ThermoTOF
@@ -93,6 +100,7 @@ model_mgr:
   predict:
     batch_size_ms2: 512
     batch_size_rt_ccs: 1024
+    batch_size_charge: 1024
     verbose: True
     multiprocessing: True
   transfer:
