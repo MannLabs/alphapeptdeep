@@ -116,7 +116,7 @@ class PredictSpecLib(SpecLibBase):
                 )
             else:
                 self._precursor_df = calc_precursor_isotope_mp(
-                    self._precursor_df, process_bar=process_bar
+                    self._precursor_df, progress_bar=process_bar
                 )
         if self.model_manager.verbose:
             logging.info(f'Predicting RT/IM/MS2 for {len(self._precursor_df)} precursors ...')
