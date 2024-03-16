@@ -492,6 +492,7 @@ class pDeepModel(model_interface.ModelInterface):
         else:
             update_sliced_fragment_dataframe(
                 self.predict_df,
+                self.predict_df.to_numpy(copy=True),
                 predicts.reshape(
                     (-1, len(self.charged_frag_types))
                 ),
