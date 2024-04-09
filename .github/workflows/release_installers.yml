@@ -102,6 +102,38 @@ jobs:
           asset_path: release/one_click_macos_gui/dist/peptdeep_gui_installer_macos.pkg
           asset_name: peptdeep_gui_installer_macos.pkg
           asset_content_type: application/octet-stream
+  Create_MacOS_Arm_Release:
+    runs-on: macos-latest-xlarge
+    needs: Create_Draft_On_GitHub
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - uses: conda-incubator/setup-miniconda@v2
+        with:
+          auto-update-conda: true
+          python-version: ${{ matrix.python-version }}
+      - name: Conda info
+        shell: bash -l {0}
+        run: conda info
+      - name: Creating installer for MacOS
+        shell: bash -l {0}
+        run: |
+          cd release/one_click_macos_gui
+          . ./create_installer_macos.sh
+      - name: Test installer for MacOS
+        shell: bash -l {0}
+        run: |
+          sudo installer -pkg release/one_click_macos_gui/dist/peptdeep_gui_installer_macos.pkg -target /
+      - name: Upload MacOS Installer
+        id: upload-release-asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.Create_Draft_On_GitHub.outputs.upload_url }}
+          asset_path: release/one_click_macos_gui/dist/peptdeep_gui_installer_macos.pkg
+          asset_name: peptdeep_gui_installer_macos_arm.pkg
+          asset_content_type: application/octet-stream
   Create_Windows_Release:
     runs-on: windows-latest
     needs: Create_Draft_On_GitHub
