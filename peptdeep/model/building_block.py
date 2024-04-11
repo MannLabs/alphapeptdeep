@@ -594,10 +594,10 @@ class Input_AA_Mod_Charge_PositionalEncoding(torch.nn.Module):
     ):
         mod_x = self.mod_nn(mod_x)
         x = self.aa_emb(aa_indices)
-        charge_x = charges.unsqueeze(1).repeat(
+        charge_x = charges[:, None, None].repeat(
             1, mod_x.size(1), self.charge_dim
         )
-        return self.pos_encoder(torch.cat((x, mod_x,charge_x), 2))
+        return self.pos_encoder(torch.cat((x, mod_x, charge_x), 2))
 
 class Input_26AA_Mod_LSTM(torch.nn.Module):
     """
