@@ -9,9 +9,9 @@
 	<key>CFBundleIconFile</key>
 	<string>alpha_logo.icns</string>
 	<key>CFBundleIdentifier</key>
-	<string>peptdeep.1.1.8</string>
+	<string>peptdeep.1.1.9</string>
 	<key>CFBundleShortVersionString</key>
-	<string>1.1.8</string>
+	<string>1.1.9</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
