@@ -32,56 +32,154 @@ from peptdeep.model.featurize import (
     get_batch_mod_feature
 )
 
-# `transformers.optimization.get_cosine_schedule_with_warmup` will import tensorflow,
-# resulting in some package version issues.
-# Here we copy the code from transformers.optimization
-def _get_cosine_schedule_with_warmup_lr_lambda(
-    current_step: int, *, num_warmup_steps: int, num_training_steps: int, num_cycles: float
-):
-    if current_step < num_warmup_steps:
-        return float(current_step+1) / float(max(1, num_warmup_steps))
-    progress = float(current_step - num_warmup_steps) / float(num_training_steps - num_warmup_steps)
-    return (
-        max(1e-10, 0.5 * (1.0 + math.cos(math.pi * float(num_cycles) * 2.0 * progress)))
-    )
-    # if current_step < num_warmup_steps:
-    #     return float(current_step) / float(max(1, num_warmup_steps))
-    # progress = float(current_step - num_warmup_steps) / float(max(1, num_training_steps - num_warmup_steps))
-    # return max(0.0, 0.5 * (1.0 + math.cos(math.pi * float(num_cycles) * 2.0 * progress)))
-
-
-def get_cosine_schedule_with_warmup(
-    optimizer, num_warmup_steps: int, num_training_steps: int, num_cycles: float = 0.5, last_epoch: int = -1
-):
+def default_epoch_callback(epoch:int, epoch_loss:float):
     """
-    Create a schedule with a learning rate that decreases following the values of the cosine function between the
-    initial lr set in the optimizer to 0, after a warmup period during which it increases linearly between 0 and the
-    initial lr set in the optimizer.
+    This is the default callback function signature for training epochs, it will be called after each epoch of training.
+    If the return value is False the training will stop.
 
-    Args:
-        optimizer ([`~torch.optim.Optimizer`]):
-            The optimizer for which to schedule the learning rate.
-        num_warmup_steps (`int`):
-            The number of steps for the warmup phase.
-        num_training_steps (`int`):
-            The total number of training steps.
-        num_cycles (`float`, *optional*, defaults to 0.5):
-            The number of waves in the cosine schedule (the defaults is to just decrease from the max value to 0
-            following a half-cosine).
-        last_epoch (`int`, *optional*, defaults to -1):
-            The index of the last epoch when resuming training.
+    Parameters
+    ----------
+    epoch : int
+        The current epoch number.
+    epoch_loss : float
+        The loss value of the current epoch.
 
-    Return:
-        `torch.optim.lr_scheduler.LambdaLR` with the appropriate schedule.
+    """
+    pass
+
+def default_batch_callback(batch:int, batch_loss:float):
+    """
+    This is the default callback function signature for training batches, it will be called after each batch of training.
+
+    Parameters
+    ----------
+    batch : int
+        The current batch number.
+    batch_loss : float
+        The loss value of the current batch.
+
+    """
+    pass
+
+class LR_SchedulerInterface(object):
+    def __init__(self, optimizer:torch.optim.Optimizer, **kwargs):
+        raise NotImplementedError
+
+    def step(self, epoch:int, loss:float):
+        """
+        This method must be implemented in the sub-class. It will be called to get the learning rate for the next epoch. 
+        While the one we are using here does not need the loss value, this is left incase of using something like the ReduceLROnPlateau scheduler.
+
+        Parameters
+        ----------
+        epoch : int
+            The current epoch number.
+        loss : float
+            The loss value of the current epoch.
+        """
+        raise NotImplementedError
+    
+    def get_last_lr(self)->float:
+        """
+        Get the last learning rate.
+
+        Returns
+        -------
+        float
+            The last learning rate.
+        """
+        raise NotImplementedError
+    
+class WarmupLR_Scheduler(LR_SchedulerInterface):
+    """
+    A Lr scheduler that includes a warmup phase and then a cosine annealing phase. 
     """
 
-    lr_lambda = functools.partial(
-        _get_cosine_schedule_with_warmup_lr_lambda,
-        num_warmup_steps=num_warmup_steps,
-        num_training_steps=num_training_steps,
-        num_cycles=num_cycles,
-    )
-    return LambdaLR(optimizer, lr_lambda, last_epoch)
+    def __init__(self,
+        optimizer:torch.optim.Optimizer,
+        num_warmup_steps:int,
+        num_training_steps:int,
+        num_cycles:float=0.5,
+        last_epoch:int=-1
+    ):
+        self.optimizer = optimizer
+        self.lamda_lr = self.get_cosine_schedule_with_warmup(
+            optimizer, num_warmup_steps, num_training_steps, num_cycles, last_epoch
+        )
+
+    def step(self, epoch:int, loss:float):
+        """
+        Get the learning rate for the next epoch.
+
+        Parameters
+        ----------
+        epoch : int
+            The current epoch number.
+        loss : float
+            The loss value of the current epoch.
+
+        """
+        return self.lamda_lr.step(epoch)
+    
+    def get_last_lr(self)->float:
+        """
+        Get the last learning rate.
+
+        Returns
+        -------
+        float
+            The last learning rate.
+        """
+        return self.lamda_lr.get_last_lr()
+
+
+    # `transformers.optimization.get_cosine_schedule_with_warmup` will import tensorflow,
+    # resulting in some package version issues.
+    # Here we copy the code from transformers.optimization
+    def _get_cosine_schedule_with_warmup_lr_lambda(self,
+        current_step: int, *, num_warmup_steps: int, num_training_steps: int, num_cycles: float
+    ):
+        if current_step < num_warmup_steps:
+            return float(current_step) / float(max(1, num_warmup_steps))
+        
+        progress = float(current_step - num_warmup_steps) / float(max(1, num_training_steps - num_warmup_steps))
+        return max(1e-10, 0.5 * (1.0 + math.cos(math.pi * float(num_cycles) * 2.0 * progress)))
+
+
+
+    def get_cosine_schedule_with_warmup( self,
+        optimizer, num_warmup_steps: int, num_training_steps: int, num_cycles: float = 0.5, last_epoch: int = -1
+    ):
+        """
+        Create a schedule with a learning rate that decreases following the values of the cosine function between the
+        initial lr set in the optimizer to 0, after a warmup period during which it increases linearly between 0 and the
+        initial lr set in the optimizer.
+
+        Args:
+            optimizer ([`~torch.optim.Optimizer`]):
+                The optimizer for which to schedule the learning rate.
+            num_warmup_steps (`int`):
+                The number of steps for the warmup phase.
+            num_training_steps (`int`):
+                The total number of training steps.
+            num_cycles (`float`, *optional*, defaults to 0.5):
+                The number of waves in the cosine schedule (the defaults is to just decrease from the max value to 0
+                following a half-cosine).
+            last_epoch (`int`, *optional*, defaults to -1):
+                The index of the last epoch when resuming training.
+
+        Return:
+            `torch.optim.lr_scheduler.LambdaLR` with the appropriate schedule.
+        """
+
+        lr_lambda = functools.partial(
+            self._get_cosine_schedule_with_warmup_lr_lambda,
+            num_warmup_steps=num_warmup_steps,
+            num_training_steps=num_training_steps,
+            num_cycles=num_cycles,
+        )
+        return LambdaLR(optimizer, lr_lambda, last_epoch)
+
 
 def append_nAA_column_if_missing(precursor_df):
     """
@@ -125,6 +223,9 @@ class ModelInterface(object):
         self.set_device(device)
         self.fixed_sequence_len = fixed_sequence_len
         self.min_pred_value = min_pred_value
+        self.epoch_callback = default_epoch_callback
+        self.batch_callback = default_batch_callback
+        self.lr_scheduler_class = WarmupLR_Scheduler
 
     @property
     def fixed_sequence_len(self)->int:
@@ -185,6 +286,68 @@ class ModelInterface(object):
     def target_column_to_train(self, column:str):
         self._target_column_to_train = column
 
+    def set_epoch_callback(self, func:callable) -> None:
+        """
+        Set the callback function that will be called after each epoch of training.
+        The callback function must have the following signature:
+        `def callback(epoch:int, epoch_loss:float)->bool:`
+        If the return value is False the training will stop. 
+        If the return value is True or None the training will continue.
+
+        Parameters
+        ----------
+        func : callable
+            The callback function.
+        """
+        # Check that the function is callable and has the right signature
+        if not callable(func):
+            raise ValueError("The callback function must be callable")
+        # Make sure that the only arguments with default values are the ones that are expected
+        for arg in inspect.signature(func).parameters:
+            if arg not in ['epoch', 'epoch_loss'] and isinstance(inspect.signature(func).parameters[arg].default, type(inspect._empty)):
+                raise ValueError("The callback function must have only two arguments without default values: epoch and epoch_loss")
+
+        self.epoch_callback = func
+    def set_batch_callback(self, func:callable) -> None:
+        """
+        Set the callback function that will be called after each batch of training.
+        The callback function must have the following signature:
+        `def callback(batch:int, batch_loss:float)->None:`
+        If the return value is False the training will stop.
+        If the return value is True or None the training will continue.
+
+        Parameters
+        ----------
+        func : callable
+            The callback function.
+        """
+        # Check that the function is callable and has the right signature
+        if not callable(func):
+            raise ValueError("The callback function must be callable")
+        # Make sure that the only arguments with default values are the ones that are expected
+        for arg in inspect.signature(func).parameters:
+            if arg not in ['batch', 'batch_loss'] and isinstance(inspect.signature(func).parameters[arg].default, type(inspect._empty)):
+                raise ValueError("The callback function must have only two arguments without default values: batch and batch_loss")
+
+        self.batch_callback = func
+    def set_lr_scheduler_class(self, lr_scheduler_class:LR_SchedulerInterface) -> None:
+        """
+        Set the learning rate scheduler class. We require the user pass a class that is a subclass of 
+        LR_SchedulerInterface because the current implementation will create an instance of it within this class.
+
+        Parameters
+        ----------
+        lr_scheduler_class : LR_SchedulerInterface
+            The learning rate scheduler class. Since we create an instance of it within this class, 
+            the ModelInterface needs the class to take the arguments `optimizer`, `num_warmup_steps`, `num_training_steps`
+
+        """
+        if not issubclass(lr_scheduler_class, LR_SchedulerInterface):
+            raise ValueError(
+                "The lr_scheduler_class must be a subclass of LR_SchedulerInterface"
+            )
+        else:
+            self.lr_scheduler_class = lr_scheduler_class
     def set_device(self, 
         device_type:str = 'gpu', 
         device_ids:list = []
@@ -298,14 +461,22 @@ class ModelInterface(object):
                     batch_size, verbose_each_epoch,
                     **kwargs
                 )
+                result = self.epoch_callback(epoch, np.mean(batch_cost))
+                if result == False: 
+                    print(f"Training stopped at epoch {epoch}")
+                    break
             else:
                 batch_cost = self._train_one_epoch_by_padding_zeros(
                     precursor_df, epoch,
                     batch_size, verbose_each_epoch,
                     **kwargs
                 )
+                result = self.epoch_callback(epoch, np.mean(batch_cost))
+                if result == False: 
+                    print(f"Training stopped at epoch {epoch}")
+                    break
 
-            lr_scheduler.step()
+            lr_scheduler.step(epoch=epoch, loss=np.mean(batch_cost))
             if verbose: print(
                 f'[Training] Epoch={epoch+1}, lr={lr_scheduler.get_last_lr()[0]}, loss={np.mean(batch_cost)}'
             )
@@ -352,12 +523,20 @@ class ModelInterface(object):
                         batch_size, verbose_each_epoch,
                         **kwargs
                     )
+                    result = self.epoch_callback(epoch, np.mean(batch_cost))
+                    if result == False: 
+                        print(f"Training stopped at epoch {epoch}")
+                        break
                 else:
                     batch_cost = self._train_one_epoch_by_padding_zeros(
                         precursor_df, epoch,
                         batch_size, verbose_each_epoch,
                         **kwargs
                     )
+                    result = self.epoch_callback(epoch, np.mean(batch_cost))
+                    if result == False: 
+                        print(f"Training stopped at epoch {epoch}")
+                        break
                 if verbose: print(f'[Training] Epoch={epoch+1}, Mean Loss={np.mean(batch_cost)}')
             
             torch.cuda.empty_cache()
@@ -636,7 +815,7 @@ class ModelInterface(object):
                 batch_cost.append(
                     self._train_one_batch(targets, features)
                 )
-                
+            self.batch_callback(i//batch_size, batch_cost[-1])         
         if verbose_each_epoch:
             batch_tqdm.set_description(
                 f'Epoch={epoch+1}, batch={len(batch_cost)}, loss={batch_cost[-1]:.4f}'
@@ -677,6 +856,8 @@ class ModelInterface(object):
                         self._train_one_batch(targets, features)
                     )
                 
+                self.batch_callback(i//batch_size, batch_cost[-1])
+
             if verbose_each_epoch:
                 batch_tqdm.set_description(
                     f'Epoch={epoch+1}, nAA={nAA}, batch={len(batch_cost)}, loss={batch_cost[-1]:.4f}'
@@ -896,8 +1077,10 @@ class ModelInterface(object):
     def _get_lr_schedule_with_warmup(self, warmup_epoch, epoch):
         if warmup_epoch > epoch:
             warmup_epoch = epoch//2
-        return get_cosine_schedule_with_warmup(
-            self.optimizer, warmup_epoch, epoch
+        return self.lr_scheduler_class(
+            self.optimizer, 
+            num_warmup_steps=warmup_epoch, 
+            num_training_steps=epoch
         )
 
     def _pad_zeros_if_fixed_len(self, precursor_df:pd.DataFrame):
