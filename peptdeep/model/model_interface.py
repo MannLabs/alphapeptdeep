@@ -39,7 +39,7 @@ class LR_SchedulerInterface(object):
     def step(self, epoch:int, loss:float):
         """
         This method must be implemented in the sub-class. It will be called to get the learning rate for the next epoch. 
-        While the one we are using here does not need the loss value, this is left incase of using something like the ReduceLROnPlateau scheduler.
+        While the one we are using here does not need the loss value, this is left in case of using something like the ReduceLROnPlateau scheduler.
 
         Parameters
         ----------
