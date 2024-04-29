@@ -1,3 +1,10 @@
+# Perform pip installation and run all tests
+
+# For feature branches, we don't test the full matrix (os x [stable, loose]) in order to save time & resources.
+# On each push to develop, the whole test matrix runs, additionally, its success is mandatory for merging to main.
+# In the (assumed to be rare case) that these full matrix tests fail but the reduced matrix tests passed,
+# we will learn about it latest before pushing to main. The merge that caused the issue can then be identified
+# from the tests that ran on develop.
 on:
   push:
     branches: [ main, development ]
@@ -21,6 +28,7 @@ jobs:
 
   loose_installation:
     name: Test loose pip installation on ${{ matrix.os }}
+    # runs-on: ${{ matrix.os }} # See https://github.com/orgs/community/discussions/62320
     strategy:
       matrix:
         os: [ubuntu-latest, macOS-latest, windows-latest, macos-latest-xlarge]
