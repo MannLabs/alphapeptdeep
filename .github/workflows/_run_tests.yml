@@ -1,0 +1,46 @@
+# reusable workflow to run all tests
+name: run-tests
+
+on:
+  workflow_call:
+    inputs:
+      os:
+        required: true
+        type: string
+      python-version:
+        required: true
+        type: string
+      install-script:
+        required: true
+        type: string
+jobs:
+  pre-commit:
+    runs-on: ${{ inputs.os }}
+    steps:
+    - uses: actions/checkout@v3
+    - uses: conda-incubator/setup-miniconda@v3
+      with:
+        miniconda-version: "latest"
+        auto-update-conda: true
+        python-version: ${{ inputs.python-version }}
+    - name: Conda info
+      shell: bash -l {0}
+      run: conda info
+    - name: Perform pip installation with all stable dependencies
+      shell: bash -l {0}
+      run: |
+        cd misc
+        . ./${{ inputs.install-script }}
+    - name: Install additional dependencies required for testing
+      shell: bash -l {0}
+      run: |
+        conda activate peptdeep
+        pip install pytest nbmake==1.5.3
+        conda deactivate
+    - name: nbs_unitests
+      shell: bash -l {0}
+      run: |
+        conda activate peptdeep
+        INCLUDED_NBS=$(find ./nbdev_nbs -name "*.ipynb")
+        python -m pytest --nbmake $(echo $INCLUDED_NBS)
+        conda deactivate
