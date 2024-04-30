@@ -11,7 +11,7 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-      - uses: conda-incubator/setup-miniconda@v2
+      - uses: conda-incubator/setup-miniconda@v3
         with:
           auto-update-conda: true
           python-version: ${{ matrix.python-version }}
@@ -44,7 +44,7 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-      - uses: conda-incubator/setup-miniconda@v2
+      - uses: conda-incubator/setup-miniconda@v3
         with:
           auto-update-conda: true
           python-version: ${{ matrix.python-version }}
@@ -76,7 +76,7 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-      - uses: conda-incubator/setup-miniconda@v2
+      - uses: conda-incubator/setup-miniconda@v3
         with:
           auto-update-conda: true
           python-version: ${{ matrix.python-version }}
@@ -108,7 +108,7 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-      - uses: conda-incubator/setup-miniconda@v2
+      - uses: conda-incubator/setup-miniconda@v3
         with:
           auto-update-conda: true
           python-version: ${{ matrix.python-version }}
@@ -140,7 +140,7 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-      - uses: conda-incubator/setup-miniconda@v2
+      - uses: conda-incubator/setup-miniconda@v3
         with:
           auto-update-conda: true
           python-version: ${{ matrix.python-version }}
