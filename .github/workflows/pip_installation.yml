@@ -9,7 +9,7 @@ on:
   push:
     branches: [ main, development ]
   pull_request:
-    branches: [ main ]
+    branches: [ main, development ]
   workflow_dispatch:
 
 name: Pip installation and tests
@@ -31,7 +31,8 @@ jobs:
     # runs-on: ${{ matrix.os }} # See https://github.com/orgs/community/discussions/62320
     strategy:
       matrix:
-        os: [ubuntu-latest, macOS-latest, windows-latest, macos-latest-xlarge]
+        os: [ubuntu-latest, macOS-latest, windows-latest]
+        # os: [ubuntu-latest, macOS-latest, windows-latest, macos-latest-xlarge]
     uses: ./.github/workflows/_run_tests.yml
     with:
       os: ${{ matrix.os }}
