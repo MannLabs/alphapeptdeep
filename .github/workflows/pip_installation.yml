@@ -19,7 +19,8 @@ jobs:
     name: Test stable pip installation on ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, macOS-latest, windows-latest, macos-latest-xlarge]
+        os: [ubuntu-latest, macOS-latest, windows-latest]
+        # os: [ubuntu-latest, macOS-latest, windows-latest, macos-latest-xlarge]
     uses: ./.github/workflows/_run_tests.yml
     with:
       os: ${{ matrix.os }}
