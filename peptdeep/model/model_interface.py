@@ -384,7 +384,7 @@ class ModelInterface(object):
             batch_tqdm = tqdm(_grouped)
         else:
             batch_tqdm = _grouped
-        with torch.no_grad():
+        with torch.inference_mode():
             for nAA, df_group in batch_tqdm:
                 for i in range(0, len(df_group), batch_size):
                     batch_end = i+batch_size
