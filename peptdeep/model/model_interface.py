@@ -930,6 +930,7 @@ class ModelInterface(object):
             self._predict_in_order = False
 
 def _inference_mode():
+    # torch.inference_mode() only available in torch>=1.9.0
     if float(torch.__version__[:torch.__version__.rfind(".")]) >= 1.9:
         return torch.inference_mode()
     else:
