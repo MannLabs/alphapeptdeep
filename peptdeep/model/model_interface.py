@@ -49,7 +49,6 @@ def _get_cosine_schedule_with_warmup_lr_lambda(
     # progress = float(current_step - num_warmup_steps) / float(max(1, num_training_steps - num_warmup_steps))
     # return max(0.0, 0.5 * (1.0 + math.cos(math.pi * float(num_cycles) * 2.0 * progress)))
 
-
 def get_cosine_schedule_with_warmup(
     optimizer, num_warmup_steps: int, num_training_steps: int, num_cycles: float = 0.5, last_epoch: int = -1
 ):
@@ -384,7 +383,7 @@ class ModelInterface(object):
             batch_tqdm = tqdm(_grouped)
         else:
             batch_tqdm = _grouped
-        with torch.inference_mode():
+        with _inference_mode():
             for nAA, df_group in batch_tqdm:
                 for i in range(0, len(df_group), batch_size):
                     batch_end = i+batch_size
@@ -929,3 +928,9 @@ class ModelInterface(object):
             self._predict_in_order = True
         else:
             self._predict_in_order = False
+
+def _inference_mode():
+    if float(torch.__version__[:torch.__version__.rfind(".")]) >= 1.9:
+        return torch.inference_mode()
+    else:
+        return torch.no_grad()
