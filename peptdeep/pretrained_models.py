@@ -445,6 +445,8 @@ class ModelManager(object):
             self.ms2_model.save(os.path.join(folder, 'ms2.pth'))
             self.rt_model.save(os.path.join(folder, 'rt.pth'))
             self.ccs_model.save(os.path.join(folder, 'ccs.pth'))
+            if self.charge_model is not None:
+                self.charge_model.save(os.path.join(folder, 'charge.pth'))
         elif not os.path.exists(folder):
             os.makedirs(folder)
             self.save_models(folder)
