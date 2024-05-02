@@ -472,7 +472,7 @@ class ModelInterface(object):
             batch_tqdm = tqdm(_grouped)
         else:
             batch_tqdm = _grouped
-        with torch.no_grad():
+        with _inference_mode():
             for nAA, df_group in batch_tqdm:
                 for i in range(0, len(df_group), batch_size):
                     batch_end = i+batch_size
@@ -1019,3 +1019,10 @@ class ModelInterface(object):
             self._predict_in_order = True
         else:
             self._predict_in_order = False
+
+def _inference_mode():
+    # torch.inference_mode() only available in torch>=1.9.0
+    if float(torch.__version__[:torch.__version__.rfind(".")]) >= 1.9:
+        return torch.inference_mode()
+    else:
+        return torch.no_grad()
