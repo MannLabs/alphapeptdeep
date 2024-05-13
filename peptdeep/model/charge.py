@@ -87,11 +87,11 @@ class ChargeModelForModAASeq(
     """
     ModelInterface for charge prediction for modified peptides
     """
-    def __init__(self, min_charge:int=1, max_charge:int=6):
+    def __init__(self, min_charge:int=1, max_charge:int=6, device:str="gpu"):
         super().__init__(
             num_target_values=max_charge-min_charge+1,
             model_class=Model_for_Generic_ModAASeq_BinaryClassification_Transformer,
-            nlayers=4, hidden_dim=128, dropout=0.1
+            nlayers=4, hidden_dim=128, dropout=0.1, device=device
         )
 
         self.target_column_to_predict = "charge_probs"
@@ -110,11 +110,11 @@ class ChargeModelForAASeq(
     """
     ModelInterface for charge prediction for amino acid sequence
     """
-    def __init__(self, min_charge:int=1, max_charge:int=6):
+    def __init__(self, min_charge:int=1, max_charge:int=6,device:str="gpu"):
         super().__init__(
             num_target_values=max_charge-min_charge+1,
             model_class=Model_for_Generic_AASeq_BinaryClassification_Transformer,
-            nlayers=4, hidden_dim=128, dropout=0.1
+            nlayers=4, hidden_dim=128, dropout=0.1, device=device
         )
 
         self.target_column_to_predict = "charge_probs"
