@@ -86,6 +86,15 @@ class ChargeModelForModAASeq(
 ):
     """
     ModelInterface for charge prediction for modified peptides
+
+     Parameters
+    ----------
+    min_charge : int, optional
+        Minimum charge to predict, by default 1
+    max_charge : int, optional
+        Maximum charge to predict, by default 6
+    device : str, optional
+        Device to use for training and prediction, by default "gpu"
     """
     def __init__(self, min_charge:int=1, max_charge:int=6, device:str="gpu"):
         super().__init__(
@@ -109,6 +118,15 @@ class ChargeModelForAASeq(
 ):
     """
     ModelInterface for charge prediction for amino acid sequence
+
+    Parameters
+    ----------
+    min_charge : int, optional
+        Minimum charge to predict, by default 1
+    max_charge : int, optional
+        Maximum charge to predict, by default 6
+    device : str, optional
+        Device to use for training and prediction, by default "gpu"
     """
     def __init__(self, min_charge:int=1, max_charge:int=6,device:str="gpu"):
         super().__init__(
