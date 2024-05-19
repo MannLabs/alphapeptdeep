@@ -1,23 +1,12 @@
 import torch
 import pandas as pd
-import numpy as np
 import typing
 
-from tqdm import tqdm
-
-from alphabase.peptide.fragment import update_precursor_mz
 
 from alphabase.peptide.mobility import (
     ccs_to_mobility_for_df,
     mobility_to_ccs_for_df
 )
-
-from peptdeep.model.featurize import (
-    get_batch_aa_indices, 
-    get_batch_mod_feature
-)
-
-from peptdeep.settings import model_const
 
 import peptdeep.model.base as model_base
 from peptdeep.utils import evaluate_linear_regression

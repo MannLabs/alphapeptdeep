@@ -6,7 +6,7 @@ import multiprocessing as mp
 from tqdm import tqdm
 
 from alphabase.peptide.fragment import get_charged_frag_types
-from alphabase.io.psm_reader import psm_reader_provider
+from alphabase.psm_reader import psm_reader_provider
 
 from peptdeep.rescore.feature_extractor import (
     ScoreFeatureExtractor,

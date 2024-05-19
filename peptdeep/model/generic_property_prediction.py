@@ -3,7 +3,8 @@ import pandas as pd
 import numpy as np
 
 import peptdeep.model.building_block as building_block
-from peptdeep.model.model_interface import ModelInterface, is_precursor_sorted
+from peptdeep.model.model_interface import ModelInterface
+from alphabase.peptide.precursor import is_precursor_refined
 
 ASCII_NUM=128
 
@@ -437,7 +438,7 @@ class ModelInterface_for_Generic_AASeq_MultiLabelClassification(
         )
     
     def _check_predict_in_order(self, precursor_df:pd.DataFrame):
-        if not is_precursor_sorted(precursor_df):
+        if not is_precursor_refined(precursor_df):
             # multilabel prediction can only predict in order
             precursor_df.sort_values("nAA", inplace=True)
             precursor_df.reset_index(drop=True, inplace=True)
@@ -480,7 +481,7 @@ class ModelInterface_for_Generic_ModAASeq_MultiLabelClassification(
         )
     
     def _check_predict_in_order(self, precursor_df:pd.DataFrame):
-        if not is_precursor_sorted(precursor_df):
+        if not is_precursor_refined(precursor_df):
             # multilabel prediction can only predict in order
             precursor_df.sort_values("nAA", inplace=True)
             precursor_df.reset_index(drop=True, inplace=True)
