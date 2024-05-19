@@ -1,4 +1,2 @@
-conda activate peptdeep
-python -m unittest test_cli
-python -m unittest test_gui
-conda deactivate
+INCLUDED_NBS=$(find ../nbs_tests -name "*.ipynb")
+python -m pytest --nbmake $(echo $INCLUDED_NBS)
