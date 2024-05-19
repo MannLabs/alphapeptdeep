@@ -201,6 +201,7 @@ class _Pseudo_Bert_Config:
         self.num_attention_heads = num_attention_heads
         self.num_hidden_layers = num_bert_layers
         self.output_attentions = output_attentions
+        self._attn_implementation = "eager"
 
 class Hidden_HFace_Transformer(torch.nn.Module):
     """
