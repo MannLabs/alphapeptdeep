@@ -1,0 +1,25 @@
+# checks to run on branches for each pull request
+name: branch-checks
+
+on:
+  pull_request:
+
+jobs:
+  pre-commit:
+    name: Run all pre-commit hooks
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - uses: actions/setup-python@v3
+    - uses: pre-commit/action@v3.0.1
+  # For feature branches, we don't test the full matrix (os x [stable, loose]) in order to save time & resources.
+  run-tests-loose:
+    name: Test loose pip installation on ubuntu-latest
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+    uses: ./.github/workflows/_run_tests.yml
+    with:
+      python-version: ${{ matrix.python-version }}
+      os: ${{ matrix.os }}
+      install-script: "loose_pip_install.sh"
