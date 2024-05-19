@@ -36,9 +36,9 @@ def run(port=10077):
     theme.append("--theme.primaryColor=#18212b")
 
     args = [
-        "streamlit", "run", 
-        file_path, "--global.developmentMode=false", 
-        f"--server.port={port}", 
+        "streamlit", "run",
+        file_path, "--global.developmentMode=false",
+        f"--server.port={port}",
         "--browser.gatherUsageStats=False",
         "--logger.level=error"
     ]

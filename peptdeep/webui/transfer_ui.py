@@ -27,7 +27,7 @@ def nce_search():
 
     grid_instrument = st.multiselect(label='Instruments for grid NCE search',
         options=global_ui_settings['model_mgr']['instrument_group'],
-        default = global_ui_settings['model_mgr']['transfer']['grid_instrument']) 
+        default = global_ui_settings['model_mgr']['transfer']['grid_instrument'])
     global_ui_settings['model_mgr']['transfer']['grid_instrument'] = grid_instrument
 
 def fine_tune():
@@ -40,7 +40,7 @@ def fine_tune():
     global_ui_settings['model_mgr']['transfer']['batch_size_ms2'] = batch_size_ms2
     lr_ms2 = st.number_input(label='Learning rate to train MS2 model', value = global_ui_settings['model_mgr']['transfer']['lr_ms2'], format='%e', step=1e-5)
     global_ui_settings['model_mgr']['transfer']['lr_ms2'] = lr_ms2
-    
+
     epoch_rt_ccs = st.number_input(label='Epoch to train RT and CCS models', value = global_ui_settings['model_mgr']['transfer']['epoch_rt_ccs'])
     global_ui_settings['model_mgr']['transfer']['epoch_rt_ccs'] = epoch_rt_ccs
     warmup_epoch_rt_ccs = st.number_input(label='Warmup epoch to train RT and CCS model', value = global_ui_settings['model_mgr']['transfer']['warmup_epoch_rt_ccs'], max_value=epoch_rt_ccs)
@@ -82,7 +82,7 @@ def add_other_psm_reader_mods():
             ] = {}
             st.session_state.other_reader_mods = ''
 
-        st.button(label='Clear all other modification mapping', 
+        st.button(label='Clear all other modification mapping',
             on_click=_clear_user_mods
         )
 
@@ -90,7 +90,7 @@ def show():
     st.write("# Transfer learning")
 
     model_output_folder = st.text_input(
-        label='Model output folder', 
+        label='Model output folder',
         value=global_ui_settings['model_mgr']['transfer']['model_output_folder'].format(
             PEPTDEEP_HOME=global_ui_settings['PEPTDEEP_HOME']
         )
@@ -122,8 +122,8 @@ def show():
     }
     global_ui_settings['model_mgr']['transfer']['psm_type'] = psm_type
     select_files(
-        global_ui_settings['model_mgr']['transfer']['psm_files'], 
-        psm_type_to_ext_dict[psm_type], 
+        global_ui_settings['model_mgr']['transfer']['psm_files'],
+        psm_type_to_ext_dict[psm_type],
         "Input PSM files"
     )
     add_other_psm_reader_mods()
@@ -134,7 +134,7 @@ def show():
         st_key='select_ms_file_type',
         default_type=global_ui_settings['model_mgr']['transfer']['ms_file_type'],
         monitor_files=global_ui_settings['model_mgr']['transfer']['ms_files'],
-        choices=global_ui_settings['model_mgr']['transfer']['ms_file_type_choices'], 
+        choices=global_ui_settings['model_mgr']['transfer']['ms_file_type_choices'],
         index=global_ui_settings['model_mgr']['transfer']['ms_file_type_choices'].index(
             global_ui_settings['model_mgr']['transfer']['ms_file_type']
         )
@@ -148,8 +148,8 @@ def show():
     }
     global_ui_settings['model_mgr']['transfer']['ms_file_type'] = ms_file_type
     select_files(
-        global_ui_settings['model_mgr']['transfer']['ms_files'], 
-        ms_type_to_ext_dict[ms_file_type], 
+        global_ui_settings['model_mgr']['transfer']['ms_files'],
+        ms_type_to_ext_dict[ms_file_type],
         "Input MS files"
     )
 
@@ -163,7 +163,7 @@ def show():
         global_ui_settings['model_mgr']['transfer'][
             'psm_num_to_train_ms2'
         ] = st.number_input(
-            label='PSM num to refine MS2 model', 
+            label='PSM num to refine MS2 model',
             value = int(global_ui_settings['model_mgr']['transfer'][
                 'psm_num_to_train_ms2'
             ]), step = 1
@@ -171,7 +171,7 @@ def show():
         global_ui_settings['model_mgr']['transfer'][
             'psm_num_per_mod_to_train_ms2'
         ] = st.number_input(
-            label='PSM num per mod to refine MS2 model', 
+            label='PSM num per mod to refine MS2 model',
             value = int(global_ui_settings['model_mgr']['transfer'][
                 'psm_num_per_mod_to_train_ms2'
             ]), step = 1
@@ -179,7 +179,7 @@ def show():
         global_ui_settings['model_mgr']['transfer'][
             'psm_num_to_test_ms2'
         ] = st.number_input(
-            label='PSM num to test MS2 model', 
+            label='PSM num to test MS2 model',
             value = int(global_ui_settings['model_mgr']['transfer'][
                 'psm_num_to_test_ms2'
             ]), step = 1
@@ -188,7 +188,7 @@ def show():
         global_ui_settings['model_mgr']['transfer'][
             'psm_num_to_train_rt_ccs'
         ] = st.number_input(
-            label='PSM num to refine RT and CCS model', 
+            label='PSM num to refine RT and CCS model',
             value = int(global_ui_settings['model_mgr']['transfer'][
                 'psm_num_to_train_rt_ccs'
             ]), step = 1
@@ -196,26 +196,26 @@ def show():
         global_ui_settings['model_mgr']['transfer'][
             'psm_num_per_mod_to_train_rt_ccs'
         ] = st.number_input(
-            label='PSM num per mod to refine RT and CCS model', 
+            label='PSM num per mod to refine RT and CCS model',
             value = int(global_ui_settings['model_mgr']['transfer'][
                 'psm_num_per_mod_to_train_rt_ccs'
             ]), step = 1
         )
-        
+
         global_ui_settings['model_mgr']['transfer'][
             'psm_num_to_test_rt_ccs'
         ] = st.number_input(
-            label='PSM num to test RT and CCS model', 
+            label='PSM num to test RT and CCS model',
             value = int(global_ui_settings['model_mgr']['transfer'][
                 'psm_num_to_test_rt_ccs'
             ]), step = 1
         )
-        
+
         st.write("#### Other hyper-parameters")
         global_ui_settings['model_mgr']['transfer'][
             'top_n_mods_to_train'
         ] = st.number_input(
-            label='Top n mods to refine models', 
+            label='Top n mods to refine models',
             value = int(global_ui_settings['model_mgr']['transfer'][
                 'top_n_mods_to_train'
             ]), step = 1
@@ -223,7 +223,7 @@ def show():
 
     st.write('#### Grid search for NCEs and instruments')
     st.write('If NCE and instrument are unknown, grid search will look for the best NCE and instrument)')
-    grid_nce_search = bool(st.checkbox(label='Enabled', 
+    grid_nce_search = bool(st.checkbox(label='Enabled',
         value=global_ui_settings['model_mgr']['transfer']['grid_nce_search']
     ))
     global_ui_settings['model_mgr']['transfer']['grid_nce_search'] = grid_nce_search
@@ -233,7 +233,7 @@ def show():
     now = datetime.now()
     current_time = now.strftime("%Y-%m-%d--%H-%M-%S.%f")
     task_name = st.text_input(label="Task name", value=f"peptdeep_transfer_{current_time}")
-    
+
     if st.button(label='Submit for transfer learning'):
         global_ui_settings['task_workflow'] = ['train']
 
@@ -246,10 +246,10 @@ def show():
         )
         save_yaml(
             os.path.join(
-                model_output_folder, 
+                model_output_folder,
                 f'{task_name}.yaml'
-            ), 
+            ),
             global_ui_settings
         )
-        
+
         st.write(f'`train` task saved as "{os.path.expanduser(yaml_path)}" in the task queue')

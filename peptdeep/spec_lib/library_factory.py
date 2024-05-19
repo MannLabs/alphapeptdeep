@@ -22,7 +22,7 @@ class PredictLibraryMakerBase(object):
     """
     Base class to predict libraries
     """
-    def __init__(self, 
+    def __init__(self,
         model_manager:ModelManager = None,
     ):
         lib_settings = global_settings['library']
@@ -38,7 +38,7 @@ class PredictLibraryMakerBase(object):
             peptide_length_max = lib_settings['max_peptide_len'],
             precursor_charge_min = lib_settings['min_precursor_charge'],
             precursor_charge_max = lib_settings['max_precursor_charge'],
-            precursor_mz_min = lib_settings['min_precursor_mz'], 
+            precursor_mz_min = lib_settings['min_precursor_mz'],
             precursor_mz_max = lib_settings['max_precursor_mz'],
             var_mods = lib_settings['var_mods'],
             min_var_mod_num = lib_settings['min_var_mod_num'],
@@ -80,7 +80,7 @@ class PredictLibraryMakerBase(object):
         return self.spec_lib.fragment_mz_df
 
     def make_library(self, infiles:Union[str,list,pd.DataFrame]):
-        """Predict a library for the `infiles`, 
+        """Predict a library for the `infiles`,
         this function runs the following methods.
 
         - self._input(infiles)
@@ -112,9 +112,9 @@ class PredictLibraryMakerBase(object):
             )
         except ValueError as e:
             raise e
-    
-    def translate_to_tsv(self, 
-        tsv_path:str, 
+
+    def translate_to_tsv(self,
+        tsv_path:str,
         translate_mod_dict:dict=None
     ):
         """Translate the predicted DataFrames into a TSV file
@@ -124,9 +124,9 @@ class PredictLibraryMakerBase(object):
 
         if 'proteins' not in self.spec_lib._precursor_df.columns:
             self.spec_lib.append_protein_name()
-        
+
         translate_to_tsv(
-            self.spec_lib, 
+            self.spec_lib,
             tsv_path,
             keep_k_highest_fragments=lib_settings['output_tsv'][
                 'keep_higest_k_peaks'
@@ -145,11 +145,11 @@ class PredictLibraryMakerBase(object):
             ],
             translate_mod_dict=translate_mod_dict,
         )
-    
-    def translate_library(self, 
+
+    def translate_library(self,
         translate_mod_dict:dict=None
     )->pd.DataFrame:
-        """Translate predicted DataFrames into 
+        """Translate predicted DataFrames into
         a single DataFrame in SWATH library format
         """
         logging.info("Translating library for DiaNN/Spectronaut...")
@@ -157,9 +157,9 @@ class PredictLibraryMakerBase(object):
 
         if 'proteins' not in self.spec_lib._precursor_df.columns:
             self.spec_lib.append_protein_name()
-        
+
         return speclib_to_single_df(
-            self.spec_lib, 
+            self.spec_lib,
             translate_mod_dict=translate_mod_dict,
             keep_k_highest_fragments=lib_settings['output_tsv'][
                 'keep_higest_k_peaks'
@@ -176,7 +176,7 @@ class PredictLibraryMakerBase(object):
         )
 
 def load_dfs(infiles):
-    if isinstance(infiles,str): infiles = [infiles] 
+    if isinstance(infiles,str): infiles = [infiles]
     df_list = []
     for file_path in infiles:
         df_list.append(read_peptide_table(file_path))
@@ -216,14 +216,14 @@ class PrecursorLibraryMaker(PredictLibraryMakerBase):
         self.spec_lib._precursor_df = df
         self.spec_lib.add_peptide_labeling()
         self.spec_lib.append_decoy_sequence()
-    
+
     def _check_df(self):
         (
             self.spec_lib.precursor_df['charge']
         ) = self.spec_lib.precursor_df['charge'].astype(np.int8)
 
         if (
-            'mods' not in self.spec_lib.precursor_df.columns or 
+            'mods' not in self.spec_lib.precursor_df.columns or
             'mod_sites' not in self.spec_lib.precursor_df.columns
         ):
             self.spec_lib.precursor_df['mods'] = ''

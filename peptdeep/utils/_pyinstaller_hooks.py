@@ -2,10 +2,10 @@ from transformers.dependency_versions_check import pkgs_to_check_at_runtime
 
 def get_peptdeep_datas():
     """
-    Huggingface has some dependencies those are not included in pyinstaller, 
+    Huggingface has some dependencies those are not included in pyinstaller,
     so we need to add them manually.
     Usages:
-    In pyinstaller's *.spec file, add `datas += get_peptdeep_datas()` before 
+    In pyinstaller's *.spec file, add `datas += get_peptdeep_datas()` before
     `.. = Analysis(..., datas=datas,...)`.
     """
     from PyInstaller.utils.hooks import copy_metadata

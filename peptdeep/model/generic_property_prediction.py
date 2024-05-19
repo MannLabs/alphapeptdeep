@@ -10,7 +10,7 @@ ASCII_NUM=128
 
 class Model_for_Generic_AASeq_Regression_LSTM(torch.nn.Module):
     """Generic LSTM regression model for AA sequence"""
-    def __init__(self, 
+    def __init__(self,
         *,
         hidden_dim=256,
         output_dim=1,
@@ -20,13 +20,13 @@ class Model_for_Generic_AASeq_Regression_LSTM(torch.nn.Module):
     ):
         super().__init__()
         self.dropout = torch.nn.Dropout(dropout)
-        
+
         self.nn = torch.nn.Sequential(
             building_block.ascii_embedding(hidden_dim//4),
             building_block.SeqCNN(hidden_dim//4),
             self.dropout,
             building_block.SeqLSTM(
-                hidden_dim, hidden_dim, 
+                hidden_dim, hidden_dim,
                 rnn_layer=nlayers
             ),
             building_block.SeqAttentionSum(hidden_dim),
@@ -56,7 +56,7 @@ class Model_for_Generic_AASeq_Regression_Transformer(torch.nn.Module):
         self.input_nn = building_block.ascii_embedding(hidden_dim)
 
         self.output_attentions = output_attentions
-        
+
         self.hidden_nn = building_block.HFace_Transformer_with_PositionalEncoder(
             hidden_dim, nlayers=nlayers, dropout=dropout,
             output_attentions=output_attentions
@@ -94,8 +94,8 @@ class ModelInterface_for_Generic_AASeq_Regression(ModelInterface):
     """
     `ModelInterface` for Generic_AASeq_Regression models
     """
-    def __init__(self, 
-        model_class:torch.nn.Module=Model_for_Generic_AASeq_Regression_LSTM, 
+    def __init__(self,
+        model_class:torch.nn.Module=Model_for_Generic_AASeq_Regression_LSTM,
         dropout=0.1,
         device:str='gpu',
         hidden_dim=256,
@@ -119,7 +119,7 @@ class ModelInterface_for_Generic_AASeq_Regression(ModelInterface):
 
 class Model_for_Generic_ModAASeq_Regression_LSTM(torch.nn.Module):
     """Generic LSTM regression model for modified sequence"""
-    def __init__(self, 
+    def __init__(self,
         *,
         hidden_dim=256,
         output_dim=1,
@@ -162,7 +162,7 @@ class Model_for_Generic_ModAASeq_Regression_Transformer(torch.nn.Module):
         self.input_nn = building_block.AA_Mod_Embedding(hidden_dim)
 
         self._output_attentions = output_attentions
-        
+
         self.hidden_nn = building_block.HFace_Transformer_with_PositionalEncoder(
             hidden_dim, nlayers=nlayers, dropout=dropout,
             output_attentions=output_attentions
@@ -183,8 +183,8 @@ class Model_for_Generic_ModAASeq_Regression_Transformer(torch.nn.Module):
     def output_attentions(self, val:bool):
         self._output_attentions = val
 
-    def forward(self, 
-        aa_indices, 
+    def forward(self,
+        aa_indices,
         mod_x,
     ):
         x = self.dropout(self.input_nn(
@@ -204,7 +204,7 @@ class ModelInterface_for_Generic_ModAASeq_Regression(ModelInterface):
     """
     `ModelInterface` for all Generic_ModAASeq_Regression models
     """
-    def __init__(self, 
+    def __init__(self,
         model_class:torch.nn.Module=Model_for_Generic_ModAASeq_Regression_LSTM,
         dropout=0.1,
         device:str='gpu',
@@ -227,7 +227,7 @@ class ModelInterface_for_Generic_ModAASeq_Regression(ModelInterface):
         self.target_column_to_predict = 'predicted_property'
         self.target_column_to_train = 'detected_property'
 
-    def _get_features_from_batch_df(self, 
+    def _get_features_from_batch_df(self,
         batch_df: pd.DataFrame,
         **kwargs,
     ):
@@ -237,7 +237,7 @@ class Model_for_Generic_AASeq_BinaryClassification_LSTM(
     Model_for_Generic_AASeq_Regression_LSTM
 ):
     """Generic LSTM classification model for AA sequence"""
-    def __init__(self, 
+    def __init__(self,
         *,
         hidden_dim=256,
         output_dim=1,
@@ -270,7 +270,7 @@ class Model_for_Generic_AASeq_BinaryClassification_Transformer(
         **kwargs,
     ):
         """
-        Model based on a transformer Architecture from 
+        Model based on a transformer Architecture from
         Huggingface's BertEncoder class.
         """
         super().__init__(
@@ -290,7 +290,7 @@ class ModelInterface_for_Generic_AASeq_BinaryClassification(ModelInterface):
     """
     `ModelInterface` for all Generic_AASeq_BinaryClassification models
     """
-    def __init__(self, 
+    def __init__(self,
         model_class:torch.nn.Module=Model_for_Generic_AASeq_BinaryClassification_LSTM,
         dropout=0.1,
         device:str='gpu',
@@ -319,7 +319,7 @@ class Model_for_Generic_ModAASeq_BinaryClassification_LSTM(
     Model_for_Generic_ModAASeq_Regression_LSTM
 ):
     """Generic LSTM classification model for modified sequence"""
-    def __init__(self, 
+    def __init__(self,
         *,
         hidden_dim=256,
         output_dim=1,
@@ -370,8 +370,8 @@ class Model_for_Generic_ModAASeq_BinaryClassification_Transformer(
     def output_attentions(self, val:bool):
         self._output_attentions = val
 
-    def forward(self, 
-        aa_indices, 
+    def forward(self,
+        aa_indices,
         mod_x,
     ):
         x = super().forward(aa_indices, mod_x)
@@ -382,7 +382,7 @@ class ModelInterface_for_Generic_ModAASeq_BinaryClassification(ModelInterface):
     """
     `ModelInterface` for Generic_ModAASeq_BinaryClassification
     """
-    def __init__(self, 
+    def __init__(self,
         model_class:torch.nn.Module=Model_for_Generic_ModAASeq_BinaryClassification_LSTM,
         dropout=0.1,
         device:str='gpu',
@@ -405,16 +405,16 @@ class ModelInterface_for_Generic_ModAASeq_BinaryClassification(ModelInterface):
         self.target_column_to_predict = 'predicted_prob'
         self.target_column_to_train = 'detected_prob'
 
-    def _get_features_from_batch_df(self, 
+    def _get_features_from_batch_df(self,
         batch_df: pd.DataFrame,
     ):
         return self._get_aa_mod_features(batch_df)
-    
+
 
 class ModelInterface_for_Generic_AASeq_MultiLabelClassification(
     ModelInterface_for_Generic_AASeq_BinaryClassification
 ):
-    def __init__(self, 
+    def __init__(self,
         num_target_values:int=6,
         model_class:torch.nn.Module=Model_for_Generic_AASeq_BinaryClassification_Transformer,
         nlayers=4, hidden_dim=256, device='gpu',
@@ -433,10 +433,10 @@ class ModelInterface_for_Generic_AASeq_MultiLabelClassification(
 
     def _get_targets_from_batch_df(self, batch_df, **kwargs):
         return self._as_tensor(
-            np.stack(batch_df[self.target_column_to_train].values), 
+            np.stack(batch_df[self.target_column_to_train].values),
             dtype=torch.float32
         )
-    
+
     def _check_predict_in_order(self, precursor_df:pd.DataFrame):
         if not is_precursor_refined(precursor_df):
             # multilabel prediction can only predict in order
@@ -457,7 +457,7 @@ class ModelInterface_for_Generic_AASeq_MultiLabelClassification(
 class ModelInterface_for_Generic_ModAASeq_MultiLabelClassification(
     ModelInterface_for_Generic_ModAASeq_BinaryClassification
 ):
-    def __init__(self, 
+    def __init__(self,
         num_target_values:int=6,
         model_class:torch.nn.Module=Model_for_Generic_ModAASeq_BinaryClassification_Transformer,
         nlayers=4, hidden_dim=256, device='gpu',
@@ -476,10 +476,10 @@ class ModelInterface_for_Generic_ModAASeq_MultiLabelClassification(
 
     def _get_targets_from_batch_df(self, batch_df, **kwargs):
         return self._as_tensor(
-            np.stack(batch_df[self.target_column_to_train].values), 
+            np.stack(batch_df[self.target_column_to_train].values),
             dtype=torch.float32
         )
-    
+
     def _check_predict_in_order(self, precursor_df:pd.DataFrame):
         if not is_precursor_refined(precursor_df):
             # multilabel prediction can only predict in order

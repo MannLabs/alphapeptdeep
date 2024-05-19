@@ -17,7 +17,7 @@ class PredictSpecLibFasta(SpecLibFasta, PredictSpecLib):
         peptide_length_max:int = 35,
         precursor_charge_min:int = 2,
         precursor_charge_max:int = 4,
-        precursor_mz_min:float = 400.0, 
+        precursor_mz_min:float = 400.0,
         precursor_mz_max:float = 1800.0,
         var_mods:list = ['Acetyl@Protein N-term','Oxidation@M'],
         min_var_mod_num:int = 0,
@@ -42,17 +42,17 @@ class PredictSpecLibFasta(SpecLibFasta, PredictSpecLib):
             ModelManager of MS2/RT/CCS... models, by default None
 
         charged_frag_types : list, optional
-            Fragment types with charge, 
+            Fragment types with charge,
             by default [ 'b_z1','b_z2','y_z1', 'y_z2' ]
 
         protease : str, optional
             Could be pre-defined protease name defined in :data:`protease_dict`,
-            or a regular expression. 
+            or a regular expression.
             By default 'trypsin'
 
         max_missed_cleavages : int, optional
             Maximal missed cleavages, by default 2
-            
+
         peptide_length_min : int, optional
             Minimal cleaved peptide length, by default 7
 
@@ -72,30 +72,30 @@ class PredictSpecLibFasta(SpecLibFasta, PredictSpecLib):
             Maximal precursor mz, by default 2000.0
 
         var_mods : list, optional
-            list of variable modifications, 
+            list of variable modifications,
             by default ['Acetyl@Protein N-term','Oxidation@M']
 
         max_var_mod_num : int, optional
-            Minimal number of variable modifications on a peptide sequence, 
+            Minimal number of variable modifications on a peptide sequence,
             by default 0
 
         max_var_mod_num : int, optional
-            Maximal number of variable modifications on a peptide sequence, 
+            Maximal number of variable modifications on a peptide sequence,
             by default 2
 
         fix_mods : list, optional
             list of fixed modifications, by default ['Carbamidomethyl@C']
 
         labeling_channels : dict, optional
-            Add isotope labeling with different channels, 
-            see :meth:`add_peptide_labeling()`. 
+            Add isotope labeling with different channels,
+            see :meth:`add_peptide_labeling()`.
             Defaults to None
 
         special_mods : list, optional
             Special modifications.
-            It is useful for modificaitons like Phospho which may largely 
+            It is useful for modificaitons like Phospho which may largely
             explode the number of candidate modified peptides.
-            The number of special_mods per peptide 
+            The number of special_mods per peptide
             is controlled by `max_append_mod_num`.
             Defaults to [].
 
@@ -106,9 +106,9 @@ class PredictSpecLibFasta(SpecLibFasta, PredictSpecLib):
             Control the max number of special_mods per peptide, by default 1.
 
         special_mods_cannot_modify_pep_c_term : bool, optional
-            Some modifications cannot modify the peptide C-term, 
-            this will be useful for GlyGly@K as if C-term is di-Glyed, 
-            it cannot be cleaved/digested. 
+            Some modifications cannot modify the peptide C-term,
+            this will be useful for GlyGly@K as if C-term is di-Glyed,
+            it cannot be cleaved/digested.
             Defaults to False.
 
         special_mods_cannot_modify_pep_n_term : bool, optional
@@ -123,10 +123,10 @@ class PredictSpecLibFasta(SpecLibFasta, PredictSpecLib):
             If include contaminants.fasta, by default False
 
         generate_precursor_isotope : bool, optional
-            If :meth:`peptdeep.spec_lib.predict_lib.PredictSpecLib.predict_all()` 
+            If :meth:`peptdeep.spec_lib.predict_lib.PredictSpecLib.predict_all()`
             includes :meth:`peptdeep.spec_lib.predict_lib.PredictSpecLib.calc_precursor_isotope()`.
             Defaults to False
-        
+
         rt_to_irt : bool, optional
             If convert predicted RT to iRT values, by default False
         """
@@ -138,7 +138,7 @@ class PredictSpecLibFasta(SpecLibFasta, PredictSpecLib):
             peptide_length_max=peptide_length_max,
             precursor_charge_min=precursor_charge_min,
             precursor_charge_max=precursor_charge_max,
-            precursor_mz_min=precursor_mz_min, 
+            precursor_mz_min=precursor_mz_min,
             precursor_mz_max=precursor_mz_max,
             var_mods=var_mods,
             min_var_mod_num=min_var_mod_num,
@@ -180,14 +180,14 @@ class PredictSpecLibFasta(SpecLibFasta, PredictSpecLib):
             print(f"Predicting charge states for {len(self.precursor_df)} peptides ...")
             if self.model_manager.use_predicted_charge_in_speclib:
                 self._precursor_df = self.model_manager.charge_model.predict_and_clip_charges(
-                    self.precursor_df, 
+                    self.precursor_df,
                     min_precursor_charge=self.min_precursor_charge,
                     max_precursor_charge=self.max_precursor_charge,
                     charge_prob_cutoff=self.model_manager.charge_prob_cutoff
                 )
             else:
                 self._precursor_df = self.model_manager.charge_model.predict_charges_as_prob(
-                    self.precursor_df, 
+                    self.precursor_df,
                     min_precursor_charge=self.min_precursor_charge,
                     max_precursor_charge=self.max_precursor_charge
                 )

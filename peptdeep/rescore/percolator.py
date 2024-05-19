@@ -64,9 +64,9 @@ class NNRescore:
         )
         self.train_batch_size = 10000
         self.predict_batch_size = 100000
-            
+
         self.optimizer = torch.optim.Adam(
-            self.nn_model.parameters(), 
+            self.nn_model.parameters(),
             lr=perc_settings['lr_percolator_torch_model']
         )
         self.loss_func = torch.nn.BCEWithLogitsLoss()
@@ -78,7 +78,7 @@ class NNRescore:
             self.device = torch.device('cpu')
         self.epoch = 20
 
-    
+
 
     def fit(self, features, labels):
         labels = torch.tensor(
@@ -131,7 +131,7 @@ class Percolator:
         percolator_backend:str=perc_settings['percolator_backend'],
         cv_fold:int = perc_settings['cv_fold'],
         iter_num:int = perc_settings['percolator_iter_num'],
-        ms2_ppm:bool = global_settings['peak_matching']['ms2_ppm'], 
+        ms2_ppm:bool = global_settings['peak_matching']['ms2_ppm'],
         ms2_tol:float = global_settings['peak_matching']['ms2_tol_value'],
         model_mgr:ModelManager = None
     ):
@@ -139,7 +139,7 @@ class Percolator:
         Parameters
         ----------
         percolator_model : str, optional
-            machine learning 
+            machine learning
             model type for rescoring, could be:
             "linear": logistic regression
             "random_forest": random forest
@@ -150,19 +150,19 @@ class Percolator:
             Defaults to perc_settings['percolator_backend']
 
         cv_fold : int, optional
-            cross-validation fold. 
+            cross-validation fold.
             Defaults to perc_settings['cv_fold'].
 
         iter_num : int, optional
-            percolator iteration number. 
+            percolator iteration number.
             Defaults to perc_settings['percolator_iter_num'].
 
         ms2_ppm : bool, optional
-            is ms2 tolerance the ppm. 
+            is ms2 tolerance the ppm.
             Defaults to perc_settings['ms2_ppm'].
 
         ms2_tol : float, optional
-            ms2 tolerance. 
+            ms2 tolerance.
             Defaults to perc_settings['ms2_tol'].
 
         model_mgr : ModelManager, optional
@@ -170,7 +170,7 @@ class Percolator:
             If None, self.model_mgr will be init by default (see `peptdeep.pretrained_models.ModelManager`).
             Defaults to None.
         """
-        
+
         if model_mgr is None:
             self.model_mgr = ModelManager()
         else:
@@ -202,8 +202,8 @@ class Percolator:
 
         self.init_percolator_model(percolator_model, percolator_backend)
 
-    def init_percolator_model(self, 
-        percolator_model="linear", 
+    def init_percolator_model(self,
+        percolator_model="linear",
         percolator_backend="sklearn"
     ):
         from sklearn.ensemble import RandomForestClassifier
@@ -236,26 +236,26 @@ class Percolator:
     def enable_model_fine_tuning(self, flag=True):
         self.feature_extractor.require_model_tuning = flag
         self.feature_extractor.require_raw_specific_rt_tuning = flag
-    
+
     def disable_model_fine_tuning(self):
         self.feature_extractor.require_model_tuning = False
         self.feature_extractor.require_raw_specific_rt_tuning = False
 
-    def _estimate_fdr(self, 
+    def _estimate_fdr(self,
         df:pd.DataFrame,
         fdr_level:str=None,
         per_raw_fdr:bool=None,
     )->pd.DataFrame:
         df = df.sort_values(['ml_score','decoy'], ascending=False)
         df = df.reset_index(drop=True)
-        if fdr_level is None: 
+        if fdr_level is None:
             fdr_level = self.fdr_level
-        if per_raw_fdr is None: 
+        if per_raw_fdr is None:
             per_raw_fdr = self.per_raw_fdr
         if per_raw_fdr:
             df_list = []
             for raw_name, df_raw in df.groupby('raw_name'):
-                df_list.append(self._estimate_fdr(df_raw, 
+                df_list.append(self._estimate_fdr(df_raw,
                     fdr_level = fdr_level,
                     per_raw_fdr = False
                 ))
@@ -285,7 +285,7 @@ class Percolator:
             fdr_values = decoy_cumsum/target_cumsum
             _df['fdr'] = fdr_to_q_values(fdr_values)
             df['fdr'] = fdr_from_ref(
-                df['ml_score'].values, _df['ml_score'].values, 
+                df['ml_score'].values, _df['ml_score'].values,
                 _df['fdr'].values
             )
         return df
@@ -293,7 +293,7 @@ class Percolator:
     def _train(self, train_t_df, train_d_df):
         if len(train_t_df) > self.max_train_sample:
             train_t_df = train_t_df.sample(
-                n=self.max_train_sample, 
+                n=self.max_train_sample,
                 random_state=1337
             )
         if len(train_d_df) > self.max_train_sample:
@@ -307,7 +307,7 @@ class Percolator:
         train_label[len(train_t_df):] = 0
 
         self.model.fit(
-            train_df[self.feature_list].values, 
+            train_df[self.feature_list].values,
             train_label
         )
 
@@ -329,8 +329,8 @@ class Percolator:
         df_target = df[df.decoy == 0]
         df_decoy = df[df.decoy != 0]
         if (
-            np.sum(df_target.fdr<0.01) < 
-            self.min_train_sample*self.cv_fold 
+            np.sum(df_target.fdr<0.01) <
+            self.min_train_sample*self.cv_fold
             or len(df_decoy) < self.min_train_sample*self.cv_fold
         ):
             logging.info(
@@ -340,7 +340,7 @@ class Percolator:
                 f'for cv-fold={self.cv_fold}. Skip rescoring!!!'
             )
             return df
-        
+
         if self.cv_fold > 1:
             test_df_list = []
             for i in range(self.cv_fold):
@@ -352,7 +352,7 @@ class Percolator:
                     cv_df_target.fdr <= self.fdr
                 ]
                 test_t_df = df_target[_slice]
-                
+
                 d_mask = np.ones(len(df_decoy), dtype=bool)
                 _slice = slice(i, len(df_decoy), self.cv_fold)
                 d_mask[_slice] = False
@@ -363,17 +363,17 @@ class Percolator:
 
                 test_df = pd.concat((test_t_df, test_d_df))
                 test_df_list.append(self._predict(test_df))
-        
+
             return pd.concat(test_df_list)
         else:
             train_t_df = df_target[df_target.fdr <= self.fdr]
 
             self._train(train_t_df, df_decoy)
             test_df = pd.concat((df_target, df_decoy))
-        
+
             return self._predict(test_df)
 
-    def load_psms(self, 
+    def load_psms(self,
         psm_file_list:list, psm_type:str
     )->pd.DataFrame:
         """Load PSM dataframe from file path list.
@@ -389,7 +389,7 @@ class Percolator:
         Returns
         -------
         pd.DataFrame
-            PSM dataframe with 100% FDR including decoys. 
+            PSM dataframe with 100% FDR including decoys.
         """
         reader = psm_reader_provider.get_reader(
             psm_type, fdr=1, keep_decoy=True
@@ -425,9 +425,9 @@ class Percolator:
         psm_df['ml_score'] = psm_df.score
         psm_df = self._estimate_fdr(psm_df, 'psm')
         psm_df = self.feature_extractor.extract_features(
-            psm_df, ms2_file_dict, 
+            psm_df, ms2_file_dict,
             ms2_file_type,
-            frag_types=self.charged_frag_types, 
+            frag_types=self.charged_frag_types,
             ms2_ppm=self.ms2_ppm, ms2_tol=self.ms2_tol
         )
 

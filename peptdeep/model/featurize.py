@@ -3,20 +3,20 @@ import pandas as pd
 from typing import List, Union
 
 from peptdeep.settings import (
-    model_const, mod_feature_size, MOD_TO_FEATURE, 
+    model_const, mod_feature_size, MOD_TO_FEATURE,
     mod_elements, mod_elem_to_idx,
     _parse_mod_formula, update_all_mod_features,
 )
 
 def parse_mod_feature(
-    nAA:int, 
-    mod_names:List[str], 
+    nAA:int,
+    mod_names:List[str],
     mod_sites:List[int]
 )->np.ndarray:
     '''
-    Get modification feature of a given peptide (len=nAA). 
-    Note that `site=0` is for peptide N-term modification, 
-    `site=1` is for peptide C-term modification, and 
+    Get modification feature of a given peptide (len=nAA).
+    Note that `site=0` is for peptide N-term modification,
+    `site=1` is for peptide C-term modification, and
     `1<=site<=nAA` is for residue modifications on the peptide.
 
     Parameters
@@ -90,9 +90,9 @@ def get_batch_aa_indices(
 )->np.ndarray:
     '''
     Convert peptide sequences into AA ID array. ID=0 is reserved for masking,
-    so ID of 'A' is 1, ID of 'B' is 2, ..., ID of 'Z' is 26 (maximum). 
+    so ID of 'A' is 1, ID of 'B' is 2, ..., ID of 'Z' is 26 (maximum).
     Zeros are padded into the N- and C-term for each sequence.
-    
+
     Parameters
     ----------
     seq_array : Union[List,np.ndarray]
@@ -116,8 +116,8 @@ def get_ascii_indices(
     seq_array: Union[List, np.ndarray]
 )->np.ndarray:
     '''
-    Convert peptide sequences into ASCII code array. 
-    The values are from 0 to 127. 
+    Convert peptide sequences into ASCII code array.
+    The values are from 0 to 127.
     Zeros are padded into the N- and C-term for each sequence.
 
     Parameters
@@ -129,12 +129,12 @@ def get_ascii_indices(
     -------
     np.ndarray
         2-D `np.int32` array with the shape
-        `(len(seq_array), max seq length+2)`. 
+        `(len(seq_array), max seq length+2)`.
         For the the sequence whose length is shorter than max seq length,
         zeros are padded to the missing values.
-        
+
     '''
-    
+
     x = np.array(seq_array).view(np.int32).reshape(
         len(seq_array), -1
     )
@@ -142,7 +142,7 @@ def get_ascii_indices(
 
 instrument_dict = dict(
     zip(
-        [inst.upper() for inst in model_const['instruments']], 
+        [inst.upper() for inst in model_const['instruments']],
         range(len(model_const['instruments']))
     )
 )

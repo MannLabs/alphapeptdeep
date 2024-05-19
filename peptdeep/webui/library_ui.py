@@ -47,11 +47,11 @@ def mod_options():
 
 def varmod_range():
     min_varmod = st.number_input(label='Min number of variable modifications',
-        value = global_ui_settings['library']['min_var_mod_num'], 
+        value = global_ui_settings['library']['min_var_mod_num'],
         min_value = 0, step = 1,
     )
     max_varmod = st.number_input(label='Max number of variable modifications',
-        value = global_ui_settings['library']['max_var_mod_num'], 
+        value = global_ui_settings['library']['max_var_mod_num'],
         min_value = 0, step = 1,
     )
     global_ui_settings['library']['min_var_mod_num'] = min_varmod
@@ -63,7 +63,7 @@ def specialmod_options():
     st.write('- For Phospho@S/T or HexNAc@S, as a sequence may generate many peptidoforms, this can control the overall number.')
     st.write('- For GlyGly@K or GG@K, it will not occur at C-term Lys/K, using `special modifications` to enable this feature.')
     specialmod_expander = st.expander(
-        label='Special modificatins', 
+        label='Special modificatins',
         expanded=len(global_ui_settings['library']['special_mods'])>0,
     )
     with specialmod_expander:
@@ -87,11 +87,11 @@ def specialmod_options():
 
 def specialmod_range():
     min_specialmod = st.number_input(label='Min number of special modifications',
-        value = global_ui_settings['library']['min_special_mod_num'], 
+        value = global_ui_settings['library']['min_special_mod_num'],
         min_value = 0, step = 1
     )
     max_specialmod = st.number_input(label='Max number of special modifications',
-        value = global_ui_settings['library']['max_special_mod_num'], 
+        value = global_ui_settings['library']['max_special_mod_num'],
         min_value = 0, step = 1
     )
     global_ui_settings['library']['min_special_mod_num'] = min_specialmod
@@ -102,7 +102,7 @@ def specialmod_range():
     global_ui_settings['library'][
         'special_mods_cannot_modify_pep_n_term'
     ] = bool(
-        st.checkbox(label='N-term', 
+        st.checkbox(label='N-term',
         value=global_ui_settings['library'][
             'special_mods_cannot_modify_pep_n_term'
         ])
@@ -110,7 +110,7 @@ def specialmod_range():
     global_ui_settings['library'][
         'special_mods_cannot_modify_pep_c_term'
     ] = bool(
-        st.checkbox(label='C-term', 
+        st.checkbox(label='C-term',
         value=global_ui_settings['library'][
             'special_mods_cannot_modify_pep_c_term'
         ])
@@ -189,11 +189,11 @@ def add_decoy():
 def choose_protease():
     def on_custom_protease():
         if (
-            len(st.session_state['custom_protease_text']) <= 1 
+            len(st.session_state['custom_protease_text']) <= 1
             or st.session_state['custom_protease_text'] in protease_dict
             or (
-                '(' in st.session_state['custom_protease_text'] and 
-                ')' in st.session_state['custom_protease_text'] and 
+                '(' in st.session_state['custom_protease_text'] and
+                ')' in st.session_state['custom_protease_text'] and
                 len(st.session_state['custom_protease_text']) >= 3
             )
         ):
@@ -248,14 +248,14 @@ def output_tsv():
     max_fragment_mz = st.number_input(label='Max fragment mz:', min_value = min_fragment_mz, value = global_ui_settings['library']['output_tsv']['max_fragment_mz'])
     global_ui_settings['library']['output_tsv']['max_fragment_mz'] = max_fragment_mz
     min_relative_intensity = st.number_input(
-        label='Min relative intensity:', 
+        label='Min relative intensity:',
         value = global_ui_settings['library']['output_tsv']['min_relative_intensity'],
         step=0.0001,
         format='%0.4f'
     )
     global_ui_settings['library']['output_tsv']['min_relative_intensity'] = min_relative_intensity
     keep_higest_k_peaks = st.number_input(
-        label='Number of highest peaks to keep:', 
+        label='Number of highest peaks to keep:',
         value = global_ui_settings['library']['output_tsv']['keep_higest_k_peaks']
     )
     global_ui_settings['library']['output_tsv']['keep_higest_k_peaks'] = keep_higest_k_peaks
@@ -274,7 +274,7 @@ def show():
         st_key='lib_input_type',
         default_type=global_ui_settings['library']['infile_type'],
         monitor_files=global_ui_settings['library']['infiles'],
-        choices=global_ui_settings['library']['infile_type_choices'], 
+        choices=global_ui_settings['library']['infile_type_choices'],
         index=global_ui_settings['library']['infile_type_choices'].index(
             global_ui_settings['library']['infile_type']
         )
@@ -306,7 +306,7 @@ def show():
 
     if infile_type == 'fasta':
         global_ui_settings['library']['fasta']['add_contaminants'] = bool(st.checkbox(
-            label='Add fasta of contaminants', 
+            label='Add fasta of contaminants',
             value=global_ui_settings['library']['fasta']['add_contaminants']
         ))
     select_files(
@@ -326,24 +326,24 @@ def show():
     elif infile_type == 'sequence_table':
         mod_options()
         specialmod_options()
-    
+
     labeling_options()
 
     st.write("#### Common peptide settings")
-    
+
     if infile_type == 'fasta':
         choose_peptide_len()
 
     if infile_type in ['fasta','sequence_table','peptide_table']:
         choose_precursor_charge()
-    
+
     choose_precursor_mz()
     choose_frag_types()
 
     st.write("### Output")
 
     output_folder = st.text_input(
-        label="Output folder", 
+        label="Output folder",
         value=global_ui_settings['library']['output_folder'].format(
             PEPTDEEP_HOME=global_ui_settings['PEPTDEEP_HOME']
         )
@@ -353,17 +353,17 @@ def show():
     global_ui_settings['library']['output_folder'] = output_folder
 
     global_ui_settings['library']['rt_to_irt'] = bool(st.checkbox(
-        label='Convert predicted RT to iRT', 
+        label='Convert predicted RT to iRT',
         value=global_ui_settings['library']['rt_to_irt']
     ))
 
     global_ui_settings['library']['generate_precursor_isotope'] = bool(st.checkbox(
-        label="Generate precursor isotopes (don't check this for DiaNN/Spectronaut search)", 
+        label="Generate precursor isotopes (don't check this for DiaNN/Spectronaut search)",
         value=global_ui_settings['library']['generate_precursor_isotope']
     ))
 
     tsv_enabled = bool(st.checkbox(
-        label='Output TSV (for DiaNN/Spectronaut)', 
+        label='Output TSV (for DiaNN/Spectronaut)',
         value=global_ui_settings['library']['output_tsv']['enabled']
     ))
     global_ui_settings['library']['output_tsv']['enabled'] = tsv_enabled
@@ -387,9 +387,9 @@ def show():
         )
         save_yaml(
             os.path.join(
-                output_folder, 
+                output_folder,
                 f'{task_name}.yaml'
-            ), 
+            ),
             global_ui_settings
         )
         st.write(f'`library` task saved as `{os.path.expanduser(yaml_path)}`')

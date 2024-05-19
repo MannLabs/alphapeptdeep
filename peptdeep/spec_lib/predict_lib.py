@@ -23,7 +23,7 @@ class PredictSpecLib(SpecLibBase):
     def __init__(self,
         model_manager: ModelManager = None,
         charged_frag_types = ['b_z1','b_z2','y_z1','y_z2'],
-        precursor_mz_min:float = 400.0, 
+        precursor_mz_min:float = 400.0,
         precursor_mz_max:float = 2000.0,
         decoy:str = 'pseudo_reverse',
         rt_to_irt:bool = False,
@@ -45,7 +45,7 @@ class PredictSpecLib(SpecLibBase):
             precursor_mz_max, by default 2000.0
 
         decoy : str, optional
-            Decoy choice, see `alphabase.spec_lib.decoy_library`, 
+            Decoy choice, see `alphabase.spec_lib.decoy_library`,
             by default 'pseudo_reverse'
 
         rt_to_irt : bool, optional
@@ -81,12 +81,12 @@ class PredictSpecLib(SpecLibBase):
         self._fragment_mz_df = fragment_mz_df
 
         self._fragment_mz_df.drop(columns=[
-            col for col in self._fragment_mz_df.columns 
+            col for col in self._fragment_mz_df.columns
             if col not in self.charged_frag_types
         ], inplace=True)
 
         self._fragment_intensity_df.drop(columns=[
-            col for col in self._fragment_intensity_df.columns 
+            col for col in self._fragment_intensity_df.columns
             if col not in self.charged_frag_types
         ], inplace=True)
 
@@ -96,7 +96,7 @@ class PredictSpecLib(SpecLibBase):
             self._precursor_df, irt_pep_df=irt_pep_df
         )
 
-    def predict_all(self, 
+    def predict_all(self,
         min_required_precursor_num_for_mp:int=2000,
         predict_items:list = ['rt','mobility','ms2'],
     ):
@@ -104,7 +104,7 @@ class PredictSpecLib(SpecLibBase):
         1. Predict RT/IM/MS2 for self._precursor_df
         2. Calculate isotope information in self._precursor_df
         """
-        if 'precursor_mz' not in self.precursor_df.columns: 
+        if 'precursor_mz' not in self.precursor_df.columns:
             self.calc_precursor_mz()
             self.clip_by_precursor_mz_()
         if self.generate_precursor_isotope:
@@ -134,11 +134,11 @@ class PredictSpecLib(SpecLibBase):
             self.translate_rt_to_irt_pred()
         if self.model_manager.verbose:
             logging.info('End predicting RT/IM/MS2')
-        
+
 
 class PredictSpecLibFlat(SpecLibFlat):
-    """ 
-    Flatten the predicted spectral library, the key feature is to 
+    """
+    Flatten the predicted spectral library, the key feature is to
     predict and flatten fragments in batch with `predict_and_parse_lib_in_batch()`
 
     Parameters
@@ -148,7 +148,7 @@ class PredictSpecLibFlat(SpecLibFlat):
     keep_top_k_fragments : int, optional
         top k highest peaks to keep, by default 1000
     """
-    def __init__(self, 
+    def __init__(self,
         min_fragment_intensity:float = 0.001,
         keep_top_k_fragments:int = 1000,
         custom_fragment_df_columns:list = [
@@ -162,8 +162,8 @@ class PredictSpecLibFlat(SpecLibFlat):
             custom_fragment_df_columns=custom_fragment_df_columns
         )
 
-    def predict_and_parse_lib_in_batch(self, 
-        predict_lib:PredictSpecLib, 
+    def predict_and_parse_lib_in_batch(self,
+        predict_lib:PredictSpecLib,
         batch_size:int = 200000
     ):
         """Predict and flatten fragments in batch
@@ -202,5 +202,3 @@ class PredictSpecLibFlat(SpecLibFlat):
             self._precursor_df, self._fragment_df = concat_precursor_fragment_dataframes(
                 precursor_df_list, fragment_df_list
             )
-
-

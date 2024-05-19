@@ -14,7 +14,7 @@ global_settings = load_yaml(
     os.path.join(CONST_FOLDER, 'default_settings.yaml')
 )
 """
-Global settings in peptdeep, 
+Global settings in peptdeep,
 it controls all functionalities of PeptDeep.
 """
 
@@ -55,7 +55,7 @@ def add_user_defined_modifications(
 ):
     """
     Add user-defined modifications into the system,
-    this is userful for isotope labeling. 
+    this is userful for isotope labeling.
 
     Parameters
     ----------
@@ -63,7 +63,7 @@ def add_user_defined_modifications(
         Example:
         ```
         {
-        "Dimethyl2@Any N-term": { 
+        "Dimethyl2@Any N-term": {
         "composition": "H(2)2H(2)C(2)",
         "modloss_composition": ""
         }, ...
@@ -128,11 +128,11 @@ def load_global_settings(yaml:str):
     d = load_yaml(yaml)
     update_global_settings(d)
 
-def update_modifications(tsv:str="", 
+def update_modifications(tsv:str="",
     modloss_importance_level:float=1.0
 ):
     """
-    Load modification tsv either from alphabase default 
+    Load modification tsv either from alphabase default
     `modification.tsv <https://github.com/MannLabs/alphabase/blob/main/alphabase/constants/const_files/modification.tsv>`_
     or an external tsv file.
 
@@ -148,7 +148,7 @@ def update_modifications(tsv:str="",
         load_mod_df(tsv, modloss_importance_level=modloss_importance_level)
     else:
         keep_modloss_by_importance(modloss_importance_level)
-    
+
     add_user_defined_modifications()
 
 update_modifications()
