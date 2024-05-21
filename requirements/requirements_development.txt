@@ -40,4 +40,5 @@ alphabase>=1.1.0
 alpharaw>=0.2.0
 
 pytest
+pre-commit==3.7.0
 nbmake==1.5.3
