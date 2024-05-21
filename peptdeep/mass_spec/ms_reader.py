@@ -43,11 +43,11 @@ class MSReaderBase:
             peaks for each scan
 
         rt_list : list
-            retention time (minutes) for each scan 
+            retention time (minutes) for each scan
 
         mobility_list : list, optional
             mobility for each scan. Defaults to None.
-            
+
         """
         def set_col(col, indexes, values, dtype, na_value):
             self.spectrum_df.loc[indexes, col] = values
@@ -75,7 +75,7 @@ class MSReaderBase:
         Parameters
         ----------
         spec_idx : int
-            indicator for a spectrum, 
+            indicator for a spectrum,
             could be scan_num-1 for thermo data.
 
         Returns
@@ -112,7 +112,7 @@ class MSReaderBase:
 
         np.array
             intensity values for the given spec_idx
-            
+
         """
         return self.get_peaks(scan_num-1)
 
@@ -123,10 +123,10 @@ class AlphaPept_HDF_MS1_Reader(MSReaderBase):
         self.peak_df['mz'] = hdf.Raw.MS1_scans.mass_list_ms1.values
         self.peak_df['intensity'] = hdf.Raw.MS1_scans.int_list_ms1.values
         self.build_spectrum_df(
-            scan_list=hdf.Raw.MS1_scans.scan_list_ms1.values, 
+            scan_list=hdf.Raw.MS1_scans.scan_list_ms1.values,
             scan_indices=hdf.Raw.MS1_scans.indices_ms1.values,
             rt_list=hdf.Raw.MS1_scans.rt_list_ms1.values,
-            mobility_list=hdf.Raw.MS1_scans.mobility.values 
+            mobility_list=hdf.Raw.MS1_scans.mobility.values
             if hasattr(hdf.Raw.MS1_scans, 'mobility') else None,
         )
 
@@ -141,10 +141,10 @@ class AlphaPept_HDF_MS2_Reader(MSReaderBase):
         else:
             scan_list = hdf.Raw.MS2_scans.scan_list_ms2.values
         self.build_spectrum_df(
-            scan_list=scan_list, 
+            scan_list=scan_list,
             scan_indices=hdf.Raw.MS2_scans.indices_ms2.values,
             rt_list=hdf.Raw.MS2_scans.rt_list_ms2.values,
-            mobility_list=hdf.Raw.MS2_scans.mobility2.values 
+            mobility_list=hdf.Raw.MS2_scans.mobility2.values
             if hasattr(hdf.Raw.MS2_scans, 'mobility2') else None,
         )
 
@@ -228,7 +228,7 @@ def index_ragged_list(ragged_list: list)  -> np.ndarray:
     -------
     indices
         A numpy array with indices.
-        
+
     """
     indices = np.zeros(len(ragged_list) + 1, np.int64)
     indices[1:] = [len(i) for i in ragged_list]
@@ -275,11 +275,11 @@ class MGFReader(MSReaderBase):
                 rt_list.append(RT)
                 masses_list.append(np.array(masses))
                 intens_list.append(np.array(intens))
-        if isinstance(mgf, str): 
+        if isinstance(mgf, str):
             f.close()
         self.build_spectrum_df(
-            scan_list, 
-            index_ragged_list(masses_list), 
+            scan_list,
+            index_ragged_list(masses_list),
             rt_list
         )
         self.peak_df['mz'] = np.concatenate(masses_list)
@@ -293,7 +293,7 @@ class MSReaderProvider:
         self.reader_dict[ms2_type.lower()] = reader_class
 
     def get_reader(self, file_type)->MSReaderBase:
-        if file_type not in self.reader_dict: 
+        if file_type not in self.reader_dict:
             frameinfo = getframeinfo(currentframe())
             logging.warn(f'{frameinfo.filename}#L{frameinfo.lineno}: "{file_type}" is not registered in `MSReaderProvider` yet.')
             return None
@@ -313,7 +313,7 @@ if RawFileReader is None:
     class ThermoRawMS1Reader:
         def __init__(self):
             raise NotImplementedError("RawFileReader is not available")
-    
+
     class ThermoRawMS2Reader:
         def __init__(self):
             raise NotImplementedError("RawFileReader is not available")
@@ -326,7 +326,7 @@ else:
 
         def load(self, raw_path):
             rawfile = RawFileReader(raw_path)
- 
+
             spec_indices = np.array(
                 range(rawfile.FirstSpectrumNumber, rawfile.LastSpectrumNumber + 1)
             )
@@ -354,7 +354,7 @@ else:
                     raise e
                 except Exception as e:
                     print(f"Bad scan={i} in raw file '{raw_path}'")
-            
+
             self.build_spectrum_df(
                 scan_list,
                 index_ragged_list(masses_list),
@@ -372,7 +372,7 @@ else:
 
         def load(self, raw_path):
             rawfile = RawFileReader(raw_path)
- 
+
             spec_indices = np.array(
                 range(rawfile.FirstSpectrumNumber, rawfile.LastSpectrumNumber + 1)
             )
@@ -400,7 +400,7 @@ else:
                     raise e
                 # except Exception as e:
                 #     print(f"Bad scan={i} in raw file '{raw_path}'")
-            
+
             self.build_spectrum_df(
                 scan_list,
                 index_ragged_list(masses_list),
@@ -409,7 +409,7 @@ else:
             self.peak_df['mz'] = np.concatenate(masses_list)
             self.peak_df['intensity'] = np.concatenate(intens_list)
             rawfile.Close()
-    
+
     ms2_reader_provider.register_reader('thermo', ThermoRawMS2Reader)
     ms2_reader_provider.register_reader('thermo_raw', ThermoRawMS2Reader)
     ms1_reader_provider.register_reader('thermo', ThermoRawMS1Reader)

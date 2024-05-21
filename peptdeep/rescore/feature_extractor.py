@@ -36,12 +36,12 @@ def match_one_raw(
     )
 
     (
-        psm_df, fragment_mz_df, 
+        psm_df, fragment_mz_df,
         matched_intensity_df, matched_mz_err_df
     ) = match.match_ms2_one_raw(
         refine_precursor_df(psm_df_one_raw),
         ms2_file=ms2_file,
-        ms2_file_type=ms2_file_type, 
+        ms2_file_type=ms2_file_type,
         ppm=ms2_ppm, tol=ms2_tol,
     )
 
@@ -51,7 +51,7 @@ def match_one_raw(
         )
         frag_mass_calibrator = MassCalibratorForRT_KNN()
         _df_fdr = psm_df.query("fdr<0.01")
-        
+
         frag_mass_calibrator.fit(
             _df_fdr, matched_mz_err_df
         )
@@ -60,13 +60,13 @@ def match_one_raw(
         )
 
     return (
-        psm_df, fragment_mz_df, 
+        psm_df, fragment_mz_df,
         matched_intensity_df, matched_mz_err_df
     )
 
 def get_psm_scores(
     psm_df:pd.DataFrame,
-    predict_intensity_df:pd.DataFrame, 
+    predict_intensity_df:pd.DataFrame,
     matched_intensity_df:pd.DataFrame,
     matched_mass_err_df:pd.DataFrame,
 )->pd.DataFrame:
@@ -91,7 +91,7 @@ def get_psm_scores(
         `psm_df` with "*_score" columns appended inplace
     """
     matched_norm_intensity_df = pd.DataFrame(
-        np.log(matched_intensity_df.values+1), 
+        np.log(matched_intensity_df.values+1),
         columns=matched_intensity_df.columns.values
     )
     matched_merr_weight_df = matched_mass_err_df.mask(matched_mass_err_df>1000000, 0).abs()
@@ -107,7 +107,7 @@ def get_psm_scores(
     def _get_one_score(
         frag_start_end,
         peak_score_values,
-        pred_weighted_score_values, 
+        pred_weighted_score_values,
     ):
         frag_start, frag_end = frag_start_end
         frag_ratio = (peak_score_values[frag_start:frag_end]>0).mean()**0.5
@@ -132,9 +132,9 @@ def get_ms2_features(
     matched_intensity_df,
     matched_mass_err_df,
 )->pd.DataFrame:
-    """ Extract ms2 features from the given 
+    """ Extract ms2 features from the given
     predict_intensity_df and matched_intensity_df. It will add columns into psm_df:
-    
+
     - cos: cosine similarity between predicted and matched fragments
     - pcc: pearson correlation between predicted and matched fragments
     - sa: spectral angle between predicted and matched fragments
@@ -229,7 +229,7 @@ def get_ms2_features(
             ].sum()
 
         return (
-            matched_frag_num, matched_frag_ratio, 
+            matched_frag_num, matched_frag_ratio,
             both_matched_pred_frag_num,
             both_matched_pred_frag_to_matched,
             both_matched_pred_frag_to_pred,
@@ -242,7 +242,7 @@ def get_ms2_features(
         )
 
     psm_df, ms2_metrics_df = calc_ms2_similarity(
-        psm_df, predict_intensity_df, 
+        psm_df, predict_intensity_df,
         matched_intensity_df,
         charged_frag_types=used_frag_types,
         metrics=['COS','SA','SPC','PCC'],
@@ -256,7 +256,7 @@ def get_ms2_features(
     )
 
     psm_df = get_psm_scores(
-        psm_df, 
+        psm_df,
         predict_intensity_df=predict_intensity_df[used_frag_types],
         matched_intensity_df=matched_intensity_df[used_frag_types],
         matched_mass_err_df=matched_mass_err_df[used_frag_types]
@@ -276,14 +276,14 @@ def get_ms2_features(
         used_frag_types
     ].values > 0.001
     has_both_matched_predicted = has_matched_intens&has_predicted_intens
-    
+
     (
         psm_df['matched_frag_num'],
         psm_df['matched_frag_ratio'],
-        psm_df['both_matched_pred_frag_num'], 
+        psm_df['both_matched_pred_frag_num'],
         psm_df['both_matched_pred_frag_to_matched'],
         psm_df['both_matched_pred_frag_to_pred'],
-        psm_df['matched_not_pred_frag_num'], 
+        psm_df['matched_not_pred_frag_num'],
         psm_df['matched_not_pred_frag_ratio'],
         psm_df['pred_not_matched_frag_num'],
         psm_df['pred_not_matched_frag_ratio'],
@@ -293,18 +293,18 @@ def get_ms2_features(
         _get_frag_features, axis=1,
         matched_inten_values=matched_intensity_df[used_frag_types].values,
         predicted_inten_values=predict_intensity_df[used_frag_types].values,
-        has_matched_intens=has_matched_intens, 
+        has_matched_intens=has_matched_intens,
         has_predicted_intens=has_predicted_intens,
         has_both_matched_predicted=has_both_matched_predicted,
     ))
 
     b_frag_types = [
-        _t for _t in used_frag_types 
+        _t for _t in used_frag_types
         if _t.startswith('b')
     ]
     if len(b_frag_types) > 0:
         psm_df, ms2_metrics_df = calc_ms2_similarity(
-            psm_df, predict_intensity_df, 
+            psm_df, predict_intensity_df,
             matched_intensity_df,
             charged_frag_types=b_frag_types,
             metrics=['COS','SA','SPC','PCC'],
@@ -317,7 +317,7 @@ def get_ms2_features(
             inplace=True
         )
         psm_df = get_psm_scores(
-            psm_df, 
+            psm_df,
             predict_intensity_df=predict_intensity_df[b_frag_types],
             matched_intensity_df=matched_intensity_df[b_frag_types],
             matched_mass_err_df=matched_mass_err_df[b_frag_types]
@@ -337,14 +337,14 @@ def get_ms2_features(
             b_frag_types
         ].values>0
         has_both_matched_predicted = has_matched_intens&has_predicted_intens
-        
+
         (
             psm_df['matched_bion_num'],
             psm_df['matched_bion_ratio'],
-            psm_df['both_matched_pred_bion_num'], 
+            psm_df['both_matched_pred_bion_num'],
             psm_df['both_matched_pred_bion_to_matched'],
             psm_df['both_matched_pred_bion_to_pred'],
-            psm_df['matched_not_pred_bion_num'], 
+            psm_df['matched_not_pred_bion_num'],
             psm_df['matched_not_pred_bion_ratio'],
             psm_df['pred_not_matched_bion_num'],
             psm_df['pred_not_matched_bion_ratio'],
@@ -354,17 +354,17 @@ def get_ms2_features(
             _get_frag_features, axis=1,
             matched_inten_values=matched_intensity_df[b_frag_types].values,
             predicted_inten_values=predict_intensity_df[b_frag_types].values,
-            has_matched_intens=has_matched_intens, 
+            has_matched_intens=has_matched_intens,
             has_predicted_intens=has_predicted_intens,
             has_both_matched_predicted=has_both_matched_predicted,
         ))
     else:
         psm_df[[
-            'matched_bion_num', 'matched_bion_ratio', 
-            'both_matched_pred_bion_num', 
+            'matched_bion_num', 'matched_bion_ratio',
+            'both_matched_pred_bion_num',
             'both_matched_pred_bion_to_matched',
             'both_matched_pred_bion_to_pred',
-            'matched_not_pred_bion_num', 
+            'matched_not_pred_bion_num',
             'matched_not_pred_bion_ratio',
             'pred_not_matched_bion_num',
             'pred_not_matched_bion_ratio',
@@ -373,12 +373,12 @@ def get_ms2_features(
         ]] = 0
 
     y_frag_types = [
-        _t for _t in used_frag_types 
+        _t for _t in used_frag_types
         if _t.startswith('y')
     ]
     if len(y_frag_types) > 0:
         psm_df, ms2_metrics_df = calc_ms2_similarity(
-            psm_df, predict_intensity_df, 
+            psm_df, predict_intensity_df,
             matched_intensity_df,
             charged_frag_types=y_frag_types,
             metrics=['COS','SA','SPC', 'PCC'],
@@ -391,7 +391,7 @@ def get_ms2_features(
             inplace=True
         )
         psm_df = get_psm_scores(
-            psm_df, 
+            psm_df,
             predict_intensity_df=predict_intensity_df[b_frag_types],
             matched_intensity_df=matched_intensity_df[b_frag_types],
             matched_mass_err_df=matched_mass_err_df[b_frag_types]
@@ -411,14 +411,14 @@ def get_ms2_features(
             y_frag_types
         ].values > 0
         has_both_matched_predicted = has_matched_intens&has_predicted_intens
-        
+
         (
             psm_df['matched_yion_num'],
             psm_df['matched_yion_ratio'],
-            psm_df['both_matched_pred_yion_num'], 
+            psm_df['both_matched_pred_yion_num'],
             psm_df['both_matched_pred_yion_to_matched'],
             psm_df['both_matched_pred_yion_to_pred'],
-            psm_df['matched_not_pred_yion_num'], 
+            psm_df['matched_not_pred_yion_num'],
             psm_df['matched_not_pred_yion_ratio'],
             psm_df['pred_not_matched_yion_num'],
             psm_df['pred_not_matched_yion_ratio'],
@@ -428,24 +428,24 @@ def get_ms2_features(
             _get_frag_features, axis=1,
             matched_inten_values=matched_intensity_df[y_frag_types].values,
             predicted_inten_values=predict_intensity_df[y_frag_types].values,
-            has_matched_intens=has_matched_intens, 
+            has_matched_intens=has_matched_intens,
             has_predicted_intens=has_predicted_intens,
             has_both_matched_predicted=has_both_matched_predicted,
         ))
     else:
         psm_df[[
-            'matched_yion_num', 'matched_yion_ratio', 
-            'both_matched_pred_yion_num', 
+            'matched_yion_num', 'matched_yion_ratio',
+            'both_matched_pred_yion_num',
             'both_matched_pred_yion_to_matched',
             'both_matched_pred_yion_to_pred',
-            'matched_not_pred_yion_num', 
+            'matched_not_pred_yion_num',
             'matched_not_pred_yion_ratio',
             'pred_not_matched_yion_num',
             'pred_not_matched_yion_ratio',
             'matched_yion_rel_to_pred',
             'pred_yion_rel_to_matched'
         ]] = 0
-        
+
     def _charge_one_hot(ch):
         x = [0]*7
         if ch>6:
@@ -476,14 +476,14 @@ def get_ms2_features(
 # for imap/imap_unordered with multiprocessing.Pool()
 def match_one_raw_mp(args):
     return match_one_raw(*args)
-    
+
 # for imap/imap_unordered with multiprocessing.Pool()
 def get_ms2_features_mp(args):
     return get_ms2_features(*args)
 
 
 class ScoreFeatureExtractor:
-    """ ScoreFeatureExtractor: Feature extractor for percolator 
+    """ ScoreFeatureExtractor: Feature extractor for percolator
             with a single process.
 
     Parameters
@@ -491,7 +491,7 @@ class ScoreFeatureExtractor:
     model_mgr : ModelManager
         The ModelManager in peptdeep.pretrained_models.
     """
-    def __init__(self, 
+    def __init__(self,
         model_mgr:ModelManager
     ):
         self.model_mgr = model_mgr
@@ -510,31 +510,31 @@ class ScoreFeatureExtractor:
             'pred_weighted_bion_score',
             'merr_weighted_yion_score',
             'pred_weighted_yion_score',
-            'matched_frag_num', 'matched_frag_ratio', 
-            'both_matched_pred_frag_num', 
+            'matched_frag_num', 'matched_frag_ratio',
+            'both_matched_pred_frag_num',
             'both_matched_pred_frag_to_matched',
             'both_matched_pred_frag_to_pred',
-            'matched_not_pred_frag_num', 
+            'matched_not_pred_frag_num',
             'matched_not_pred_frag_ratio',
             'pred_not_matched_frag_num',
             'pred_not_matched_frag_ratio',
             'matched_frag_rel_to_pred',
             'pred_frag_rel_to_matched',
-            'matched_bion_num', 'matched_bion_ratio', 
-            'both_matched_pred_bion_num', 
+            'matched_bion_num', 'matched_bion_ratio',
+            'both_matched_pred_bion_num',
             'both_matched_pred_bion_to_matched',
             'both_matched_pred_bion_to_pred',
-            'matched_not_pred_bion_num', 
+            'matched_not_pred_bion_num',
             'matched_not_pred_bion_ratio',
             'pred_not_matched_bion_num',
             'pred_not_matched_bion_ratio',
             'matched_bion_rel_to_pred',
             'pred_bion_rel_to_matched',
-            'matched_yion_num', 'matched_yion_ratio', 
-            'both_matched_pred_yion_num', 
+            'matched_yion_num', 'matched_yion_ratio',
+            'both_matched_pred_yion_num',
             'both_matched_pred_yion_to_matched',
             'both_matched_pred_yion_to_pred',
-            'matched_not_pred_yion_num', 
+            'matched_not_pred_yion_num',
             'matched_not_pred_yion_ratio',
             'pred_not_matched_yion_num',
             'pred_not_matched_yion_ratio',
@@ -564,7 +564,7 @@ class ScoreFeatureExtractor:
     def _select_raw_to_tune(self,
         psm_df:pd.DataFrame,
     )->tuple:
-        """ Randomly select `self.raw_num_to_tune` raw files 
+        """ Randomly select `self.raw_num_to_tune` raw files
         to tune the models. If # raw files is less than `self.raw_num_to_tune`,
         all raw files will be used to tune the model.
 
@@ -580,7 +580,7 @@ class ScoreFeatureExtractor:
 
         list
             selected raw_name list
-            
+
         """
         if 'fdr' not in psm_df.columns:
             psm_df = calc_fdr_for_df(psm_df, 'score')
@@ -631,7 +631,7 @@ class ScoreFeatureExtractor:
 
         ms2_tol : float
             tolerance value for ms2 matching
-            
+
         """
         logging.info('Preparing for fine-tuning ...')
 
@@ -645,7 +645,7 @@ class ScoreFeatureExtractor:
             df_groupby_raw, df_groupby_raw.ngroups
         ):
             if (
-                raw_name not in raw_list 
+                raw_name not in raw_list
                 or raw_name not in ms2_file_dict
             ):
                 continue
@@ -674,7 +674,7 @@ class ScoreFeatureExtractor:
     def _save_models(self):
         # save the model for future uses
         model_folder = os.path.join(
-            perc_settings['output_folder'], 
+            perc_settings['output_folder'],
             "tuned_models"
         )
         self.model_mgr.save_models(model_folder)
@@ -686,7 +686,7 @@ class ScoreFeatureExtractor:
             f.write(f"nce={self.model_mgr.nce}\n")
 
     def _tune(self,
-        psm_df, 
+        psm_df,
         matched_intensity_df
     ):
         self.model_mgr.train_ccs_model(psm_df)
@@ -721,7 +721,7 @@ class ScoreFeatureExtractor:
             ) = perc_settings['psm_num_per_raw_to_tune']
 
             self.model_mgr.psm_num_per_mod_to_train_rt_ccs = 0
-            
+
             (
                 self.model_mgr.epoch_to_train_rt_ccs
             ) = perc_settings['epoch_per_raw_to_tune']
@@ -771,7 +771,7 @@ class ScoreFeatureExtractor:
             psm_df = self.model_mgr.predict_mobility(
                 psm_df
             )
-            
+
             psm_df[
                 'mobility_delta'
             ] = (
@@ -792,7 +792,7 @@ class ScoreFeatureExtractor:
         else:
             psm_df['mobility_delta'] = 0
             psm_df['mobility_delta_abs'] = 0
-    
+
 
     def match_ms2(self,
         psm_df: pd.DataFrame,
@@ -808,10 +808,10 @@ class ScoreFeatureExtractor:
         self.match.match_ms2_centroid(
             refine_precursor_df(psm_df),
             ms2_file_dict=ms2_file_dict,
-            ms2_file_type=ms2_file_type, 
+            ms2_file_type=ms2_file_type,
             ppm=ms2_ppm, tol=ms2_tol,
         )
-        
+
     def _get_model_frag_types(self, frag_types):
         used_frag_types = []
         for frag_type in frag_types:
@@ -823,10 +823,10 @@ class ScoreFeatureExtractor:
 
     def extract_features(self,
         psm_df: pd.DataFrame,
-        ms2_file_dict, 
-        ms2_file_type, 
+        ms2_file_dict,
+        ms2_file_type,
         frag_types:list = get_charged_frag_types(['b','y'], 2),
-        ms2_ppm=global_settings['peak_matching']['ms2_ppm'], 
+        ms2_ppm=global_settings['peak_matching']['ms2_ppm'],
         ms2_tol=global_settings['peak_matching']['ms2_tol_value'],
     )->pd.DataFrame:
         """ Extract features and add columns (`self.score_feature_list`) into psm_df
@@ -840,19 +840,19 @@ class ScoreFeatureExtractor:
             MS2 file path dict: {raw_name: ms2_path}
 
         ms2_file_type : str, optional
-            MS2 file type, coult be 
+            MS2 file type, coult be
             'alphapept', 'mgf', or 'raw'.
 
         frag_types : list, optional
-            fragment types. 
+            fragment types.
             Defaults to `alphabase.fragment.get_charged_frag_types(['b','y'], 2)`.
 
         ms2_ppm : bool, optional
-            Matching MS2 mass tolerance unit. 
+            Matching MS2 mass tolerance unit.
             Defaults to True.
 
         ms2_tol : int, optional
-            Matching mass tolerance. 
+            Matching mass tolerance.
             Defaults to 20.
 
         Returns
@@ -861,13 +861,13 @@ class ScoreFeatureExtractor:
             psm_df with feature columns added
 
         """
-        
+
         frag_types = self._get_model_frag_types(frag_types)
 
         if self.require_model_tuning:
             logging.info('Fine-tuning models ...')
             self.fine_tune_models(
-                psm_df, 
+                psm_df,
                 ms2_file_dict, ms2_file_type,
                 frag_types, ms2_ppm, ms2_tol
             )
@@ -896,25 +896,25 @@ class ScoreFeatureExtractor:
 
             result_psm_list.append(
                 get_ms2_features(
-                    df, frag_types, 
+                    df, frag_types,
                     predict_inten_df,
                     frag_inten_df,
                     frag_merr_df,
                 )
             )
-            
+
         self.psm_df = pd.concat(
             result_psm_list, ignore_index=True
         )
         logging.info('Finish extracting features')
         return self.psm_df
-        
+
 
 class ScoreFeatureExtractorMP(ScoreFeatureExtractor):
-    def __init__(self, 
+    def __init__(self,
         model_mgr:ModelManager
     ):
-        """ ScoreFeatureExtractorMP: Feature extractor for percolator 
+        """ ScoreFeatureExtractorMP: Feature extractor for percolator
               with multiprocessing.
 
         Parameters
@@ -969,7 +969,7 @@ class ScoreFeatureExtractorMP(ScoreFeatureExtractor):
         def one_raw_param_generator(df_groupby_raw):
             for raw_name, df in df_groupby_raw:
                 if (
-                    raw_name not in raw_list 
+                    raw_name not in raw_list
                     or raw_name not in ms2_file_dict
                 ):
                     continue
@@ -982,14 +982,14 @@ class ScoreFeatureExtractorMP(ScoreFeatureExtractor):
                     ms2_ppm, ms2_tol,
                     self.calibrate_frag_mass_error,
                 )
-        
-        logging.info('Preparing for fine-tuning ...')  
+
+        logging.info('Preparing for fine-tuning ...')
         psm_df_list = []
-        matched_intensity_df_list = []  
+        matched_intensity_df_list = []
         with mp.get_context('spawn').Pool(global_settings['thread_num']) as p:
             for df, _, inten_df, _ in process_bar(
                 p.imap_unordered(
-                    match_one_raw_mp, 
+                    match_one_raw_mp,
                     one_raw_param_generator(df_groupby_raw)
                 ), df_groupby_raw.ngroups
             ):
@@ -1010,7 +1010,7 @@ class ScoreFeatureExtractorMP(ScoreFeatureExtractor):
 
     def extract_features_one_raw(self,
         df_one_raw: pd.DataFrame,
-        ms2_file, 
+        ms2_file,
         ms2_file_type,
         frag_types,
         ms2_ppm, ms2_tol,
@@ -1018,7 +1018,7 @@ class ScoreFeatureExtractorMP(ScoreFeatureExtractor):
     ):
         (
             df, frag_mz_df, frag_inten_df, frag_merr_df
-        ) = match_one_raw(df_one_raw, 
+        ) = match_one_raw(df_one_raw,
             ms2_file, ms2_file_type, frag_types,
             ms2_ppm, ms2_tol,
             calibrate_frag_mass_error,
@@ -1029,8 +1029,8 @@ class ScoreFeatureExtractorMP(ScoreFeatureExtractor):
 
         predict_inten_df = self.model_mgr.predict_ms2(df)
 
-        return get_ms2_features(df, 
-            frag_types, 
+        return get_ms2_features(df,
+            frag_types,
             predict_inten_df,
             frag_inten_df,
             frag_merr_df,
@@ -1041,10 +1041,10 @@ class ScoreFeatureExtractorMP(ScoreFeatureExtractor):
         ms2_file_dict,
         ms2_file_type,
         frag_types:list = get_charged_frag_types(['b','y'], 2),
-        ms2_ppm=global_settings['peak_matching']['ms2_ppm'], 
+        ms2_ppm=global_settings['peak_matching']['ms2_ppm'],
         ms2_tol=global_settings['peak_matching']['ms2_tol_value'],
     )->pd.DataFrame:
-        """ Extract (multiprocessing) features and 
+        """ Extract (multiprocessing) features and
         add columns (self.score_feature_list) into psm_df.
 
         Parameters
@@ -1056,19 +1056,19 @@ class ScoreFeatureExtractorMP(ScoreFeatureExtractor):
             MS2 file path dict: {raw_name: ms2_path}
 
         ms2_file_type : str, optional
-            MS2 file type, coult be 
+            MS2 file type, coult be
             'alphapept', 'mgf', or 'thermo'.
 
         frag_types : list, optional
-            fragment types. 
+            fragment types.
             Defaults to `alphabase.fragment.get_charged_frag_types(['b','y'], 2)`.
 
         ms2_ppm : bool, optional
-            Matching MS2 mass tolerance unit. 
+            Matching MS2 mass tolerance unit.
             Defaults to True.
 
         ms2_tol : int, optional
-            Matching mass tolerance. 
+            Matching mass tolerance.
             Defaults to 20.
 
         Returns
@@ -1082,7 +1082,7 @@ class ScoreFeatureExtractorMP(ScoreFeatureExtractor):
         if self.require_model_tuning:
             logging.info('Require fine-tuning models ...')
             self.fine_tune_models(
-                psm_df, 
+                psm_df,
                 ms2_file_dict, ms2_file_type,
                 used_frag_types, ms2_ppm, ms2_tol
             )
@@ -1111,7 +1111,7 @@ class ScoreFeatureExtractorMP(ScoreFeatureExtractor):
         if (
             self.require_raw_specific_tuning or
             self.model_mgr.ms2_model.device_type!='cpu'
-            
+
         ):
             # multiprocessing is only used for ms2 matching
             def prediction_gen(df_groupby_raw):
@@ -1119,7 +1119,7 @@ class ScoreFeatureExtractorMP(ScoreFeatureExtractor):
                     for (
                         df, frag_mz_df, frag_inten_df, frag_merr_df
                     ) in _p.imap_unordered(
-                        match_one_raw_mp, 
+                        match_one_raw_mp,
                         one_raw_param_generator(df_groupby_raw)
                     ):
                         # outsite multiprocessing region
@@ -1127,12 +1127,12 @@ class ScoreFeatureExtractorMP(ScoreFeatureExtractor):
                         self.extract_mobility_features(df)
 
                         if (
-                            self.require_raw_specific_tuning 
+                            self.require_raw_specific_tuning
                             and self.raw_specific_ms2_tuning
                         ):
                             (
-                                psm_num_to_train_ms2, 
-                                psm_num_per_mod_to_train_ms2, 
+                                psm_num_to_train_ms2,
+                                psm_num_per_mod_to_train_ms2,
                                 epoch_to_train_ms2,
                                 use_grid_nce_search
                             ) = (
@@ -1166,33 +1166,33 @@ class ScoreFeatureExtractorMP(ScoreFeatureExtractor):
                                 self.model_mgr.epoch_to_train_ms2,
                                 self.model_mgr.use_grid_nce_search
                             ) = (
-                                psm_num_to_train_ms2, 
-                                psm_num_per_mod_to_train_ms2, 
+                                psm_num_to_train_ms2,
+                                psm_num_per_mod_to_train_ms2,
                                 epoch_to_train_ms2,
                                 use_grid_nce_search
                             )
-                            
+
                         predict_inten_df = self.model_mgr.predict_ms2(df)
 
                         yield (
-                            df, used_frag_types, 
+                            df, used_frag_types,
                             predict_inten_df,
                             frag_inten_df, frag_merr_df,
                         )
 
             with mp.get_context('spawn').Pool(global_settings['thread_num']) as p:
                 for df in process_bar(p.imap_unordered(
-                    get_ms2_features_mp, 
+                    get_ms2_features_mp,
                     prediction_gen(df_groupby_raw)
                 ), df_groupby_raw.ngroups):
                     result_psm_list.append(df)
 
         else:
-            # use multiprocessing for prediction 
+            # use multiprocessing for prediction
             # only when no GPUs are available
             with mp.get_context('spawn').Pool(global_settings['thread_num']) as p:
                 for _df in process_bar(p.imap_unordered(
-                    self.extract_features_one_raw_mp, 
+                    self.extract_features_one_raw_mp,
                     one_raw_param_generator(df_groupby_raw)
                 ), df_groupby_raw.ngroups):
                     result_psm_list.append(_df)

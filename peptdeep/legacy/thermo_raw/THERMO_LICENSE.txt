@@ -6,7 +6,7 @@ These License terms are an agreement between you and Thermo Finnigan LLC ("Licen
 
 1.1. You may install and use this Software on any of your computing devices.
 
-1.2. You may distribute this Software to others, but only in combination with other software components and/or programs that you provide and subject to the distribution requirements and restrictions below. 
+1.2. You may distribute this Software to others, but only in combination with other software components and/or programs that you provide and subject to the distribution requirements and restrictions below.
 
 2.  Use Restrictions:
 

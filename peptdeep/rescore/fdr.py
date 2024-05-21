@@ -11,7 +11,7 @@ def fdr_to_q_values(
     Parameters
     ----------
     fdr_values : np.ndarray
-        FDR values, they should be 
+        FDR values, they should be
         sorted according to the descending order of the `score`
 
     Returns
@@ -30,8 +30,8 @@ def fdr_to_q_values(
     return q_values
 
 def calc_fdr(
-    df:pd.DataFrame, 
-    score_column:str, 
+    df:pd.DataFrame,
+    score_column:str,
     decoy_column:str='decoy'
 )->pd.DataFrame:
     """Calculate FDR values (q_values in fact) for the given dataframe
@@ -45,7 +45,7 @@ def calc_fdr(
         score column to sort in decending order
 
     decoy_column : str, optional
-        decoy column in the dataframe. 
+        decoy column in the dataframe.
         1=target, 0=decoy. Defaults to 'decoy'.
 
     Returns
@@ -69,22 +69,22 @@ calc_fdr_for_df = calc_fdr
 
 @numba.njit
 def fdr_from_ref(
-    sorted_scores:np.ndarray, 
-    ref_scores:np.ndarray, 
+    sorted_scores:np.ndarray,
+    ref_scores:np.ndarray,
     ref_fdr_values:np.ndarray
 )->np.ndarray:
-    """ Calculate FDR values from the given reference scores and fdr_values. 
-    It is used to extend peptide-level or sequence-level FDR (reference) 
+    """ Calculate FDR values from the given reference scores and fdr_values.
+    It is used to extend peptide-level or sequence-level FDR (reference)
     to each PSM, as PSMs are more useful for quantification.
 
     Parameters
     ----------
     sorted_scores : np.array
-        the scores to calculate FDRs, 
+        the scores to calculate FDRs,
         they must be sorted in decending order.
 
     ref_scores : np.array
-        reference scores that used to 
+        reference scores that used to
         calculate ref_fdr_values, also sorted in decending order.
 
     ref_fdr_values : np.array
@@ -111,14 +111,14 @@ def fdr_from_ref(
 
 def calc_fdr_from_ref(
     df: pd.DataFrame,
-    ref_scores:np.ndarray, 
+    ref_scores:np.ndarray,
     ref_fdr_values:np.ndarray,
-    score_column:str, 
+    score_column:str,
     decoy_column:str='decoy'
 )->pd.DataFrame:
     """ Calculate FDR values for a PSM dataframe from the given reference
-     scores and fdr_values. It is used to extend peptide-level or 
-     sequence-level FDR (reference) to each PSM, as PSMs are more useful 
+     scores and fdr_values. It is used to extend peptide-level or
+     sequence-level FDR (reference) to each PSM, as PSMs are more useful
      for quantification.
     ``
 
@@ -128,7 +128,7 @@ def calc_fdr_from_ref(
         PSM dataframe
 
     ref_scores : np.array
-        reference scores that used to 
+        reference scores that used to
         calculate ref_fdr_values, also sorted in decending order.
 
     ref_fdr_values : np.array
@@ -138,7 +138,7 @@ def calc_fdr_from_ref(
         score column in the dataframe
 
     decoy_column : str, optional
-        decoy column in the dataframe. 
+        decoy column in the dataframe.
         1=target, 0=decoy. Defaults to 'decoy'.
 
     Returns

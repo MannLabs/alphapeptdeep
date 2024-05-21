@@ -43,7 +43,7 @@ common:
   user_defined_modifications: {}
   # For example,
   # user_defined_modifications:
-  #   "Dimethyl2@Any_N-term": 
+  #   "Dimethyl2@Any_N-term":
   #     composition: "H(2)2H(2)C(2)"
   #     modloss_composition: "H(0)" # can be missing if no modloss
   #   "Dimethyl2@K":
@@ -151,10 +151,10 @@ model_mgr:
     psm_modification_mapping: {} # alphabase modifications to modifications of other engine PSMs
     # Example (note that `X(UniMod:id)` format can directly be recognized by alphabase),
     # psm_modification_mapping:
-    #   Dimethyl@Any N-term: 
+    #   Dimethyl@Any N-term:
     #     - _(Dimethyl-n-0)
     #     - _(Dimethyl)
-    #   Dimethyl:2H(2)@K: 
+    #   Dimethyl:2H(2)@K:
     #     - K(Dimethyl-K-2)
     #   ...
 # percolator:
@@ -185,7 +185,7 @@ model_mgr:
 #     sklearn_as_backend:
 #       - linear # logistic regression
 #       - random_forest
-#   lr_percolator_torch_model: 0.1 # learning rate, only used when percolator_backend==pytorch 
+#   lr_percolator_torch_model: 0.1 # learning rate, only used when percolator_backend==pytorch
 #   percolator_iter_num: 5 # percolator iteration number
 #   cv_fold: 1
 #   fdr: 0.01
@@ -219,7 +219,7 @@ library:
   - peptide_table # sequence with mods and mod_sites
   - precursor_table # peptide with charge state
   - all_other_psm_reader_types # see psm_type_choices in model_mgr section
-  infiles: 
+  infiles:
   - xxx.fasta
   fasta:
     protease: 'trypsin'
@@ -237,7 +237,7 @@ library:
     - 'glu-c'
     max_miss_cleave: 2
     add_contaminants: False
-  fix_mods: 
+  fix_mods:
   - Carbamidomethyl@C
   var_mods:
   - Acetyl@Protein_N-term

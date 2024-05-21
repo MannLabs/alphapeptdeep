@@ -9,19 +9,19 @@ def _is_mps_available()->bool:
 
 torch_devices:dict = {
     'gpu': {
-        'is_available': torch.cuda.is_available, 
+        'is_available': torch.cuda.is_available,
         'device': 'cuda',
     },
     'cuda': {
-        'is_available': torch.cuda.is_available, 
+        'is_available': torch.cuda.is_available,
         'device': 'cuda',
     },
     'mps': {
-        'is_available': _is_mps_available, 
+        'is_available': _is_mps_available,
         'device': 'mps',
     },
     'm1': {
-        'is_available': _is_mps_available, 
+        'is_available': _is_mps_available,
         'device': 'mps',
     }
 }
@@ -46,7 +46,7 @@ def get_device(device:str, device_ids:list=[])->tuple:
     if device in torch_devices:
         if torch_devices[device]['is_available']():
             if (
-                torch_devices[device]['device'] == 'cuda' 
+                torch_devices[device]['device'] == 'cuda'
                 and len(device_ids) > 0
             ):
                 return torch.device(
@@ -54,7 +54,7 @@ def get_device(device:str, device_ids:list=[])->tuple:
                 ), 'cuda'
             else:
                 return (
-                    torch.device(torch_devices[device]['device']), 
+                    torch.device(torch_devices[device]['device']),
                     device
                 )
     return torch.device('cpu'), 'cpu'
@@ -64,4 +64,3 @@ def get_available_device()->tuple:
         if item['is_available']():
             return torch.device(item['device']), name
     return torch.device('cpu'), 'cpu'
-

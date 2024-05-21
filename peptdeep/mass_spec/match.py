@@ -4,7 +4,7 @@ import pandas as pd
 import tqdm
 
 from alphabase.peptide.fragment import (
-    create_fragment_mz_dataframe, 
+    create_fragment_mz_dataframe,
     get_charged_frag_types
 )
 from peptdeep.mass_spec.ms_reader import (
@@ -13,14 +13,14 @@ from peptdeep.mass_spec.ms_reader import (
 
 @numba.njit
 def match_centroid_mz(
-    spec_mzs:np.ndarray, 
-    query_mzs:np.ndarray, 
+    spec_mzs:np.ndarray,
+    query_mzs:np.ndarray,
     spec_mz_tols:np.ndarray,
 )->np.ndarray:
     """
-    Matching query masses against sorted MS2/spec centroid masses, 
+    Matching query masses against sorted MS2/spec centroid masses,
     only closest (minimal abs mass error) peaks are returned.
-    
+
     Parameters
     ----------
     spec_mzs : np.ndarray
@@ -49,7 +49,7 @@ def match_centroid_mz(
             min_idx = idx-1
         if idx < len(spec_mzs):
             merr = abs(spec_mzs[idx]-query_mzs[i])
-            if merr <= spec_mz_tols[idx] and merr < min_merr: 
+            if merr <= spec_mz_tols[idx] and merr < min_merr:
                 min_idx = idx
         ret_indices[i] = min_idx
     return ret_indices
@@ -92,7 +92,7 @@ def match_profile_mz(
 
         highest = 0
         highest_idx = -1
-            
+
         for _idx in range(idx, -1, -1):
             if abs(spec_mzs[_idx]-query_mzs[i])>spec_mz_tols[_idx]:
                 break
@@ -132,7 +132,7 @@ def match_first_last_profile_mz(
     Returns
     -------
     np.ndarray
-        2D np.ndarray of int32 with first and last matched index 
+        2D np.ndarray of int32 with first and last matched index
         for the query mz. The shape is the same as (len(query_mzs),2).
         -1 means no peaks are matched for the query mz
     """
@@ -165,12 +165,12 @@ def match_first_last_profile_mz(
 def match_one_raw_with_numba(
     spec_idxes, frag_start_idxes, frag_stop_idxes,
     all_frag_mzs,
-    all_spec_mzs, all_spec_intensities, 
+    all_spec_mzs, all_spec_intensities,
     peak_start_idxes, peak_end_idxes,
     matched_intensities, matched_mz_errs,
     ppm, tol,
 ):
-    """ 
+    """
     Internel function to match fragment mz values to spectrum mz values.
     Matched_mz_errs[i] = np.inf if no peaks are matched.
     """
@@ -182,14 +182,14 @@ def match_one_raw_with_numba(
         if peak_end == peak_start: continue
         spec_mzs = all_spec_mzs[peak_start:peak_end]
         spec_intens = all_spec_intensities[peak_start:peak_end]
-        
+
         if ppm:
             spec_mz_tols = spec_mzs*tol*1e-6
         else:
             spec_mz_tols = np.full_like(spec_mzs, tol)
 
         frag_mzs = all_frag_mzs[frag_start:frag_end,:].copy()
-        
+
         matched_idxes = match_centroid_mz(
             spec_mzs, frag_mzs, spec_mz_tols
         ).reshape(-1)
@@ -231,7 +231,7 @@ class PepSpecMatch(object):
             psm_df, self.charged_frag_types
         )
 
-    def match_ms2_one_raw(self, 
+    def match_ms2_one_raw(self,
         psm_df_one_raw: pd.DataFrame,
         ms2_file:str,
         ms2_file_type:str='alphapept',
@@ -242,7 +242,7 @@ class PepSpecMatch(object):
         Parameters
         ----------
         psm_df_one_raw : pd.DataFrame
-            psm dataframe 
+            psm dataframe
             that contains only one raw file
 
         ms2_file : str
@@ -262,14 +262,14 @@ class PepSpecMatch(object):
         -------
         tuple:
             pd.DataFrame: psm dataframe with fragment index information.
-            
+
             pd.DataFrame: fragment mz dataframe.
-            
+
             pd.DataFrame: matched intensity dataframe.
-            
-            pd.DataFrame: matched mass error dataframe. 
+
+            pd.DataFrame: matched mass error dataframe.
             np.inf if a fragment is not matched.
-            
+
         """
         self._preprocess_psms(psm_df_one_raw)
         psm_df = psm_df_one_raw
@@ -286,7 +286,7 @@ class PepSpecMatch(object):
             add_spec_info_list.append('rt')
 
         if (
-            'mobility' not in psm_df.columns and 
+            'mobility' not in psm_df.columns and
             'mobility' in ms2_reader.spectrum_df.columns
         ):
             add_spec_info_list.append('mobility')
@@ -309,25 +309,25 @@ class PepSpecMatch(object):
                 psm_df['rt_norm'] = psm_df.rt/ms2_reader.spectrum_df.rt.max()
 
         fragment_mz_df = self.get_fragment_mz_df(psm_df)
-        
+
         matched_intensity_df = pd.DataFrame(
             np.zeros_like(
                 fragment_mz_df.values, dtype=np.float64
-            ), 
+            ),
             columns=fragment_mz_df.columns
         )
 
         matched_mz_err_df = pd.DataFrame(
             np.full_like(
                 fragment_mz_df.values, np.inf, dtype=np.float64
-            ), 
+            ),
             columns=fragment_mz_df.columns
         )
-        
+
         for (
             spec_idx, frag_start_idx, frag_stop_idx
         ) in psm_df[[
-            'spec_idx', 'frag_start_idx', 
+            'spec_idx', 'frag_start_idx',
             'frag_stop_idx'
         ]].values:
             (
@@ -343,7 +343,7 @@ class PepSpecMatch(object):
             frag_mzs = fragment_mz_df.values[
                 frag_start_idx:frag_stop_idx,:
             ]
-            
+
             matched_idxes = match_centroid_mz(
                 spec_mzs, frag_mzs, mz_tols
             )
@@ -364,7 +364,7 @@ class PepSpecMatch(object):
             ] = matched_mz_errs
 
         return (
-            psm_df, fragment_mz_df, 
+            psm_df, fragment_mz_df,
             matched_intensity_df, matched_mz_err_df
         )
 
@@ -395,7 +395,7 @@ class PepSpecMatch(object):
                 df_group.frag_start_idx.values,
                 df_group.frag_stop_idx.values,
                 self.fragment_mz_df.values,
-                ms2_reader.peak_df.mz.values, 
+                ms2_reader.peak_df.mz.values,
                 ms2_reader.peak_df.intensity.values,
                 ms2_reader.spectrum_df.peak_start_idx.values,
                 ms2_reader.spectrum_df.peak_end_idx.values,
@@ -403,7 +403,7 @@ class PepSpecMatch(object):
                 self.matched_mz_err_df.values,
                 self.ppm, self.tol
             )
-    
+
     def match_ms2_centroid(self,
         psm_df: pd.DataFrame,
         ms2_file_dict: dict, #raw_name: ms2_file_path or ms_reader object
@@ -426,7 +426,7 @@ class PepSpecMatch(object):
             {raw_name: ms2 path}
 
         ms2_file_type : str, optional
-            Could be 'alphapept', 'mgf' or 'thermo'. 
+            Could be 'alphapept', 'mgf' or 'thermo'.
             Defaults to 'alphapept'.
 
         ppm : bool, optional
@@ -434,7 +434,7 @@ class PepSpecMatch(object):
 
         tol : float, optional
             PPM units, defaults to 20.0.
-            
+
         """
         self._preprocess_psms(psm_df)
         self.psm_df = psm_df
@@ -442,23 +442,23 @@ class PepSpecMatch(object):
         if 'frag_start_idx' in self.psm_df.columns:
             del self.psm_df['frag_start_idx']
             del self.psm_df['frag_stop_idx']
-            
+
         self.fragment_mz_df = self.get_fragment_mz_df(self.psm_df)
-        
+
         self.matched_intensity_df = pd.DataFrame(
             np.zeros_like(
                 self.fragment_mz_df.values, dtype=np.float64
-            ), 
+            ),
             columns=self.fragment_mz_df.columns
         )
 
         self.matched_mz_err_df = pd.DataFrame(
             np.full_like(
                 self.fragment_mz_df.values, np.inf, dtype=np.float64
-            ), 
+            ),
             columns=self.fragment_mz_df.columns
         )
-        
+
         self._ms2_file_dict = ms2_file_dict
         self._ms2_file_type = ms2_file_type
         self.ppm = ppm

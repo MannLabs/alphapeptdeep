@@ -1,7 +1,7 @@
 alphabase.mass_spec
 ===========================
 
-Legacy modules and functionalities. Should be replaced by 
+Legacy modules and functionalities. Should be replaced by
 functionalities in the AlphaRaw project.
 
 .. toctree::

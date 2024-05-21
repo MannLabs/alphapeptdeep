@@ -5,8 +5,8 @@ import shutil
 import multiprocessing as mp
 
 from peptdeep.pipeline_api import (
-    generate_library, 
-    transfer_learn, 
+    generate_library,
+    transfer_learn,
     # rescore
 )
 from peptdeep.settings import global_settings, load_global_settings
@@ -44,7 +44,7 @@ def serve():
         if len(files) > 0:
             yaml_file = files.pop(0)
             print(f"[PeptDeep] Starting a new job '{yaml_file}'...")
-            
+
             running_txt = f'{home_folder}/tasks/running.txt'
             with open(running_txt,'w') as f:
                 f.write(yaml_file)
@@ -65,7 +65,7 @@ def serve():
                     continue
                 if os.path.isfile(yaml_file):
                     shutil.move(
-                        yaml_file, 
+                        yaml_file,
                         os.path.join(done_folder, os.path.basename(yaml_file))
                     )
             except KeyboardInterrupt as e:
@@ -75,7 +75,7 @@ def serve():
             except Exception as e:
                 if os.path.isfile(yaml_file):
                     shutil.move(
-                        yaml_file, 
+                        yaml_file,
                         os.path.join(failed_folder, os.path.basename(yaml_file)),
                     )
                 print(e)
@@ -95,8 +95,8 @@ class PeptDeepServer:
     def __init__(self):
         self.process:mp.Process = None
         self._process_file = os.path.join(
-            global_settings['PEPTDEEP_HOME'], 
-            'tasks/serve_pid.txt', 
+            global_settings['PEPTDEEP_HOME'],
+            'tasks/serve_pid.txt',
         )
 
     def start(self):
@@ -117,5 +117,5 @@ class PeptDeepServer:
 
     def __del__(self):
         self.terminate()
-    
+
 _server = PeptDeepServer()

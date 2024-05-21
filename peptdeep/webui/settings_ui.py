@@ -52,7 +52,7 @@ def add_user_mods():
             st.session_state.user_mod_comp = ''
             st.session_state.user_mod_loss = ''
 
-        st.button(label='Clear all user modifications', 
+        st.button(label='Clear all user modifications',
             on_click=_clear_user_mods
         )
 
@@ -70,7 +70,7 @@ def show():
     save_settings_gui()
 
     st.write("### Common settings")
-    
+
     add_user_mods()
 
     ms2_ppm = st.checkbox(label='MS2 ppm (otherwise Da)', value=global_ui_settings['peak_matching']['ms2_ppm'])
@@ -82,17 +82,17 @@ def show():
     global_ui_settings['peak_matching']['ms1_ppm'] = ms1_ppm
     ms1_tol_value = st.number_input(label='MS1 tolerance', value = global_ui_settings['peak_matching']['ms1_tol_value'], step = 1.0)
     global_ui_settings['peak_matching']['ms1_tol_value'] = ms1_tol_value
-    
+
     cpu_count = multiprocessing.cpu_count()
-    thread_num = st.number_input(label='Thread number', 
+    thread_num = st.number_input(label='Thread number',
         value=min(
-            global_ui_settings['thread_num'], 
-            cpu_count, 
+            global_ui_settings['thread_num'],
+            cpu_count,
             global_settings['MAX_THREADS']
-        ), 
+        ),
         max_value=min(
             cpu_count, global_settings['MAX_THREADS']
-        ), 
+        ),
         step=1
     )
     global_ui_settings['thread_num'] = thread_num
@@ -106,15 +106,15 @@ def show():
     )
 
     global_ui_settings['log_level'] = st.selectbox(
-        label='Log level', 
-        options=global_ui_settings['log_level_choices'], 
+        label='Log level',
+        options=global_ui_settings['log_level_choices'],
         index = global_ui_settings['log_level_choices'].index(
             global_ui_settings['log_level']
         )
     )
 
     global_ui_settings['common']['modloss_importance_level'] = st.number_input(
-        'Modification loss importance level (for a PTM, fragment modloss mz=0 if modloss_importance<modloss_importance_level)', 
+        'Modification loss importance level (for a PTM, fragment modloss mz=0 if modloss_importance<modloss_importance_level)',
         value=global_ui_settings['common']['modloss_importance_level'], step=1.0,
     )
     keep_modloss_by_importance(global_ui_settings['common']['modloss_importance_level'])

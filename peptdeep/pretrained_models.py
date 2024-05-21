@@ -80,11 +80,11 @@ def download_models(
     Parameters
     ----------
     url : str, optional
-        Remote or local path. 
+        Remote or local path.
         Defaults to `peptdeep.pretrained_models.model_url`
 
     overwrite : bool, optional
-        overwirte old model files. 
+        overwirte old model files.
         Defaults to True.
 
     Raises
@@ -100,8 +100,8 @@ def download_models(
             with open(model_zip, 'wb') as f:
                 f.write(requests.read())
         except (
-            socket.timeout, 
-            urllib.error.URLError, 
+            socket.timeout,
+            urllib.error.URLError,
             urllib.error.HTTPError
         ) as e:
             raise FileNotFoundError(
@@ -133,8 +133,8 @@ def count_mods(psm_df)->pd.DataFrame:
         for mod in set(one_mods):
             items = mod.split('->')
             if (
-                len(items)==2 
-                and len(items[0])==3 
+                len(items)==2
+                and len(items[0])==3
                 and len(items[1])==5
             ):
                 mod_dict['mutation']['spec_count'] += 1
@@ -152,9 +152,9 @@ def count_mods(psm_df)->pd.DataFrame:
         ).reset_index(drop=True)
 
 def psm_sampling_with_important_mods(
-    psm_df, n_sample, 
+    psm_df, n_sample,
     top_n_mods = 10,
-    n_sample_each_mod = 0, 
+    n_sample_each_mod = 0,
     uniform_sampling_column = None,
     random_state=1337,
 ):
@@ -234,9 +234,9 @@ def clear_error_modloss_intensities(
             ] = 0
 
 class ModelManager(object):
-    """ 
+    """
     The manager class to access MS2/RT/CCS models.
-                
+
     Attributes
     ----------
     ms2_model : peptdeep.model.ms2.pDeepModel
@@ -249,19 +249,19 @@ class ModelManager(object):
         The CCS prediciton model.
 
     psm_num_to_train_ms2 : int
-        Number of PSMs to train the MS2 model. 
+        Number of PSMs to train the MS2 model.
         Defaults to global_settings['model_mgr']['transfer']['psm_num_to_train_ms2'].
 
     epoch_to_train_ms2 : int
-        Number of epoches to train the MS2 model. 
+        Number of epoches to train the MS2 model.
         Defaults to global_settings['model_mgr']['transfer']['epoch_ms2'].
 
     psm_num_to_train_rt_ccs : int
-        Number of PSMs to train RT/CCS model. 
+        Number of PSMs to train RT/CCS model.
         Defaults to global_settings['model_mgr']['transfer']['psm_num_to_train_rt_ccs'].
 
     epoch_to_train_rt_ccs : int
-        Number of epoches to train RT/CCS model. 
+        Number of epoches to train RT/CCS model.
         Defaults to global_settings['model_mgr']['transfer']['epoch_rt_ccs'].
 
     nce : float
@@ -277,7 +277,7 @@ class ModelManager(object):
         NCE and instrument type. This will change `self.nce` and `self.instrument` values.
         Defaults to global_settings['model_mgr']['transfer']['grid_nce_search'].
     """
-    def __init__(self, 
+    def __init__(self,
         mask_modloss:bool=False,
         device:str="gpu",
     ):
@@ -285,8 +285,8 @@ class ModelManager(object):
         Parameters
         ----------
         mask_modloss : bool, optional
-            If modloss ions are masked to zeros in the ms2 model. `modloss` 
-            ions are mostly useful for phospho MS2 prediciton model. 
+            If modloss ions are masked to zeros in the ms2 model. `modloss`
+            ions are mostly useful for phospho MS2 prediciton model.
             Defaults to True.
 
         device : str, optional
@@ -329,7 +329,7 @@ class ModelManager(object):
             )
 
             self.ms2_model.model._mask_modloss = global_settings['model_mgr']['mask_modloss']
-            
+
             device = global_settings['torch_device']['device_type']
             self.ms2_model.set_device(device)
             self.rt_model.set_device(device)
@@ -417,7 +417,7 @@ class ModelManager(object):
 
     def set_default_nce_instrument(self, df):
         """
-        Append 'nce' and 'instrument' columns into df 
+        Append 'nce' and 'instrument' columns into df
         with self.nce and self.instrument
         """
         if 'nce' not in df.columns and 'instrument' not in df.columns:
@@ -450,15 +450,15 @@ class ModelManager(object):
             os.makedirs(folder)
             self.save_models(folder)
 
-    def load_installed_models(self, 
+    def load_installed_models(self,
         model_type:str='generic'
     ):
         """ Load built-in MS2/CCS/RT models.
-        
+
         Parameters
         ----------
         model_type : str, optional
-            To load the installed MS2/RT/CCS models or phos MS2/RT/CCS models. 
+            To load the installed MS2/RT/CCS models or phos MS2/RT/CCS models.
             It could be 'digly', 'phospho', 'HLA', or 'generic'.
             Defaults to 'generic'.
         """
@@ -470,15 +470,15 @@ class ModelManager(object):
                 model_path_in_zip='generic/ms2.pth'
             )
             self.rt_model.load(
-                model_zip, 
+                model_zip,
                 model_path_in_zip='phospho/rt_phos.pth'
             )
             self.ccs_model.load(
-                model_zip, 
+                model_zip,
                 model_path_in_zip='generic/ccs.pth'
             )
         elif model_type.lower() in [
-            'digly','glygly','ubiquitylation', 
+            'digly','glygly','ubiquitylation',
             'ubiquitination','ubiquitinylation'
         ]:
             self.ms2_model.load(
@@ -486,11 +486,11 @@ class ModelManager(object):
                 model_path_in_zip='generic/ms2.pth'
             )
             self.rt_model.load(
-                model_zip, 
+                model_zip,
                 model_path_in_zip='digly/rt_digly.pth'
             )
             self.ccs_model.load(
-                model_zip, 
+                model_zip,
                 model_path_in_zip='generic/ccs.pth'
             )
         elif model_type.lower() in ['regular','common','generic']:
@@ -524,7 +524,7 @@ class ModelManager(object):
         Parameters
         ----------
         ms2_model_file : Tuple[str, io.BytesIO], optional
-            MS2 model file or stream. Do nothing if the value is '' or None. 
+            MS2 model file or stream. Do nothing if the value is '' or None.
             Defaults to ''.
 
         rt_model_file : Tuple[str, io.BytesIO], optional
@@ -532,7 +532,7 @@ class ModelManager(object):
             Defaults to ''.
 
         ccs_model_file : Tuple[str, io.BytesIO], optional
-            CCS model or stream. Do nothing if the value is '' or None. 
+            CCS model or stream. Do nothing if the value is '' or None.
             Defaults to ''.
         """
 
@@ -560,7 +560,7 @@ class ModelManager(object):
             if not os.path.isfile(rt_model_file):
                 logging.info(" -- This model file does not exist")
         _load_file(self.rt_model, rt_model_file)
-        
+
         if isinstance(ccs_model_file, str) and ccs_model_file:
             logging.info(f"Using external ccs model: '{ccs_model_file}'")
             if not os.path.isfile(ccs_model_file):
@@ -570,8 +570,8 @@ class ModelManager(object):
     def train_rt_model(self,
         psm_df:pd.DataFrame,
     ):
-        """ 
-        Train/fine-tune the RT model. The fine-tuning will be skipped 
+        """
+        Train/fine-tune the RT model. The fine-tuning will be skipped
         if `self.psm_num_to_train_rt_ccs` is zero.
 
         Parameters
@@ -597,7 +597,7 @@ class ModelManager(object):
                 logging.info(f"{len(tr_df)} PSMs for RT model training/transfer learning")
         else:
             tr_df = []
-        
+
         if self.psm_num_to_test_rt_ccs > 0:
             if len(tr_df) > 0:
                 test_psm_df = psm_df[
@@ -618,31 +618,31 @@ class ModelManager(object):
         else:
             test_psm_df = []
 
-        if len(test_psm_df) > 0:    
+        if len(test_psm_df) > 0:
             logging.info(
-                "Testing pretrained RT model:\n" + 
+                "Testing pretrained RT model:\n" +
                 str(self.rt_model.test(test_psm_df))
             )
-        
+
         if len(tr_df) > 0:
-            self.rt_model.train(tr_df, 
+            self.rt_model.train(tr_df,
                 batch_size=self.batch_size_to_train_rt_ccs,
                 epoch=self.epoch_to_train_rt_ccs,
                 warmup_epoch=self.warmup_epoch_to_train_rt_ccs,
                 lr=self.lr_to_train_rt_ccs,
                 verbose=self.train_verbose,
             )
-        
-        if len(test_psm_df) > 0:    
+
+        if len(test_psm_df) > 0:
             logging.info(
-                "Testing refined RT model:\n" + 
+                "Testing refined RT model:\n" +
                 str(self.rt_model.test(test_psm_df))
             )
 
     def train_ccs_model(self,
         psm_df:pd.DataFrame,
     ):
-        """ 
+        """
         Train/fine-tune the CCS model. The fine-tuning will be skipped
         if `self.psm_num_to_train_rt_ccs` is zero.
 
@@ -680,7 +680,7 @@ class ModelManager(object):
                 logging.info(f"{len(tr_df)} PSMs for CCS model training/transfer learning")
         else:
             tr_df = []
-        
+
         if self.psm_num_to_test_rt_ccs > 0:
             if len(tr_df) > 0:
                 test_psm_df = psm_df[
@@ -703,22 +703,22 @@ class ModelManager(object):
 
         if len(test_psm_df) > 0:
             logging.info(
-                "Testing pretrained CCS model:\n" + 
+                "Testing pretrained CCS model:\n" +
                 str(self.ccs_model.test(test_psm_df))
             )
 
         if len(tr_df) > 0:
-            self.ccs_model.train(tr_df, 
+            self.ccs_model.train(tr_df,
                 batch_size=self.batch_size_to_train_rt_ccs,
                 epoch=self.epoch_to_train_rt_ccs,
                 warmup_epoch=self.warmup_epoch_to_train_rt_ccs,
                 lr=self.lr_to_train_rt_ccs,
                 verbose=self.train_verbose,
             )
-          
-        if len(test_psm_df) > 0:  
+
+        if len(test_psm_df) > 0:
             logging.info(
-                "Testing refined CCS model:\n" + 
+                "Testing refined CCS model:\n" +
                 str(self.ccs_model.test(test_psm_df))
             )
 
@@ -727,10 +727,10 @@ class ModelManager(object):
         matched_intensity_df: pd.DataFrame,
     ):
         """
-        Using matched_intensity_df to train/fine-tune the ms2 model. 
-        
+        Using matched_intensity_df to train/fine-tune the ms2 model.
+
         1. It will sample `n=self.psm_num_to_train_ms2` PSMs into training dataframe (`tr_df`) to for fine-tuning.
-        2. This method will also consider some important PTMs (`n=self.top_n_mods_to_train`) into `tr_df` for fine-tuning. 
+        2. This method will also consider some important PTMs (`n=self.top_n_mods_to_train`) into `tr_df` for fine-tuning.
         3. If `self.use_grid_nce_search==True`, this method will call `self.ms2_model.grid_nce_search` to find the best NCE and instrument.
 
         Parameters
@@ -817,7 +817,7 @@ class ModelManager(object):
         if len(tr_df) > 0:
             if self._train_psm_logging:
                 logging.info(f"{len(tr_df)} PSMs for MS2 model training/transfer learning")
-            self.ms2_model.train(tr_df, 
+            self.ms2_model.train(tr_df,
                 fragment_intensity_df=tr_inten_df,
                 batch_size=self.batch_size_to_train_ms2,
                 epoch=self.epoch_to_train_ms2,
@@ -836,8 +836,8 @@ class ModelManager(object):
             )
 
 
-    def predict_ms2(self, precursor_df:pd.DataFrame, 
-        *, 
+    def predict_ms2(self, precursor_df:pd.DataFrame,
+        *,
         batch_size:int=512,
         reference_frag_df:pd.DataFrame = None,
     )->pd.DataFrame:
@@ -849,32 +849,32 @@ class ModelManager(object):
             Precursor dataframe for MS2 prediction
 
         batch_size : int, optional
-            Batch size for prediction. 
+            Batch size for prediction.
             Defaults to 512.
 
         reference_frag_df : pd.DataFrame, optional
-            If precursor_df has 'frag_start_idx' pointing to reference_frag_df. 
+            If precursor_df has 'frag_start_idx' pointing to reference_frag_df.
             Defaults to None
 
         Returns
         -------
         pd.DataFrame
-            Predicted fragment intensity dataframe. 
-            If there are no such two columns in precursor_df, 
-            it will insert 'frag_start_idx' and `frag_stop_idx` in 
+            Predicted fragment intensity dataframe.
+            If there are no such two columns in precursor_df,
+            it will insert 'frag_start_idx' and `frag_stop_idx` in
             precursor_df pointing to this predicted fragment dataframe.
         """
         self.set_default_nce_instrument(precursor_df)
         if self.verbose:
             logging.info('Predicting MS2 ...')
-        return self.ms2_model.predict(precursor_df, 
+        return self.ms2_model.predict(precursor_df,
             batch_size=batch_size,
             reference_frag_df=reference_frag_df,
             verbose=self.verbose
         )
 
     def predict_rt(self, precursor_df:pd.DataFrame,
-        *, 
+        *,
         batch_size:int=1024
     )->pd.DataFrame:
         """ Predict RT ('rt_pred') inplace into `precursor_df`.
@@ -885,7 +885,7 @@ class ModelManager(object):
             precursor_df for RT prediction
 
         batch_size : int, optional
-            Batch size for prediction. 
+            Batch size for prediction.
             Defaults to 1024.
 
         Returns
@@ -895,14 +895,14 @@ class ModelManager(object):
         """
         if self.verbose:
             logging.info("Predicting RT ...")
-        df = self.rt_model.predict(precursor_df, 
+        df = self.rt_model.predict(precursor_df,
             batch_size=batch_size, verbose=self.verbose
         )
         df['rt_norm_pred'] = df.rt_pred
         return df
 
     def predict_mobility(self, precursor_df:pd.DataFrame,
-        *, 
+        *,
         batch_size:int=1024
     )->pd.DataFrame:
         """ Predict mobility (`ccs_pred` and `mobility_pred`) inplace into `precursor_df`.
@@ -913,7 +913,7 @@ class ModelManager(object):
             Precursor_df for CCS/mobility prediction
 
         batch_size : int, optional
-            Batch size for prediction. 
+            Batch size for prediction.
             Defaults to 1024.
 
         Returns
@@ -941,7 +941,7 @@ class ModelManager(object):
         *,
         predict_items:list = [
             'rt' ,'mobility' ,'ms2'
-        ], 
+        ],
         frag_types:list =  None,
         process_num:int = 8,
         mp_batch_size:int = 100000,
@@ -990,9 +990,9 @@ class ModelManager(object):
         with mp.get_context('spawn').Pool(process_num) as p:
             for ret_dict in process_bar(
                 p.imap_unordered(
-                    self._predict_func_for_mp, 
+                    self._predict_func_for_mp,
                     mp_param_generator(df_groupby)
-                ), 
+                ),
                 get_batch_num_mp(df_groupby)
             ):
                 precursor_df_list.append(ret_dict['precursor_df'])
@@ -1013,46 +1013,46 @@ class ModelManager(object):
                 fragment_mz_df_list,
                 fragment_intensity_df_list,
             )
-            
+
             return {
-                'precursor_df': precursor_df, 
+                'precursor_df': precursor_df,
                 'fragment_mz_df': fragment_mz_df,
-                'fragment_intensity_df': fragment_intensity_df, 
+                'fragment_intensity_df': fragment_intensity_df,
             }
         else:
             precursor_df = pd.concat(precursor_df_list)
             precursor_df.reset_index(drop=True, inplace=True)
-            
-            return {'precursor_df': precursor_df} 
+
+            return {'precursor_df': precursor_df}
 
     def predict_all(self, precursor_df:pd.DataFrame,
-        *, 
+        *,
         predict_items:list = [
             'rt' ,'mobility' ,'ms2'
-        ], 
+        ],
         frag_types:list =  None,
         multiprocessing:bool = True,
         min_required_precursor_num_for_mp:int = 3000,
         process_num:int = 8,
         mp_batch_size:int = 100000,
     )->Dict[str, pd.DataFrame]:
-        """ 
-        Predict all items defined by `predict_items`, 
-        which may include rt, mobility, fragment_mz 
+        """
+        Predict all items defined by `predict_items`,
+        which may include rt, mobility, fragment_mz
         and fragment_intensity.
 
         Parameters
         ----------
         precursor_df : pd.DataFrame
-            Precursor dataframe contains `sequence`, `mods`, `mod_sites`, `charge` ... columns. 
+            Precursor dataframe contains `sequence`, `mods`, `mod_sites`, `charge` ... columns.
 
         predict_items : list, optional
             items ('rt', 'mobility', 'ms2') to predict.
             Defaults to ['rt' ,'mobility' ,'ms2'].
 
         frag_types : list, optional
-            Fragment types to predict. 
-            If it is None, it then depends on `self.ms2_model.charged_frag_types` and 
+            Fragment types to predict.
+            If it is None, it then depends on `self.ms2_model.charged_frag_types` and
             `self.ms2_model.model._mask_modloss`.
             Defaults to None.
 
@@ -1064,14 +1064,14 @@ class ModelManager(object):
             Defaults to 4
 
         min_required_precursor_num_for_mp : int, optional
-            It will not use multiprocessing when the number of precursors in precursor_df 
-            is lower than this value. 
+            It will not use multiprocessing when the number of precursors in precursor_df
+            is lower than this value.
             Defaults to 3000.
 
         mp_batch_size : int, optional
-            Splitting data into batches for multiprocessing. 
+            Splitting data into batches for multiprocessing.
             Defaults to 100000.
-              
+
         Returns
         -------
         Dict[str, pd.DataFrame]
@@ -1103,13 +1103,13 @@ class ModelManager(object):
             update_precursor_mz(precursor_df)
 
         if (
-            self.ms2_model.device_type!='cpu' 
+            self.ms2_model.device_type!='cpu'
             or not multiprocessing or process_num <= 1
             or len(precursor_df) < min_required_precursor_num_for_mp
         ):
             refine_df(precursor_df)
             if 'rt' in predict_items:
-                self.predict_rt(precursor_df, 
+                self.predict_rt(precursor_df,
                     batch_size=model_mgr_settings['predict']['batch_size_rt_ccs']
                 )
             if 'mobility' in predict_items:
@@ -1119,14 +1119,14 @@ class ModelManager(object):
             if 'ms2' in predict_items:
                 if 'frag_start_idx' in precursor_df.columns:
                     precursor_df.drop(
-                        columns=['frag_start_idx','frag_stop_idx'], 
+                        columns=['frag_start_idx','frag_stop_idx'],
                         inplace=True
                     )
 
                 fragment_mz_df = create_fragment_mz_dataframe(
                     precursor_df, frag_types
                 )
-                
+
                 fragment_intensity_df = self.predict_ms2(
                     precursor_df,
                     batch_size=model_mgr_settings['predict']['batch_size_ms2']
@@ -1144,16 +1144,16 @@ class ModelManager(object):
                 )
 
                 return {
-                    'precursor_df': precursor_df, 
+                    'precursor_df': precursor_df,
                     'fragment_mz_df': fragment_mz_df,
-                    'fragment_intensity_df': fragment_intensity_df, 
+                    'fragment_intensity_df': fragment_intensity_df,
                 }
             else:
                 return {'precursor_df': precursor_df}
         else:
             logging.info(f"Using multiprocessing with {process_num} processes ...")
             return self.predict_all_mp(
-                precursor_df, 
+                precursor_df,
                 predict_items=predict_items,
                 process_num = process_num,
                 mp_batch_size=mp_batch_size,

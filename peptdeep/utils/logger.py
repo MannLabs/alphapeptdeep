@@ -50,7 +50,7 @@ def set_logger(
     log_level : str or int
         The logging level. Usable values are defined in Python's "logging"
         module. Could be: 'debug', 'info', 'warning', 'error', 'critical'.
-        See `log_level_dict`. 
+        See `log_level_dict`.
         Default is 'info'.
 
     overwrite : bool
@@ -68,7 +68,7 @@ def set_logger(
             log_level = log_level_dict[log_level.lower()]
         else:
             log_level = logging.INFO
-    
+
     root = logging.getLogger()
     formatter = logging.Formatter(
         '%(asctime)s> %(message)s', "%Y-%m-%d %H:%M:%S"
