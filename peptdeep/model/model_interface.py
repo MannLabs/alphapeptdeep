@@ -18,7 +18,7 @@ from torch.optim.lr_scheduler import LambdaLR
 from zipfile import ZipFile
 from typing import IO, Tuple, List, Union
 from alphabase.yaml_utils import save_yaml, load_yaml
-from alphabase.peptide.precursor import is_precursor_sorted
+from alphabase.peptide.precursor import is_precursor_refined
 
 from peptdeep.settings import model_const
 from peptdeep.utils import ( 
@@ -1076,7 +1076,7 @@ class ModelInterface(object):
         self.set_lr(lr)
 
     def _check_predict_in_order(self, precursor_df:pd.DataFrame):
-        if is_precursor_sorted(precursor_df):
+        if is_precursor_refined(precursor_df):
             self._predict_in_order = True
         else:
             self._predict_in_order = False

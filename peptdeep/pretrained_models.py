@@ -18,11 +18,10 @@ if sys.platform.lower().startswith("linux"):
 
 from typing import Dict
 from zipfile import ZipFile
-from typing import Tuple, Union
+from typing import Union
 
 from alphabase.peptide.fragment import (
     create_fragment_mz_dataframe,
-    get_charged_frag_types,
     concat_precursor_fragment_dataframes
 )
 from alphabase.peptide.precursor import (

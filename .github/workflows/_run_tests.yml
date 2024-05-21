@@ -41,6 +41,6 @@ jobs:
       shell: bash -l {0}
       run: |
         conda activate peptdeep
-        INCLUDED_NBS=$(find ./nbdev_nbs -name "*.ipynb")
-        python -m pytest --nbmake $(echo $INCLUDED_NBS)
+        cd tests
+        . ./run_tests.sh
         conda deactivate

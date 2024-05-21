@@ -9,7 +9,7 @@ on:
   push:
     branches: [ main, development ]
   pull_request:
-    branches: [ main, development ]
+    branches: [ main ]
   workflow_dispatch:
 
 name: Pip installation and tests

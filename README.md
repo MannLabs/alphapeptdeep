@@ -266,20 +266,6 @@ if an editable version is installed. In case of confusion, you can
 always retrieve the location of any Python module with e.g. the command
 `import module` followed by `module.__file__`.***
 
-We used [nbdev v2](https://nbdev.fast.ai/) for developers to build
-Python source code and docs smoothly from Python notebooks, so please do
-not edit .py files directly, edit .ipynb in `nbdev_nbs` folder instead.
-After installing nbdev, cd to alphapeptdeep project folder and run:
-
-``` bash
-nbdev_install_hooks
-```
-
-to init gitconfig for nbdev. After editing the source code in .ipynb
-files, using `nbdev_export` to build python source code and `nbdev_test`
-to run all .ipynb files in `nbdev_nbs` for testing. Check [nbdev
-docs](https://nbdev.fast.ai/) for more information.
-
 ------------------------------------------------------------------------
 
 ## Usage
