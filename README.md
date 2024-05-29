@@ -266,20 +266,6 @@ if an editable version is installed. In case of confusion, you can
 always retrieve the location of any Python module with e.g. the command
 `import module` followed by `module.__file__`.***
 
-We used [nbdev v2](https://nbdev.fast.ai/) for developers to build
-Python source code and docs smoothly from Python notebooks, so please do
-not edit .py files directly, edit .ipynb in `nbdev_nbs` folder instead.
-After installing nbdev, cd to alphapeptdeep project folder and run:
-
-``` bash
-nbdev_install_hooks
-```
-
-to init gitconfig for nbdev. After editing the source code in .ipynb
-files, using `nbdev_export` to build python source code and `nbdev_test`
-to run all .ipynb files in `nbdev_nbs` for testing. Check [nbdev
-docs](https://nbdev.fast.ai/) for more information.
-
 ------------------------------------------------------------------------
 
 ## Usage
@@ -364,7 +350,7 @@ as a template, users can edit the yaml file to run other commands.
 
 Here is a section of the yaml file which controls global parameters for
 different tasks:
-  
+
 ```
 model_url: "https://github.com/MannLabs/alphapeptdeep/releases/download/pre-trained-models/pretrained_models.zip"
 
@@ -395,7 +381,7 @@ common:
   user_defined_modifications: {}
   # For example,
   # user_defined_modifications:
-  #   "Dimethyl2@Any N-term": 
+  #   "Dimethyl2@Any N-term":
   #     composition: "H(2)2H(2)C(2)"
   #     modloss_composition: "H(0)" # can be without if no modloss
   #   "Dimethyl2@K":
@@ -463,7 +449,7 @@ peptdeep cmd-flow ...
 Support CLI parameters to control `global_settings` for CLI users. It supports three workflows: `train`, `library` or `train library`, controlled by CLI parameter `--task_workflow`, for example, `--task_workflow train library`. All settings in [global_settings](peptdeep/constants/default_settings.yaml) are converted to CLI parameters using `--` as the dict level indicator, for example, `global_settings["library"]["var_mods"]` corresponds to `--library--var_mods`. See [test_cmd_flow.sh](tests/test_cmd_flow.sh) for example.
 
 There are three kinds of parameter types:
-  1. value type (int, float, bool, str): The CLI parameter only has a single value, for instance: `--model_mgr--default_instrument 30.0`. 
+  1. value type (int, float, bool, str): The CLI parameter only has a single value, for instance: `--model_mgr--default_instrument 30.0`.
   2. list type (list): The CLI parameter has a list of values seperated by a space, for instance `--library--var_mods "Oxidation@M" "Acetyl@Protein_N-term"`.
   3. dict type (dict): Only three parameters are `dict type`, `--library--labeling_channels`, `--model_mgr--transfer--psm_modification_mapping`, and `--common--user_defined_modifications`. Here are the examples:
     - `--library--labeling_channels`: labeling channels for the library. Example: `--library--labeling_channels "0:Dimethyl@Any_N-term;Dimethyl@K" "4:xx@Any_N-term;xx@K"`
@@ -489,7 +475,7 @@ library:
   - sequence_table
   - peptide_table # sequence with mods and mod_sites
   - precursor_table # peptide with charge state
-  infiles: 
+  infiles:
   - xxx.fasta
   fasta:
     protease: 'trypsin'
@@ -507,7 +493,7 @@ library:
     - 'glu-c'
     max_miss_cleave: 2
     add_contaminants: False
-  fix_mods: 
+  fix_mods:
   - Carbamidomethyl@C
   var_mods:
   - Acetyl@Protein N-term
@@ -618,7 +604,7 @@ df
 
 |  | sequence | mods | mod_sites | charge |
 | --- | --- | --- | --- | --- |
-| 0 | ACDEFGHIK | Carbamidomethyl@C | 2 | 2 | 
+| 0 | ACDEFGHIK | Carbamidomethyl@C | 2 | 2 |
 | 1 | LMNPQRSTVK | Acetyl@Protein N-term;Phospho@S | 0;7 | 3 |
 | 2 | WYVSTR | | | 1 |
 
@@ -696,14 +682,14 @@ model_mgr:
     psm_num_per_mod_to_train_rt_ccs: 50
     psm_num_to_test_rt_ccs: 0
     top_n_mods_to_train: 10
-    psm_modification_mapping: {} 
+    psm_modification_mapping: {}
     # alphabase modification to modifications of other search engines
     # For example,
     # psm_modification_mapping:
-    #   Dimethyl@Any N-term: 
+    #   Dimethyl@Any N-term:
     #     - _(Dimethyl-n-0)
     #     - _(Dimethyl)
-    #   Dimethyl:2H(2)@K: 
+    #   Dimethyl:2H(2)@K:
     #     - K(Dimethyl-K-2)
     #   ...
 ```
@@ -778,7 +764,7 @@ percolator:
     sklearn_as_backend:
       - linear # logistic regression
       - random_forest
-  lr_percolator_torch_model: 0.1 # learning rate, only used when percolator_backend==pytorch 
+  lr_percolator_torch_model: 0.1 # learning rate, only used when percolator_backend==pytorch
   percolator_iter_num: 5 # percolator iteration number
   cv_fold: 1
   fdr: 0.01
@@ -805,7 +791,7 @@ percolator:
     ms_files: []
     other_score_column_mapping:
       alphapept: {}
-      pfind: 
+      pfind:
         raw_score: Raw_Score
       msfragger:
         hyperscore: hyperscore
@@ -877,7 +863,7 @@ learning](#transfer), and [rescoring](#rescore).
 ``` python
 from peptdeep.pipeline_api import (
     generate_library,
-    transfer_learn, 
+    transfer_learn,
     rescore,
 )
 ```

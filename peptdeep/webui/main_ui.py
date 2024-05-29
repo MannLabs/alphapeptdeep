@@ -8,7 +8,7 @@ import socket
 import peptdeep
 
 from peptdeep.webui import (
-    model_ui, startpage, rescore_ui, 
+    model_ui, startpage, rescore_ui,
     library_ui, transfer_ui,
     settings_ui, server_ui,
 )

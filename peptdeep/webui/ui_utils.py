@@ -31,9 +31,9 @@ def files_in_pandas(files:list) -> pd.DataFrame:
 
     return df
 
-def file_type_selectbox( 
+def file_type_selectbox(
     ui_label:str,
-    st_key:str, 
+    st_key:str,
     default_type:str,
     monitor_files:list,
     choices:list,
@@ -60,8 +60,8 @@ def update_input_paths(file_list:list):
     file_list.extend(_list)
 
 def select_files(
-    file_list:list, 
-    file_exts:list, 
+    file_list:list,
+    file_exts:list,
     ui_label="File"
 ):
     if isinstance(file_exts, str):
@@ -160,7 +160,7 @@ def files_in_folder_pandas(folder: str, file_type:str=None) -> pd.DataFrame:
     else:
         file_type = file_type.lower()
         files = [
-            file for file in os.listdir(folder) 
+            file for file in os.listdir(folder)
             if file.lower().endswith(f".{file_type}") or file.lower() == file_type
         ]
     created = [time.ctime(os.path.getctime(os.path.join(folder, _))) for _ in files]

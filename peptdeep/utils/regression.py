@@ -20,7 +20,7 @@ def regional_sampling(psm_df:pd.DataFrame,
         Defaults to 'rt_norm'.
 
     n_train : int, optional
-        The number of training PSMs to sample. 
+        The number of training PSMs to sample.
         Defaults to 1000.
 
     return_test_df : bool, optional
@@ -87,7 +87,7 @@ def linear_regression(x, y):
     )
 
 def evaluate_linear_regression(
-    df:pd.DataFrame, x='rt_pred', y='rt_norm', 
+    df:pd.DataFrame, x='rt_pred', y='rt_norm',
     ci=95, n_sample=10000000
 ):
     if len(df) > n_sample:
@@ -99,7 +99,7 @@ def evaluate_linear_regression(
     return pd.DataFrame(regs)
 
 def evaluate_linear_regression_plot(
-    df:pd.DataFrame, x='rt_pred', y='rt_norm', 
+    df:pd.DataFrame, x='rt_pred', y='rt_norm',
     ci=95, n_sample=100000
 ):
     import seaborn as sns
@@ -111,6 +111,6 @@ def evaluate_linear_regression_plot(
     elif len(df) < 50000:
         alpha = 5000.0/len(df)
     return sns.regplot(
-        data=df, x=x, y=y, color='r', ci=ci, 
+        data=df, x=x, y=y, color='r', ci=ci,
         scatter_kws={'s':0.05, 'alpha':alpha, 'color':'b'}
     )

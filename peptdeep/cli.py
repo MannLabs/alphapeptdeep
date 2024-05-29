@@ -24,12 +24,12 @@ from .cli_argparse import get_parser, parse_args_to_global_settings
 def run(ctx, **kwargs):
     click.echo(
 r'''
-     ____             __  ____                
-    / __ \___  ____  / /_/ __ \___  ___  ____ 
+     ____             __  ____
+    / __ \___  ____  / /_/ __ \___  ___  ____
    / /_/ / _ \/ __ \/ __/ / / / _ \/ _ \/ __ \
   / ____/  __/ /_/ / /_/ /_/ /  __/  __/ /_/ /
- /_/    \___/ .___/\__/_____/\___/\___/ .___/ 
-           /_/                       /_/      
+ /_/    \___/ .___/\__/_____/\___/\___/ .___/
+           /_/                       /_/
 ....................................................
 .{version}.
 .{url}.
@@ -37,7 +37,7 @@ r'''
 ....................................................
 '''.format(
         version=peptdeep.__version__.center(50),
-        url=peptdeep.__github__.center(50), 
+        url=peptdeep.__github__.center(50),
         license=peptdeep.__license__.center(50),
     )
 )
@@ -81,7 +81,7 @@ _help_str = (
     "\n\nTo get the settings_yaml file,"
     " you can either export from the GUI,"
     " or use `peptdeep export-settings`."
-    " Visit https://github.com/mannlabs/alphapeptdeep/#cli" 
+    " Visit https://github.com/mannlabs/alphapeptdeep/#cli"
     " for detailed usages."
 )
 
@@ -122,7 +122,7 @@ class ParserHelper(click.Command):
         parser = get_parser()
         formatter.write(parser.format_help())
 
-@run.command("cmd-flow", 
+@run.command("cmd-flow",
     help="Using command line arguments to control the settings",
     cls=ParserHelper,
     context_settings=dict(
@@ -132,7 +132,7 @@ class ParserHelper(click.Command):
 @click.pass_context
 def _cmd_flow(ctx):
     parser = get_parser()
-    if len(ctx.args) == 0: 
+    if len(ctx.args) == 0:
         parser.print_help()
     else:
         parse_args_to_global_settings(parser, ctx.args)
@@ -160,4 +160,3 @@ def _cmd_flow(ctx):
         if "library" in global_settings["task_workflow"]:
             from peptdeep.pipeline_api import generate_library
             generate_library()
-    

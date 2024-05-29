@@ -64,8 +64,8 @@ init_state = xavier_param
 
 class SeqCNN_MultiKernel(torch.nn.Module):
     """
-    Extract sequence features using `torch.nn.Conv1D` with 
-    different kernel sizes (1(residue connection),3,5,7), 
+    Extract sequence features using `torch.nn.Conv1D` with
+    different kernel sizes (1(residue connection),3,5,7),
     and then concatenate the outputs of these Conv1Ds.
     """
     def __init__(self, out_features:int):
@@ -79,7 +79,7 @@ class SeqCNN_MultiKernel(torch.nn.Module):
         ------
         ValueError
             "out_features must be divided by 4"
-            
+
         """
         super().__init__()
 
@@ -110,8 +110,8 @@ class SeqCNN_MultiKernel(torch.nn.Module):
 #legacy
 class SeqCNN(torch.nn.Module):
     """
-    Extract sequence features using `torch.nn.Conv1D` with 
-    different kernel sizes (1(residue connection),3,5,7), and then concatenate 
+    Extract sequence features using `torch.nn.Conv1D` with
+    different kernel sizes (1(residue connection),3,5,7), and then concatenate
     the outputs of these Conv1Ds. The Output dim is 4*embedding_hidden.
     """
     def __init__(self, embedding_hidden):
@@ -156,7 +156,7 @@ class Seq_Transformer(torch.nn.Module):
         self.transformer_encoder = torch.nn.TransformerEncoder(
             encoder_layers, nlayers
         )
-        
+
     def forward(self, x):
         return self.transformer_encoder(x.permute(1,0,2)).permute(1,0,2)
 
@@ -165,21 +165,21 @@ class Hidden_Transformer(torch.nn.Module):
     """
     Transformer NN based on pytorch's built-in TransformerLayer class
     """
-    def __init__(self, 
+    def __init__(self,
         hidden, hidden_expand=4,
         nheads=8, nlayers=4, dropout=0.1
     ):
         super().__init__()
         self.transormer = Seq_Transformer(
-            hidden, hidden*hidden_expand, nheads=nheads, 
+            hidden, hidden*hidden_expand, nheads=nheads,
             nlayers=nlayers, dropout=dropout
         )
     def forward(self, x):
         return self.transormer(x)
 
 class _Pseudo_Bert_Config:
-    def __init__(self, 
-        hidden_dim=256, 
+    def __init__(self,
+        hidden_dim=256,
         intermediate_size=1024,
         num_attention_heads=8,
         num_bert_layers=4,
@@ -201,12 +201,13 @@ class _Pseudo_Bert_Config:
         self.num_attention_heads = num_attention_heads
         self.num_hidden_layers = num_bert_layers
         self.output_attentions = output_attentions
+        self._attn_implementation = "eager" # Add this for transformers-4.41.0
 
 class Hidden_HFace_Transformer(torch.nn.Module):
     """
     Transformer NN based on HuggingFace's BertEncoder class
     """
-    def __init__(self, 
+    def __init__(self,
         hidden_dim, hidden_expand=4,
         nheads=8, nlayers=4, dropout=0.1,
         output_attentions=False,
@@ -222,7 +223,7 @@ class Hidden_HFace_Transformer(torch.nn.Module):
         )
         self.output_attentions = output_attentions
         self.bert = BertEncoder(self.config)
-    def forward(self, x:torch.Tensor, 
+    def forward(self, x:torch.Tensor,
         attention_mask:torch.Tensor=None,
     )->tuple:
         """
@@ -236,8 +237,8 @@ class Hidden_HFace_Transformer(torch.nn.Module):
         Returns
         -------
         (Tensor, [Tensor])
-            out[0] is the hidden layer output, 
-            and out[1] is the output attention 
+            out[0] is the hidden layer output,
+            and out[1] is the output attention
             if self.output_attentions==True
         """
         if attention_mask is not None:
@@ -293,7 +294,7 @@ class HFace_Transformer_with_PositionalEncoder(torch.nn.Module):
             nheads=nheads, nlayers=nlayers, dropout=dropout,
             output_attentions=output_attentions
         )
-    def forward(self, 
+    def forward(self,
         x:torch.Tensor,
         attention_mask:torch.Tensor=None,
     )->tuple:
@@ -316,7 +317,7 @@ class SeqLSTM(torch.nn.Module):
     """
     returns LSTM applied on sequence input
     """
-    def __init__(self, in_features, out_features, 
+    def __init__(self, in_features, out_features,
                  rnn_layer=2, bidirectional=True
         ):
         super().__init__()
@@ -335,7 +336,7 @@ class SeqLSTM(torch.nn.Module):
         self.rnn_c0 = init_state(
             rnn_layer+rnn_layer*bidirectional,
             1, hidden
-        ) 
+        )
         self.rnn = torch.nn.LSTM(
             input_size = in_features,
             hidden_size = hidden,
@@ -354,7 +355,7 @@ class SeqGRU(torch.nn.Module):
     """
     returns GRU applied on sequence input
     """
-    def __init__(self, in_features, out_features, 
+    def __init__(self, in_features, out_features,
                  rnn_layer=2, bidirectional=True
         ):
         super().__init__()
@@ -367,9 +368,9 @@ class SeqGRU(torch.nn.Module):
             hidden = out_features//2
         else:
             hidden = out_features
-        
+
         self.rnn_h0 = init_state(
-            rnn_layer+rnn_layer*bidirectional, 
+            rnn_layer+rnn_layer*bidirectional,
             1, hidden
         )
         self.rnn = torch.nn.GRU(
@@ -395,7 +396,7 @@ class SeqAttentionSum(torch.nn.Module):
             torch.nn.Linear(in_features, 1, bias=False),
             torch.nn.Softmax(dim=1),
         )
-    
+
     def forward(self, x):
         attn = self.attn(x)
         return torch.sum(torch.mul(x, attn), dim=1)
@@ -438,7 +439,7 @@ class PositionalEmbedding(torch.nn.Module):
         ).unsqueeze(0))
 
 class Meta_Embedding(torch.nn.Module):
-    """Encodes Charge state, Normalized Collision Energy (NCE) and Instrument for a given spectrum 
+    """Encodes Charge state, Normalized Collision Energy (NCE) and Instrument for a given spectrum
     into a 'meta' single layer network
     """
     def __init__(self,
@@ -479,7 +480,7 @@ class Mod_Embedding_FixFirstK(torch.nn.Module):
         mod_x,
     ):
         return torch.cat((
-            mod_x[:,:,:self.k], 
+            mod_x[:,:,:self.k],
             self.nn(mod_x[:,:,self.k:])
         ), 2)
 #legacy
@@ -541,8 +542,8 @@ class Input_26AA_Mod_PositionalEncoding(torch.nn.Module):
         self.pos_encoder = PositionalEncoding(
             out_features, max_len
         )
-        
-    def forward(self, 
+
+    def forward(self,
         aa_indices, mod_x
     ):
         mod_x = self.mod_nn(mod_x)
@@ -565,8 +566,8 @@ class Input_AA_Mod_PositionalEncoding(torch.nn.Module):
         self.pos_encoder = PositionalEncoding(
             out_features, max_len
         )
-        
-    def forward(self, 
+
+    def forward(self,
         aa_indices, mod_x
     ):
         mod_x = self.mod_nn(mod_x)
@@ -588,8 +589,8 @@ class Input_AA_Mod_Charge_PositionalEncoding(torch.nn.Module):
         self.pos_encoder = PositionalEncoding(
             out_features, max_len
         )
-        
-    def forward(self, 
+
+    def forward(self,
         aa_indices, mod_x, charges
     ):
         mod_x = self.mod_nn(mod_x)
@@ -613,7 +614,7 @@ class Input_26AA_Mod_LSTM(torch.nn.Module):
         self.lstm = SeqLSTM(
             aa_embedding_size+mod_hidden,
             out_features,
-            n_lstm_layers=n_lstm_layers, 
+            n_lstm_layers=n_lstm_layers,
             bidirectional=True
         )
     def forward(self, aa_indices, mod_x):
@@ -623,11 +624,11 @@ class Input_26AA_Mod_LSTM(torch.nn.Module):
 #legacy
 InputAALSTM = Input_26AA_Mod_LSTM
 
-        
+
 class Input_26AA_Mod_Meta_LSTM(torch.nn.Module):
     """
     Applies a LSTM network to a AA (26 AA letters) sequence and modifications,
-    and concatenates with 'meta' information (charge, nce, instrument_indices) 
+    and concatenates with 'meta' information (charge, nce, instrument_indices)
     """
     def __init__(self,
         out_features,
@@ -642,8 +643,8 @@ class Input_26AA_Mod_Meta_LSTM(torch.nn.Module):
             out_features-meta_dim,
             rnn_layer=1, bidirectional=True
         )
-        
-    def forward(self, 
+
+    def forward(self,
         aa_indices, mod_x, charges, NCEs, instrument_indices
     ):
         mod_x = self.mod_nn(mod_x)
@@ -659,7 +660,7 @@ InputAALSTM_cat_Meta = Input_26AA_Mod_Meta_LSTM
 
 class Input_26AA_Mod_Charge_LSTM(torch.nn.Module):
     """
-    Applies a LSTM network to a AA (26 AA letters) sequence and modifications, 
+    Applies a LSTM network to a AA (26 AA letters) sequence and modifications,
     and concatenates with charge state information
     """
     def __init__(self,
@@ -674,7 +675,7 @@ class Input_26AA_Mod_Charge_LSTM(torch.nn.Module):
             out_features-self.charge_dim,
             rnn_layer=1, bidirectional=True
         )
-        
+
     def forward(self, aa_indices, mod_x, charges):
         mod_x = self.mod_nn(mod_x)
         x = aa_one_hot(aa_indices, mod_x)
@@ -689,7 +690,7 @@ InputAALSTM_cat_Charge = Input_26AA_Mod_Charge_LSTM
 
 class Seq_Meta_LSTM(torch.nn.Module):
     """
-    Takes a hidden layer which processes the hidden tensor 
+    Takes a hidden layer which processes the hidden tensor
     as well as the 'meta' information of NCE, Instrument, Charge
     """
     def __init__(self,
@@ -704,7 +705,7 @@ class Seq_Meta_LSTM(torch.nn.Module):
             out_features,
             rnn_layer=1, bidirectional=False
         )
-        
+
     def forward(self, x, charges, NCEs, instrument_indices):
         meta_x = self.meta_nn(
             charges, NCEs, instrument_indices
@@ -712,7 +713,7 @@ class Seq_Meta_LSTM(torch.nn.Module):
         return self.nn(torch.cat((x, meta_x), 2))
 #legacy
 OutputLSTM_cat_Meta = Seq_Meta_LSTM
-    
+
 class Seq_Meta_Linear(torch.nn.Module):
     """
     takes a hidden linear which processed the 'meta' information of NCE, Instrument, Charge
@@ -729,7 +730,7 @@ class Seq_Meta_Linear(torch.nn.Module):
             out_features,
             bias=False
         )
-        
+
     def forward(self, x, charges, NCEs, instrument_indices):
         meta_x = self.meta_nn(
             charges, NCEs, instrument_indices
@@ -744,10 +745,10 @@ class Encoder_26AA_Mod_LSTM(torch.nn.Module):
     """
     def __init__(self, out_features, n_lstm_layers=1):
         super().__init__()
-        
+
         self.input_nn = Input_26AA_Mod_LSTM(out_features)
         self.nn = SeqLSTM(
-            out_features, out_features, 
+            out_features, out_features,
             rnn_layer=n_lstm_layers
         )
 
@@ -772,7 +773,7 @@ class Encoder_26AA_Mod_CNN_LSTM(torch.nn.Module):
         input_dim = aa_embedding_size+mod_hidden
         self.input_cnn = SeqCNN(input_dim)
         self.hidden_nn = SeqLSTM(
-            input_dim*4, out_features, 
+            input_dim*4, out_features,
             rnn_layer=n_lstm_layers
         ) #SeqCNN outputs 4*input_dim
 
@@ -788,19 +789,19 @@ Input_AA_CNN_Encoder = Encoder_26AA_Mod_CNN_LSTM
 
 class Encoder_26AA_Mod_CNN_LSTM_AttnSum(torch.nn.Module):
     """
-    Encode AAs (26 AA letters) and modifications by CNN and LSTM layers, 
+    Encode AAs (26 AA letters) and modifications by CNN and LSTM layers,
     then by 'SeqAttentionSum'.
     """
     def __init__(self, out_features, n_lstm_layers=2):
         super().__init__()
-        
+
         mod_hidden = 8
         self.mod_nn = Mod_Embedding_FixFirstK(mod_hidden)
 
         input_dim = aa_embedding_size+mod_hidden
         self.input_cnn = SeqCNN(input_dim)
         self.hidden_nn = SeqLSTM(
-            input_dim*4, out_features, 
+            input_dim*4, out_features,
             rnn_layer=n_lstm_layers
         ) #SeqCNN outputs 4*input_dim
         self.attn_sum = SeqAttentionSum(out_features)
@@ -817,12 +818,12 @@ Input_AA_CNN_LSTM_Encoder = Encoder_26AA_Mod_CNN_LSTM_AttnSum
 
 class Encoder_AA_Mod_CNN_LSTM_AttnSum(torch.nn.Module):
     """
-    Encode AAs (128 ASCII codes) and modifications by CNN and LSTM layers, 
+    Encode AAs (128 ASCII codes) and modifications by CNN and LSTM layers,
     and then by 'SeqAttentionSum'.
     """
     def __init__(self, out_features, n_lstm_layers=2):
         super().__init__()
-        
+
         mod_hidden = 8
         input_dim = out_features//4
         self.aa_mod_embedding = AA_Mod_Embedding(
@@ -830,7 +831,7 @@ class Encoder_AA_Mod_CNN_LSTM_AttnSum(torch.nn.Module):
         )
         self.input_cnn = SeqCNN(input_dim)
         self.hidden_nn = SeqLSTM(
-            input_dim*4, out_features, 
+            input_dim*4, out_features,
             rnn_layer=n_lstm_layers
         ) #SeqCNN outputs 4*input_dim
         self.attn_sum = SeqAttentionSum(out_features)
@@ -845,7 +846,7 @@ class Encoder_AA_Mod_CNN_LSTM_AttnSum(torch.nn.Module):
 
 class Encoder_AA_Mod_Transformer(torch.nn.Module):
     """
-    AAs (128 ASCII codes) and modifications embedded by Bert, 
+    AAs (128 ASCII codes) and modifications embedded by Bert,
     then encoded by 'SeqAttentionSum'.
     """
     def __init__(self,out_features,
@@ -856,7 +857,7 @@ class Encoder_AA_Mod_Transformer(torch.nn.Module):
         super().__init__()
 
         self.dropout = torch.nn.Dropout(dropout)
-        
+
         self.input_nn = Input_AA_Mod_PositionalEncoding(out_features)
 
         self.output_attentions = output_attentions
@@ -891,13 +892,13 @@ class Encoder_AA_Mod_Transformer_AttnSum(torch.nn.Module):
         super().__init__()
 
         self.dropout = torch.nn.Dropout(dropout)
-        
+
         self.encoder_nn = Encoder_AA_Mod_Transformer(
             out_features, dropout=dropout, nlayers=nlayers,
-            output_attentions=output_attentions 
+            output_attentions=output_attentions
         )
         self.attn_sum = SeqAttentionSum(out_features)
-        
+
     def forward(self, aa_indices, mod_x):
         x = self.encoder_nn(aa_indices, mod_x)
         return self.dropout(self.attn_sum(x))
@@ -912,7 +913,7 @@ class Encoder_AA_Mod_Charge_Transformer(torch.nn.Module):
         output_attentions=False
     ):
         super().__init__()
-        
+
         self.dropout = torch.nn.Dropout(dropout)
         self.input_nn = Input_AA_Mod_Charge_PositionalEncoding(out_features)
 
@@ -938,7 +939,7 @@ class Encoder_AA_Mod_Charge_Transformer(torch.nn.Module):
 
 class Encoder_AA_Mod_Charge_Transformer_AttnSum(torch.nn.Module):
     """
-    Encode AAs (128 ASCII codes), modifications and charge by transformers, 
+    Encode AAs (128 ASCII codes), modifications and charge by transformers,
     and then by 'SeqAttentionSum'
     """
     def __init__(self,out_features,
@@ -949,10 +950,10 @@ class Encoder_AA_Mod_Charge_Transformer_AttnSum(torch.nn.Module):
         super().__init__()
 
         self.dropout = torch.nn.Dropout(dropout)
-        
+
         self.encoder_nn = Encoder_AA_Mod_Charge_Transformer(
             out_features, dropout=dropout, nlayers=nlayers,
-            output_attentions=output_attentions 
+            output_attentions=output_attentions
         )
         self.attn_sum = SeqAttentionSum(out_features)
     def forward(self, aa_indices, mod_x, charges):
@@ -961,12 +962,12 @@ class Encoder_AA_Mod_Charge_Transformer_AttnSum(torch.nn.Module):
 
 class Encoder_26AA_Mod_Charge_CNN_LSTM_AttnSum(torch.nn.Module):
     """
-    Encode AAs (26 AA letters), modifications and charge by transformers, 
+    Encode AAs (26 AA letters), modifications and charge by transformers,
     and then by 'SeqAttentionSum'
     """
     def __init__(self, out_features):
         super().__init__()
-        
+
         mod_hidden = 8
         self.mod_nn = Mod_Embedding_FixFirstK(mod_hidden)
 
@@ -980,7 +981,7 @@ class Encoder_26AA_Mod_Charge_CNN_LSTM_AttnSum(torch.nn.Module):
     def forward(self, aa_indices, mod_x, charges):
         mod_x = self.mod_nn(mod_x)
         x = aa_one_hot(
-            aa_indices, mod_x, 
+            aa_indices, mod_x,
             charges.unsqueeze(1).repeat(1,mod_x.size(1),1)
         )
         x = self.input_cnn(x)
@@ -1008,7 +1009,7 @@ class Decoder_LSTM(torch.nn.Module):
         self.output_nn = torch.nn.Linear(
             hidden, out_features, bias=False
         )
-    
+
     def forward(self, x:torch.tensor, output_len):
         x = self.rnn(
             x.unsqueeze(1).repeat(1,output_len,1)
@@ -1034,7 +1035,7 @@ class Decoder_GRU(torch.nn.Module):
         self.output_nn = torch.nn.Linear(
             hidden, out_features, bias=False
         )
-    
+
     def forward(self, x:torch.tensor, output_len):
         x = self.rnn(
             x.unsqueeze(1).repeat(1,output_len,1)

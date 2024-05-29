@@ -1,0 +1,6 @@
+
+[tool.ruff.lint]
+select = ["E", "F"]
+ignore = [
+    "E501"  # Line too long  (ruff wraps code, but not docstrings)
+]

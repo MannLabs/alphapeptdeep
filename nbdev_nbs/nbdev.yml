@@ -1,9 +1,0 @@
-project:
-  output-dir: docs
-
-website:
-  title: "alphapeptdeep"
-  site-url: "https://MannLabs.github.io/alphapeptdeep"
-  description: "Deep Learning in Proteomics"
-  repo-branch: main
-  repo-url: "https://github.com/MannLabs/alphapeptdeep"

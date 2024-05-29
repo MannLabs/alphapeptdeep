@@ -1,23 +1,12 @@
 import torch
 import pandas as pd
-import numpy as np
 import typing
 
-from tqdm import tqdm
-
-from alphabase.peptide.fragment import update_precursor_mz
 
 from alphabase.peptide.mobility import (
     ccs_to_mobility_for_df,
     mobility_to_ccs_for_df
 )
-
-from peptdeep.model.featurize import (
-    get_batch_aa_indices, 
-    get_batch_mod_feature
-)
-
-from peptdeep.settings import model_const
 
 import peptdeep.model.base as model_base
 from peptdeep.utils import evaluate_linear_regression
@@ -41,7 +30,7 @@ class Model_CCS_Bert(torch.nn.Module):
         self.input_nn = model_base.AATransformerEncoding(hidden-2)
 
         self._output_attentions = output_attentions
-        
+
         self.hidden_nn = model_base.Hidden_HFace_Transformer(
             hidden, nlayers=nlayers, dropout=dropout,
             output_attentions=output_attentions
@@ -63,8 +52,8 @@ class Model_CCS_Bert(torch.nn.Module):
         self._output_attentions = val
         self.hidden_nn.output_attentions = val
 
-    def forward(self, 
-        aa_indices, 
+    def forward(self,
+        aa_indices,
         mod_x,
         charges:torch.Tensor,
     ):
@@ -89,9 +78,9 @@ class Model_CCS_LSTM(torch.nn.Module):
         dropout=0.1
     ):
         super().__init__()
-        
+
         self.dropout = torch.nn.Dropout(dropout)
-        
+
         hidden = 256
 
         self.ccs_encoder = (
@@ -104,8 +93,8 @@ class Model_CCS_LSTM(torch.nn.Module):
             hidden+1, 1
         )
 
-    def forward(self, 
-        aa_indices, 
+    def forward(self,
+        aa_indices,
         mod_x,
         charges,
     ):
@@ -140,7 +129,7 @@ class AlphaCCSModel(model_base.ModelInterface):
     """
     `ModelInterface` for `Model_CCS_LSTM` or `Model_CCS_Bert`
     """
-    def __init__(self, 
+    def __init__(self,
         dropout=0.1,
         model_class:torch.nn.Module=Model_CCS_LSTM,
         device:str='gpu',
@@ -150,7 +139,7 @@ class AlphaCCSModel(model_base.ModelInterface):
         self.model:Model_CCS_LSTM = None
         self.build(
             model_class,
-            dropout=dropout, 
+            dropout=dropout,
             **kwargs
         )
         self.charge_factor = 0.1
@@ -158,10 +147,10 @@ class AlphaCCSModel(model_base.ModelInterface):
         self.target_column_to_predict = 'ccs_pred'
         self.target_column_to_train = 'ccs'
 
-    def test(self, 
-        precursor_df: pd.DataFrame, 
+    def test(self,
+        precursor_df: pd.DataFrame,
         *,
-        x:typing.Literal["ccs_pred","mobility_pred"]="ccs_pred", 
+        x:typing.Literal["ccs_pred","mobility_pred"]="ccs_pred",
         y:typing.Literal["ccs","mobility"]="ccs",
         batch_size:int = 1024,
     ):
@@ -172,7 +161,7 @@ class AlphaCCSModel(model_base.ModelInterface):
             x=x, y=y
         )
 
-    def _get_features_from_batch_df(self, 
+    def _get_features_from_batch_df(self,
         batch_df: pd.DataFrame,
     ):
         aa_indices = self._get_26aa_indice_features(batch_df)

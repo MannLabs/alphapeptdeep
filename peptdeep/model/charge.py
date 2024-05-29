@@ -12,12 +12,12 @@ class _ChargeModelInterface:
     def __init__(self, *args, **kwargs):
         raise TypeError("Interface class cannot be instantiated.")
     def predict_charges_as_prob(self,
-        pep_df:pd.DataFrame, 
+        pep_df:pd.DataFrame,
         min_precursor_charge:int,
         max_precursor_charge:int,
     ):
         df = self.predict_mp(
-            pep_df.copy(), 
+            pep_df.copy(),
             batch_size=self.predict_batch_size,
         )
         df.rename(columns={"charge_probs":"charge_prob"}, inplace=True)
@@ -37,7 +37,7 @@ class _ChargeModelInterface:
         df["charge"] = df.charge.astype(np.int8)
         df["charge_prob"] = df.charge_prob.astype(np.float32)
         return df
-    
+
     def predict_prob_for_charge(self,
         precursor_df:pd.DataFrame,
     ):
@@ -53,8 +53,8 @@ class _ChargeModelInterface:
         precursor_df.drop(columns="charge_probs", inplace=True)
         return precursor_df
 
-    def predict_and_clip_charges(self, 
-        pep_df:pd.DataFrame, 
+    def predict_and_clip_charges(self,
+        pep_df:pd.DataFrame,
         min_precursor_charge:int,
         max_precursor_charge:int,
         charge_prob_cutoff:float,
@@ -79,19 +79,28 @@ class _ChargeModelInterface:
         ).reset_index(drop=True)
         df["charge_prob"] = df.charge_prob.astype(np.float32)
         return df
-    
+
 class ChargeModelForModAASeq(
     ModelInterface_for_Generic_ModAASeq_MultiLabelClassification,
     _ChargeModelInterface
 ):
     """
     ModelInterface for charge prediction for modified peptides
+
+     Parameters
+    ----------
+    min_charge : int, optional
+        Minimum charge to predict, by default 1
+    max_charge : int, optional
+        Maximum charge to predict, by default 6
+    device : str, optional
+        Device to use for training and prediction, by default "gpu"
     """
-    def __init__(self, min_charge:int=1, max_charge:int=6):
+    def __init__(self, min_charge:int=1, max_charge:int=6, device:str="gpu"):
         super().__init__(
             num_target_values=max_charge-min_charge+1,
             model_class=Model_for_Generic_ModAASeq_BinaryClassification_Transformer,
-            nlayers=4, hidden_dim=128, dropout=0.1
+            nlayers=4, hidden_dim=128, dropout=0.1, device=device
         )
 
         self.target_column_to_predict = "charge_probs"
@@ -109,12 +118,21 @@ class ChargeModelForAASeq(
 ):
     """
     ModelInterface for charge prediction for amino acid sequence
+
+    Parameters
+    ----------
+    min_charge : int, optional
+        Minimum charge to predict, by default 1
+    max_charge : int, optional
+        Maximum charge to predict, by default 6
+    device : str, optional
+        Device to use for training and prediction, by default "gpu"
     """
-    def __init__(self, min_charge:int=1, max_charge:int=6):
+    def __init__(self, min_charge:int=1, max_charge:int=6,device:str="gpu"):
         super().__init__(
             num_target_values=max_charge-min_charge+1,
             model_class=Model_for_Generic_AASeq_BinaryClassification_Transformer,
-            nlayers=4, hidden_dim=128, dropout=0.1
+            nlayers=4, hidden_dim=128, dropout=0.1, device=device
         )
 
         self.target_column_to_predict = "charge_probs"

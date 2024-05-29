@@ -18,10 +18,10 @@ from torch.optim.lr_scheduler import LambdaLR
 from zipfile import ZipFile
 from typing import IO, Tuple, List, Union
 from alphabase.yaml_utils import save_yaml, load_yaml
-from alphabase.peptide.precursor import is_precursor_sorted
+from alphabase.peptide.precursor import is_precursor_refined
 
 from peptdeep.settings import model_const
-from peptdeep.utils import ( 
+from peptdeep.utils import (
     logging, process_bar, get_device,
     get_available_device
 )
@@ -32,56 +32,164 @@ from peptdeep.model.featurize import (
     get_batch_mod_feature
 )
 
-# `transformers.optimization.get_cosine_schedule_with_warmup` will import tensorflow,
-# resulting in some package version issues.
-# Here we copy the code from transformers.optimization
-def _get_cosine_schedule_with_warmup_lr_lambda(
-    current_step: int, *, num_warmup_steps: int, num_training_steps: int, num_cycles: float
-):
-    if current_step < num_warmup_steps:
-        return float(current_step+1) / float(max(1, num_warmup_steps))
-    progress = float(current_step - num_warmup_steps) / float(num_training_steps - num_warmup_steps)
-    return (
-        max(1e-10, 0.5 * (1.0 + math.cos(math.pi * float(num_cycles) * 2.0 * progress)))
-    )
-    # if current_step < num_warmup_steps:
-    #     return float(current_step) / float(max(1, num_warmup_steps))
-    # progress = float(current_step - num_warmup_steps) / float(max(1, num_training_steps - num_warmup_steps))
-    # return max(0.0, 0.5 * (1.0 + math.cos(math.pi * float(num_cycles) * 2.0 * progress)))
+class LR_SchedulerInterface(object):
+    def __init__(self, optimizer:torch.optim.Optimizer, **kwargs):
+        raise NotImplementedError
 
+    def step(self, epoch:int, loss:float):
+        """
+        This method must be implemented in the sub-class. It will be called to get the learning rate for the next epoch.
+        While the one we are using here does not need the loss value, this is left in case of using something like the ReduceLROnPlateau scheduler.
 
-def get_cosine_schedule_with_warmup(
-    optimizer, num_warmup_steps: int, num_training_steps: int, num_cycles: float = 0.5, last_epoch: int = -1
-):
+        Parameters
+        ----------
+        epoch : int
+            The current epoch number.
+        loss : float
+            The loss value of the current epoch.
+        """
+        raise NotImplementedError
+
+    def get_last_lr(self)->float:
+        """
+        Get the last learning rate.
+
+        Returns
+        -------
+        float
+            The last learning rate.
+        """
+        raise NotImplementedError
+
+class WarmupLR_Scheduler(LR_SchedulerInterface):
     """
-    Create a schedule with a learning rate that decreases following the values of the cosine function between the
-    initial lr set in the optimizer to 0, after a warmup period during which it increases linearly between 0 and the
-    initial lr set in the optimizer.
-
-    Args:
-        optimizer ([`~torch.optim.Optimizer`]):
-            The optimizer for which to schedule the learning rate.
-        num_warmup_steps (`int`):
-            The number of steps for the warmup phase.
-        num_training_steps (`int`):
-            The total number of training steps.
-        num_cycles (`float`, *optional*, defaults to 0.5):
-            The number of waves in the cosine schedule (the defaults is to just decrease from the max value to 0
-            following a half-cosine).
-        last_epoch (`int`, *optional*, defaults to -1):
-            The index of the last epoch when resuming training.
-
-    Return:
-        `torch.optim.lr_scheduler.LambdaLR` with the appropriate schedule.
+    A learning rate scheduler that includes a warmup phase and then a cosine annealing phase.
     """
 
-    lr_lambda = functools.partial(
-        _get_cosine_schedule_with_warmup_lr_lambda,
-        num_warmup_steps=num_warmup_steps,
-        num_training_steps=num_training_steps,
-        num_cycles=num_cycles,
-    )
-    return LambdaLR(optimizer, lr_lambda, last_epoch)
+    def __init__(self,
+        optimizer:torch.optim.Optimizer,
+        num_warmup_steps:int,
+        num_training_steps:int,
+        num_cycles:float=0.5,
+        last_epoch:int=-1
+    ):
+        self.optimizer = optimizer
+        self.lambda_lr = self.get_cosine_schedule_with_warmup(
+            optimizer, num_warmup_steps, num_training_steps, num_cycles, last_epoch
+        )
+
+    def step(self, epoch:int, loss:float):
+        """
+        Get the learning rate for the next epoch.
+
+        Parameters
+        ----------
+        epoch : int
+            The current epoch number.
+        loss : float
+            The loss value of the current epoch.
+
+        """
+        return self.lambda_lr.step(epoch)
+
+    def get_last_lr(self)->float:
+        """
+        Get the last learning rate.
+
+        Returns
+        -------
+        float
+            The last learning rate.
+        """
+        return self.lambda_lr.get_last_lr()
+
+
+    # `transformers.optimization.get_cosine_schedule_with_warmup` will import tensorflow,
+    # resulting in some package version issues.
+    # Here we copy the code from transformers.optimization
+    def _get_cosine_schedule_with_warmup_lr_lambda(self,
+        current_step: int, *, num_warmup_steps: int, num_training_steps: int, num_cycles: float
+    ):
+        if current_step < num_warmup_steps:
+            return float(current_step+1) / float(max(1, num_warmup_steps))
+
+        progress = float(current_step - num_warmup_steps) / float(max(1, num_training_steps - num_warmup_steps))
+        return max(1e-10, 0.5 * (1.0 + math.cos(math.pi * float(num_cycles) * 2.0 * progress)))
+
+
+
+    def get_cosine_schedule_with_warmup( self,
+        optimizer, num_warmup_steps: int, num_training_steps: int, num_cycles: float = 0.5, last_epoch: int = -1
+    ):
+        """
+        Create a schedule with a learning rate that decreases following the values of the cosine function between the
+        initial lr set in the optimizer to 0, after a warmup period during which it increases linearly between 0 and the
+        initial lr set in the optimizer.
+
+        Args:
+            optimizer ([`~torch.optim.Optimizer`]):
+                The optimizer for which to schedule the learning rate.
+            num_warmup_steps (`int`):
+                The number of steps for the warmup phase.
+            num_training_steps (`int`):
+                The total number of training steps.
+            num_cycles (`float`, *optional*, defaults to 0.5):
+                The number of waves in the cosine schedule (the defaults is to just decrease from the max value to 0
+                following a half-cosine).
+            last_epoch (`int`, *optional*, defaults to -1):
+                The index of the last epoch when resuming training.
+
+        Return:
+            `torch.optim.lr_scheduler.LambdaLR` with the appropriate schedule.
+        """
+
+        lr_lambda = functools.partial(
+            self._get_cosine_schedule_with_warmup_lr_lambda,
+            num_warmup_steps=num_warmup_steps,
+            num_training_steps=num_training_steps,
+            num_cycles=num_cycles,
+        )
+        return LambdaLR(optimizer, lr_lambda, last_epoch)
+
+class CallbackHandler:
+    """
+    A CallbackHandler class that can be used to add callbacks to the training process for both
+    epoch-level and batch-level events. To have more control over the training process, you can
+    create a subclass of this class and override the methods you need.
+    """
+    def epoch_callback(self, epoch:int, epoch_loss:float) -> bool:
+        """
+        This method will be called at the end of each epoch. The callback can also be used to
+        stop the training by returning False. If the return value is None, or True, the training
+        will continue.
+
+        Parameters
+        ----------
+        epoch : int
+            The current epoch number.
+        epoch_loss : float
+            The loss value of the current epoch.
+
+        Returns
+        -------
+        continue_training : bool
+            If False, the training will stop.
+        """
+        continue_training = True
+        return continue_training
+    def batch_callback(self, batch:int, batch_loss:float):
+        """
+        This method will be called at the end of each batch.
+
+        Parameters
+        ----------
+        batch : int
+            The current batch number.
+        batch_loss : float
+            The loss value of the current batch.
+
+        """
+        pass
 
 def append_nAA_column_if_missing(precursor_df):
     """
@@ -99,7 +207,7 @@ class ModelInterface(object):
     with ml models. Inherit into new class and override
     the abstract (i.e. not implemented) methods.
     """
-    
+
     def __init__(self,
         device:str='gpu',
         fixed_sequence_len:int = 0,
@@ -112,7 +220,7 @@ class ModelInterface(object):
         device : str, optional
             device type in 'get_available', 'cpu', 'mps', 'gpu' (or 'cuda'),
             by default 'gpu'
-        
+
         fixed_sequence_len : int, optional
             See :attr:`fixed_sequence_len`, defaults to 0.
 
@@ -125,12 +233,14 @@ class ModelInterface(object):
         self.set_device(device)
         self.fixed_sequence_len = fixed_sequence_len
         self.min_pred_value = min_pred_value
+        self.lr_scheduler_class = WarmupLR_Scheduler
+        self.callback_handler = CallbackHandler()
 
     @property
     def fixed_sequence_len(self)->int:
         """
         This attribute controls how to train and infer for variable-length sequences:
-        
+
         - if the value is 0, all sequence tensors will be grouped by nAA and train/infer on same nAA in batch.
         - if the value is > 0: all sequence tensors will be padded by zeros to the fixed length.
         - if the value is < 0: in each batch, padded by zeros to max length of the batch.
@@ -158,7 +268,7 @@ class ModelInterface(object):
     def device_type(self)->str:
         """Read-only"""
         return self._device_type
-    
+
     @property
     def device(self)->torch.device:
         """Read-only"""
@@ -185,8 +295,36 @@ class ModelInterface(object):
     def target_column_to_train(self, column:str):
         self._target_column_to_train = column
 
-    def set_device(self, 
-        device_type:str = 'gpu', 
+    def set_lr_scheduler_class(self, lr_scheduler_class:LR_SchedulerInterface) -> None:
+        """
+        Set the learning rate scheduler class. We require the user pass a class that is a subclass of
+        LR_SchedulerInterface because the current implementation will create an instance of it within this class.
+
+        Parameters
+        ----------
+        lr_scheduler_class : LR_SchedulerInterface
+            The learning rate scheduler class. Since we create an instance of it within this class,
+            the ModelInterface needs the class to take the arguments `optimizer`, `num_warmup_steps`, `num_training_steps`
+
+        """
+        if not issubclass(lr_scheduler_class, LR_SchedulerInterface):
+            raise ValueError(
+                "The lr_scheduler_class must be a subclass of LR_SchedulerInterface"
+            )
+        else:
+            self.lr_scheduler_class = lr_scheduler_class
+    def set_callback_handler(self, callback_handler:CallbackHandler) -> None:
+        """
+        Set the callback handler. It has to be a subclass of CallbackHandler.
+        """
+        if isinstance(callback_handler, CallbackHandler):
+            self.callback_handler = callback_handler
+        else:
+            raise ValueError(
+                "The callback handler passed must be a subclass of model_interface.CallbackHandler"
+            )
+    def set_device(self,
+        device_type:str = 'gpu',
         device_ids:list = []
     ):
         """
@@ -196,13 +334,13 @@ class ModelInterface(object):
         ----------
         device_type : str, optional
             Device type, see :data:`peptdeep.utils.torch_device_dict`.
-            It will check available devices using 
-            :meth:`peptdeep.utils.get_available_device()` 
+            It will check available devices using
+            :meth:`peptdeep.utils.get_available_device()`
             if device_type=='get_available'.
             By default 'gpu'
 
         device_ids : list, optional
-            List of int. Device ids for cuda/gpu (e.g. [1,3] for cuda:1,3). 
+            List of int. Device ids for cuda/gpu (e.g. [1,3] for cuda:1,3).
             By default []
         """
         self._device_ids = device_ids
@@ -217,10 +355,10 @@ class ModelInterface(object):
         self._model_to_device()
 
     def _model_to_device(self):
-        """ 
+        """
         Enable multiple GPUs using torch.nn.DataParallel.
 
-        TODO It is better to use torch.nn.parallel.DistributedDataParallel, 
+        TODO It is better to use torch.nn.parallel.DistributedDataParallel,
         but this may need more setups for models and optimizers.
         """
         if self.model is None: return
@@ -242,7 +380,7 @@ class ModelInterface(object):
         **kwargs
     ):
         """
-        Builds the model by specifying the PyTorch module, 
+        Builds the model by specifying the PyTorch module,
         the parameters, the device, the loss function ...
         """
         self.model = model_class(**kwargs)
@@ -253,7 +391,7 @@ class ModelInterface(object):
     def set_bert_trainable(self,
         bert_layer_name="hidden_nn",
         bert_layer_idxes=[1,2], # [0,1,2,3] in ms2 model
-        trainable=True,  
+        trainable=True,
     ):
         self.set_layer_trainable(
             layer_names=[
@@ -263,9 +401,9 @@ class ModelInterface(object):
             trainable=trainable,
         )
 
-    def set_layer_trainable(self, 
+    def set_layer_trainable(self,
         layer_names=[],
-        trainable=True, 
+        trainable=True,
     ):
         for layer in layer_names:
             self.model.get_submodule(layer).requires_grad_(trainable)
@@ -273,8 +411,8 @@ class ModelInterface(object):
     def train_with_warmup(self,
         precursor_df: pd.DataFrame,
         *,
-        batch_size=1024, 
-        epoch=10, 
+        batch_size=1024,
+        epoch=10,
         warmup_epoch=5,
         lr=1e-4,
         verbose=False,
@@ -282,7 +420,7 @@ class ModelInterface(object):
         **kwargs
     ):
         """
-        Train the model according to specifications. Includes a warumup 
+        Train the model according to specifications. Includes a warumup
         phase with linear increasing and cosine decreasing for lr scheduling).
         """
         self._prepare_training(precursor_df, lr, **kwargs)
@@ -305,18 +443,23 @@ class ModelInterface(object):
                     **kwargs
                 )
 
-            lr_scheduler.step()
+            lr_scheduler.step(epoch=epoch, loss=np.mean(batch_cost))
             if verbose: print(
                 f'[Training] Epoch={epoch+1}, lr={lr_scheduler.get_last_lr()[0]}, loss={np.mean(batch_cost)}'
             )
-        
+            continue_training = self.callback_handler.epoch_callback(
+                epoch=epoch, epoch_loss=np.mean(batch_cost)
+            )
+            if not continue_training:
+                print(f"Training stopped at epoch {epoch}")
+                break
         torch.cuda.empty_cache()
 
     def train(self,
         precursor_df: pd.DataFrame,
         *,
-        batch_size=1024, 
-        epoch=10, 
+        batch_size=1024,
+        epoch=10,
         warmup_epoch:int=0,
         lr=1e-4,
         verbose=False,
@@ -359,7 +502,13 @@ class ModelInterface(object):
                         **kwargs
                     )
                 if verbose: print(f'[Training] Epoch={epoch+1}, Mean Loss={np.mean(batch_cost)}')
-            
+
+                continue_training = self.callback_handler.epoch_callback(
+                    epoch=epoch, epoch_loss=np.mean(batch_cost)
+                    )
+                if not continue_training:
+                    print(f"Training stopped at epoch {epoch}")
+                    break
             torch.cuda.empty_cache()
 
     def predict(self,
@@ -384,11 +533,11 @@ class ModelInterface(object):
             batch_tqdm = tqdm(_grouped)
         else:
             batch_tqdm = _grouped
-        with torch.no_grad():
+        with _inference_mode():
             for nAA, df_group in batch_tqdm:
                 for i in range(0, len(df_group), batch_size):
                     batch_end = i+batch_size
-                    
+
                     batch_df = df_group.iloc[i:batch_end,:]
 
                     features = self._get_features_from_batch_df(
@@ -401,7 +550,7 @@ class ModelInterface(object):
                         predicts = self._predict_one_batch(features)
 
                     self._set_batch_predict_data(
-                        batch_df, predicts, 
+                        batch_df, predicts,
                         **kwargs
                     )
 
@@ -425,13 +574,13 @@ class ModelInterface(object):
 
         if self.device_type != 'cpu':
             return self.predict(
-                precursor_df, 
+                precursor_df,
                 batch_size=batch_size,
                 verbose=True,
                 **kwargs
             )
-            
-        _predict_func = functools.partial(self.predict, 
+
+        _predict_func = functools.partial(self.predict,
             batch_size=batch_size, verbose=False, **kwargs
         )
 
@@ -455,7 +604,7 @@ class ModelInterface(object):
 
         self.predict_df = pd.concat(df_list)
         self.predict_df.reset_index(drop=True, inplace=True)
-        
+
         return self.predict_df
 
     def save(self, filename:str):
@@ -504,7 +653,7 @@ class ModelInterface(object):
         **kwargs
     ):
         """
-        Build the model based on a python file. Must contain a PyTorch 
+        Build the model based on a python file. Must contain a PyTorch
         model implemented as 'class Model(...'
         """
         if model_code_file_or_zip.lower().endswith('.zip'):
@@ -526,7 +675,7 @@ class ModelInterface(object):
                 )
 
         compiled_codes = compile(
-            codes, 
+            codes,
             filename='model_file_py',
             mode='exec'
         )
@@ -551,8 +700,8 @@ class ModelInterface(object):
         """
         self.loss_func = torch.nn.L1Loss()
 
-    def _as_tensor(self, 
-        data:np.ndarray, 
+    def _as_tensor(self,
+        data:np.ndarray,
         dtype:torch.dtype=torch.float32
     )->torch.Tensor:
         """Convert numerical np.array to pytorch tensor.
@@ -562,9 +711,9 @@ class ModelInterface(object):
         ----------
         data : np.ndarray
             Numerical np.ndarray to be converted as a tensor
-            
+
         dtype : torch.dtype, optional
-            The dtype of the indices used for embedding should be `torch.long`. 
+            The dtype of the indices used for embedding should be `torch.long`.
             Defaults to `torch.float32`
 
         Returns
@@ -585,7 +734,7 @@ class ModelInterface(object):
 
     def _load_model_from_stream(self, stream):
         (
-            missing_keys, unexpect_keys 
+            missing_keys, unexpect_keys
         ) = self.model.load_state_dict(torch.load(
             stream, map_location=self.device),
             strict=False
@@ -607,8 +756,8 @@ class ModelInterface(object):
         except (TypeError, ValueError, KeyError) as e:
             logging.info(f'Cannot save model source codes: {str(e)}')
 
-    def _train_one_epoch_by_padding_zeros(self, 
-        precursor_df, epoch, batch_size, verbose_each_epoch, 
+    def _train_one_epoch_by_padding_zeros(self,
+        precursor_df, epoch, batch_size, verbose_each_epoch,
         **kwargs
     ):
         """Training for an epoch by padding zeros"""
@@ -636,15 +785,15 @@ class ModelInterface(object):
                 batch_cost.append(
                     self._train_one_batch(targets, features)
                 )
-                
+            self.callback_handler.batch_callback(i//batch_size, batch_cost[-1])
         if verbose_each_epoch:
             batch_tqdm.set_description(
                 f'Epoch={epoch+1}, batch={len(batch_cost)}, loss={batch_cost[-1]:.4f}'
             )
         return batch_cost
 
-    def _train_one_epoch(self, 
-        precursor_df, epoch, batch_size, verbose_each_epoch, 
+    def _train_one_epoch(self,
+        precursor_df, epoch, batch_size, verbose_each_epoch,
         **kwargs
     ):
         """Training for an epoch"""
@@ -676,7 +825,7 @@ class ModelInterface(object):
                     batch_cost.append(
                         self._train_one_batch(targets, features)
                     )
-                
+                self.callback_handler.batch_callback(i//batch_size, batch_cost[-1])
             if verbose_each_epoch:
                 batch_tqdm.set_description(
                     f'Epoch={epoch+1}, nAA={nAA}, batch={len(batch_cost)}, loss={batch_cost[-1]:.4f}'
@@ -684,8 +833,8 @@ class ModelInterface(object):
         return batch_cost
 
     def _train_one_batch(
-        self, 
-        targets:torch.Tensor, 
+        self,
+        targets:torch.Tensor,
         *features,
     ):
         """Training for a mini batch"""
@@ -723,7 +872,7 @@ class ModelInterface(object):
             Target value tensor
         """
         return self._as_tensor(
-            batch_df[self.target_column_to_train].values, 
+            batch_df[self.target_column_to_train].values,
             dtype=torch.float32
         )
 
@@ -731,7 +880,7 @@ class ModelInterface(object):
         self, batch_df:pd.DataFrame
     )->torch.LongTensor:
         """
-        Get indices values of variable length sequences 
+        Get indices values of variable length sequences
         using 128 ascii codes
         """
         if self.fixed_sequence_len < 0:
@@ -743,7 +892,7 @@ class ModelInterface(object):
                 batch_df['sequence'].apply(
                     lambda seq: seq + chr(0)*(max_len-len(seq))
                 ).values.astype('U')
-            ), 
+            ),
             dtype=torch.long
         )
 
@@ -751,13 +900,13 @@ class ModelInterface(object):
         self, batch_df:pd.DataFrame
     )->torch.LongTensor:
         """
-        Get indices values for fixed length sequences 
+        Get indices values for fixed length sequences
         with 128 ascii codes.
         """
         return self._as_tensor(
             get_ascii_indices(
                 batch_df['sequence'].values.astype('U')
-            ), 
+            ),
             dtype=torch.long
         )
 
@@ -765,23 +914,23 @@ class ModelInterface(object):
         self, batch_df:pd.DataFrame
     )->torch.LongTensor:
         """
-        Get indices values for 26 upper-case letters (amino acids), 
+        Get indices values for 26 upper-case letters (amino acids),
         from 1 to 26. 0 is used for padding.
         """
         return self._as_tensor(
             get_batch_aa_indices(
                 batch_df['sequence'].values.astype('U')
-            ), 
+            ),
             dtype=torch.long
         )
-        
+
     def _get_features_from_batch_df(self,
         batch_df:pd.DataFrame, **kwargs,
     )->Union[torch.LongTensor, Tuple[torch.Tensor]]:
         """
         Any sub-class must re-implement this method:
-        
-        - Return `self._get_aa_features()` for sequence-level prediciton 
+
+        - Return `self._get_aa_features()` for sequence-level prediciton
         - Return `self._get_aa_mod_features()` for modified sequence-level
 
         Parameters
@@ -791,7 +940,7 @@ class ModelInterface(object):
 
         Returns
         -------
-        Union[torch.LongTensor, Tuple[torch.Tensor]]: 
+        Union[torch.LongTensor, Tuple[torch.Tensor]]:
             A LongTensor if the sub-class call `self._get_aa_features(batch_df)` (default).
             Or a tuple of tensors if call `self._get_aa_mod_features(batch_df)`.
         """
@@ -818,7 +967,7 @@ class ModelInterface(object):
             get_batch_mod_feature(batch_df)
         )
 
-    def _get_aa_features(self, 
+    def _get_aa_features(self,
         batch_df:pd.DataFrame
     )->torch.LongTensor:
         """
@@ -830,11 +979,11 @@ class ModelInterface(object):
             return self._get_aa_indice_features_padding_zeros(batch_df)
 
     def _prepare_predict_data_df(self,
-        precursor_df:pd.DataFrame, 
+        precursor_df:pd.DataFrame,
         **kwargs
     ):
         """
-        This methods fills 0s in the column of 
+        This methods fills 0s in the column of
         `self.target_column_to_predict` in `precursor_df`,
         and then does `self.predict_df=precursor_df`.
         """
@@ -842,7 +991,7 @@ class ModelInterface(object):
         self.predict_df = precursor_df
 
     def _prepare_train_data_df(self,
-        precursor_df:pd.DataFrame, 
+        precursor_df:pd.DataFrame,
         **kwargs
     ):
         """Changes to the training dataframe can be implemented here.
@@ -896,8 +1045,10 @@ class ModelInterface(object):
     def _get_lr_schedule_with_warmup(self, warmup_epoch, epoch):
         if warmup_epoch > epoch:
             warmup_epoch = epoch//2
-        return get_cosine_schedule_with_warmup(
-            self.optimizer, warmup_epoch, epoch
+        return self.lr_scheduler_class(
+            self.optimizer,
+            num_warmup_steps=warmup_epoch,
+            num_training_steps=epoch
         )
 
     def _pad_zeros_if_fixed_len(self, precursor_df:pd.DataFrame):
@@ -905,15 +1056,15 @@ class ModelInterface(object):
             precursor_df.drop(
                 index=precursor_df[
                     precursor_df.nAA>self.fixed_sequence_len
-                ].index, 
+                ].index,
                 inplace=True,
             )
             precursor_df.reset_index(drop=True, inplace=True)
             precursor_df['nAA'] = self.fixed_sequence_len
 
-    def _prepare_training(self, 
-        precursor_df:pd.DataFrame, 
-        lr:float, 
+    def _prepare_training(self,
+        precursor_df:pd.DataFrame,
+        lr:float,
         **kwargs
     ):
         if 'nAA' not in precursor_df.columns:
@@ -925,7 +1076,14 @@ class ModelInterface(object):
         self.set_lr(lr)
 
     def _check_predict_in_order(self, precursor_df:pd.DataFrame):
-        if is_precursor_sorted(precursor_df):
+        if is_precursor_refined(precursor_df):
             self._predict_in_order = True
         else:
             self._predict_in_order = False
+
+def _inference_mode():
+    # torch.inference_mode() only available in torch>=1.9.0
+    if float(torch.__version__[:torch.__version__.rfind(".")]) >= 1.9:
+        return torch.inference_mode()
+    else:
+        return torch.no_grad()

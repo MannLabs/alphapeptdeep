@@ -18,7 +18,7 @@ class MassCalibratorForRT_KNN:
     def __init__(self, n_neighbors=5):
         self._n_neighbors = n_neighbors
         self.model = KNeighborsRegressor(n_neighbors)
-    
+
     def fit(self, psm_df:pd.DataFrame, mass_error_df:pd.DataFrame):
         mass_error_df = mass_error_df.replace(np.inf, np.nan)
         mean_merrs = psm_df[['frag_start_idx','frag_stop_idx']].apply(
@@ -26,7 +26,7 @@ class MassCalibratorForRT_KNN:
         ).values
         self.model.fit(psm_df.rt.values.reshape((-1,1)), mean_merrs.reshape(-1,1))
 
-    def calibrate(self, 
+    def calibrate(self,
         psm_df:pd.DataFrame, mass_error_df:pd.DataFrame
     )->pd.DataFrame:
         psm_df['frag_mass_shift'] = self.model.predict(

@@ -8,21 +8,21 @@ from typing import List, Tuple, IO
 from tqdm import tqdm
 
 from alphabase.peptide.fragment import (
-    init_fragment_by_precursor_dataframe, 
-    update_sliced_fragment_dataframe, 
-    get_sliced_fragment_dataframe, 
+    init_fragment_by_precursor_dataframe,
+    update_sliced_fragment_dataframe,
+    get_sliced_fragment_dataframe,
     get_charged_frag_types
 )
 
 from peptdeep.utils import get_available_device
 
 from peptdeep.model.featurize import (
-    get_batch_aa_indices, parse_instrument_indices, 
+    get_batch_aa_indices, parse_instrument_indices,
     get_batch_mod_feature
 )
 
 from peptdeep.settings import (
-    global_settings as settings, 
+    global_settings as settings,
     model_const
 )
 
@@ -84,7 +84,7 @@ class ModelMS2Transformer(torch.nn.Module):
             hidden,
             self._num_non_modloss,
         )
-        
+
         if num_modloss_types > 0:
             # for transfer learning of modloss frags
             self.modloss_nn = torch.nn.ModuleList([
@@ -177,7 +177,7 @@ class ModelMS2Bert(torch.nn.Module):
             hidden,
             self._num_non_modloss,
         )
-        
+
         if num_modloss_types > 0:
             # for transfer learning of modloss frags
             self.modloss_nn = torch.nn.ModuleList([
@@ -195,7 +195,7 @@ class ModelMS2Bert(torch.nn.Module):
     @property
     def output_attentions(self):
         return self._output_attentions
-        
+
     @output_attentions.setter
     def output_attentions(self, val:bool):
         self._output_attentions = val
@@ -277,7 +277,7 @@ class ModelMS2pDeep(torch.nn.Module):
         self.input_nn = building_block.InputAALSTM_cat_Meta(hidden)
 
         self.hidden_nn = building_block.SeqLSTM(
-            hidden, hidden, rnn_layer=hidden_rnn_layer, 
+            hidden, hidden, rnn_layer=hidden_rnn_layer,
             bidirectional=BiRNN
         )
 
@@ -290,7 +290,7 @@ class ModelMS2pDeep(torch.nn.Module):
             # for transfer learning of modloss frags
             self.modloss_nn = torch.nn.ModuleList([
                 building_block.SeqLSTM(
-                    hidden, hidden, 
+                    hidden, hidden,
                     rnn_layer=1, bidirectional=BiRNN
                 ),
                 building_block.SeqLSTM(
@@ -310,7 +310,7 @@ class ModelMS2pDeep(torch.nn.Module):
     ):
 
         in_x = self.input_nn(
-            aa_indices, mod_x, 
+            aa_indices, mod_x,
             charges, NCEs, instrument_indices
         )
         in_x = self.dropout(in_x)
@@ -319,7 +319,7 @@ class ModelMS2pDeep(torch.nn.Module):
         hidden_x = self.dropout(hidden_x)
 
         out_x = self.output_nn(
-            hidden_x, 
+            hidden_x,
             charges, NCEs, instrument_indices
         )
 
@@ -383,7 +383,7 @@ class pDeepModel(model_interface.ModelInterface):
         self.NCE_factor = 0.01
         self.model:ModelMS2Bert = None
         self.build(
-            model_class, 
+            model_class,
             num_frag_types = len(self.charged_frag_types),
             num_modloss_types = len(self._modloss_frag_types),
             mask_modloss=mask_modloss,
@@ -400,7 +400,7 @@ class pDeepModel(model_interface.ModelInterface):
             if modloss in frag:
                 self._modloss_frag_types.append(i)
 
-    def _prepare_train_data_df(self, 
+    def _prepare_train_data_df(self,
         precursor_df:pd.DataFrame,
         fragment_intensity_df:pd.DataFrame=None,
     ):
@@ -417,7 +417,7 @@ class pDeepModel(model_interface.ModelInterface):
     ):
         if reference_frag_df is None and precursor_df.nAA.is_monotonic_increasing:
             self._predict_in_order = True
-            
+
             if 'frag_start_idx' in precursor_df.columns:
                 precursor_df.drop(
                     columns=['frag_start_idx','frag_stop_idx'],
@@ -425,18 +425,18 @@ class pDeepModel(model_interface.ModelInterface):
                 )
         else:
             self._predict_in_order = False
-        
+
         self.predict_df = init_fragment_by_precursor_dataframe(
-            precursor_df, self.charged_frag_types, 
-            reference_fragment_df=reference_frag_df, 
+            precursor_df, self.charged_frag_types,
+            reference_fragment_df=reference_frag_df,
             dtype=np.float32
         )
 
         # if np.all(precursor_df['nce'].values > 1):
         #     precursor_df['nce'] = precursor_df['nce']*self.NCE_factor
 
-    def _get_features_from_batch_df(self, 
-        batch_df: pd.DataFrame, 
+    def _get_features_from_batch_df(self,
+        batch_df: pd.DataFrame,
         **kwargs,
     ) -> Tuple[torch.Tensor]:
         aa_indices = self._get_26aa_indice_features(batch_df)
@@ -457,24 +457,24 @@ class pDeepModel(model_interface.ModelInterface):
         )
         return aa_indices, mod_x, charges, nces, instrument_indices
 
-    def _get_targets_from_batch_df(self, 
+    def _get_targets_from_batch_df(self,
         batch_df: pd.DataFrame,
         fragment_intensity_df:pd.DataFrame=None
     ) -> torch.Tensor:
         return self._as_tensor(
             get_sliced_fragment_dataframe(
-                fragment_intensity_df, 
+                fragment_intensity_df,
                 batch_df[
                     ['frag_start_idx','frag_stop_idx']
                 ].values
             ).values
-        ).view(-1, 
-            batch_df.nAA.values[0]-1, 
+        ).view(-1,
+            batch_df.nAA.values[0]-1,
             len(self.charged_frag_types)
         )
 
-    def _set_batch_predict_data(self, 
-        batch_df: pd.DataFrame, 
+    def _set_batch_predict_data(self,
+        batch_df: pd.DataFrame,
         predicts:np.ndarray,
         **kwargs,
     ):
@@ -485,7 +485,7 @@ class pDeepModel(model_interface.ModelInterface):
         if self._predict_in_order:
             self.predict_df.values[
                 batch_df.frag_start_idx.values[0]:
-                batch_df.frag_stop_idx.values[-1], 
+                batch_df.frag_stop_idx.values[-1],
             :] = predicts.reshape(
                     (-1, len(self.charged_frag_types))
                 )
@@ -502,30 +502,30 @@ class pDeepModel(model_interface.ModelInterface):
             )
 
     def train_with_warmup(self,
-        precursor_df: pd.DataFrame, 
-        fragment_intensity_df, 
-        *, 
-        batch_size=1024, 
+        precursor_df: pd.DataFrame,
+        fragment_intensity_df,
+        *,
+        batch_size=1024,
         epoch=10,
         warmup_epoch=5,
         lr = 1e-5,
-        verbose=False, 
+        verbose=False,
         verbose_each_epoch=False,
         **kwargs
     ):
         return super().train_with_warmup(
-            precursor_df, 
+            precursor_df,
             fragment_intensity_df=fragment_intensity_df,
-            batch_size=batch_size, 
+            batch_size=batch_size,
             epoch=epoch,
             warmup_epoch=warmup_epoch,
             lr=lr,
-            verbose=verbose, 
+            verbose=verbose,
             verbose_each_epoch=verbose_each_epoch,
             **kwargs
         )
-    
-    def test(self, 
+
+    def test(self,
         precursor_df:pd.DataFrame,
         fragment_intensity_df:pd.DataFrame,
         default_instrument:str = "Lumos",
@@ -540,54 +540,54 @@ class pDeepModel(model_interface.ModelInterface):
             fragment_intensity_df.columns.values,
         )
         return calc_ms2_similarity(
-            precursor_df, 
+            precursor_df,
             self.predict(
                 precursor_df, reference_frag_df=fragment_intensity_df
-            )[columns], 
+            )[columns],
             fragment_intensity_df=fragment_intensity_df[columns]
         )[-1]
 
-    def train(self, 
-        precursor_df: pd.DataFrame, 
-        fragment_intensity_df, 
-        *, 
-        batch_size=1024, 
+    def train(self,
+        precursor_df: pd.DataFrame,
+        fragment_intensity_df,
+        *,
+        batch_size=1024,
         epoch=20,
         warmup_epoch=0,
         lr = 1e-5,
-        verbose=False, 
+        verbose=False,
         verbose_each_epoch=False,
         **kwargs
     ):
         return super().train(
-            precursor_df, 
+            precursor_df,
             fragment_intensity_df=fragment_intensity_df,
-            batch_size=batch_size, 
-            epoch=epoch, 
+            batch_size=batch_size,
+            epoch=epoch,
             warmup_epoch=warmup_epoch,
             lr=lr,
-            verbose=verbose, 
+            verbose=verbose,
             verbose_each_epoch=verbose_each_epoch,
             **kwargs
         )
 
-    def predict(self, 
-        precursor_df: pd.DataFrame, 
-        *, 
-        batch_size=1024, 
-        verbose=False, 
+    def predict(self,
+        precursor_df: pd.DataFrame,
+        *,
+        batch_size=1024,
+        verbose=False,
         reference_frag_df=None,
         **kwargs
     ) -> pd.DataFrame:
         return super().predict(
-            precursor_df, 
-            batch_size=batch_size, 
-            verbose=verbose, 
-            reference_frag_df=reference_frag_df, 
+            precursor_df,
+            batch_size=batch_size,
+            verbose=verbose,
+            reference_frag_df=reference_frag_df,
             **kwargs
         )
 
-    def predict_mp(self, 
+    def predict_mp(self,
         **kwargs
     ) -> pd.DataFrame:
         warnings.warn(
@@ -595,8 +595,8 @@ class pDeepModel(model_interface.ModelInterface):
             "for MS2 prediction with multiprocessing"
         )
 
-    def bootstrap_nce_search(self, 
-        psm_df:pd.DataFrame, 
+    def bootstrap_nce_search(self,
+        psm_df:pd.DataFrame,
         fragment_intensity_df:pd.DataFrame,
         nce_first=15, nce_last=45, nce_step=3,
         instrument = 'Lumos',
@@ -620,7 +620,7 @@ class pDeepModel(model_interface.ModelInterface):
         return np.median(nce_list), instrument
 
     def grid_nce_search(self,
-        psm_df:pd.DataFrame, 
+        psm_df:pd.DataFrame,
         fragment_intensity_df:pd.DataFrame,
         nce_first=15, nce_last=45, nce_step=3,
         search_instruments = ['Lumos'],
@@ -647,12 +647,12 @@ class pDeepModel(model_interface.ModelInterface):
                 psm_df['nce'] = nce
                 psm_df['instrument'] = inst
                 predict_inten_df = self.predict(
-                    psm_df, 
+                    psm_df,
                     reference_frag_df=fragment_intensity_df
                 )
                 df, metrics = calc_ms2_similarity(
                     psm_df,
-                    predict_inten_df, 
+                    predict_inten_df,
                     fragment_intensity_df,
                     charged_frag_types=charged_frag_types,
                     metrics=['PCC']
@@ -666,7 +666,7 @@ class pDeepModel(model_interface.ModelInterface):
 
 
 def normalize_fragment_intensities(
-    psm_df:pd.DataFrame, 
+    psm_df:pd.DataFrame,
     frag_intensity_df:pd.DataFrame
 ):
     """Normalize the intensities to 0-1 values inplace
@@ -677,7 +677,7 @@ def normalize_fragment_intensities(
         PSM DataFrame
 
     frag_intensity_df : pd.DataFrame
-        Fragment intensity DataFrame to be normalized. 
+        Fragment intensity DataFrame to be normalized.
         Intensities will be normalzied inplace.
     """
     frag_intensity_df_np = frag_intensity_df.to_numpy()
@@ -745,7 +745,7 @@ def spearman_correlation(x: torch.Tensor, y: torch.Tensor, device):
     """
     x_rank = _get_ranks(x, device).to(torch.float32)
     y_rank = _get_ranks(y, device).to(torch.float32)
-    
+
     n = x.size(1)
     upper = 6 * torch.sum((x_rank - y_rank).pow(2), dim=1)
     down = n * (n ** 2 - 1.0)
@@ -793,13 +793,13 @@ def calc_ms2_similarity(
         psm_df[met] = 0.0
 
     for nAA, df_group in batch_tqdm:
-        for i in range(0, len(df_group), batch_size):   
+        for i in range(0, len(df_group), batch_size):
             batch_end = i+batch_size
             batch_df = df_group.iloc[i:batch_end,:]
 
             pred_intens = torch.tensor(
                 get_sliced_fragment_dataframe(
-                    predict_intensity_df, 
+                    predict_intensity_df,
                     batch_df[
                         ['frag_start_idx','frag_stop_idx']
                     ].values,
@@ -812,7 +812,7 @@ def calc_ms2_similarity(
 
             frag_intens = torch.tensor(
                 get_sliced_fragment_dataframe(
-                    fragment_intensity_df, 
+                    fragment_intensity_df,
                     batch_df[
                         ['frag_start_idx','frag_stop_idx']
                     ].values,
@@ -835,7 +835,7 @@ def calc_ms2_similarity(
                 psm_df.loc[
                     batch_df.index,'COS'
                 ] = cos.cpu().detach().numpy()
-                
+
                 if 'SA' in metrics:
                     psm_df.loc[
                         batch_df.index,'SA'

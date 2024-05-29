@@ -41,8 +41,5 @@ peptdeep cmd-flow \
 --library--output_tsv--enabled True \
 --library--rt_to_irt True \
 # --library--labeling_channels "0:Dimethyl@Any_N-term;Dimethyl@K" \
-# In windows/powershell, use replace " \" with " `" 
+# In windows/powershell, use replace " \" with " `"
 # End of the `peptdeep cmd-flow`
-
-
-

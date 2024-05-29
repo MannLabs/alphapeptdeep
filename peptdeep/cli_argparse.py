@@ -11,7 +11,7 @@ from peptdeep.settings import (
 __argparse_dict_level_sep="--" # do not change
 
 def convert_dict_to_argparse(
-    settings:dict, 
+    settings:dict,
     prefix_key="",
     dict_level_sep=__argparse_dict_level_sep,
 ):
@@ -34,7 +34,7 @@ def convert_dict_to_argparse(
         return ret
     else:
         return [(prefix_key, settings)]
-    
+
 def _set_dict_val(_dict, keys, val):
     if len(keys) < 1: return
     elif keys[0] == "labeling_channels":
@@ -68,7 +68,7 @@ def _set_dict_val(_dict, keys, val):
 def get_parser():
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "--settings_yaml", type=str, default="", 
+        "--settings_yaml", type=str, default="",
         help="The yaml file for saved settings (default: %(default)s)"
     )
     arg_settings = convert_dict_to_argparse(global_settings)
@@ -110,7 +110,7 @@ def parse_args_to_global_settings(parser, args):
             arg = arg[2:].replace("--","__")
             if arg in args_dict:
                 used_args[arg] = args_dict[arg]
-    
+
     for key, val in used_args.items():
         keys = key.split("__")
         _set_dict_val(global_settings, keys, val)

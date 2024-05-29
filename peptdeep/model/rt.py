@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 
 from peptdeep.model.featurize import (
-    get_batch_aa_indices, 
+    get_batch_aa_indices,
     get_batch_mod_feature
 )
 
@@ -52,7 +52,7 @@ class Model_RT_Bert(torch.nn.Module):
         self.input_nn = building_block.AATransformerEncoding(hidden)
 
         self._output_attentions = output_attentions
-        
+
         self.hidden_nn = building_block.Hidden_HFace_Transformer(
             hidden, nlayers=nlayers, dropout=dropout,
             output_attentions=output_attentions
@@ -74,8 +74,8 @@ class Model_RT_Bert(torch.nn.Module):
         self._output_attentions = val
         self.hidden_nn.output_attentions = val
 
-    def forward(self, 
-        aa_indices, 
+    def forward(self,
+        aa_indices,
         mod_x,
     ):
         x = self.dropout(self.input_nn(
@@ -94,13 +94,13 @@ class Model_RT_Bert(torch.nn.Module):
 
 class Model_RT_LSTM_CNN(torch.nn.Module):
     """CNN+LSTM model for RT prediction"""
-    def __init__(self, 
+    def __init__(self,
         dropout=0.2,
     ):
         super().__init__()
-        
+
         self.dropout = torch.nn.Dropout(dropout)
-        
+
         hidden = 256
         self.rt_encoder = building_block.Encoder_26AA_Mod_CNN_LSTM_AttnSum(
             hidden
@@ -110,8 +110,8 @@ class Model_RT_LSTM_CNN(torch.nn.Module):
             hidden, 1
         )
 
-    def forward(self, 
-        aa_indices, 
+    def forward(self,
+        aa_indices,
         mod_x,
     ):
         x = self.rt_encoder(aa_indices, mod_x)
@@ -125,7 +125,7 @@ class AlphaRTModel(model_interface.ModelInterface):
     """
     `ModelInterface` for RT models
     """
-    def __init__(self, 
+    def __init__(self,
         dropout=0.1,
         model_class:torch.nn.Module=Model_RT_LSTM_CNN, #model defined above
         device:str='gpu',
@@ -141,8 +141,8 @@ class AlphaRTModel(model_interface.ModelInterface):
         self.target_column_to_predict = 'rt_pred'
         self.target_column_to_train = 'rt_norm'
 
-    def test(self, 
-        precursor_df: pd.DataFrame, 
+    def test(self,
+        precursor_df: pd.DataFrame,
         *,
         batch_size:int = 1024,
     ):
@@ -153,7 +153,7 @@ class AlphaRTModel(model_interface.ModelInterface):
             x="rt_pred", y="rt_norm"
         )
 
-    def _get_features_from_batch_df(self, 
+    def _get_features_from_batch_df(self,
         batch_df: pd.DataFrame,
     ):
         return (
@@ -186,5 +186,3 @@ class AlphaRTModel(model_interface.ModelInterface):
         intercept = eval_df.intercept.values[0]
         precursor_df['irt_pred'] = precursor_df.rt_pred*slope + intercept
         return precursor_df
-
-
