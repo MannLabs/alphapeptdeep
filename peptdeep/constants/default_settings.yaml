@@ -81,7 +81,7 @@ model_mgr:
   use_predicted_charge_in_speclib: True # if True, it ignores min/max_precursor_charge in `library`
   instrument_group:
     ThermoTOF: ThermoTOF
-    Astral: ThermoTOF
+    Astral: Lumos
     Lumos: Lumos
     QE: QE
     timsTOF: timsTOF
