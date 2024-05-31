@@ -12,3 +12,5 @@ repos:
 #   hooks:
 #     - id: ruff-format
 #     - id: ruff
+
+exclude: .bumpversion.cfg
