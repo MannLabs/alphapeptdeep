@@ -381,12 +381,12 @@ common:
   user_defined_modifications: {}
   # For example,
   # user_defined_modifications:
-  #   "Dimethyl2@Any N-term":
+  #   "Dimethyl2@Any_N-term":
   #     composition: "H(2)2H(2)C(2)"
   #     modloss_composition: "H(0)" # can be without if no modloss
   #   "Dimethyl2@K":
   #     composition: "H(2)2H(2)C(2)"
-  #   "Dimethyl6@Any N-term":
+  #   "Dimethyl6@Any_N-term":
   #     composition: "2H(4)13C(2)"
   #   "Dimethyl6@K":
   #     composition: "2H(4)13C(2)"
@@ -496,7 +496,7 @@ library:
   fix_mods:
   - Carbamidomethyl@C
   var_mods:
-  - Acetyl@Protein N-term
+  - Acetyl@Protein_N-term
   - Oxidation@M
   special_mods: [] # normally for Phospho or GlyGly@K
   special_mods_cannot_modify_pep_n_term: False
@@ -504,8 +504,8 @@ library:
   labeling_channels: {}
   # For example,
   # labeling_channels:
-  #   0: ['Dimethyl@Any N-term','Dimethyl@K']
-  #   4: ['Dimethyl:2H(2)@Any N-term','Dimethyl:2H(2)@K']
+  #   0: ['Dimethyl@Any_N-term','Dimethyl@K']
+  #   4: ['Dimethyl:2H(2)@Any_N-term','Dimethyl:2H(2)@K']
   #   8: [...]
   min_var_mod_num: 0
   max_var_mod_num: 2
@@ -565,7 +565,7 @@ See examples:
 import pandas as pd
 df = pd.DataFrame({
     'sequence': ['ACDEFGHIK','LMNPQRSTVK','WYVSTR'],
-    'mods': ['Carbamidomethyl@C','Acetyl@Protein N-term;Phospho@S',''],
+    'mods': ['Carbamidomethyl@C','Acetyl@Protein_N-term;Phospho@S',''],
     'mod_sites': ['2','0;7',''],
     'charge': [2,3,1],
 })
@@ -593,7 +593,7 @@ df[['sequence','mods','mod_sites']]
 |  | sequence | mods | mod_sites |
 | --- | --- | --- | --- |
 | 0 | ACDEFGHIK | Carbamidomethyl@C | 2 |
-| 1 | LMNPQRSTVK | Acetyl@Protein N-term;Phospho@S | 0;7 |
+| 1 | LMNPQRSTVK | Acetyl@Protein_N-term;Phospho@S | 0;7 |
 | 2 | WYVSTR | | |
 
 ##### precursor_table
@@ -605,7 +605,7 @@ df
 |  | sequence | mods | mod_sites | charge |
 | --- | --- | --- | --- | --- |
 | 0 | ACDEFGHIK | Carbamidomethyl@C | 2 | 2 |
-| 1 | LMNPQRSTVK | Acetyl@Protein N-term;Phospho@S | 0;7 | 3 |
+| 1 | LMNPQRSTVK | Acetyl@Protein_N-term;Phospho@S | 0;7 | 3 |
 | 2 | WYVSTR | | | 1 |
 
 > Columns of `proteins` and `genes` are optional for these txt/tsv/csv
@@ -686,7 +686,7 @@ model_mgr:
     # alphabase modification to modifications of other search engines
     # For example,
     # psm_modification_mapping:
-    #   Dimethyl@Any N-term:
+    #   Dimethyl@Any_N-term:
     #     - _(Dimethyl-n-0)
     #     - _(Dimethyl)
     #   Dimethyl:2H(2)@K:

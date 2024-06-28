@@ -47,7 +47,7 @@ def filter_phos(mq_df, prob):
 
     (mq_df["PhosProbs"], mq_df["PhosSites"]) = zip(
         *mq_df[["Modifications", "Phospho (STY) Probabilities"]].apply(
-            lambda x: parse_phos_probs(x[0], x[1], prob), axis=1
+            lambda x: parse_phos_probs(x.iloc[0], x.iloc[1], prob), axis=1
         )
     )
     return mq_df[mq_df["PhosProbs"] != "x"]
@@ -138,7 +138,7 @@ class MaxQuantMSMSReader(MaxQuantReader, PSMReader_w_FragBase):
 
             if np.any(intens > 0):
                 intens /= np.max(intens)
-            self._fragment_intensity_df.iloc[start:end, :] = intens
+            self._fragment_intensity_df.iloc[start:end, :] = np.float32(intens)
 
         self._psm_df[["frag_start_idx", "frag_stop_idx"]] = mq_df[
             ["frag_start_idx", "frag_stop_idx"]

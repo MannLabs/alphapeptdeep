@@ -1,4 +1,4 @@
 sequence,mods,mod_sites,charge
 ACDEFGHIK,Carbamidomethyl@C,2,2
-LMNPQRSTVK,Acetyl@Protein N-term;Phospho@S,0;7,3
+LMNPQRSTVK,Acetyl@Protein_N-term;Phospho@S,0;7,3
 WYVSTR,,,1
