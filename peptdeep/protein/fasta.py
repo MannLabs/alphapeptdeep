@@ -19,7 +19,7 @@ class PredictSpecLibFasta(SpecLibFasta, PredictSpecLib):
         precursor_charge_max:int = 4,
         precursor_mz_min:float = 400.0,
         precursor_mz_max:float = 1800.0,
-        var_mods:list = ['Acetyl@Protein N-term','Oxidation@M'],
+        var_mods:list = ['Acetyl@Protein_N-term','Oxidation@M'],
         min_var_mod_num:int = 0,
         max_var_mod_num:int = 2,
         fix_mods:list = ['Carbamidomethyl@C'],
@@ -73,7 +73,7 @@ class PredictSpecLibFasta(SpecLibFasta, PredictSpecLib):
 
         var_mods : list, optional
             list of variable modifications,
-            by default ['Acetyl@Protein N-term','Oxidation@M']
+            by default ['Acetyl@Protein_N-term','Oxidation@M']
 
         max_var_mod_num : int, optional
             Minimal number of variable modifications on a peptide sequence,
@@ -112,7 +112,7 @@ class PredictSpecLibFasta(SpecLibFasta, PredictSpecLib):
             Defaults to False.
 
         special_mods_cannot_modify_pep_n_term : bool, optional
-            Similar to `special_mods_cannot_modify_pep_c_term`, but at N-term.
+            Similar to `special_mods_cannot_modify_pep_c_term`, but at_N-term.
             Defaults to False.
 
         decoy : str, optional
