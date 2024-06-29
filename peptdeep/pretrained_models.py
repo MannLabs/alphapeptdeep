@@ -74,7 +74,9 @@ def is_model_zip(downloaded_zip):
         return any(x=='generic/ms2.pth' for x in zip.namelist())
 
 def download_models(
-    url:str=model_url, overwrite=True
+    url:str=model_url,
+    target_path:str=model_zip,
+    overwrite=True
 ):
     """
     Parameters
@@ -82,6 +84,10 @@ def download_models(
     url : str, optional
         Remote or local path.
         Defaults to `peptdeep.pretrained_models.model_url`
+
+    target_path : str, optional
+        Target file path after download.
+        Defaults to `peptdeep.pretrained_models.model_zip`
 
     overwrite : bool, optional
         overwirte old model files.
@@ -93,17 +99,17 @@ def download_models(
         If remote url is not accessible.
     """
     if not os.path.isfile(url):
-        logging.info(f'Downloading {model_zip_name} ...')
+        logging.info(f'Downloading {url} ...')
         try:
             context = ssl._create_unverified_context()
             requests = urllib.request.urlopen(url, context=context, timeout=10)
-            with open(model_zip, 'wb') as f:
+            with open(target_path, 'wb') as f:
                 f.write(requests.read())
         except (
             socket.timeout,
             urllib.error.URLError,
             urllib.error.HTTPError
-        ) as e:
+        ):
             raise FileNotFoundError(
                 'Downloading model failed! Please download the '
                 f'zip or tar file by yourself from "{url}",'
@@ -113,9 +119,9 @@ def download_models(
             )
     else:
         shutil.copy(
-            url, model_zip
+            url, target_path
         )
-    logging.info(f'The pretrained models had been downloaded in {model_zip}')
+    logging.info(f'The pretrained models had been downloaded in {target_path}')
 
 if not os.path.exists(model_zip):
     download_models()
