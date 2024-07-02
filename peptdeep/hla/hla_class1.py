@@ -166,7 +166,8 @@ class HLA1_Binding_Classifier(ModelInterface):
         precursor_df['nAA'] = precursor_df.sequence.str.len()
         precursor_df.drop(
             index=precursor_df[
-                (precursor_df.nAA<8)|(precursor_df.nAA>14)
+                (precursor_df.nAA<self.min_peptide_length)
+                |(precursor_df.nAA>self.max_peptide_length)
             ].index,
             inplace=True,
         )
