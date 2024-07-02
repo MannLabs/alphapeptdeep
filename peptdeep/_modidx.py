@@ -1,2 +1,1 @@
-d = { 'settings': { },
-  'syms': { }}
+d = {"settings": {}, "syms": {}}

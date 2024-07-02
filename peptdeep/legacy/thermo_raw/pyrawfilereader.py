@@ -3,13 +3,14 @@ import numpy as np
 
 # require pythonnet, pip install pythonnet on Windows
 import clr
-clr.AddReference('System')
+
+clr.AddReference("System")
 import System
 from System.Threading import Thread
 from System.Globalization import CultureInfo
 
-de_fr = CultureInfo('fr-FR')
-other = CultureInfo('en-US')
+de_fr = CultureInfo("fr-FR")
+other = CultureInfo("en-US")
 
 Thread.CurrentThread.CurrentCulture = other
 Thread.CurrentThread.CurrentUICulture = other
@@ -20,15 +21,15 @@ clr.AddReference(os.path.join(this_dir, "ThermoFisher.CommonCore.RawFileReader.d
 import ThermoFisher
 from ThermoFisher.CommonCore.Data.Interfaces import IScanEventBase, IScanEvent
 
-'''C# code to read Raw data
+"""C# code to read Raw data
 rawFile = ThermoFisher.CommonCore.RawFileReader.RawFileReaderAdapter.FileFactory(raw_filename)
 var scanStatistics = rawFile.GetScanStatsForScanNumber(1);
 var seg = rawFile.GetSegmentedScanFromScanNumber(1, scanStatistics);
 var scanEvent = rawFile.GetScanEventForScanNumber(1);
 var trailerData = rawFile.GetTrailerExtraInformation(1);
-'''
+"""
 
-'''
+"""
 APIs to access Thermo's Raw Files
 > This implementation is based on [pythonnet](http://pythonnet.github.io) and ThermoFisher's `RawFileReader` project.
 
@@ -43,7 +44,7 @@ APIs to access Thermo's Raw Files
 > 3. "export PKG_CONFIG_PATH=/usr/local/lib/pkgconfig:/usr/lib/pkgconfig:/Library/Frameworks/Mono.framework/Versions/Current/lib/pkgconfig:$PKG_CONFIG_PATH";
 >   `or` add these PKG_CONFIG_PATH into ~./bash_profile, and run "source ~/bash_profile". 6.12.0 is my mono version
 > 4. pip install pythonnet
-'''
+"""
 
 # see https://github.com/mobiusklein/ms_deisotope/blob/90b817d4b5ae7823cfe4ad61c57119d62a6e3d9d/ms_deisotope/data_source/thermo_raw_net.py#L217
 # from System.Runtime.InteropServices import Marshal
@@ -71,136 +72,157 @@ APIs to access Thermo's Raw Files
 
 from System.Runtime.InteropServices import GCHandle, GCHandleType
 import ctypes
+
+
 def DotNetArrayToNPArray(src, dtype=None):
-    '''
+    """
     See https://mail.python.org/pipermail/pythondotnet/2014-May/001527.html
-    '''
+    """
     if src is None:
         return np.array([], dtype=np.float64)
     src_hndl = GCHandle.Alloc(src, GCHandleType.Pinned)
     try:
         src_ptr = src_hndl.AddrOfPinnedObject().ToInt64()
-        bufType = ctypes.c_double*len(src)
+        bufType = ctypes.c_double * len(src)
         cbuf = bufType.from_address(src_ptr)
         dest = np.frombuffer(cbuf, dtype=cbuf._type_).copy()
     finally:
-        if src_hndl.IsAllocated: src_hndl.Free()
+        if src_hndl.IsAllocated:
+            src_hndl.Free()
         return dest
 
-'''
+
+"""
 APIs are similar to [pymsfilereader](https://github.com/frallain/pymsfilereader), but some APIs have not been implemented yet."
-'''
+"""
+
+
 class RawFileReader(object):
     # static class members
-    sampleType = {0: 'Unknown',
-                  1: 'Blank',
-                  2: 'QC',
-                  3: 'Standard Clear (None)',
-                  4: 'Standard Update (None)',
-                  5: 'Standard Bracket (Open)',
-                  6: 'Standard Bracket Start (multiple brackets)',
-                  7: 'Standard Bracket End (multiple brackets)'}
+    sampleType = {
+        0: "Unknown",
+        1: "Blank",
+        2: "QC",
+        3: "Standard Clear (None)",
+        4: "Standard Update (None)",
+        5: "Standard Bracket (Open)",
+        6: "Standard Bracket Start (multiple brackets)",
+        7: "Standard Bracket End (multiple brackets)",
+    }
 
-    controllerType = {-1: 'No device',
-                      0: 'MS',
-                      1: 'Analog',
-                      2: 'A/D card',
-                      3: 'PDA',
-                      4: 'UV',
-                      'No device': -1,
-                      'MS': 0,
-                      'Analog': 1,
-                      'A/D card': 2,
-                      'PDA': 3,
-                      'UV': 4}
+    controllerType = {
+        -1: "No device",
+        0: "MS",
+        1: "Analog",
+        2: "A/D card",
+        3: "PDA",
+        4: "UV",
+        "No device": -1,
+        "MS": 0,
+        "Analog": 1,
+        "A/D card": 2,
+        "PDA": 3,
+        "UV": 4,
+    }
 
-    massAnalyzerType = {'ITMS': 0,
-                        'TQMS': 1,
-                        'SQMS': 2,
-                        'TOFMS': 3,
-                        'FTMS': 4,
-                        'Sector': 5,
-                        0: 'ITMS',
-                        1: 'TQMS',
-                        2: 'SQMS',
-                        3: 'TOFMS',
-                        4: 'FTMS',
-                        5: 'Sector'}
-    activationType = {'CID': 0,
-                      'MPD': 1,
-                      'ECD': 2,
-                      'PQD': 3,
-                      'ETD': 4,
-                      'HCD': 5,
-                      'Any activation type': 6,
-                      'SA': 7,
-                      'PTR': 8,
-                      'NETD': 9,
-                      'NPTR': 10,
-                      'UVPD': 11,
-                      'ETHCD': 12, # not Thermo's build-in activation types
-                      'ETCID': 13, # not Thermo's build-in activation types
-                      0: 'CID',
-                      1: 'MPD',
-                      2: 'ECD',
-                      3: 'PQD',
-                      4: 'ETD',
-                      5: 'HCD',
-                      6: 'Any activation type',
-                      7: 'SA',
-                      8: 'PTR',
-                      9: 'NETD',
-                      10: 'NPTR',
-                      11: 'UVPD',
-                      12: 'ETHCD', # not Thermo's build-in activation types
-                      13: 'ETCID', # not Thermo's build-in activation types
-                     }
+    massAnalyzerType = {
+        "ITMS": 0,
+        "TQMS": 1,
+        "SQMS": 2,
+        "TOFMS": 3,
+        "FTMS": 4,
+        "Sector": 5,
+        0: "ITMS",
+        1: "TQMS",
+        2: "SQMS",
+        3: "TOFMS",
+        4: "FTMS",
+        5: "Sector",
+    }
+    activationType = {
+        "CID": 0,
+        "MPD": 1,
+        "ECD": 2,
+        "PQD": 3,
+        "ETD": 4,
+        "HCD": 5,
+        "Any activation type": 6,
+        "SA": 7,
+        "PTR": 8,
+        "NETD": 9,
+        "NPTR": 10,
+        "UVPD": 11,
+        "ETHCD": 12,  # not Thermo's build-in activation types
+        "ETCID": 13,  # not Thermo's build-in activation types
+        0: "CID",
+        1: "MPD",
+        2: "ECD",
+        3: "PQD",
+        4: "ETD",
+        5: "HCD",
+        6: "Any activation type",
+        7: "SA",
+        8: "PTR",
+        9: "NETD",
+        10: "NPTR",
+        11: "UVPD",
+        12: "ETHCD",  # not Thermo's build-in activation types
+        13: "ETCID",  # not Thermo's build-in activation types
+    }
 
-    detectorType = {'Valid': 0,
-                    'Any': 1,
-                    'NotValid': 2,
-                    0: 'Valid',
-                    1: 'Any',
-                    2: 'NotValid',
-                   }
+    detectorType = {
+        "Valid": 0,
+        "Any": 1,
+        "NotValid": 2,
+        0: "Valid",
+        1: "Any",
+        2: "NotValid",
+    }
 
-    scanDataType = {'Centroid': 0,
-                    'Profile': 1,
-                    'Any': 2,
-                    0: 'Centroid',
-                    1: 'Profile',
-                    2: 'Any',
-                   }
+    scanDataType = {
+        "Centroid": 0,
+        "Profile": 1,
+        "Any": 2,
+        0: "Centroid",
+        1: "Profile",
+        2: "Any",
+    }
 
-    scanType = {'Full': 0,
-                'Zoom': 1,
-                'SIM': 2,
-                'SRM': 3,
-                'CRM': 4,
-                'Any': 5,
-                'Q1MS': 6,
-                'Q3MS': 7,
-                0: 'Full',
-                1: 'SIM',
-                2: 'Zoom',
-                3: 'SRM',
-                4: 'CRM',
-                5: 'Any',
-                6: 'Q1MS',
-                7: 'Q3MS',
-               }
+    scanType = {
+        "Full": 0,
+        "Zoom": 1,
+        "SIM": 2,
+        "SRM": 3,
+        "CRM": 4,
+        "Any": 5,
+        "Q1MS": 6,
+        "Q3MS": 7,
+        0: "Full",
+        1: "SIM",
+        2: "Zoom",
+        3: "SRM",
+        4: "CRM",
+        5: "Any",
+        6: "Q1MS",
+        7: "Q3MS",
+    }
 
     def __init__(self, filename, **kwargs):
-
         self.filename = os.path.abspath(filename)
         self.filename = os.path.normpath(self.filename)
 
-        self.source = ThermoFisher.CommonCore.RawFileReader.RawFileReaderAdapter.FileFactory(self.filename)
+        self.source = (
+            ThermoFisher.CommonCore.RawFileReader.RawFileReaderAdapter.FileFactory(
+                self.filename
+            )
+        )
 
         if not self.source.IsOpen:
             raise IOError(
                 "RAWfile '{0}' could not be opened, is the file accessible ?".format(
-                    self.filename))
+                    self.filename
+                )
+            )
         self.source.SelectInstrument(ThermoFisher.CommonCore.Data.Business.Device.MS, 1)
 
         try:
@@ -213,7 +235,7 @@ class RawFileReader(object):
             self.MassResolution = self.GetMassResolution()
             self.NumSpectra = self.GetNumSpectra()
         except Exception as e:
-            raise IOError(f'{e}')
+            raise IOError(f"{e}")
 
     def Close(self):
         """Closes a raw file and frees the associated memory."""
@@ -232,7 +254,7 @@ class RawFileReader(object):
         """Returns the file creation date in DATE format."""
         # https://msdn.microsoft.com/en-us/library/82ab7w69.aspx
         # The DATE type is implemented using an 8-byte floating-point number
-        return self.source.CreationDate.ToString('o')
+        return self.source.CreationDate.ToString("o")
 
     def GetStatusLogForRetentionTime(self, rt):
         logEntry = self.source.GetStatusLogForRetentionTime(rt)
@@ -305,7 +327,10 @@ class RawFileReader(object):
     # INSTRUMENT BEGIN
     def GetInstName(self):
         """Returns the instrument name, if available, for the current controller."""
-        return System.String.Join(" -> ", self.source.GetAllInstrumentNamesFromInstrumentMethod())
+        return System.String.Join(
+            " -> ", self.source.GetAllInstrumentNamesFromInstrumentMethod()
+        )
+
     # INSTRUMENT END
 
     def GetScanEventStringForScanNum(self, scanNumber):
@@ -321,36 +346,48 @@ class RawFileReader(object):
 
     def GetNumberOfMassRangesFromScanNum(self, scanNumber):
         """This function gets the number of MassRange data items in the scan."""
-        return IScanEventBase(self.source.GetScanEventForScanNumber(scanNumber)).MassRangeCount
+        return IScanEventBase(
+            self.source.GetScanEventForScanNumber(scanNumber)
+        ).MassRangeCount
 
     def GetMassRangeFromScanNum(self, scanNumber, massRangeIndex):
         """This function retrieves information about the mass range data of a scan (high and low
         masses). You can find the count of mass ranges for the scan by calling
         GetNumberOfMassRangesFromScanNum()."""
-        range = IScanEventBase(self.source.GetScanEventForScanNumber(scanNumber)).GetMassRange(massRangeIndex)
+        range = IScanEventBase(
+            self.source.GetScanEventForScanNumber(scanNumber)
+        ).GetMassRange(massRangeIndex)
         return range.Low, range.High
 
     def GetNumberOfSourceFragmentsFromScanNum(self, scanNumber):
         """This function gets the number of source fragments (or compensation voltages) in the scan."""
-        return IScanEventBase(self.source.GetScanEventForScanNumber(scanNumber)).SourceFragmentationInfoCount
+        return IScanEventBase(
+            self.source.GetScanEventForScanNumber(scanNumber)
+        ).SourceFragmentationInfoCount
 
     def GetSourceFragmentValueFromScanNum(self, scanNumber, sourceFragmentIndex):
         """This function retrieves information about one of the source fragment values of a scan. It is
         also the same value as the compensation voltage. You can find the count of source fragments
         for the scan by calling GetNumberOfSourceFragmentsFromScanNum ()."""
-        return IScanEventBase(self.source.GetScanEventForScanNumber(scanNumber)).GetSourceFragmentationInfo(sourceFragmentIndex)
+        return IScanEventBase(
+            self.source.GetScanEventForScanNumber(scanNumber)
+        ).GetSourceFragmentationInfo(sourceFragmentIndex)
 
-    def GetIsolationWidthForScanNum(self, scanNumber, MSOrder = 0):
+    def GetIsolationWidthForScanNum(self, scanNumber, MSOrder=0):
         """This function returns the isolation width for the scan specified by scanNumber and the
         transition specified by MSOrder (0 for MS1?) from the scan event structure in the raw file."""
-        return IScanEventBase(self.source.GetScanEventForScanNumber(scanNumber)).GetIsolationWidth(MSOrder)
+        return IScanEventBase(
+            self.source.GetScanEventForScanNumber(scanNumber)
+        ).GetIsolationWidth(MSOrder)
 
-    def GetCollisionEnergyForScanNum(self, scanNumber, MSOrder = 0):
+    def GetCollisionEnergyForScanNum(self, scanNumber, MSOrder=0):
         """This function returns the collision energy for the scan specified by scanNumber and the
-        transition specified by MSOrder (0 for MS1?) from the scan event structure in the raw file. """
-        return IScanEventBase(self.source.GetScanEventForScanNumber(scanNumber)).GetEnergy(MSOrder)
+        transition specified by MSOrder (0 for MS1?) from the scan event structure in the raw file."""
+        return IScanEventBase(
+            self.source.GetScanEventForScanNumber(scanNumber)
+        ).GetEnergy(MSOrder)
 
-    def GetActivationTypeForScanNum(self, scanNumber, MSOrder = 0):
+    def GetActivationTypeForScanNum(self, scanNumber, MSOrder=0):
         """This function returns the activation type for the scan specified by scanNumber and the
         transition specified by MSOrder from the scan event structure in the RAW file.
         The value returned in the pnActivationType variable is one of the following:
@@ -366,7 +403,11 @@ class RawFileReader(object):
         NETD 9
         NPTR 10
         UVPD 11"""
-        return RawFileReader.activationType[IScanEventBase(self.source.GetScanEventForScanNumber(scanNumber)).GetActivation(MSOrder)]
+        return RawFileReader.activationType[
+            IScanEventBase(
+                self.source.GetScanEventForScanNumber(scanNumber)
+            ).GetActivation(MSOrder)
+        ]
 
     def GetMassAnalyzerTypeForScanNum(self, scanNumber):
         """This function returns the mass analyzer type for the scan specified by scanNumber from the
@@ -379,17 +420,23 @@ class RawFileReader(object):
     def GetDetectorTypeForScanNum(self, scanNumber):
         """This function returns the detector type for the scan specified by scanNumber from the scan
         event structure in the RAW file."""
-        return RawFileReader.detectorType[IScanEventBase(self.source.GetScanEventForScanNumber(scanNumber)).Detector]
+        return RawFileReader.detectorType[
+            IScanEventBase(self.source.GetScanEventForScanNumber(scanNumber)).Detector
+        ]
 
     def GetNumberOfMassCalibratorsFromScanNum(self, scanNumber):
         """This function gets the number of mass calibrators (each of which is a double) in the scan."""
-        return IScanEvent(self.source.GetScanEventForScanNumber(scanNumber)).MassCalibratorCount
+        return IScanEvent(
+            self.source.GetScanEventForScanNumber(scanNumber)
+        ).MassCalibratorCount
 
     def GetMassCalibrationValueFromScanNum(self, scanNumber, massCalibrationIndex):
         """This function retrieves information about one of the mass calibration data values of a scan.
         You can find the count of mass calibrations for the scan by calling
         GetNumberOfMassCalibratorsFromScanNum()."""
-        return IScanEvent(self.source.GetScanEventForScanNumber(scanNumber)).GetMassCalibrator(massCalibrationIndex)
+        return IScanEvent(
+            self.source.GetScanEventForScanNumber(scanNumber)
+        ).GetMassCalibrator(massCalibrationIndex)
 
     def GetMassResolution(self):
         """Gets the mass resolution value recorded for the current controller. The value is returned as one
@@ -442,7 +489,7 @@ class RawFileReader(object):
         For non-scanning devices, such as UV, the closest reading number is returned. The value of
         RT must be within the acquisition run time for the current controller. The acquisition run
         time for the current controller may be obtained by calling GetStartTime and GetEndTime."""
-        return self.ScanNumFromRT(RTInSeconds/60)
+        return self.ScanNumFromRT(RTInSeconds / 60)
 
     def RTFromScanNum(self, scanNumber):
         """Returns the closest matching run time or retention time that corresponds to scanNumber for
@@ -454,7 +501,7 @@ class RawFileReader(object):
         """Returns the closest matching run time or retention time that corresponds to scanNumber for
         the current controller. For non-scanning devices, such as UV, the scanNumber is the reading
         number."""
-        return self.RTFromScanNum(scanNumber)*60
+        return self.RTFromScanNum(scanNumber) * 60
 
     def IsProfileScanForScanNum(self, scanNumber):
         """Returns TRUE if the scan specified by scanNumber is a profile scan, FALSE if the scan is a
@@ -490,14 +537,20 @@ class RawFileReader(object):
         """This function gets the number of MS reaction data items in the scan event for the scan
         specified by scanNumber and the transition specified by MSOrder from the scan event
         structure in the raw file."""
-        return IScanEventBase(self.source.GetScanEventForScanNumber(scanNumber)).MassCount
+        return IScanEventBase(
+            self.source.GetScanEventForScanNumber(scanNumber)
+        ).MassCount
 
-    def GetPrecursorMassForScanNum(self, scanNumber, MSOrder = 0):
+    def GetPrecursorMassForScanNum(self, scanNumber, MSOrder=0):
         """This function returns the precursor mass for the scan specified by scanNumber and the
         transition specified by MSOrder (0 for precursor in MS1?) from the scan event structure in the RAW file."""
-        return IScanEventBase(self.source.GetScanEventForScanNumber(scanNumber)).GetReaction(MSOrder).PrecursorMass
+        return (
+            IScanEventBase(self.source.GetScanEventForScanNumber(scanNumber))
+            .GetReaction(MSOrder)
+            .PrecursorMass
+        )
 
-    def GetPrecursorRangeForScanNum(self, scanNumber, MSOrder = 0):
+    def GetPrecursorRangeForScanNum(self, scanNumber, MSOrder=0):
         """This function returns the first and last precursor mass values of the range and whether they are
         valid for the scan specified by scanNumber and the transition specified by MSOrder (0 for precursor in MS1?) from the scan event structure in the raw file."""
         scanEvent = IScanEventBase(self.source.GetScanEventForScanNumber(scanNumber))
@@ -521,8 +574,8 @@ class RawFileReader(object):
 
     def GetMS2MonoMzAndChargeFromScanNum(self, scanNumber):
         trailerData = self.GetTrailerExtraForScanNum(scanNumber)
-        mono = float(trailerData['Monoisotopic M/Z:'].strip())
-        charge = int(trailerData['Charge State:'].strip())
+        mono = float(trailerData["Monoisotopic M/Z:"].strip())
+        charge = int(trailerData["Charge State:"].strip())
         if mono < 1:
             mono = self.GetPrecursorMassForScanNum(scanNumber)
         if mono < 1:
@@ -531,20 +584,48 @@ class RawFileReader(object):
 
     def GetProfileMassListFromScanNum(self, scanNumber):
         scanStatistics = self.source.GetScanStatsForScanNumber(scanNumber)
-        segmentedScan = self.source.GetSegmentedScanFromScanNumber(scanNumber, scanStatistics)
-        return np.array([DotNetArrayToNPArray(segmentedScan.Positions, float), DotNetArrayToNPArray(segmentedScan.Intensities, float)])
+        segmentedScan = self.source.GetSegmentedScanFromScanNumber(
+            scanNumber, scanStatistics
+        )
+        return np.array(
+            [
+                DotNetArrayToNPArray(segmentedScan.Positions, float),
+                DotNetArrayToNPArray(segmentedScan.Intensities, float),
+            ]
+        )
 
     def GetCentroidMassListFromScanNum(self, scanNumber):
         scanStatistics = self.source.GetScanStatsForScanNumber(scanNumber)
         if scanStatistics.IsCentroidScan:
-            segmentedScan = self.source.GetSegmentedScanFromScanNumber(scanNumber, scanStatistics)
-            return np.array([DotNetArrayToNPArray(segmentedScan.Positions, float), DotNetArrayToNPArray(segmentedScan.Intensities, float)])
+            segmentedScan = self.source.GetSegmentedScanFromScanNumber(
+                scanNumber, scanStatistics
+            )
+            return np.array(
+                [
+                    DotNetArrayToNPArray(segmentedScan.Positions, float),
+                    DotNetArrayToNPArray(segmentedScan.Intensities, float),
+                ]
+            )
         else:
-            scan = ThermoFisher.CommonCore.Data.Business.Scan.FromFile(self.source, scanNumber)
+            scan = ThermoFisher.CommonCore.Data.Business.Scan.FromFile(
+                self.source, scanNumber
+            )
             if scan.HasCentroidStream:
                 stream = self.source.GetCentroidStream(scanNumber, False)
-                return np.array([DotNetArrayToNPArray(stream.Masses, float), DotNetArrayToNPArray(stream.Intensities, float)])
+                return np.array(
+                    [
+                        DotNetArrayToNPArray(stream.Masses, float),
+                        DotNetArrayToNPArray(stream.Intensities, float),
+                    ]
+                )
             else:
                 print("Profile scan {0} cannot be centroided!".format(scanNumber))
-                segmentedScan = self.source.GetSegmentedScanFromScanNumber(scanNumber, scanStatistics)
-                return np.array([DotNetArrayToNPArray(segmentedScan.Positions, float), DotNetArrayToNPArray(segmentedScan.Intensities, float)])
+                segmentedScan = self.source.GetSegmentedScanFromScanNumber(
+                    scanNumber, scanStatistics
+                )
+                return np.array(
+                    [
+                        DotNetArrayToNPArray(segmentedScan.Positions, float),
+                        DotNetArrayToNPArray(segmentedScan.Intensities, float),
+                    ]
+                )

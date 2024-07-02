@@ -10,22 +10,23 @@ import importlib.metadata
 
 import peptdeep
 
-BASE_PATH = os.path.expanduser('~/peptdeep')
+BASE_PATH = os.path.expanduser("~/peptdeep")
 LOG_PATH = os.path.join(BASE_PATH, "logs")
 
 log_level_dict = {
-    'debug': logging.DEBUG,
-    'info': logging.INFO,
-    'warning': logging.WARNING,
-    'error': logging.ERROR,
-    'critical': logging.CRITICAL,
+    "debug": logging.DEBUG,
+    "info": logging.INFO,
+    "warning": logging.WARNING,
+    "error": logging.ERROR,
+    "critical": logging.CRITICAL,
 }
+
 
 def set_logger(
     *,
     log_file_name="",
     stream: bool = True,
-    log_level: str = 'info',
+    log_level: str = "info",
     overwrite: bool = False,
 ) -> str:
     """Set the log stream and file.
@@ -70,9 +71,7 @@ def set_logger(
             log_level = logging.INFO
 
     root = logging.getLogger()
-    formatter = logging.Formatter(
-        '%(asctime)s> %(message)s', "%Y-%m-%d %H:%M:%S"
-    )
+    formatter = logging.Formatter("%(asctime)s> %(message)s", "%Y-%m-%d %H:%M:%S")
     root.setLevel(log_level)
     while root.hasHandlers():
         root.removeHandler(root.handlers[0])
@@ -91,18 +90,15 @@ def set_logger(
             current_time = time.localtime()
             current_time = "".join(
                 [
-                    f'{current_time.tm_year:04}',
-                    f'{current_time.tm_mon:02}',
-                    f'{current_time.tm_mday:02}',
-                    f'{current_time.tm_hour:02}',
-                    f'{current_time.tm_min:02}',
-                    f'{current_time.tm_sec:02}',
+                    f"{current_time.tm_year:04}",
+                    f"{current_time.tm_mon:02}",
+                    f"{current_time.tm_mday:02}",
+                    f"{current_time.tm_hour:02}",
+                    f"{current_time.tm_min:02}",
+                    f"{current_time.tm_sec:02}",
                 ]
             )
-            log_file_name = os.path.join(
-                log_file_name,
-                f"log_{current_time}.txt"
-            )
+            log_file_name = os.path.join(log_file_name, f"log_{current_time}.txt")
         directory = os.path.dirname(log_file_name)
         if not os.path.exists(directory):
             os.makedirs(directory)
@@ -114,7 +110,10 @@ def set_logger(
         file_handler.setFormatter(formatter)
         root.addHandler(file_handler)
     return log_file_name
+
+
 set_logger(log_file_name=None)
+
 
 def show_platform_info() -> None:
     """Log all platform information.
@@ -167,7 +166,7 @@ def show_python_info() -> None:
     """
     module_versions = {
         "python": platform.python_version(),
-        "peptdeep": peptdeep.__version__
+        "peptdeep": peptdeep.__version__,
     }
     requirements = importlib.metadata.requires("peptdeep")
     for requirement in requirements:
