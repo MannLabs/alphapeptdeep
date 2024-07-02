@@ -10,9 +10,10 @@ from alphabase.protein.lcp_digest import get_substring_indices
 
 from alphabase.protein.fasta import load_all_proteins
 
+
 def load_prot_df(
-    protein_data:Union[str,list,tuple,set,dict],
-)->pd.DataFrame:
+    protein_data: Union[str, list, tuple, set, dict],
+) -> pd.DataFrame:
     """
     Load protein dataframe from input protein_data.
 
@@ -35,7 +36,7 @@ def load_prot_df(
     """
     if isinstance(protein_data, str):
         protein_dict = load_all_proteins([protein_data])
-    elif isinstance(protein_data, (list,tuple,set)):
+    elif isinstance(protein_data, (list, tuple, set)):
         protein_dict = load_all_proteins(protein_data)
     elif isinstance(protein_data, dict):
         protein_dict = protein_data
@@ -44,11 +45,12 @@ def load_prot_df(
             "`protein_data` must be str, list, tuple, set or dict, "
             f"`{type(protein_data)}` is given."
         )
-    prot_df = pd.DataFrame().from_dict(protein_dict, orient='index')
-    prot_df['nAA'] = prot_df.sequence.str.len()
+    prot_df = pd.DataFrame().from_dict(protein_dict, orient="index")
+    prot_df["nAA"] = prot_df.sequence.str.len()
     return prot_df
 
-def cat_proteins(sequences:List[str], sep:str='$')->str:
+
+def cat_proteins(sequences: List[str], sep: str = "$") -> str:
     """
     Concatenate protein sequences in `prot_df` into a single sequence.
 
@@ -72,9 +74,10 @@ def cat_proteins(sequences:List[str], sep:str='$')->str:
     """
     return sep + sep.join(sequences) + sep
 
+
 def nonspecific_digest_cat_proteins(
-    cat_sequence:str, min_len:int, max_len:int
-)->pd.DataFrame:
+    cat_sequence: str, min_len: int, max_len: int
+) -> pd.DataFrame:
     """
     Digest the concat protein sequence to non-specific peptides.
 
@@ -97,29 +100,32 @@ def nonspecific_digest_cat_proteins(
     """
     pos_starts, pos_ends = get_substring_indices(cat_sequence, min_len, max_len)
     digest_df = pd.DataFrame(dict(start_pos=pos_starts, end_pos=pos_ends))
-    digest_df["nAA"] = digest_df.end_pos-digest_df.start_pos
-    digest_df.sort_values('nAA', inplace=True)
+    digest_df["nAA"] = digest_df.end_pos - digest_df.start_pos
+    digest_df.sort_values("nAA", inplace=True)
     digest_df.reset_index(inplace=True, drop=True)
     return digest_df
+
 
 def _get_rnd_subseq(x, pep_len):
     sequence, prot_len = x
     if prot_len <= pep_len:
-        return ''.join(
-            [sequence]*(pep_len//prot_len)
-        ) + sequence[:pep_len%prot_len]
-    start = np.random.randint(0,prot_len-pep_len)
-    return sequence[start:start+pep_len]
+        return (
+            "".join([sequence] * (pep_len // prot_len)) + sequence[: pep_len % prot_len]
+        )
+    start = np.random.randint(0, prot_len - pep_len)
+    return sequence[start : start + pep_len]
 
-def get_random_sequences(prot_df:pd.DataFrame, n:int, pep_len:int):
+
+def get_random_sequences(prot_df: pd.DataFrame, n: int, pep_len: int):
     """
     Random peptide sampling from proteins
     """
-    return prot_df.sample(
-        n, replace=True, weights='nAA'
-    )[['sequence','nAA']].apply(
-        _get_rnd_subseq, pep_len=pep_len, axis=1
-    ).values.astype('U')
+    return (
+        prot_df.sample(n, replace=True, weights="nAA")[["sequence", "nAA"]]
+        .apply(_get_rnd_subseq, pep_len=pep_len, axis=1)
+        .values.astype("U")
+    )
+
 
 @numba.njit
 def check_sty(seq):
@@ -128,15 +134,16 @@ def check_sty(seq):
             return True
     return False
 
+
 def get_seq(x, cat_prot):
     return cat_prot[slice(*x)]
 
-def get_seq_series(df, cat_prot):
-    return df[["start_pos","end_pos"]].apply(
-        get_seq, axis=1, cat_prot=cat_prot
-    )
 
-def check_is_file(file_path:str):
+def get_seq_series(df, cat_prot):
+    return df[["start_pos", "end_pos"]].apply(get_seq, axis=1, cat_prot=cat_prot)
+
+
+def check_is_file(file_path: str):
     if os.path.isfile(file_path):
         print(f"Loading `{file_path}`")
         return True

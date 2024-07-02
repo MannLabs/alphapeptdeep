@@ -490,7 +490,7 @@ class ModelManager(object):
                         return
                 else:
                     model.load(model_file)
-            except (UnpicklingError, TypeError, ValueError, KeyError) as e:
+            except (UnpicklingError, TypeError, ValueError, KeyError):
                 logging.info(
                     f"Cannot load {model_file} as {model.__class__} model, peptdeep will use the pretrained model instead."
                 )
