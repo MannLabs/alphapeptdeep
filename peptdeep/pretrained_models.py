@@ -83,11 +83,11 @@ def download_models(
     ----------
     url : str, optional
         Remote or local path.
-        Defaults to `peptdeep.pretrained_models.model_url`
+        Defaults to :data:`peptdeep.pretrained_models.model_url`
 
     target_path : str, optional
         Target file path after download.
-        Defaults to `peptdeep.pretrained_models.model_zip`
+        Defaults to :data:`peptdeep.pretrained_models.model_zip`
 
     overwrite : bool, optional
         overwirte old model files.

@@ -20,16 +20,6 @@ from .hla_utils import (
     nonspecific_digest_cat_proteins,
 )
 
-
-_model_zip_name = global_settings['local_hla_model_zip_name']
-_model_url = global_settings['hla_model_url']
-_model_zip = os.path.join(
-    pretrain_dir, _model_zip_name
-)
-
-if not os.path.exists(_model_zip):
-    download_models(url=_model_url, target_path=_model_zip)
-
 class HLA_Class_I_LSTM(torch.nn.Module):
     """
     HLA-I-binding peptide prediction model using LSTM.
@@ -132,6 +122,13 @@ class HLA1_Binding_Classifier(ModelInterface):
     """
     Class to predict HLA-binding probabilities of peptides.
     """
+
+    _model_zip_name = global_settings['local_hla_model_zip_name']
+    _model_url = global_settings['hla_model_url']
+    _model_zip = os.path.join(
+        pretrain_dir, _model_zip_name
+    )
+
     def __init__(self,
         dropout:float=0.1,
         model_class:type=HLA_Class_I_LSTM, # model defined above
@@ -398,11 +395,16 @@ class HLA1_Binding_Classifier(ModelInterface):
         )
         return peptide_df
 
+    def _download_pretrained_hla_model(self):
+        download_models(url=self._model_url, target_path=self._model_zip)
+
     def load_pretrained_hla_model(self):
         """
         Load pretrained `HLA1_IEDB.pt` model.
         """
+        if not os.path.exists(self._model_zip):
+            self._download_pretrained_hla_model()
         self.load(
-            model_file=_model_zip,
+            model_file=self._model_zip,
             model_path_in_zip="HLA1_IEDB.pt"
         )

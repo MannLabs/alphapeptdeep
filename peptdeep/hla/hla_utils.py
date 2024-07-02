@@ -11,14 +11,14 @@ from alphabase.protein.lcp_digest import get_substring_indices
 from alphabase.protein.fasta import load_all_proteins
 
 def load_prot_df(
-    protein_data:Union[str,list,dict],
+    protein_data:Union[str,list,tuple,set,dict],
 )->pd.DataFrame:
     """
     Load protein dataframe from input protein_data.
 
     Parameters
     ----------
-    protein_data : Union[str,list,dict]
+    protein_data : Union[str,list,tuple,set,dict]
         str: fasta file
         list (tuple, or set): a list of fasta files
         dict: protein dict
@@ -27,17 +27,23 @@ def load_prot_df(
     -------
     pd.DataFrame
         protein dataframe
+
+    Raises
+    ------
+    TypeError
+        protein_data type is not one of str, list, tuple, set, or dict.
     """
     if isinstance(protein_data, str):
         protein_dict = load_all_proteins([protein_data])
     elif isinstance(protein_data, (list,tuple,set)):
         protein_dict = load_all_proteins(protein_data)
-    elif isinstance(protein_data, str):
-        protein_dict = load_all_proteins([protein_data])
     elif isinstance(protein_data, dict):
         protein_dict = protein_data
     else:
-        return pd.DataFrame()
+        raise TypeError(
+            "`protein_data` must be str, list, tuple, set or dict, "
+            f"`{type(protein_data)}` is given."
+        )
     prot_df = pd.DataFrame().from_dict(protein_dict, orient='index')
     prot_df['nAA'] = prot_df.sequence.str.len()
     return prot_df
