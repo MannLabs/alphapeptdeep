@@ -1,0 +1,1 @@
+pydivsufsort # used by alphabase.protein.lcp_digest
