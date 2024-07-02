@@ -1,5 +1,6 @@
 from transformers.dependency_versions_check import pkgs_to_check_at_runtime
 
+
 def get_peptdeep_datas():
     """
     Huggingface has some dependencies those are not included in pyinstaller,
@@ -9,7 +10,8 @@ def get_peptdeep_datas():
     `.. = Analysis(..., datas=datas,...)`.
     """
     from PyInstaller.utils.hooks import copy_metadata
-    for _pkg in ["python","accelerate"]:
+
+    for _pkg in ["python", "accelerate"]:
         if _pkg in pkgs_to_check_at_runtime:
             pkgs_to_check_at_runtime.remove(_pkg)
     datas = []

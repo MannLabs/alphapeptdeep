@@ -942,8 +942,21 @@ clone the repository and create a [pull
 request](https://github.com/MannLabs/alphapeptdeep/pulls) with a new
 branch. For an even more interactive participation, check out the
 [discussions](https://github.com/MannLabs/alphapeptdeep/discussions) and
-the [the Contributors License Agreement](misc/CLA.md).
+the [Contributors License Agreement](misc/CLA.md).
 
+### Notes for developers
+#### pre-commit hooks
+It is highly recommended to use the provided pre-commit hooks, as the CI pipeline enforces all checks therein to
+pass in order to merge a branch.
+
+The hooks need to be installed once by
+```bash
+pre-commit install
+```
+You can run the checks yourself using:
+```bash
+pre-commit run --all-files
+```
 ------------------------------------------------------------------------
 
 ## Changelog

@@ -1,4 +1,4 @@
-#copy from alphapept
+# copy from alphapept
 import streamlit as st
 from peptdeep.webui.ui_utils import markdown_link
 import peptdeep
@@ -9,7 +9,9 @@ def show():
     st.write("# Start page")
     st.write("Welcome to AlphaPeptDeep (PeptDeep for short).")
     st.write("#### Cite: ")
-    st.write("Wen-Feng Zeng, Xie-Xuan Zhou, Sander Willems, Constantin Ammar, Maria Wahle, Isabell Bludau, Eugenia Voytik, Maximillian T. Strauss & Matthias Mann. AlphaPeptDeep: a modular deep learning framework to predict peptide properties for proteomics. Nat Commun 13, 7238 (2022). https://doi.org/10.1038/s41467-022-34904-3")
+    st.write(
+        "Wen-Feng Zeng, Xie-Xuan Zhou, Sander Willems, Constantin Ammar, Maria Wahle, Isabell Bludau, Eugenia Voytik, Maximillian T. Strauss & Matthias Mann. AlphaPeptDeep: a modular deep learning framework to predict peptide properties for proteomics. Nat Commun 13, 7238 (2022). https://doi.org/10.1038/s41467-022-34904-3"
+    )
 
     with st.expander("Navigation"):
         st.write("Use the sidebar on the left to navigate through the different tasks.")
@@ -38,7 +40,6 @@ def show():
         )
 
     with st.expander("Server"):
-
         st.write(
             "When starting PeptDeep you launch a server that can be closed when closing the terminal window."
         )
