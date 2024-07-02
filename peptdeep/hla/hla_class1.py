@@ -31,12 +31,27 @@ if not os.path.exists(_model_zip):
     download_models(url=_model_url, target_path=_model_zip)
 
 class HLA_Class_I_LSTM(torch.nn.Module):
+    """
+    HLA-I-binding peptide prediction model using LSTM.
+    """
     def __init__(self, *,
         hidden_dim=256,
         input_dim=128,
         n_lstm_layers=4,
         dropout=0.1,
     ):
+        """
+        Parameters
+        ----------
+        hidden_dim : int, optional
+            hidden dimension, by default 256
+        input_dim : int, optional
+            input dimension, by default 128 (ASCII)
+        n_lstm_layers : int, optional
+            number of LSTM layers, by default 4
+        dropout : float, optional
+            dropout rate, by default 0.1
+        """
         super().__init__()
         self.dropout = torch.nn.Dropout(dropout)
 
@@ -56,6 +71,10 @@ class HLA_Class_I_LSTM(torch.nn.Module):
         return self.nn(x).squeeze(-1)
 
 class HLA_Class_I_Bert(torch.nn.Module):
+    """
+    Model based on a transformer Architecture from
+    Huggingface's BertEncoder class.
+    """
     def __init__(self,
         nlayers = 4,
         input_dim = 128,
@@ -64,10 +83,6 @@ class HLA_Class_I_Bert(torch.nn.Module):
         dropout = 0.1,
         **kwargs,
     ):
-        """
-        Model based on a transformer Architecture from
-        Huggingface's BertEncoder class.
-        """
         super().__init__()
 
         self.dropout = torch.nn.Dropout(dropout)
@@ -155,13 +170,29 @@ class HLA1_Binding_Classifier(ModelInterface):
     def _prepare_predict_data_df(self,
         precursor_df:pd.DataFrame,
     ):
+        """
+        Prepare the predicting data from `precursor_df`.
+
+        Parameters
+        ----------
+        precursor_df : pd.DataFrame
+            The dataframe to predict.
+        """
         self.__training = False
         precursor_df[self.target_column_to_predict] = 0.
         self.predict_df = precursor_df
 
     def _prepare_train_data_df(self,
-        precursor_df, **kwargs
+        precursor_df: pd.DataFrame, **kwargs
     ):
+        """
+        Prepare data for training from precursor_df.
+
+        Parameters
+        ----------
+        precursor_df : pd.DataFrame
+            The dataframe for training.
+        """
         self.__training = True
         precursor_df['nAA'] = precursor_df.sequence.str.len()
         precursor_df.drop(
@@ -176,7 +207,22 @@ class HLA1_Binding_Classifier(ModelInterface):
     def _get_features_from_batch_df(self,
         batch_df: pd.DataFrame,
         **kwargs,
-    ):
+    )->torch.LongTensor:
+        """
+        Convert AA sequences to tokens, which are `torch.LongTensor` of AA ASCII code array.
+
+        Parameters
+        ----------
+        batch_df : pd.DataFrame
+            The batch dataframe containing the `sequence` column.
+            All sequences in batch_df are treated as positive.
+            When training, negative sequences are sampled from self.protein_df.
+
+        Returns
+        -------
+        torch.LongTensor
+            The ASCII tokens of AA sequences.
+        """
         aa_indices = self._as_tensor(
             get_ascii_indices(
                 batch_df['sequence'].values.astype('U')
@@ -203,6 +249,20 @@ class HLA1_Binding_Classifier(ModelInterface):
         batch_df: pd.DataFrame,
         **kwargs
     ) -> torch.Tensor:
+        """
+        Get target (y) value for training from batch_df.
+
+        Parameters
+        ----------
+        batch_df : pd.DataFrame
+            All sequences in batch_df are positive.
+            Random sequences are negative.
+
+        Returns
+        -------
+        torch.Tensor
+            Tensor with 0-1 binary values.
+        """
         x = torch.zeros(
             len(batch_df)+(
                 int(len(batch_df)*self._n_neg_per_pos_training)
@@ -214,7 +274,7 @@ class HLA1_Binding_Classifier(ModelInterface):
         return x
 
     def load_proteins(self,
-        protein_data:Union[str,list,dict],
+        protein_data:Union[pd.DataFrame,str,list,dict],
     ):
         """
         Load proteins, and generate :attr:`protein_df` and
@@ -222,19 +282,27 @@ class HLA1_Binding_Classifier(ModelInterface):
 
         Parameters
         ----------
-        protein_data : Union[str,list,dict]
-            str: a fasta file
-            list: a fasta file list
-            dict: protein_dict
+        protein_data : pd.DataFrame | str | list | dict
+            pd.DataFrame: protein_df with a `sequence` column
+            str : absolute or relative fasta file path
+            list: list of fasta file path
+            dict: protein dict structure
         """
-        self.protein_df = load_prot_df(
-            protein_data
-        )
-        self._cat_protein_sequence = cat_proteins(
-            self.protein_df["sequence"].to_numpy()
-        )
 
-    def digest_proteins(self):
+        if isinstance(protein_data, pd.DataFrame):
+            self.protein_df = protein_data
+            self._cat_protein_sequence = cat_proteins(
+                self.protein_df["sequence"].to_numpy()
+            )
+        else:
+            self.protein_df = load_prot_df(
+                protein_data
+            )
+            self._cat_protein_sequence = cat_proteins(
+                self.protein_df["sequence"].to_numpy()
+            )
+
+    def _digest_proteins(self):
         """
         Unspecific digestion of proteins generates :attr:`digested_idxes_df`.
         """
@@ -244,7 +312,10 @@ class HLA1_Binding_Classifier(ModelInterface):
             self.max_peptide_length
         )
 
-    def _predict_all_probs(self, digest_batch_size):
+    def _predict_all_probs(self, digest_batch_size: int):
+        """
+        Predict probabilities for self.digested_idxes_df.
+        """
         for i in tqdm.tqdm(range(
             0, len(self.digested_idxes_df),
             digest_batch_size
@@ -306,15 +377,9 @@ class HLA1_Binding_Classifier(ModelInterface):
         pd.DataFrame
             The peptide dataframe in alphabase format.
         """
-        if isinstance(protein_data, pd.DataFrame):
-            self.protein_df = protein_data
-            self._cat_protein_sequence = cat_proteins(
-                self.protein_df["sequence"].to_numpy()
-            )
-        else:
-            self.load_proteins(protein_data=protein_data)
+        self.load_proteins(protein_data=protein_data)
 
-        self.digest_proteins()
+        self._digest_proteins()
         self.digested_idxes_df[
             self.target_column_to_predict
         ] = 0.0
