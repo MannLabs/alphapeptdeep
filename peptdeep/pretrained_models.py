@@ -64,13 +64,17 @@ def is_model_zip(downloaded_zip):
         return any(x == "generic/ms2.pth" for x in zip.namelist())
 
 
-def download_models(url: str = model_url, overwrite=True):
+def download_models(url: str = model_url, target_path: str = model_zip, overwrite=True):
     """
     Parameters
     ----------
     url : str, optional
         Remote or local path.
-        Defaults to `peptdeep.pretrained_models.model_url`
+        Defaults to :data:`peptdeep.pretrained_models.model_url`
+
+    target_path : str, optional
+        Target file path after download.
+        Defaults to :data:`peptdeep.pretrained_models.model_zip`
 
     overwrite : bool, optional
         overwirte old model files.
@@ -82,13 +86,13 @@ def download_models(url: str = model_url, overwrite=True):
         If remote url is not accessible.
     """
     if not os.path.isfile(url):
-        logging.info(f"Downloading {model_zip_name} ...")
+        logging.info(f"Downloading {url} ...")
         try:
             context = ssl._create_unverified_context()
             requests = urllib.request.urlopen(url, context=context, timeout=10)
-            with open(model_zip, "wb") as f:
+            with open(target_path, "wb") as f:
                 f.write(requests.read())
-        except (socket.timeout, urllib.error.URLError, urllib.error.HTTPError) as e:
+        except (socket.timeout, urllib.error.URLError, urllib.error.HTTPError):
             raise FileNotFoundError(
                 "Downloading model failed! Please download the "
                 f'zip or tar file by yourself from "{url}",'
@@ -97,8 +101,8 @@ def download_models(url: str = model_url, overwrite=True):
                 " to install the models"
             )
     else:
-        shutil.copy(url, model_zip)
-    logging.info(f"The pretrained models had been downloaded in {model_zip}")
+        shutil.copy(url, target_path)
+    logging.info(f"The pretrained models had been downloaded in {target_path}")
 
 
 if not os.path.exists(model_zip):
@@ -486,7 +490,7 @@ class ModelManager(object):
                         return
                 else:
                     model.load(model_file)
-            except (UnpicklingError, TypeError, ValueError, KeyError) as e:
+            except (UnpicklingError, TypeError, ValueError, KeyError):
                 logging.info(
                     f"Cannot load {model_file} as {model.__class__} model, peptdeep will use the pretrained model instead."
                 )
