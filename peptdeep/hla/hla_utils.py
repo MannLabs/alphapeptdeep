@@ -106,8 +106,24 @@ def nonspecific_digest_cat_proteins(
     return digest_df
 
 
-def _get_rnd_subseq(x, pep_len):
-    sequence, prot_len = x
+def _get_rnd_subseq(prot_seq_len: tuple, pep_len: int) -> str:
+    """
+    Get random subsequence from a protein sequence.
+    This function is only used by :func:`get_random_sequences`.
+
+    Parameters
+    ----------
+    prot_seq_len : tuple
+        (protein sequence, sequence length)
+    pep_len : int
+        peptide length to get
+
+    Returns
+    -------
+    str
+        The peptide sequence.
+    """
+    sequence, prot_len = prot_seq_len
     if prot_len <= pep_len:
         return (
             "".join([sequence] * (pep_len // prot_len)) + sequence[: pep_len % prot_len]
@@ -128,22 +144,41 @@ def get_random_sequences(prot_df: pd.DataFrame, n: int, pep_len: int):
 
 
 @numba.njit
-def check_sty(seq):
+def _check_sty(seq: str) -> bool:
+    """
+    If a sequence contains STY.
+    """
     for aa in seq:
         if aa in "STY":
             return True
     return False
 
 
-def get_seq(x, cat_prot):
-    return cat_prot[slice(*x)]
+def get_seq_series(idxes_df: pd.DataFrame, cat_prot: str) -> pd.Series:
+    """
+    Get sub-sequence pd.Series from a concat protein sequence based on `idxes_df`.
 
+    Parameters
+    ----------
+    idxes_df : pd.DataFrame
+        a dataframe with `start_pos` and `stop_pos` columns of `cat_prot`.
+    cat_prot : str
+        The concat protein sequence.
 
-def get_seq_series(df, cat_prot):
-    return df[["start_pos", "end_pos"]].apply(get_seq, axis=1, cat_prot=cat_prot)
+    Returns
+    -------
+    pd.Series
+        pd.Series with sub-sequences (peptide sequences).
+    """
+    return idxes_df[["start_pos", "end_pos"]].apply(
+        lambda x: cat_prot[slice(*x)], axis=1
+    )
 
 
 def check_is_file(file_path: str):
+    """
+    Check if a file_path exists.
+    """
     if os.path.isfile(file_path):
         print(f"Loading `{file_path}`")
         return True
