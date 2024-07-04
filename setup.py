@@ -4,6 +4,7 @@
 import setuptools
 import re
 import os
+
 # local
 import peptdeep as package2install
 
@@ -12,6 +13,7 @@ def get_long_description():
     with open("README.md", "r") as readme_file:
         long_description = readme_file.read()
     return long_description
+
 
 def get_requirements():
     extra_requirements = {}
@@ -32,7 +34,7 @@ def get_requirements():
             for line in requirements_file:
                 extra_requirements[extra_stable].append(line)
                 # conditional requirements like: pywin32; sys_platform=='win32'
-                line, *conditions = line.split(';')
+                line, *conditions = line.split(";")
                 requirement, *comparison = re.split("[><=~!]", line)
                 requirement = requirement.strip()
                 requirement = ";".join([requirement] + conditions)

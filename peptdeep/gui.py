@@ -1,13 +1,14 @@
 #!python
 import os
 
+
 def run(port=10077):
-    print(f'Starting PeptDeep Web Server on port {port} ...')
+    print(f"Starting PeptDeep Web Server on port {port} ...")
 
     _this_file = __file__
     _this_directory = os.path.dirname(_this_file)
 
-    file_path = os.path.join(_this_directory, 'webui', 'main_ui.py')
+    file_path = os.path.join(_this_directory, "webui", "main_ui.py")
 
     HOME = os.path.expanduser("~")
 
@@ -16,13 +17,12 @@ def run(port=10077):
     if not os.path.isdir(ST_PATH):
         os.mkdir(ST_PATH)
 
-    #Check if streamlit credentials exists
-    ST_CREDENTIALS = os.path.join(ST_PATH, 'credentials.toml')
+    # Check if streamlit credentials exists
+    ST_CREDENTIALS = os.path.join(ST_PATH, "credentials.toml")
     if not os.path.isfile(ST_CREDENTIALS):
-        with open(ST_CREDENTIALS, 'w') as file:
+        with open(ST_CREDENTIALS, "w") as file:
             file.write("[general]\n")
             file.write('\nemail = ""')
-
 
     import sys
     from streamlit.web import cli as stcli
@@ -36,11 +36,13 @@ def run(port=10077):
     theme.append("--theme.primaryColor=#18212b")
 
     args = [
-        "streamlit", "run",
-        file_path, "--global.developmentMode=false",
+        "streamlit",
+        "run",
+        file_path,
+        "--global.developmentMode=false",
         f"--server.port={port}",
         "--browser.gatherUsageStats=False",
-        "--logger.level=error"
+        "--logger.level=error",
     ]
 
     args.extend(theme)
