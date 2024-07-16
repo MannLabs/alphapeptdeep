@@ -12,3 +12,4 @@ Tutorials and notebooks about how to use AlphaPeptDeep
    nbs/tutorial_model_manager
    nbs/tutorial_building_rt_model
    nbs/tutorial_building_ccs_model
+   nbs/tutorials/tutorial_immunopeptidomics
