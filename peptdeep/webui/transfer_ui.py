@@ -6,6 +6,7 @@ from datetime import datetime
 
 from alphabase.yaml_utils import save_yaml
 from alphabase.constants.modification import MOD_DF
+import alphabase.psm_reader
 
 from peptdeep.webui.server import queue_folder
 from peptdeep.webui.ui_utils import (
@@ -140,6 +141,15 @@ def add_other_psm_reader_mods():
 
 
 def show():
+    psm_type_to_ext_dict = {
+        "alphapept": ".ms_data.hdf",
+        "pfind": ".spectra",
+        "maxquant": "msms.txt",
+        "diann": "tsv",
+        "speclib_tsv": "tsv",
+    }
+    used_psm_types = list(psm_type_to_ext_dict.keys())
+
     st.write("# Transfer learning")
 
     model_output_folder = st.text_input(
@@ -159,20 +169,13 @@ def show():
         st_key="select_psm_type",
         default_type=global_ui_settings["model_mgr"]["transfer"]["psm_type"],
         monitor_files=global_ui_settings["model_mgr"]["transfer"]["psm_files"],
-        choices=global_ui_settings["model_mgr"]["transfer"]["psm_type_choices"],
-        index=global_ui_settings["model_mgr"]["transfer"]["psm_type_choices"].index(
+        choices=used_psm_types,
+        index=used_psm_types.index(
             global_ui_settings["model_mgr"]["transfer"]["psm_type"]
         ),
     )
     global_ui_settings["model_mgr"]["transfer"]["psm_type"] = psm_type
 
-    psm_type_to_ext_dict = {
-        "alphapept": ".ms_data.hdf",
-        "pfind": ".spectra",
-        "maxquant": "msms.txt",
-        "diann": "tsv",
-        "speclib_tsv": "tsv",
-    }
     global_ui_settings["model_mgr"]["transfer"]["psm_type"] = psm_type
     select_files(
         global_ui_settings["model_mgr"]["transfer"]["psm_files"],
