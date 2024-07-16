@@ -95,12 +95,12 @@ def nonspecific_digest_cat_proteins(
     pd.DataFrame
         A dataframe sorted by `nAA` with three columns:
         `start_pos`: the start index of the peptide in cat_protein
-        `end_pos`: the stop/end index of the peptide in cat_protein
+        `stop_pos`: the stop/end index of the peptide in cat_protein
         `nAA`: the number of amino acids (peptide length).
     """
     pos_starts, pos_ends = get_substring_indices(cat_sequence, min_len, max_len)
-    digest_df = pd.DataFrame(dict(start_pos=pos_starts, end_pos=pos_ends))
-    digest_df["nAA"] = digest_df.end_pos - digest_df.start_pos
+    digest_df = pd.DataFrame(dict(start_pos=pos_starts, stop_pos=pos_ends))
+    digest_df["nAA"] = digest_df.stop_pos - digest_df.start_pos
     digest_df.sort_values("nAA", inplace=True)
     digest_df.reset_index(inplace=True, drop=True)
     return digest_df
@@ -170,7 +170,7 @@ def get_seq_series(idxes_df: pd.DataFrame, cat_prot: str) -> pd.Series:
     pd.Series
         pd.Series with sub-sequences (peptide sequences).
     """
-    return idxes_df[["start_pos", "end_pos"]].apply(
+    return idxes_df[["start_pos", "stop_pos"]].apply(
         lambda x: cat_prot[slice(*x)], axis=1
     )
 
