@@ -6,7 +6,7 @@ import tqdm
 from typing import Union
 
 import peptdeep.model.building_block as building_block
-from peptdeep.model.model_interface import ModelInterface
+from peptdeep.model.model_interface import ModelInterface, append_nAA_column_if_missing
 from peptdeep.model.featurize import get_ascii_indices
 from peptdeep.pretrained_models import pretrain_dir, download_models, global_settings
 
@@ -379,6 +379,40 @@ class HLA1_Binding_Classifier(ModelInterface):
 
         peptide_df["sequence"] = get_seq_series(peptide_df, self._cat_protein_sequence)
         return peptide_df
+
+    def _concat_neg_df(self, precursor_df, column_to_train='HLA'):
+        precursor_df = append_nAA_column_if_missing(precursor_df)
+        precursor_df[column_to_train] = 1
+        df_list = [precursor_df]
+        for nAA, group_df in precursor_df.groupby('nAA'):
+            rnd_seqs = get_random_sequences(
+                self.protein_df, 
+                n=len(group_df),
+                pep_len = nAA
+            )
+            df_list.append(pd.DataFrame(
+                {'sequence':rnd_seqs,'nAA':nAA,column_to_train:0}
+            ))
+        return pd.concat(df_list).reset_index(drop=True)
+
+    def test(self, precursor_df):
+        df = self._concat_neg_df(precursor_df)
+        self.predict(df)
+        prob_list = []
+        precision_list = []
+        recall_list = []
+        fp_list = []
+        for prob in [0.5,0.6,0.7,0.8, 0.9]:
+            prob_list.append(prob)
+            precision_list.append(df[df.HLA_prob_pred>prob].HLA.mean())
+            recall_list.append(df[df.HLA_prob_pred>prob].HLA.sum()/len(df)*2)
+            fp_list.append(1-(1-df[df.HLA_prob_pred<prob].HLA).sum()/len(df)*2)
+        return pd.DataFrame(dict(
+            HLA_prob_pred=prob_list,
+            precision=precision_list,
+            recall=recall_list,
+            false_positive=fp_list
+            ))    
 
     def _download_pretrained_hla_model(self):
         download_models(url=self._model_url, target_path=self._model_zip)
