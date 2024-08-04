@@ -79,19 +79,17 @@ class WarmupLR_Scheduler(LR_SchedulerInterface):
             optimizer, num_warmup_steps, num_training_steps, num_cycles, last_epoch
         )
 
-    def step(self, epoch: int, loss: float):
+    def step(self, epoch: int = None, loss=None):
         """
         Get the learning rate for the next epoch.
 
         Parameters
         ----------
-        epoch : int
+        epoch : int (Deprecated)
             The current epoch number.
-        loss : float
-            The loss value of the current epoch.
 
         """
-        return self.lambda_lr.step(epoch)
+        return self.lambda_lr.step()
 
     def get_last_lr(self) -> float:
         """
