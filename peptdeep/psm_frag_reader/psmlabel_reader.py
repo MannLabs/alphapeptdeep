@@ -157,7 +157,7 @@ def load_psmlabel_list(
         "Phospho@S",
         "Phospho@T",
         "Phospho@Y",
-        "Acetyl@Protein N-term",
+        "Acetyl@Protein_N-term",
     ],
 ):
     psm_df_list = []

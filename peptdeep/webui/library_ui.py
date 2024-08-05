@@ -378,7 +378,7 @@ def show():
         df = pd.DataFrame(
             {
                 "sequence": ["ACDEFGHIK", "LMNPQRSTVK", "WYVSTR"],
-                "mods": ["Carbamidomethyl@C", "Acetyl@Protein N-term;Phospho@S", ""],
+                "mods": ["Carbamidomethyl@C", "Acetyl@Protein_N-term;Phospho@S", ""],
                 "mod_sites": ["2", "0;7", ""],
                 "charge": [2, 3, 1],
             }

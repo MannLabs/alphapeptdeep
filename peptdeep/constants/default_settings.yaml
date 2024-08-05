@@ -153,7 +153,7 @@ model_mgr:
     psm_modification_mapping: {} # alphabase modifications to modifications of other engine PSMs
     # Example (note that `X(UniMod:id)` format can directly be recognized by alphabase),
     # psm_modification_mapping:
-    #   Dimethyl@Any N-term:
+    #   Dimethyl@Any_N-term:
     #     - _(Dimethyl-n-0)
     #     - _(Dimethyl)
     #   Dimethyl:2H(2)@K:

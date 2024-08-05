@@ -65,7 +65,7 @@ def add_user_defined_modifications(user_mods: dict = None):
         Example:
         ```
         {
-        "Dimethyl2@Any N-term": {
+        "Dimethyl2@Any_N-term": {
         "composition": "H(2)2H(2)C(2)",
         "modloss_composition": ""
         }, ...
