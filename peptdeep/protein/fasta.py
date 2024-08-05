@@ -21,7 +21,7 @@ class PredictSpecLibFasta(SpecLibFasta, PredictSpecLib):
         precursor_charge_max: int = 4,
         precursor_mz_min: float = 400.0,
         precursor_mz_max: float = 1800.0,
-        var_mods: list = ["Acetyl@Protein N-term", "Oxidation@M"],
+        var_mods: list = ["Acetyl@Protein_N-term", "Oxidation@M"],
         min_var_mod_num: int = 0,
         max_var_mod_num: int = 2,
         fix_mods: list = ["Carbamidomethyl@C"],
