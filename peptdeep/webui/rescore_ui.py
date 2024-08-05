@@ -1,7 +1,5 @@
 import streamlit as st
-import pandas as pd
 import os
-import time
 
 from .ui_utils import files_in_folder_pandas
 from peptdeep.settings import global_settings

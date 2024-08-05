@@ -1,12 +1,10 @@
 import streamlit as st
 import pandas as pd
 import os
-import time
 from datetime import datetime
 
 from alphabase.yaml_utils import save_yaml
 from alphabase.constants.modification import MOD_DF
-import alphabase.psm_reader
 
 from peptdeep.webui.server import queue_folder
 from peptdeep.webui.ui_utils import (
@@ -147,6 +145,7 @@ def show():
         "maxquant": "msms.txt",
         "diann": "tsv",
         "speclib_tsv": "tsv",
+        "msfragger_pepxml": "pepxml",
     }
     used_psm_types = list(psm_type_to_ext_dict.keys())
 
