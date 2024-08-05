@@ -1,7 +1,6 @@
 import streamlit as st
 import os
 import psutil
-import time
 
 from alphabase.yaml_utils import load_yaml
 

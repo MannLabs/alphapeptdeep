@@ -265,10 +265,9 @@ library:
   max_precursor_mz: 2000.0
   decoy: None
   decoy_choices:
-  - protein_reverse
+  - None
   - pseudo_reverse
   - diann
-  - None
   max_frag_charge: 2
   frag_types:
   - b
