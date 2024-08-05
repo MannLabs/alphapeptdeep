@@ -1,6 +1,5 @@
 import time
 import os
-import sys
 import shutil
 import multiprocessing as mp
 
