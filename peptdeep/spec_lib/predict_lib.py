@@ -75,17 +75,7 @@ class PredictSpecLib(SpecLibBase):
         self.rt_to_irt = rt_to_irt
         self.generate_precursor_isotope = generate_precursor_isotope
 
-    def set_precursor_and_fragment(
-        self,
-        *,
-        precursor_df: pd.DataFrame,
-        fragment_mz_df: pd.DataFrame,
-        fragment_intensity_df: pd.DataFrame,
-    ):
-        self._precursor_df = precursor_df
-        self._fragment_intensity_df = fragment_intensity_df
-        self._fragment_mz_df = fragment_mz_df
-
+    def _drop_unused_frag_columns(self):
         self._fragment_mz_df.drop(
             columns=[
                 col
@@ -103,6 +93,20 @@ class PredictSpecLib(SpecLibBase):
             ],
             inplace=True,
         )
+
+    def set_precursor_and_fragment(
+        self,
+        *,
+        precursor_df: pd.DataFrame,
+        fragment_mz_df: pd.DataFrame = None,
+        fragment_intensity_df: pd.DataFrame = None,
+    ):
+        self._precursor_df = precursor_df
+        if fragment_intensity_df is not None and fragment_mz_df is not None:
+            self._fragment_intensity_df = fragment_intensity_df
+            self._fragment_mz_df = fragment_mz_df
+
+            self._drop_unused_frag_columns()
 
     def translate_rt_to_irt_pred(self, irt_pep_df: pd.DataFrame = None):
         """Add 'irt_pred' into columns based on 'rt_pred'"""
