@@ -49,13 +49,13 @@ class LR_SchedulerInterface(object):
         """
         raise NotImplementedError
 
-    def get_last_lr(self) -> float:
+    def get_last_lr(self) -> List[float]:
         """
         Get the last learning rate.
 
         Returns
         -------
-        float
+        List[float]
             The last learning rate.
         """
         raise NotImplementedError
@@ -91,13 +91,13 @@ class WarmupLR_Scheduler(LR_SchedulerInterface):
         """
         return self.lambda_lr.step()
 
-    def get_last_lr(self) -> float:
+    def get_last_lr(self) -> List[float]:
         """
         Get the last learning rate.
 
         Returns
         -------
-        float
+        List[float]
             The last learning rate.
         """
         return self.lambda_lr.get_last_lr()
