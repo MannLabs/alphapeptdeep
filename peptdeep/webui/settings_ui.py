@@ -9,9 +9,8 @@ from alphabase.constants.modification import MOD_DF, keep_modloss_by_importance
 from peptdeep.settings import (
     update_settings,
     add_user_defined_modifications,
+    global_settings,
 )
-
-from peptdeep.settings import global_settings
 
 global_ui_settings = global_settings
 
