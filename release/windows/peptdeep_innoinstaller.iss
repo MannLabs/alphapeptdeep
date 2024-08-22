@@ -21,13 +21,13 @@ AppSupportURL={#MyAppURL}
 AppUpdatesURL={#MyAppURL}
 DefaultDirName={autopf}\{#MyAppName}
 DisableProgramGroupPage=yes
-LicenseFile=..\..\LICENSE.txt
+LicenseFile=LICENSE.txt
 ; Uncomment the following line to run in non administrative install mode (install for current user only.)
 PrivilegesRequired=lowest
 PrivilegesRequiredOverridesAllowed=dialog
 OutputDir=dist
 OutputBaseFilename=peptdeep-1.7.2-win-x64
-SetupIconFile=..\logos\alpha_logo.ico
+SetupIconFile=.\release\logos\alpha_logo.ico
 Compression=lzma
 SolidCompression=yes
 WizardStyle=modern

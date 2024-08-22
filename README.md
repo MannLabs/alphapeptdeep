@@ -120,12 +120,14 @@ Older releases remain available on the [release
 page](https://github.com/MannLabs/alphapeptdeep/releases), but no
 backwards compatibility is guaranteed.
 
-# TODO fix this!
-Note that, as GitHub does not allow large release files, these installers do not have GPU support. To create GPU version installers, clone the source code and install GPU-version pytorch (#use-gpu), and then use `release/[macos, linux, windows]/create_installer_*.sh` to build installer locally. For example in Windows, run
 
+TODO
+Note that, as GitHub does not allow large release files, these installers do not have GPU support.
+To create GPU version installers, clone the source code and install GPU-version pytorch [see here](#use-gpu),
+and then use `release/[macos, linux, windows]/create_installer_*.sh` to build an installer locally.
+For Linux you need to additionally pass the "GPU" flag, i.e. run
 ```bash
-cd release/windows
-. ./create_installer_windows.sh
+release/linux/XXXX.sh GPU
 ```
 
 ### Pip
