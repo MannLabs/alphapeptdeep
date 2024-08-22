@@ -121,12 +121,12 @@ jobs:
       - name: Creating installer for Windows
         shell: bash -l {0}
         run: |
-          cd release/one_click_windows_gui
+          cd release/windows
           . ./create_installer_windows.sh
       - name: Test installer for Windows
         shell: bash -l {0}
         run: |
-          cd release/one_click_windows_gui/dist/
+          cd release/windows/dist/
           echo "TODO, this test seems to freeze the runner..."
           # ./peptdeep_gui_installer_windows.exe //verysilent //log=log.txt //noicons //tasks= //portable=1
           # cat log.txt
@@ -137,9 +137,43 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ needs.Create_Draft_On_GitHub.outputs.upload_url }}
-          asset_path: release/one_click_windows_gui/dist/peptdeep_gui_installer_windows.exe
+          asset_path: release/windows/dist/peptdeep_gui_installer_windows.exe
           asset_name: peptdeep_gui_installer_windows.exe
           asset_content_type: application/octet-stream
+
+  Create_MacOS_Arm_Release:
+    runs-on: macos-latest-xlarge
+    needs: Create_Draft_On_GitHub
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - uses: conda-incubator/setup-miniconda@v3
+        with:
+          auto-update-conda: true
+          python-version: ${{ matrix.python-version }}
+      - name: Conda info
+        shell: bash -l {0}
+        run: conda info
+      - name: Creating installer for MacOS
+        shell: bash -l {0}
+        run: |
+          cd release/macos
+          . ./create_installer_macos.sh
+      - name: Test installer for MacOS
+        shell: bash -l {0}
+        run: |
+          sudo installer -pkg release/macos/dist/peptdeep_gui_installer_macos.pkg -target /
+      - name: Upload MacOS Installer
+        id: upload-release-asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.Create_Draft_On_GitHub.outputs.upload_url }}
+          asset_path: release/macos/dist/peptdeep_gui_installer_macos.pkg
+          asset_name: peptdeep_gui_installer_macos_arm.pkg
+          asset_content_type: application/octet-stream
+
   Create_PyPi_Release:
     runs-on: ubuntu-latest
     needs: Version_Bumped

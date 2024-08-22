@@ -123,7 +123,7 @@ backwards compatibility is guaranteed.
 Note that, as GitHub does not allow large release files, these installers do not have GPU support. To create GPU version installers, clone the source code and install GPU-version pytorch (#use-gpu), and then use `release/one_click_xxx_gui/create_installer_xxx.sh` to build installer locally. For example in Windows, run
 
 ```bash
-cd release/one_click_windows_gui
+cd release/windows
 . ./create_installer_windows.sh
 ```
 

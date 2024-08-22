@@ -15,7 +15,7 @@ conda activate peptdeep_installer
 python setup.py sdist bdist_wheel
 
 # Setting up the local package
-cd release/one_click_windows_gui
+cd release/windows
 # Make sure you include the required extra packages and always use the stable or very-stable options!
 pip install "../../dist/peptdeep-1.2.1-py3-none-any.whl[stable]"
 
