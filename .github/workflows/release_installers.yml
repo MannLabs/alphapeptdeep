@@ -157,7 +157,7 @@ jobs:
         run: |
           cd release/windows/dist/
           echo "TODO, this test seems to freeze the runner..."
-          # ./peptdeep_gui_installer_windows.exe //verysilent //log=log.txt //noicons //tasks= //portable=1
+          # ./peptdeep-1.7.2-win-x64.exe //verysilent //log=log.txt //noicons //tasks= //portable=1
           # cat log.txt
       - name: Upload Windows Installer
         id: upload-release-asset
@@ -166,6 +166,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ needs.Create_Draft_On_GitHub.outputs.upload_url }}
-          asset_path: release/windows/dist/peptdeep_gui_installer_windows.exe
-          asset_name: peptdeep_gui_installer_windows.exe
+          asset_path: release/windows/dist/peptdeep-${{ needs.Version_Bumped.outputs.version }}-win-x64.exe
+          asset_name: peptdeep-${{ needs.Version_Bumped.outputs.version }}-win-x64.exe
           asset_content_type: application/octet-stream
