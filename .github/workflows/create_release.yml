@@ -14,7 +14,7 @@ on:
 
 jobs:
   create-release:
-    uses: MannLabs/alphashared/.github/workflows/create_release.yml@v1
+    uses: MannLabs/alphashared/.github/workflows/create_release.yml@v0
     with:
       package_name: peptdeep
       build_nodejs_ui: false
