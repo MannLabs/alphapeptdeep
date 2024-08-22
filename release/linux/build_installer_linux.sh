@@ -19,7 +19,7 @@ BUILD_NAME="${PACKAGE_NAME}-${PACKAGE_VERSION}-${KERNEL}-${ARCH}"
 # WARNING: this probably does not work!!!!
 
 # Wrapping the pyinstaller folder in a .deb package
-mv dist/peptdeep mv dist/peptdeep.tmp
+mv dist/peptdeep dist/peptdeep.tmp
 mkdir -p dist/$BUILD_NAME/usr/local/bin
 mv dist/peptdeep.tmp dist/$BUILD_NAME/usr/local/bin/peptdeep
 mkdir dist/$BUILD_NAME/DEBIAN
