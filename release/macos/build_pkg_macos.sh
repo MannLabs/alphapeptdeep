@@ -23,8 +23,8 @@ cp release/logos/alpha_logo.icns dist/peptdeep/Contents/Resources
 mv dist/peptdeep_gui dist/peptdeep/Contents/MacOS
 cp release/macos/Info.plist dist/peptdeep/Contents
 cp release/macos/peptdeep_terminal dist/peptdeep/Contents/MacOS
-cp LICENSE.txt Resources/LICENSE.txt
-cp logos/alpha_logo.png Resources/alpha_logo.png
+cp LICENSE.txt dist/peptdeep/Contents/Resources/LICENSE.txt
+cp release/logos/alpha_logo.png dist/peptdeep/Contents/Resources/alpha_logo.png
 chmod 777 release/macos/scripts/*
 
 pkgbuild --root dist/${PACKAGE_NAME} --identifier de.mpg.biochem.${PACKAGE_NAME}.app --version 1.2.1 --install-location /Applications/${PACKAGE_NAME}.app --scripts release/macos/scripts ${BUILD_NAME}.pkg
