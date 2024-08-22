@@ -54,12 +54,12 @@ jobs:
       - name: Creating installer for Linux
         shell: bash -l {0}
         run: |
-          cd release/one_click_linux_gui
+          cd release/linux
           . ./create_installer_linux.sh CPU
       - name: Test installer for Linux
         shell: bash -l {0}
         run: |
-          sudo dpkg -i release/one_click_linux_gui/dist/peptdeep_gui_installer_linux.deb
+          sudo dpkg -i release/linux/dist/peptdeep_gui_installer_linux.deb
       - name: Upload Linux Installer
         id: upload-release-asset
         uses: actions/upload-release-asset@v1
@@ -67,7 +67,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ needs.Create_Draft_On_GitHub.outputs.upload_url }}
-          asset_path: release/one_click_linux_gui/dist/peptdeep_gui_installer_linux.deb
+          asset_path: release/linux/dist/peptdeep_gui_installer_linux.deb
           asset_name: peptdeep_gui_installer_linux.deb
           asset_content_type: application/octet-stream
   Create_MacOS_Release:
