@@ -1,5 +1,5 @@
-#TODO: remove once the new release workflow is in place
 #!bash
+# TODO remove with old release workflow
 
 # Initial cleanup
 rm -rf dist

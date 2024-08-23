@@ -1,3 +1,4 @@
+# TODO remove with old release workflow
 on:
   workflow_dispatch:
 
@@ -157,7 +158,7 @@ jobs:
         run: |
           cd release/windows/dist/
           echo "TODO, this test seems to freeze the runner..."
-          # ./peptdeep-1.7.2-win-x64.exe //verysilent //log=log.txt //noicons //tasks= //portable=1
+          # ./peptdeep-1.2.1-win-x64.exe //verysilent //log=log.txt //noicons //tasks= //portable=1
           # cat log.txt
       - name: Upload Windows Installer
         id: upload-release-asset
