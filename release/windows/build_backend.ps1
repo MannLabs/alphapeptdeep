@@ -10,5 +10,14 @@ pip install "dist/peptdeep-1.2.1-py3-none-any.whl[stable]"
 pip install pyinstaller
 pyinstaller release/pyinstaller/peptdeep.spec -y
 
+
+echo ls dist:
+ls dist
+
+echo ls release/windows/dist:
+ls release/windows/dist
+
 # for some reason, the installer builder expects the files here
 mv dist/* release/windows/dist
+mkdir release/windows/dist/peptdeep
+mv release/windows/peptdeep.exe release/windows/dist/peptdeep
