@@ -14,7 +14,8 @@ pyinstaller release/pyinstaller/peptdeep.spec -y
 echo ls dist:
 ls dist
 
+set +e
 # for some reason, the installer builder expects the files here
 mv dist/* release/windows/dist
 mkdir release/windows/dist/peptdeep
-mv release/windows/peptdeep.exe release/windows/dist/peptdeep
+mv release/windows/dist/peptdeep.exe release/windows/dist/peptdeep
