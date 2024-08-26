@@ -1,6 +1,11 @@
 #!/bin/bash
 
-# OUT OF SCOPE: moving to pyproject.toml / unifying these scripts
+# Build the installer for MacOS.
+# This script is intended to be run from the root of the repository.
+
+
+rm -rf dist
+rm -rf build
 
 # Creating the wheel
 python setup.py sdist bdist_wheel

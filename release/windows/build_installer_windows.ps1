@@ -1,3 +1,6 @@
+# Build the installer for Windows.
+# This script is intended to be run from the root of the repository.
+
 Remove-Item -Recurse -Force -ErrorAction SilentlyContinue ./build
 Remove-Item -Recurse -Force -ErrorAction SilentlyContinue ./dist
 
@@ -10,11 +13,6 @@ pip install "dist/peptdeep-1.2.1-py3-none-any.whl[stable]"
 pip install pyinstaller
 pyinstaller release/pyinstaller/peptdeep.spec -y
 
-
-echo ls dist:
-ls dist
-
-set +e
 # for some reason, the installer builder expects the files here
 mv dist/* release/windows/dist
 mkdir release/windows/dist/peptdeep
