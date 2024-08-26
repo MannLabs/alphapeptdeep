@@ -5,12 +5,7 @@
 
 PACKAGE_NAME="peptdeep"
 PACKAGE_VERSION="1.2.1"
-
-ARCH=$(uname -m)
-if [ "$ARCH" == "x86_64" ]; then
-  ARCH="x64"
-fi
-echo "ARCH=${ARCH}" >> $GITHUB_ENV
+# ARCH is taken from environment variable
 
 KERNEL=$(uname -s | tr '[:upper:]' '[:lower:]')
 
