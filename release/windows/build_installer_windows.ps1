@@ -14,7 +14,7 @@ pip install "dist/peptdeep-1.2.1-py3-none-any.whl[stable]"
 
 # Creating the stand-alone pyinstaller folder
 pip install pyinstaller
-pyinstaller release/pyinstaller/peptdeep.spec --log-level DEBUG -y
+pyinstaller release/pyinstaller/peptdeep.spec -y
 
 # for some reason, the installer builder expects the files here
 mv dist/* release/windows/dist
