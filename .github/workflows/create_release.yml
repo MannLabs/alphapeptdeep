@@ -14,10 +14,11 @@ on:
 
 jobs:
   create-release:
-    uses: MannLabs/alphashared/.github/workflows/create_release.yml@v0
+    uses: MannLabs/alphashared/workflows/release/create_release.yml@v0
     with:
       package_name: peptdeep
       build_nodejs_ui: false
       commit_to_release: ${{ inputs.commit_to_release }}
       tag_to_release: ${{ inputs.tag_to_release }}
+      python_version: 3.9
     secrets: inherit
