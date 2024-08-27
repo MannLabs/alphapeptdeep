@@ -1,15 +1,10 @@
 #!/bin/bash
 
+set -u -e
 # Build the install package for Linux.
 # This script is intended to be run from the root of the repository after running build_installer_linux.sh
 
-PACKAGE_NAME="peptdeep"
-PACKAGE_VERSION="1.2.1"
-# ARCH is taken from environment variable
-
-KERNEL=$(uname -s | tr '[:upper:]' '[:lower:]')
-
-BUILD_NAME="${PACKAGE_NAME}-${PACKAGE_VERSION}-${KERNEL}-${ARCH}"
+rm -rf ${BUILD_NAME}.deb
 
 # If needed, include additional source such as e.g.:
 # cp ../../peptdeep/data/*.fasta dist/peptdeep/data
