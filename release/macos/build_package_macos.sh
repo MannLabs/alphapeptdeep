@@ -2,10 +2,10 @@
 set -u -e
 
 # Build the install package for MacOS.
-# This script is intended to be run from the root of the repository after running build_installer_macos.sh
+# This script must be run from the root of the repository after running build_installer_macos.sh
 
 PACKAGE_NAME=peptdeep
-# BUILD_NAME is taken from environment variables, e.g. peptdeep-1.2.1-macos-darwin-arm64.pkg or peptdeep-1.2.1-macos-darwin-x64.pkg
+# BUILD_NAME is taken from environment variables, e.g. peptdeep-1.2.1-macos-darwin-arm64 or peptdeep-1.2.1-macos-darwin-x64
 rm -rf ${BUILD_NAME}.pkg
 
 # If needed, include additional source such as e.g.:

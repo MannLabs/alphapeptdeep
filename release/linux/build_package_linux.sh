@@ -2,10 +2,10 @@
 set -u -e
 
 # Build the install package for Linux.
-# This script is intended to be run from the root of the repository after running build_installer_linux.sh
+# This script must be run from the root of the repository after running build_installer_linux.sh
 
 PACKAGE_NAME=peptdeep
-# BUILD_NAME is taken from environment variables, e.g. 'peptdeep-1.2.1-linux-x64.deb'
+# BUILD_NAME is taken from environment variables, e.g. 'peptdeep-1.2.1-linux-x64'
 rm -rf ${BUILD_NAME}.deb
 
 # If needed, include additional source such as e.g.:

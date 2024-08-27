@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Build the installer for MacOS.
-# This script is intended to be run from the root of the repository.
+# This script must be run from the root of the repository.
 
 
 rm -rf dist

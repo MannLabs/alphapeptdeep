@@ -1,5 +1,5 @@
 # Build the installer for Windows.
-# This script is intended to be run from the root of the repository.
+# This script must be run from the root of the repository.
 
 Remove-Item -Recurse -Force -ErrorAction SilentlyContinue ./build
 Remove-Item -Recurse -Force -ErrorAction SilentlyContinue ./dist
