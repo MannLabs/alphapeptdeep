@@ -109,6 +109,8 @@ jobs:
   Create_Windows_Release:
     runs-on: windows-latest
     needs: Create_Draft_On_GitHub
+    env:
+      BUILD_NAME: peptdeep-1.2.1-win-x64
     steps:
       - name: Checkout code
         uses: actions/checkout@v3

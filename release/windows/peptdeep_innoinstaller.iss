@@ -26,7 +26,7 @@ LicenseFile=..\..\LICENSE.txt
 PrivilegesRequired=lowest
 PrivilegesRequiredOverridesAllowed=dialog
 OutputDir=dist
-; was: peptdeep-1.2.1-win-x64
+; example for BUILD_NAME: peptdeep-1.2.1-windows-amd64.exe
 OutputBaseFilename={#GetEnv('BUILD_NAME')}
 SetupIconFile=..\logos\alpha_logo.ico
 Compression=lzma
