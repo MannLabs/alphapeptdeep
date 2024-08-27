@@ -1,4 +1,5 @@
 # Create a draft release and build and upload all installers to it.
+name: Create Draft Release
 
 on:
   workflow_dispatch:
