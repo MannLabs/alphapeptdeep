@@ -1,3 +1,4 @@
+# Publish and test releases on Test-PyPI and PyPI.
 name: Publish on PyPi
 
 on:
@@ -15,7 +16,8 @@ jobs:
       # see the documentation of the workflow for more information on the parameters
       package_name: peptdeep
       tag_to_release: ${{ inputs.tag_to_release }}
-      test_pypi_api_token: ${{ secrets.TEST_PYPI_PEPTDEEP_API_TOKEN }}
-      pypi_api_token: ${{ secrets.PYPI_PEPTDEEP_API_TOKEN }}
       python_version: 3.9
       use_pyproject_toml: false
+    secrets:
+      test_pypi_api_token: ${{ secrets.TEST_PYPI_PEPTDEEP_API_TOKEN }}
+      pypi_api_token: ${{ secrets.PYPI_PEPTDEEP_API_TOKEN }}
