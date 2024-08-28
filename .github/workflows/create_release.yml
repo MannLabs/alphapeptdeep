@@ -23,6 +23,5 @@ jobs:
       tag_to_release: ${{ inputs.tag_to_release }}
       python_version: 3.9
     secrets: inherit
-    permissions:
-      actions: write
-      contents: write
+#    permissions:
+#      contents: write
