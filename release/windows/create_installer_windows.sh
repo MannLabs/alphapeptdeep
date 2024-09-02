@@ -29,5 +29,5 @@ conda deactivate
 # cp ../../peptdeep/data/*.fasta dist/peptdeep/data
 
 # Wrapping the pyinstaller folder in a .exe package
-"C:\Program Files (x86)\Inno Setup 6\ISCC.exe" peptdeep_innoinstaller.iss
+"C:\Program Files (x86)\Inno Setup 6\ISCC.exe" peptdeep_innoinstaller_old.iss
 # WARNING: this assumes a static location for innosetup
