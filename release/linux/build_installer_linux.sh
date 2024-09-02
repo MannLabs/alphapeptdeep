@@ -4,6 +4,8 @@ set -e -u
 # Build the installer for Linux.
 # This script must be run from the root of the repository.
 
+CPU_OR_GPU=${1:-CPU}
+
 rm -rf dist
 rm -rf build
 
@@ -14,7 +16,7 @@ python setup.py sdist bdist_wheel
 # Make sure you include the required extra packages and always use the stable or very-stable options!
 pip install "dist/peptdeep-1.2.1-py3-none-any.whl[stable]"
 
-if [ "$1" != "GPU" ]; then
+if [ "${CPU_OR_GPU}" != "GPU" ]; then
     pip install torch -U --extra-index-url https://download.pytorch.org/whl/cpu
 fi
 
