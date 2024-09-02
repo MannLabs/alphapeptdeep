@@ -6,8 +6,8 @@ set -e -u
 
 CPU_OR_GPU=${1:-CPU}
 
-rm -rf dist
-rm -rf build
+rm -rf dist build *.egg-info
+rm -rf dist_pyinstaller build_pyinstaller
 
 # Creating the wheel
 python setup.py sdist bdist_wheel
@@ -21,5 +21,4 @@ if [ "${CPU_OR_GPU}" != "GPU" ]; then
 fi
 
 # Creating the stand-alone pyinstaller folder
-pip install pyinstaller
-pyinstaller release/pyinstaller/peptdeep.spec -y
+pyinstaller release/pyinstaller/peptdeep.spec --distpath dist_pyinstaller --workpath build_pyinstaller -y

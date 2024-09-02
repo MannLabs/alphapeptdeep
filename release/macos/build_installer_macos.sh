@@ -12,5 +12,4 @@ python setup.py sdist bdist_wheel
 pip install "dist/peptdeep-1.2.1-py3-none-any.whl[stable]"
 
 # Creating the stand-alone pyinstaller folder
-pip install pyinstaller
-pyinstaller release/pyinstaller/peptdeep.spec -y
+pyinstaller release/pyinstaller/peptdeep.spec --distpath dist_pyinstaller --workpath build_pyinstaller -y
