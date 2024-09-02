@@ -1,5 +1,5 @@
 #!/bin/bash
-set -u -e
+set -e -u
 
 # Build the install package for Linux.
 # This script must be run from the root of the repository after running build_installer_linux.sh

@@ -1,8 +1,8 @@
 #!/bin/bash
+set -e -u
 
 # Build the installer for MacOS.
 # This script must be run from the root of the repository.
-
 
 rm -rf dist
 rm -rf build

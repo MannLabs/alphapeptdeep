@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e -u
 
 # Build the installer for Linux.
 # This script must be run from the root of the repository.
