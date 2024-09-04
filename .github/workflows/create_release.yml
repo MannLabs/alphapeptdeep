@@ -4,14 +4,10 @@ name: Create Draft Release
 on:
   workflow_dispatch:
     inputs:
-      commit_to_release:
-        description: 'Enter commit hash to release (example: ef4037cb571f99cb4919b520fde7174972aae473)'
+      commitish_to_release:
         type: string
-        required: true
-      tag_to_release:
-        description: 'Enter tag to release (example: v1.5.5)'
-        type: string
-        required: true
+        description: 'Enter commit hash or branch to release (default: main).'
+        default: "main"
 
 jobs:
   create-release:
@@ -21,7 +17,6 @@ jobs:
       contents: write
     with:
       package_name: peptdeep
+      commitish_to_release: ${{ inputs.commitish_to_release }}
       build_nodejs_ui: false
-      commit_to_release: ${{ inputs.commit_to_release }}
-      tag_to_release: ${{ inputs.tag_to_release }}
       python_version: 3.9
