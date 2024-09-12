@@ -14,7 +14,7 @@ python setup.py sdist bdist_wheel
 
 # Setting up the local package
 # Make sure you include the required extra packages and always use the stable or very-stable options!
-pip install "dist/peptdeep-1.2.1-py3-none-any.whl[stable]"
+pip install "dist/peptdeep-1.3.0-py3-none-any.whl[stable]"
 
 if [ "${CPU_OR_GPU}" != "GPU" ]; then
     pip install torch -U --extra-index-url https://download.pytorch.org/whl/cpu

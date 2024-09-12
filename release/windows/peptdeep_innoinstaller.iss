@@ -5,7 +5,7 @@
 ; so all paths are given relative to the location of this .iss file.
 
 #define MyAppName "peptdeep"
-#define MyAppVersion "1.2.1"
+#define MyAppVersion "1.3.0"
 #define MyAppPublisher "Max Planck Institute of Biochemistry and the University of Copenhagen, Mann Labs"
 #define MyAppURL "https://github.com/MannLabs/peptdeep"
 #define MyAppExeName "peptdeep_gui.exe"
@@ -30,7 +30,7 @@ PrivilegesRequired=lowest
 PrivilegesRequiredOverridesAllowed=dialog
 ; release workflow expects artifact at root of repository
 OutputDir=..\..\
-; example for BUILD_NAME: peptdeep-1.2.1-windows-amd64
+; example for BUILD_NAME: peptdeep-1.3.0-windows-amd64
 OutputBaseFilename={#GetEnv('BUILD_NAME')}
 SetupIconFile=..\logos\alpha_logo.ico
 Compression=lzma
