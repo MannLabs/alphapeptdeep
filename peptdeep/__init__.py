@@ -50,6 +50,10 @@ __urls__ = {
     "PyPi": __pypi__,
 }
 __extra_requirements__ = {
-    "development": "requirements_development.txt",
-    "gui": "requirements_gui.txt",
+    "development-stable": "development-stable.txt",
+    "gui-stable": "gui-stable.txt",
+    "hla-stable": "hla-stable.txt",
+    "development": "development.txt",
+    "gui": "gui.txt",
+    "hla": "hla.txt",
 }

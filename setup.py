@@ -18,27 +18,16 @@ def get_long_description():
 def get_requirements():
     extra_requirements = {}
     requirement_file_names = package2install.__extra_requirements__
-    requirement_file_names[""] = "requirements.txt"
+    requirement_file_names[""] = "base.txt"
     for extra, requirement_file_name in requirement_file_names.items():
         full_requirement_file_name = os.path.join(
             "requirements",
             requirement_file_name,
         )
         with open(full_requirement_file_name) as requirements_file:
-            if extra != "":
-                extra_stable = f"{extra}-stable"
-            else:
-                extra_stable = "stable"
-            extra_requirements[extra_stable] = []
             extra_requirements[extra] = []
             for line in requirements_file:
-                extra_requirements[extra_stable].append(line)
-                # conditional requirements like: pywin32; sys_platform=='win32'
-                line, *conditions = line.split(";")
-                requirement, *comparison = re.split("[><=~!]", line)
-                requirement = requirement.strip()
-                requirement = ";".join([requirement] + conditions)
-                extra_requirements[extra].append(requirement)
+                extra_requirements[extra].append(line)
     requirements = extra_requirements.pop("")
     return requirements, extra_requirements
 
