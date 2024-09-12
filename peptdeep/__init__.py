@@ -53,6 +53,7 @@ __extra_requirements__ = {
     "development-stable": "development-stable.txt",
     "gui-stable": "gui-stable.txt",
     "hla-stable": "hla-stable.txt",
+    "stable": "base-stable.txt",
     "development": "development.txt",
     "gui": "gui.txt",
     "hla": "hla.txt",
