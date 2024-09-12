@@ -1,3 +1,4 @@
+# TODO remove with old release workflow
 cd ../..
 conda create -n peptdeep_pypi_wheel python=3.9
 conda activate peptdeep_pypi_wheel

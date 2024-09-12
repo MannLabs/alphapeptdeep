@@ -1,4 +1,5 @@
 #!bash
+# TODO remove with old release workflow
 
 # Initial cleanup
 rm -rf dist
@@ -19,7 +20,7 @@ conda activate peptdeepinstaller
 python setup.py sdist bdist_wheel
 
 # Setting up the local package
-cd release/one_click_macos_gui
+cd release/macos
 pip install "../../dist/peptdeep-1.2.1-py3-none-any.whl[stable]"
 
 # Creating the stand-alone pyinstaller folder
