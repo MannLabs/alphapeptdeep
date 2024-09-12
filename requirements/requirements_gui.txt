@@ -3,7 +3,7 @@ pythonnet; sys_platform=='win32'
 
 click
 pandas
-numpy
+numpy<2
 torch
 tqdm
 numba

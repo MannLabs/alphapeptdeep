@@ -12,7 +12,7 @@ pyinstaller
 
 click
 pandas
-numpy
+numpy<2
 seaborn
 matplotlib
 numba
