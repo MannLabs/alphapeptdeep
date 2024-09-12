@@ -2,6 +2,7 @@ if __name__ == "__main__":
     try:
         import peptdeep.cli
         import multiprocessing
+
         multiprocessing.freeze_support()
         peptdeep.cli._gui()
     except KeyboardInterrupt:
@@ -9,6 +10,7 @@ if __name__ == "__main__":
     except Exception:
         import traceback
         import sys
+
         exc_info = sys.exc_info()
         # Display the *original* exception
         traceback.print_exception(*exc_info)

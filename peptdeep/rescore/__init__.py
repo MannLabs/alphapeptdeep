@@ -1,3 +1,1 @@
-from peptdeep.rescore import (
-    feature_extractor
-)
+from peptdeep.rescore import feature_extractor

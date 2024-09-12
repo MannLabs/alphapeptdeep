@@ -7,33 +7,35 @@ class PredictSpecLibFasta(SpecLibFasta, PredictSpecLib):
     """
     Predicted spec lib from fasta files or other peptide files.
     """
-    def __init__(self,
-        model_manager:ModelManager = None,
+
+    def __init__(
+        self,
+        model_manager: ModelManager = None,
         *,
-        charged_frag_types:list = ['b_z1','b_z2','y_z1','y_z2'],
-        protease:str = 'trypsin',
-        max_missed_cleavages:int = 2,
-        peptide_length_min:int = 7,
-        peptide_length_max:int = 35,
-        precursor_charge_min:int = 2,
-        precursor_charge_max:int = 4,
-        precursor_mz_min:float = 400.0,
-        precursor_mz_max:float = 1800.0,
-        var_mods:list = ['Acetyl@Protein N-term','Oxidation@M'],
-        min_var_mod_num:int = 0,
-        max_var_mod_num:int = 2,
-        fix_mods:list = ['Carbamidomethyl@C'],
-        labeling_channels:dict = None,
-        special_mods:list = [],
-        min_special_mod_num:int = 0,
-        max_special_mod_num:int = 1,
-        special_mods_cannot_modify_pep_n_term:bool=False,
-        special_mods_cannot_modify_pep_c_term:bool=False,
-        decoy: str = None, # or pseudo_reverse or diann
-        include_contaminants: bool=False,
+        charged_frag_types: list = ["b_z1", "b_z2", "y_z1", "y_z2"],
+        protease: str = "trypsin",
+        max_missed_cleavages: int = 2,
+        peptide_length_min: int = 7,
+        peptide_length_max: int = 35,
+        precursor_charge_min: int = 2,
+        precursor_charge_max: int = 4,
+        precursor_mz_min: float = 400.0,
+        precursor_mz_max: float = 1800.0,
+        var_mods: list = ["Acetyl@Protein_N-term", "Oxidation@M"],
+        min_var_mod_num: int = 0,
+        max_var_mod_num: int = 2,
+        fix_mods: list = ["Carbamidomethyl@C"],
+        labeling_channels: dict = None,
+        special_mods: list = [],
+        min_special_mod_num: int = 0,
+        max_special_mod_num: int = 1,
+        special_mods_cannot_modify_pep_n_term: bool = False,
+        special_mods_cannot_modify_pep_c_term: bool = False,
+        decoy: str = None,  # or pseudo_reverse or diann
+        include_contaminants: bool = False,
         I_to_L=False,
-        generate_precursor_isotope:bool = False,
-        rt_to_irt:bool = False,
+        generate_precursor_isotope: bool = False,
+        rt_to_irt: bool = False,
     ):
         """
         Parameters
@@ -73,7 +75,7 @@ class PredictSpecLibFasta(SpecLibFasta, PredictSpecLib):
 
         var_mods : list, optional
             list of variable modifications,
-            by default ['Acetyl@Protein N-term','Oxidation@M']
+            by default ['Acetyl@Protein_N-term','Oxidation@M']
 
         max_var_mod_num : int, optional
             Minimal number of variable modifications on a peptide sequence,
@@ -112,7 +114,7 @@ class PredictSpecLibFasta(SpecLibFasta, PredictSpecLib):
             Defaults to False.
 
         special_mods_cannot_modify_pep_n_term : bool, optional
-            Similar to `special_mods_cannot_modify_pep_c_term`, but at N-term.
+            Similar to `special_mods_cannot_modify_pep_c_term`, but at_N-term.
             Defaults to False.
 
         decoy : str, optional
@@ -130,7 +132,8 @@ class PredictSpecLibFasta(SpecLibFasta, PredictSpecLib):
         rt_to_irt : bool, optional
             If convert predicted RT to iRT values, by default False
         """
-        SpecLibFasta.__init__(self,
+        SpecLibFasta.__init__(
+            self,
             charged_frag_types=charged_frag_types,
             protease=protease,
             max_missed_cleavages=max_missed_cleavages,
@@ -155,7 +158,8 @@ class PredictSpecLibFasta(SpecLibFasta, PredictSpecLib):
             I_to_L=I_to_L,
         )
 
-        PredictSpecLib.__init__(self,
+        PredictSpecLib.__init__(
+            self,
             model_manager=model_manager,
             charged_frag_types=self.charged_frag_types,
             precursor_mz_min=self.min_precursor_mz,
@@ -170,7 +174,9 @@ class PredictSpecLibFasta(SpecLibFasta, PredictSpecLib):
                 self.model_manager = ModelManager()
                 self.model_manager.reset_by_global_settings()
             else:
-                print("Oops, `PredictSpecLibFasta.model_manager` is None, while it should not happen")
+                print(
+                    "Oops, `PredictSpecLibFasta.model_manager` is None, while it should not happen"
+                )
                 self.model_manager = model_manager
 
     def add_charge(self):
@@ -179,15 +185,19 @@ class PredictSpecLibFasta(SpecLibFasta, PredictSpecLib):
         else:
             print(f"Predicting charge states for {len(self.precursor_df)} peptides ...")
             if self.model_manager.use_predicted_charge_in_speclib:
-                self._precursor_df = self.model_manager.charge_model.predict_and_clip_charges(
-                    self.precursor_df,
-                    min_precursor_charge=self.min_precursor_charge,
-                    max_precursor_charge=self.max_precursor_charge,
-                    charge_prob_cutoff=self.model_manager.charge_prob_cutoff
+                self._precursor_df = (
+                    self.model_manager.charge_model.predict_and_clip_charges(
+                        self.precursor_df,
+                        min_precursor_charge=self.min_precursor_charge,
+                        max_precursor_charge=self.max_precursor_charge,
+                        charge_prob_cutoff=self.model_manager.charge_prob_cutoff,
+                    )
                 )
             else:
-                self._precursor_df = self.model_manager.charge_model.predict_charges_as_prob(
-                    self.precursor_df,
-                    min_precursor_charge=self.min_precursor_charge,
-                    max_precursor_charge=self.max_precursor_charge
+                self._precursor_df = (
+                    self.model_manager.charge_model.predict_charges_as_prob(
+                        self.precursor_df,
+                        min_precursor_charge=self.min_precursor_charge,
+                        max_precursor_charge=self.max_precursor_charge,
+                    )
                 )

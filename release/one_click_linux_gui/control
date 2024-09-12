@@ -1,7 +1,0 @@
-Package: peptdeep
-Version: 1.2.1
-Architecture: all
-Maintainer: Mann Labs <opensource@alphapept.com>
-Description: peptdeep
-  peptdeep is an open-source Python package in the AlphaX ecosystem.
-  peptdeep was developed by the Mann Labs at the Max Planck Institute of Biochemistry and University of Copenhagen and is freely available with an Apache License. Additional third-party licenses are applicable for external Python packages (see https://github.com/MannLabs/peptdeep for more details.).

@@ -1,2 +1,0 @@
-d = { 'settings': { },
-  'syms': { }}

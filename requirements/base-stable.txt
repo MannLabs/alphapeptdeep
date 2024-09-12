@@ -1,0 +1,20 @@
+pywin32; sys_platform=='win32'
+pythonnet; sys_platform=='win32'
+
+click
+pandas
+numpy<2
+torch
+tqdm
+numba
+psutil
+biopython
+transformers
+scikit-learn
+streamlit-aggrid
+lxml
+pyteomics
+
+streamlit>=1.23.0
+alphabase>=1.1.0
+alpharaw>=0.2.0

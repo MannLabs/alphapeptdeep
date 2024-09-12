@@ -1,0 +1,3 @@
+#!/bin/sh
+
+open -a Terminal "${BASH_SOURCE%/*}/peptdeep_gui"

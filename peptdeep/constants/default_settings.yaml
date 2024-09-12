@@ -10,9 +10,11 @@ model:
 PEPTDEEP_HOME: "~/peptdeep" # ~ refers to user folder (e.g. C:/Users/username)
 
 local_model_zip_name: "pretrained_models.zip"
+local_hla_model_zip_name: "hla_model.zip"
 
 # overwritable config
 model_url: "https://github.com/MannLabs/alphapeptdeep/releases/download/pre-trained-models/pretrained_models.zip"
+hla_model_url: "https://github.com/MannLabs/alphapeptdeep/releases/download/pre-trained-models/hla_model.zip"
 
 task_workflow: [library]
 task_choices:
@@ -151,7 +153,7 @@ model_mgr:
     psm_modification_mapping: {} # alphabase modifications to modifications of other engine PSMs
     # Example (note that `X(UniMod:id)` format can directly be recognized by alphabase),
     # psm_modification_mapping:
-    #   Dimethyl@Any N-term:
+    #   Dimethyl@Any_N-term:
     #     - _(Dimethyl-n-0)
     #     - _(Dimethyl)
     #   Dimethyl:2H(2)@K:
@@ -263,10 +265,9 @@ library:
   max_precursor_mz: 2000.0
   decoy: None
   decoy_choices:
-  - protein_reverse
+  - None
   - pseudo_reverse
   - diann
-  - None
   max_frag_charge: 2
   frag_types:
   - b

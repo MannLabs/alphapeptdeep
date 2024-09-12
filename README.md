@@ -112,19 +112,23 @@ The GUI of peptdeep is a completely stand-alone tool that requires no
 knowledge of Python or CLI tools. Click on one of the links below to
 download the latest release for:
 
-- [**Windows**](https://github.com/MannLabs/alphapeptdeep/releases/latest/download/peptdeep_gui_installer_windows.exe)
-- [**macOS**](https://github.com/MannLabs/alphapeptdeep/releases/latest/download/peptdeep_gui_installer_macos.pkg)
-- [**Linux**](https://github.com/MannLabs/alphapeptdeep/releases/latest/download/peptdeep_gui_installer_linux.deb)
+- [**Windows**](https://github.com/MannLabs/alphapeptdeep/releases/latest/download/peptdeep-1.3.0-windows-amd64.exe)
+- [**macOS**](https://github.com/MannLabs/alphapeptdeep/releases/latest/download/peptdeep-1.3.0-macos-darwin-x64.pkg)
+- [**macOS ARM**](https://github.com/MannLabs/alphapeptdeep/releases/latest/download/peptdeep-1.3.0-macos-darwin-arm64.pkg )
+- [**Linux**](https://github.com/MannLabs/alphapeptdeep/releases/latest/download/peptdeep-1.3.0-linux-x64.deb)
 
 Older releases remain available on the [release
 page](https://github.com/MannLabs/alphapeptdeep/releases), but no
 backwards compatibility is guaranteed.
 
-Note that, as GitHub does not allow large release files, these installers do not have GPU support. To create GPU version installers, clone the source code and install GPU-version pytorch (#use-gpu), and then use `release/one_click_xxx_gui/create_installer_xxx.sh` to build installer locally. For example in Windows, run
-
+Note that, as GitHub does not allow large release files, these installers do not have GPU support.
+To create GPU version installers: clone the source code, install the GPU-version of pytorch [see here](#use-gpu),
+and then use the `build_installer_*.sh` and `build_package_*.sh`
+script in the respective `release/[macos, linux, windows]` folder to build the installer locally.
+For Linux you need to additionally pass the "GPU" flag, i.e. run
 ```bash
-cd release/one_click_windows_gui
-. ./create_installer_windows.sh
+release/linux/build_installer_linux.sh GPU
+release/linux/build_package_linux.sh
 ```
 
 ### Pip
@@ -381,12 +385,12 @@ common:
   user_defined_modifications: {}
   # For example,
   # user_defined_modifications:
-  #   "Dimethyl2@Any N-term":
+  #   "Dimethyl2@Any_N-term":
   #     composition: "H(2)2H(2)C(2)"
   #     modloss_composition: "H(0)" # can be without if no modloss
   #   "Dimethyl2@K":
   #     composition: "H(2)2H(2)C(2)"
-  #   "Dimethyl6@Any N-term":
+  #   "Dimethyl6@Any_N-term":
   #     composition: "2H(4)13C(2)"
   #   "Dimethyl6@K":
   #     composition: "2H(4)13C(2)"
@@ -496,7 +500,7 @@ library:
   fix_mods:
   - Carbamidomethyl@C
   var_mods:
-  - Acetyl@Protein N-term
+  - Acetyl@Protein_N-term
   - Oxidation@M
   special_mods: [] # normally for Phospho or GlyGly@K
   special_mods_cannot_modify_pep_n_term: False
@@ -504,8 +508,8 @@ library:
   labeling_channels: {}
   # For example,
   # labeling_channels:
-  #   0: ['Dimethyl@Any N-term','Dimethyl@K']
-  #   4: ['Dimethyl:2H(2)@Any N-term','Dimethyl:2H(2)@K']
+  #   0: ['Dimethyl@Any_N-term','Dimethyl@K']
+  #   4: ['Dimethyl:2H(2)@Any_N-term','Dimethyl:2H(2)@K']
   #   8: [...]
   min_var_mod_num: 0
   max_var_mod_num: 2
@@ -565,7 +569,7 @@ See examples:
 import pandas as pd
 df = pd.DataFrame({
     'sequence': ['ACDEFGHIK','LMNPQRSTVK','WYVSTR'],
-    'mods': ['Carbamidomethyl@C','Acetyl@Protein N-term;Phospho@S',''],
+    'mods': ['Carbamidomethyl@C','Acetyl@Protein_N-term;Phospho@S',''],
     'mod_sites': ['2','0;7',''],
     'charge': [2,3,1],
 })
@@ -593,7 +597,7 @@ df[['sequence','mods','mod_sites']]
 |  | sequence | mods | mod_sites |
 | --- | --- | --- | --- |
 | 0 | ACDEFGHIK | Carbamidomethyl@C | 2 |
-| 1 | LMNPQRSTVK | Acetyl@Protein N-term;Phospho@S | 0;7 |
+| 1 | LMNPQRSTVK | Acetyl@Protein_N-term;Phospho@S | 0;7 |
 | 2 | WYVSTR | | |
 
 ##### precursor_table
@@ -605,7 +609,7 @@ df
 |  | sequence | mods | mod_sites | charge |
 | --- | --- | --- | --- | --- |
 | 0 | ACDEFGHIK | Carbamidomethyl@C | 2 | 2 |
-| 1 | LMNPQRSTVK | Acetyl@Protein N-term;Phospho@S | 0;7 | 3 |
+| 1 | LMNPQRSTVK | Acetyl@Protein_N-term;Phospho@S | 0;7 | 3 |
 | 2 | WYVSTR | | | 1 |
 
 > Columns of `proteins` and `genes` are optional for these txt/tsv/csv
@@ -686,7 +690,7 @@ model_mgr:
     # alphabase modification to modifications of other search engines
     # For example,
     # psm_modification_mapping:
-    #   Dimethyl@Any N-term:
+    #   Dimethyl@Any_N-term:
     #     - _(Dimethyl-n-0)
     #     - _(Dimethyl)
     #   Dimethyl:2H(2)@K:
@@ -942,8 +946,32 @@ clone the repository and create a [pull
 request](https://github.com/MannLabs/alphapeptdeep/pulls) with a new
 branch. For an even more interactive participation, check out the
 [discussions](https://github.com/MannLabs/alphapeptdeep/discussions) and
-the [the Contributors License Agreement](misc/CLA.md).
+the [Contributors License Agreement](misc/CLA.md).
 
+### Notes for developers
+
+#### Tagging of changes
+In order to have release notes automatically generated, changes need to be tagged with labels.
+The following labels are used (should be safe-explanatory):
+`breaking-change`, `bug`, `enhancement`.
+
+#### Release a new version
+This package uses a shared release process defined in the
+[alphashared](https://github.com/MannLabs/alphashared) repository. Please see the instructions
+[there](https://github.com/MannLabs/alphashared/blob/reusable-release-workflow/.github/workflows/README.md#release-a-new-version).
+
+#### pre-commit hooks
+It is highly recommended to use the provided pre-commit hooks, as the CI pipeline enforces all checks therein to
+pass in order to merge a branch.
+
+The hooks need to be installed once by
+```bash
+pre-commit install
+```
+You can run the checks yourself using:
+```bash
+pre-commit run --all-files
+```
 ------------------------------------------------------------------------
 
 ## Changelog

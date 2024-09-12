@@ -205,7 +205,7 @@ elif sys.platform.startswith('win32'):
 		upx_exclude=[],
 		name=cli_name
 	)
-else:
+else:  # macOS
 	gui_exe = EXE(
 		gui_pyz,
 		gui_a.scripts,

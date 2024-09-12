@@ -11,7 +11,7 @@
 #     pass
 
 __project__ = "peptdeep"
-__version__ = "1.2.1"
+__version__ = "1.3.0"
 __license__ = "Apache 2.0"
 __description__ = "The AlphaX deep learning framework for Proteomics"
 __author__ = "Mann Labs"
@@ -50,6 +50,11 @@ __urls__ = {
     "PyPi": __pypi__,
 }
 __extra_requirements__ = {
-    "development": "requirements_development.txt",
-    "gui": "requirements_gui.txt",
+    "development-stable": "development-stable.txt",
+    "gui-stable": "gui-stable.txt",
+    "hla-stable": "hla-stable.txt",
+    "stable": "base-stable.txt",
+    "development": "development.txt",
+    "gui": "gui.txt",
+    "hla": "hla.txt",
 }
