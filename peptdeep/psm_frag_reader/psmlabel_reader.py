@@ -55,7 +55,9 @@ class PSMLabelReader(pFindReader, PSMReader_w_FragBase):
         }
 
     def _load_file(self, filename):
-        psmlabel_df = pd.read_csv(filename, sep="\t")
+        return pd.read_csv(filename, sep="\t")
+
+    def _pre_process(self, psmlabel_df: pd.DataFrame):
         psmlabel_df.fillna("", inplace=True)
 
         if psmlabel_df["spec"].values[0].count(".") >= 4:  # pfind
