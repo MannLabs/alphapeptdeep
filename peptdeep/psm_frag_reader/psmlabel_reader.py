@@ -31,9 +31,11 @@ class PSMLabelReader(pFindReader, PSMReader_w_FragBase):
         )
         pFindReader.__init__(self)
 
-        psmlabel_columns = "b,b-NH3,b-H20,b-ModLoss,y,y-HN3,y-H20,y-ModLoss".split(",")
         self.psmlabel_frag_columns = []
         self.frag_df_columns = {}
+        self._origin_df = None
+
+        psmlabel_columns = "b,b-NH3,b-H20,b-ModLoss,y,y-HN3,y-H20,y-ModLoss".split(",")
         for _type in psmlabel_columns:
             frag_idxes = [
                 i
@@ -55,7 +57,9 @@ class PSMLabelReader(pFindReader, PSMReader_w_FragBase):
         }
 
     def _load_file(self, filename):
-        return pd.read_csv(filename, sep="\t")
+        df = pd.read_csv(filename, sep="\t")
+        self._origin_df = df.copy()
+        return df
 
     def _pre_process(self, psmlabel_df: pd.DataFrame):
         psmlabel_df.fillna("", inplace=True)
@@ -81,16 +85,20 @@ class PSMLabelReader(pFindReader, PSMReader_w_FragBase):
             *psmlabel_df["modinfo"].apply(get_pFind_mods)
         )
 
-    def _translate_decoy(self, df):
+    def _translate_decoy(self):
         pass
 
-    def _translate_score(self, df):
+    def _translate_score(self):
         pass
 
     def _translate_modifications(self):
         self._psm_df["mods"] = self._psm_df["mods"].apply(translate_pFind_mod)
 
-    def _post_process(self, psmlabel_df: pd.DataFrame):
+    def _post_process(self):
+        psmlabel_df = (
+            self._origin_df
+        )  # TODO: this is to have compatibility with newer alphabase
+
         psmlabel_df["nAA"] = psmlabel_df.peptide.str.len()
         self._psm_df["nAA"] = psmlabel_df.nAA
         psmlabel_df = psmlabel_df[~self._psm_df["mods"].isna()].reset_index(drop=True)
