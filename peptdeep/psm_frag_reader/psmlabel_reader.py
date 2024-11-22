@@ -33,7 +33,6 @@ class PSMLabelReader(pFindReader, PSMReader_w_FragBase):
 
         self.psmlabel_frag_columns = []
         self.frag_df_columns = {}
-        self._origin_df = None
 
         psmlabel_columns = "b,b-NH3,b-H20,b-ModLoss,y,y-HN3,y-H20,y-ModLoss".split(",")
         for _type in psmlabel_columns:
@@ -58,7 +57,6 @@ class PSMLabelReader(pFindReader, PSMReader_w_FragBase):
 
     def _load_file(self, filename):
         df = pd.read_csv(filename, sep="\t")
-        self._origin_df = df.copy()
         return df
 
     def _pre_process(self, psmlabel_df: pd.DataFrame):
@@ -94,11 +92,7 @@ class PSMLabelReader(pFindReader, PSMReader_w_FragBase):
     def _translate_modifications(self):
         self._psm_df["mods"] = self._psm_df["mods"].apply(translate_pFind_mod)
 
-    def _post_process(self):
-        psmlabel_df = (
-            self._origin_df
-        )  # TODO: this is to have compatibility with newer alphabase
-
+    def _post_process(self, psmlabel_df):
         psmlabel_df["nAA"] = psmlabel_df.peptide.str.len()
         self._psm_df["nAA"] = psmlabel_df.nAA
         psmlabel_df = psmlabel_df[~self._psm_df["mods"].isna()].reset_index(drop=True)
