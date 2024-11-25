@@ -29,7 +29,17 @@ class PSMLabelReader(pFindReader, PSMReader_w_FragBase):
         PSMReader_w_FragBase.__init__(
             self, frag_types=frag_types, max_frag_charge=max_frag_charge, **kwargs
         )
-        pFindReader.__init__(self)
+        pFindReader.__init__(
+            self,
+            column_mapping={
+                "sequence": "peptide",
+                "charge": "charge",
+                "rt": "RT",
+                "raw_name": "raw_name",
+                "query_id": "spec",
+                "scan_num": "scan_num",
+            },
+        )
 
         self.psmlabel_frag_columns = []
         self.frag_df_columns = {}
@@ -44,16 +54,6 @@ class PSMLabelReader(pFindReader, PSMReader_w_FragBase):
             if frag_idxes:
                 self.psmlabel_frag_columns.append(_type)
                 self.frag_df_columns[_type] = np.array(frag_idxes, dtype=int)
-
-    def _init_column_mapping(self):
-        self.column_mapping = {
-            "sequence": "peptide",
-            "charge": "charge",
-            "rt": "RT",
-            "raw_name": "raw_name",
-            "query_id": "spec",
-            "scan_num": "scan_num",
-        }
 
     def _load_file(self, filename):
         df = pd.read_csv(filename, sep="\t")

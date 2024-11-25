@@ -77,7 +77,7 @@ class MaxQuantMSMSReader(MaxQuantReader, PSMReader_w_FragBase):
     def fragment_intensity_df(self):
         return self._fragment_intensity_df
 
-    def _preprocess(self, df):
+    def _pre_process(self, df):
         df = filter_phos(df, self._phos_prob)
         df = df[
             (df.Score >= self._score_thres) | ((df.Score >= 60) & (df.PhosProbs != ""))
