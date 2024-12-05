@@ -252,14 +252,14 @@ conda activate peptdeep
 Finally, peptdeep and all its [dependancies](requirements) need to be
 installed. To take advantage of all features and allow development (with
 the `-e` flag), this is best done by also installing the [development
-dependencies](requirements/requirements_development.txt) instead of only
-the [core dependencies](requirements/requirements.txt):
+dependencies](requirements/requirements_development_loose.txt) instead of only
+the [core dependencies](requirements/requirements_loose.txt):
 
 ``` bash
 pip install -e ".[development]"
 ```
 
-By default this installs loose dependencies (no explicit versioning),
+By default this installs 'loose' dependencies (no pinned versions),
 although it is also possible to use stable dependencies
 (e.g. `pip install -e ".[stable,development-stable]"`).
 
