@@ -19,5 +19,4 @@ jobs:
       package_name: peptdeep
       commitish_to_release: ${{ inputs.commitish_to_release }}
       build_nodejs_ui: false
-      use_pyproject_toml: true
       python_version: 3.9

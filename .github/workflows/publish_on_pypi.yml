@@ -17,7 +17,8 @@ jobs:
       package_name: peptdeep
       tag_to_release: ${{ inputs.tag_to_release }}
       python_version: 3.9
-      use_pyproject_toml: false
+      use_pyproject_toml: true
+      only_testpypi_release: true
     secrets:
       test_pypi_api_token: ${{ secrets.TEST_PYPI_PEPTDEEP_API_TOKEN }}
       pypi_api_token: ${{ secrets.PYPI_PEPTDEEP_API_TOKEN }}
