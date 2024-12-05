@@ -67,7 +67,7 @@ version = {attr = "peptdeep.__version__"}
 peptdeep = "peptdeep.cli:run"
 
 [tool.ruff]
-extend-exclude = ["misc/.bumpversion.cfg"]
+extend-exclude = [".bumpversion.cfg"]
 
 [tool.ruff.lint]
 select = ["E", "F"]
