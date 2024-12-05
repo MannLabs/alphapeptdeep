@@ -1,0 +1,23 @@
+# Publish and test releases on Test-PyPI and PyPI.
+name: Publish on PyPi
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag_to_release:
+        description: 'Enter tag to release (example: v1.5.5). A tag with the same name must exist in the repository.'
+        type: string
+        required: true
+
+jobs:
+  publish_on_pypi:
+    uses: MannLabs/alphashared/.github/workflows/publish_on_pypi.yml@v0
+    with:
+      # see the documentation of the workflow for more information on the parameters
+      package_name: peptdeep
+      tag_to_release: ${{ inputs.tag_to_release }}
+      python_version: 3.9
+      use_pyproject_toml: false
+    secrets:
+      test_pypi_api_token: ${{ secrets.TEST_PYPI_PEPTDEEP_API_TOKEN }}
+      pypi_api_token: ${{ secrets.PYPI_PEPTDEEP_API_TOKEN }}
