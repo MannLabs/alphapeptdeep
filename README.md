@@ -259,7 +259,7 @@ the [core dependencies](requirements/requirements.txt):
 pip install -e ".[development]"
 ```
 
-By default this installs loose dependancies (no explicit versioning),
+By default this installs loose dependencies (no explicit versioning),
 although it is also possible to use stable dependencies
 (e.g. `pip install -e ".[stable,development-stable]"`).
 

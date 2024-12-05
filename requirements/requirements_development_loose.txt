@@ -1,0 +1,23 @@
+jupyter
+twine
+bumpversion
+pipdeptree
+ipykernel
+wget
+
+seaborn
+matplotlib
+streamlit-aggrid # df interact
+
+# sphinx
+autodocsumm
+myst_parser
+sphinx
+nbsphinx
+jinja2
+contextfilter
+furo
+
+pytest
+pre-commit==3.7.0
+nbmake==1.5.3
