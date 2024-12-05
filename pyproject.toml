@@ -1,3 +1,73 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "peptdeep"
+requires-python = ">=3.8.0"
+dynamic = ["version", "dependencies", "optional-dependencies"]
+
+authors = [
+    {name = "Mann Labs", email = "jalew.zwf@qq.com"}
+]
+description = "The AlphaX deep learning framework for Proteomics"
+readme = "README.md"
+keywords = [
+    "mass spectrometry",
+    "proteomics",
+    "search engine",
+    "DIA",
+    "data-independent acquisition",
+    "bioinformatics",
+    "AlphaPept",
+    "AlphaPept ecosystem",
+    "deep learning",
+    "AlphaX ecosystem",
+]
+license = {file = "LICENSE.txt"}
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    # "Development Status :: 6 - Mature",
+    # "Development Status :: 7 - Inactive"
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: Apache Software License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Topic :: Scientific/Engineering :: Bio-Informatics",
+]
+
+[project.urls]
+
+"Paper preprint" = "https://www.biochem.mpg.de/mann"
+Repository = "https://github.com/MannLabs/peptdeep"
+#Documentation = "https://readthedocs.org"
+#Changelog = "https://github.com/me/spam/blob/master/CHANGELOG.md"
+Issues = "https://github.com/MannLabs/peptdeep/issues"
+"Mann Labs Homepage" = "https://www.biochem.mpg.de/mann"
+Docs = "https://alphapeptdeep.readthedocs.io/en/latest/"
+PyPi = "https://pypi.org/project/peptdeep/"
+
+[tool.setuptools.packages]
+find = {}
+
+[tool.setuptools.dynamic]
+# https://stackoverflow.com/a/73600610
+dependencies = {file = ["requirements/requirements_loose.txt"]}
+optional-dependencies = { stable = { file = ["requirements/requirements.txt",
+] }, gui = { file = [ "requirements/requirements_gui_loose.txt",
+] }, gui-stable = { file = [ "requirements/requirements_gui.txt",
+] }, development = { file = ["requirements/requirements_development_loose.txt",
+] }, development-stable = { file = ["requirements/requirements_development.txt",
+] }, hla = { file = ["requirements/requirements_hla_loose.txt",
+] }, hla-stable = { file = ["requirements/requirements_hla.txt",
+] }}
+version = {attr = "peptdeep.__version__"}
+
+[project.scripts]
+peptdeep = "peptdeep.cli:run"
+
+[tool.ruff]
+extend-exclude = ["misc/.bumpversion.cfg"]
 
 [tool.ruff.lint]
 select = ["E", "F"]
