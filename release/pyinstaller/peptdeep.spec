@@ -30,51 +30,20 @@ bundle_name = "peptdeep"
 #####################
 
 
-requirements = {
-	req.split()[0] for req in importlib.metadata.requires(project)
-}
-requirements.add(project)
-requirements.add("distributed")
-hidden_imports = set()
-datas = []
-binaries = []
-checked = set()
-while requirements:
-	requirement = requirements.pop()
-	checked.add(requirement)
-	if requirement in ["pywin32"]:
-		continue
-	try:
-		module_version = importlib.metadata.version(requirement)
-	except (
-		importlib.metadata.PackageNotFoundError,
-		ModuleNotFoundError,
-		ImportError
-	):
-		continue
-	try:
-		datas_, binaries_, hidden_imports_ = PyInstaller.utils.hooks.collect_all(
-			requirement,
-			include_py_files=True
-		)
-	except ImportError:
-		continue
-	datas += datas_
-	# binaries += binaries_
-	hidden_imports_ = set(hidden_imports_)
-	if "" in hidden_imports_:
-		hidden_imports_.remove("")
-	if None in hidden_imports_:
-		hidden_imports_.remove(None)
-	requirements |= hidden_imports_ - checked
-	hidden_imports |= hidden_imports_
+datas, binaries, hidden_imports = PyInstaller.utils.hooks.collect_all(
+	project,
+	include_py_files=True
+)
 
-if remove_tests:
-	hidden_imports = sorted(
-		[h for h in hidden_imports if "tests" not in h.split(".")]
+alpha_x = ['alphabase', 'alpharaw']
+for alpha_package in alpha_x:
+	_datas, _binaries, _hidden_imports = PyInstaller.utils.hooks.collect_all(
+		alpha_package,
+		include_py_files=True
 	)
-else:
-	hidden_imports = sorted(hidden_imports)
+	datas+=_datas
+	binaries+=_binaries
+	hidden_imports+=_hidden_imports
 
 
 hidden_imports = [h for h in hidden_imports if "__pycache__" not in h]
