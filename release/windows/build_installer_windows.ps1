@@ -10,7 +10,7 @@ Remove-Item -Recurse -Force -ErrorAction SilentlyContinue ./dist_pyinstaller
 # Creating the wheel
 python -m build
 # Make sure you include the required extra packages and always use the stable or very-stable options!
-pip install "dist/peptdeep-1.3.1-py3-none-any.whl[stable, gui-stable]"
+pip install "dist/peptdeep-1.3.0-py3-none-any.whl[stable, gui-stable]"
 
 # Creating the stand-alone pyinstaller folder
 pyinstaller release/pyinstaller/peptdeep.spec  --distpath dist_pyinstaller --workpath build_pyinstaller -y

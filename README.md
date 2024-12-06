@@ -112,10 +112,10 @@ The GUI of peptdeep is a completely stand-alone tool that requires no
 knowledge of Python or CLI tools. Click on one of the links below to
 download the latest release for:
 
-- [**Windows**](https://github.com/MannLabs/alphapeptdeep/releases/latest/download/peptdeep-1.3.1-windows-amd64.exe)
-- [**macOS**](https://github.com/MannLabs/alphapeptdeep/releases/latest/download/peptdeep-1.3.1-macos-darwin-x64.pkg)
-- [**macOS ARM**](https://github.com/MannLabs/alphapeptdeep/releases/latest/download/peptdeep-1.3.1-macos-darwin-arm64.pkg )
-- [**Linux**](https://github.com/MannLabs/alphapeptdeep/releases/latest/download/peptdeep-1.3.1-linux-x64.deb)
+- [**Windows**](https://github.com/MannLabs/alphapeptdeep/releases/latest/download/peptdeep-1.3.0-windows-amd64.exe)
+- [**macOS**](https://github.com/MannLabs/alphapeptdeep/releases/latest/download/peptdeep-1.3.0-macos-darwin-x64.pkg)
+- [**macOS ARM**](https://github.com/MannLabs/alphapeptdeep/releases/latest/download/peptdeep-1.3.0-macos-darwin-arm64.pkg )
+- [**Linux**](https://github.com/MannLabs/alphapeptdeep/releases/latest/download/peptdeep-1.3.0-linux-x64.deb)
 
 Older releases remain available on the [release
 page](https://github.com/MannLabs/alphapeptdeep/releases), but no
