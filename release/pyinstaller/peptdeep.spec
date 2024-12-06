@@ -35,10 +35,10 @@ datas, binaries, hidden_imports = PyInstaller.utils.hooks.collect_all(
 	include_py_files=True
 )
 
-alpha_x = ['alphabase', 'alpharaw']
-for alpha_package in alpha_x:
+additional_pkgs = ['alphabase', 'alpharaw', "streamlit"]
+for pkg in additional_pkgs:
 	_datas, _binaries, _hidden_imports = PyInstaller.utils.hooks.collect_all(
-		alpha_package,
+		pkg,
 		include_py_files=True
 	)
 	datas+=_datas
