@@ -1,4 +1,8 @@
 recursive-include peptdeep *
 include LICENSE.txt
 include README.md
-recursive-exclude peptdeep/logs *
+recursive-exclude logs *
+recursive-exclude tests *
+
+global-exclude */__pycache__/*
+global-exclude *.pyc *.nbi *.nbc
