@@ -500,7 +500,7 @@ class pDeepModel(model_interface.ModelInterface):
         else:
             update_sliced_fragment_dataframe(
                 self.predict_df,
-                self.predict_df.to_numpy(copy=True),
+                self.predict_df.to_numpy(),
                 predicts.reshape((-1, len(self.charged_frag_types))),
                 batch_df[["frag_start_idx", "frag_stop_idx"]].values,
             )
