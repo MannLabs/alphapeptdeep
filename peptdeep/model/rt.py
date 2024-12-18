@@ -123,6 +123,67 @@ class Model_RT_LSTM_CNN(torch.nn.Module):
         return self.rt_decoder(x).squeeze(1)
 
 
+class Model_RT_CustomTransformer(torch.nn.Module):
+    """
+    Customize a TransformerEncoderLayer for RT prediction using the BERT Encoder architecture, and invoke it through a TransformerEncoder
+    """
+
+    def __init__(
+        self,
+        dropout=0.1,
+        nlayers=4,
+        hidden=128,
+        output_attentions=False,
+        **kwargs,
+    ):
+        super().__init__()
+
+        self.dropout = torch.nn.Dropout(dropout)
+
+        self.input_nn = building_block.AATransformerEncoding(hidden)
+
+        self._output_attentions = output_attentions
+
+        self.hidden_nn = building_block.Hidden_PyTorch_TransformerEncoder(
+            hidden,
+            nlayers=nlayers,
+            dropout=dropout,
+            output_attentions=output_attentions,
+        )
+
+        self.output_nn = torch.nn.Sequential(
+            building_block.SeqAttentionSum(hidden),
+            torch.nn.PReLU(),
+            self.dropout,
+            torch.nn.Linear(hidden, 1),
+        )
+
+    @property
+    def output_attentions(self):
+        return self._output_attentions
+
+    @output_attentions.setter
+    def output_attentions(self, val: bool):
+        self._output_attentions = val
+        self.hidden_nn.output_attentions = val
+
+    def forward(
+        self,
+        aa_indices,
+        mod_x,
+    ):
+        x = self.dropout(self.input_nn(aa_indices, mod_x))
+
+        hidden_x = self.hidden_nn(x)
+        if self.output_attentions:
+            self.attentions = hidden_x[1]
+        else:
+            self.attentions = None
+        x = self.dropout(hidden_x[0] + x * 0.2)
+
+        return self.output_nn(x).squeeze(1)
+    
+
 # legacy
 Model_RT_LSTM = Model_RT_LSTM_CNN
 

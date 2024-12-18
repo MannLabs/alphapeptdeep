@@ -3,6 +3,7 @@ import numpy as np
 
 # Separate 'BertEncoder' from HuggingFace
 from peptdeep.model.EncoderModule.modeling_bert import BertEncoderLocal
+from peptdeep.model.EncoderModule.modeling_transformer import CustomTransformerEncoder
 
 from peptdeep.settings import model_const
 from peptdeep.settings import global_settings as settings
@@ -180,7 +181,7 @@ class _Pseudo_Encoder_Config:
         hidden_dim=256,
         intermediate_size=1024,
         num_attention_heads=8,
-        num_bert_layers=4,
+        num_layers=4,
         dropout=0.1,
         output_attentions=False,
     ):
@@ -197,7 +198,7 @@ class _Pseudo_Encoder_Config:
         self.intermediate_size = intermediate_size
         self.layer_norm_eps = 1e-8
         self.num_attention_heads = num_attention_heads
-        self.num_hidden_layers = num_bert_layers
+        self.num_hidden_layers = num_layers
         self.output_attentions = output_attentions
         self._attn_implementation = "eager"  # Add this for transformers-4.41.0
         self.batch_first = True
@@ -222,7 +223,7 @@ class Hidden_HFace_BertEncoder_Local(torch.nn.Module):
             hidden_dim=hidden_dim,
             intermediate_size=hidden_dim * hidden_expand,
             num_attention_heads=nheads,
-            num_bert_layers=nlayers,
+            num_layers=nlayers,
             dropout=dropout,
             output_attentions=output_attentions,
         )
@@ -257,6 +258,59 @@ class Hidden_HFace_BertEncoder_Local(torch.nn.Module):
             return_dict=False,
         )
 
+
+class Hidden_PyTorch_TransformerEncoder(torch.nn.Module):
+    """
+    Rewrite TransformerEncoder NN based on PyTorch's TransformerEncoder class with custom Transformer Encoder Layer
+    """
+
+    def __init__(
+        self,
+        hidden_dim,
+        hidden_expand=4,
+        nheads=8,
+        nlayers=4,
+        dropout=0.1,
+        output_attentions=False,
+    ):
+        super().__init__()
+        self.config = _Pseudo_Encoder_Config(
+            hidden_dim=hidden_dim,
+            intermediate_size=hidden_dim * hidden_expand,
+            num_attention_heads=nheads,
+            num_layers=nlayers,
+            dropout=dropout,
+            output_attentions=output_attentions,
+        )
+        self.customtransformerencoder = CustomTransformerEncoder(self.config)
+
+    def forward(
+        self,
+        x: torch.Tensor,
+        attention_mask: torch.Tensor = None,
+    ) -> tuple:
+        if attention_mask is not None:
+            attention_mask = invert_attention_mask(attention_mask, dtype=x.dtype)
+        
+        all_self_attentions = None
+        
+        outputs =  self.customtransformerencoder(
+            x,
+            attention_mask = attention_mask,
+        )
+        if self.config.output_attentions:
+            all_self_attentions = ()
+            for layer_module in self.customtransformerencoder.layers:
+                all_self_attentions = all_self_attentions + (layer_module.attn_output_weights)
+        
+        return tuple(
+            v
+            for v in [
+                outputs,
+                all_self_attentions
+            ]
+            if v is not None
+        )
 
 # legacy
 HiddenBert = Hidden_HFace_BertEncoder_Local
