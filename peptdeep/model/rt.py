@@ -35,8 +35,10 @@ IRT_PEPTIDE_DF["nAA"] = IRT_PEPTIDE_DF.sequence.str.len()
 irt_pep = IRT_PEPTIDE_DF
 
 
-class Model_RT_Bert(torch.nn.Module):
-    """Transformer model for RT prediction"""
+class Model_RT_Bert_Local(torch.nn.Module):
+    """
+    Pulliing away HuggingFace's BertEncoder for RT prediction in case of a series of minor problems caused by different versions
+    """
 
     def __init__(
         self,
@@ -54,7 +56,7 @@ class Model_RT_Bert(torch.nn.Module):
 
         self._output_attentions = output_attentions
 
-        self.hidden_nn = building_block.Hidden_HFace_Transformer(
+        self.hidden_nn = building_block.Hidden_HFace_BertEncoder_Local(
             hidden,
             nlayers=nlayers,
             dropout=dropout,

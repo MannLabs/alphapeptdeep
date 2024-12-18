@@ -28,7 +28,7 @@ import peptdeep.model.model_interface as model_interface
 import peptdeep.model.building_block as building_block
 
 
-class ModelMS2Transformer(torch.nn.Module):
+class Model_MS2_Transformer(torch.nn.Module):
     """Transformer model for MS2 prediction
 
     Parameters
@@ -146,8 +146,10 @@ class ModelMS2Transformer(torch.nn.Module):
         return out_x[:, 3:, :]
 
 
-class ModelMS2Bert(torch.nn.Module):
-    """Using HuggingFace's BertEncoder for MS2 prediction"""
+class Model_MS2_Bert_Local(torch.nn.Module):
+    """
+    Pulliing away HuggingFace's BertEncoder for MS2 prediction in case of a series of minor problems caused by different versions
+    """
 
     def __init__(
         self,
@@ -178,7 +180,7 @@ class ModelMS2Bert(torch.nn.Module):
         self.meta_nn = building_block.Meta_Embedding(meta_dim)
 
         self._output_attentions = output_attentions
-        self.hidden_nn = building_block.Hidden_HFace_Transformer(
+        self.hidden_nn = building_block.Hidden_HFace_BertEncoder_Local(
             hidden,
             nlayers=nlayers,
             dropout=dropout,
@@ -194,7 +196,7 @@ class ModelMS2Bert(torch.nn.Module):
             # for transfer learning of modloss frags
             self.modloss_nn = torch.nn.ModuleList(
                 [
-                    building_block.Hidden_HFace_Transformer(
+                    building_block.Hidden_HFace_BertEncoder_Local(
                         hidden,
                         nlayers=1,
                         dropout=dropout,
@@ -269,7 +271,7 @@ class ModelMS2Bert(torch.nn.Module):
         return out_x[:, 3:, :]
 
 
-class ModelMS2pDeep(torch.nn.Module):
+class Model_MS2_pDeep(torch.nn.Module):
     """LSTM model for MS2 prediction similar to pDeep series"""
 
     def __init__(
@@ -387,7 +389,7 @@ class pDeepModel(model_interface.ModelInterface):
         dropout=0.1,
         mask_modloss=True,
         modloss_type="modloss",
-        model_class: torch.nn.Module = ModelMS2Bert,
+        model_class: torch.nn.Module = Model_MS2_Bert_Local,
         device: str = "gpu",
         **kwargs,  # model params
     ):
@@ -397,7 +399,7 @@ class pDeepModel(model_interface.ModelInterface):
 
         self.charge_factor = 0.1
         self.NCE_factor = 0.01
-        self.model: ModelMS2Bert = None
+        self.model: Model_MS2_Bert_Local = None
         self.build(
             model_class,
             num_frag_types=len(self.charged_frag_types),

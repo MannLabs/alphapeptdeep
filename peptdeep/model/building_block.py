@@ -1,8 +1,8 @@
 import torch
 import numpy as np
 
-# BERT from huggingface
-from transformers.models.bert.modeling_bert import BertEncoder
+# Separate 'BertEncoder' from HuggingFace
+from peptdeep.model.EncoderModule.modeling_bert import BertEncoderLocal
 
 from peptdeep.settings import model_const
 from peptdeep.settings import global_settings as settings
@@ -174,7 +174,7 @@ class Hidden_Transformer(torch.nn.Module):
         return self.transormer(x)
 
 
-class _Pseudo_Bert_Config:
+class _Pseudo_Encoder_Config:
     def __init__(
         self,
         hidden_dim=256,
@@ -200,11 +200,12 @@ class _Pseudo_Bert_Config:
         self.num_hidden_layers = num_bert_layers
         self.output_attentions = output_attentions
         self._attn_implementation = "eager"  # Add this for transformers-4.41.0
+        self.batch_first = True
 
 
-class Hidden_HFace_Transformer(torch.nn.Module):
+class Hidden_HFace_BertEncoder_Local(torch.nn.Module):
     """
-    Transformer NN based on HuggingFace's BertEncoder class
+    Rewrite TransformerEncoder NN based on HuggingFace's BertEncoder class
     """
 
     def __init__(
@@ -217,16 +218,15 @@ class Hidden_HFace_Transformer(torch.nn.Module):
         output_attentions=False,
     ):
         super().__init__()
-        self.config = _Pseudo_Bert_Config(
+        self.config = _Pseudo_Encoder_Config(
             hidden_dim=hidden_dim,
             intermediate_size=hidden_dim * hidden_expand,
             num_attention_heads=nheads,
             num_bert_layers=nlayers,
             dropout=dropout,
-            output_attentions=False,
+            output_attentions=output_attentions,
         )
-        self.output_attentions = output_attentions
-        self.bert = BertEncoder(self.config)
+        self.bert = BertEncoderLocal(self.config)
 
     def forward(
         self,
@@ -253,13 +253,13 @@ class Hidden_HFace_Transformer(torch.nn.Module):
         return self.bert(
             x,
             attention_mask=attention_mask,
-            output_attentions=self.output_attentions,
+            output_attentions=self.config.output_attentions,
             return_dict=False,
         )
 
 
 # legacy
-HiddenBert = Hidden_HFace_Transformer
+HiddenBert = Hidden_HFace_BertEncoder_Local
 
 
 class HFace_Transformer_with_PositionalEncoder(torch.nn.Module):
@@ -302,7 +302,7 @@ class HFace_Transformer_with_PositionalEncoder(torch.nn.Module):
     ):
         super().__init__()
         self.pos_encoder = PositionalEncoding(hidden_dim, max_len=max_len)
-        self.bert = Hidden_HFace_Transformer(
+        self.bert = Hidden_HFace_BertEncoder_Local(
             hidden_dim=hidden_dim,
             hidden_expand=hidden_expand,
             nheads=nheads,
@@ -892,7 +892,7 @@ class Encoder_AA_Mod_Transformer(torch.nn.Module):
         self.input_nn = Input_AA_Mod_PositionalEncoding(out_features)
 
         self.output_attentions = output_attentions
-        self.encoder = Hidden_HFace_Transformer(
+        self.encoder = Hidden_HFace_BertEncoder_Local(
             out_features,
             nlayers=nlayers,
             dropout=dropout,
@@ -946,7 +946,7 @@ class Encoder_AA_Mod_Charge_Transformer(torch.nn.Module):
         self.input_nn = Input_AA_Mod_Charge_PositionalEncoding(out_features)
 
         self.output_attentions = output_attentions
-        self.encoder = Hidden_HFace_Transformer(
+        self.encoder = Hidden_HFace_BertEncoder_Local(
             out_features,
             nlayers=nlayers,
             dropout=dropout,

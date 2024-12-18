@@ -9,9 +9,9 @@ import peptdeep.model.base as model_base
 from peptdeep.utils import evaluate_linear_regression
 
 
-class Model_CCS_Bert(torch.nn.Module):
+class Model_CCS_Bert_Local(torch.nn.Module):
     """
-    Transformer model for CCS prediction
+    Pulliing away HuggingFace's BertEncoder for CCS prediction in case of a series of minor problems caused by different versions
     """
 
     def __init__(
@@ -30,7 +30,7 @@ class Model_CCS_Bert(torch.nn.Module):
 
         self._output_attentions = output_attentions
 
-        self.hidden_nn = model_base.Hidden_HFace_Transformer(
+        self.hidden_nn = model_base.Hidden_HFace_BertEncoder_Local(
             hidden,
             nlayers=nlayers,
             dropout=dropout,
@@ -113,7 +113,7 @@ def mobility_to_ccs_df_(precursor_df: pd.DataFrame) -> pd.DataFrame:
 
 class AlphaCCSModel(model_base.ModelInterface):
     """
-    `ModelInterface` for `Model_CCS_LSTM` or `Model_CCS_Bert`
+    `ModelInterface` for `Model_CCS_LSTM` or `Model_CCS_Bert_Local`
     """
 
     def __init__(
