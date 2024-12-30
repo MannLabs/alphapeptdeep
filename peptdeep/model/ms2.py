@@ -424,6 +424,7 @@ class pDeepModel(model_interface.ModelInterface):
         self.frag_inten_df = fragment_intensity_df[self.charged_frag_types]
         # if np.all(precursor_df['nce'].values > 1):
         #     precursor_df['nce'] = precursor_df['nce']*self.NCE_factor
+
     def _load_model_from_stream(self, stream: IO):
         """
         Overriding this function to allow for partial loading of pretrained models.
@@ -454,11 +455,22 @@ class pDeepModel(model_interface.ModelInterface):
         self.model.load_state_dict(filtered_params, strict=False)
         if size_mismatches or unexpected_keys or missing_keys:
             warning_msg = "Some layers might be randomly initialized due to a mismatch between the loaded weights and the model architecture. Make sure to train the model or load different weights before prediction."
-            warning_msg += f" The following keys had size mismatches: {size_mismatches}" if size_mismatches else ""
-            warning_msg += f" The following keys were unexpected: {unexpected_keys}" if unexpected_keys else ""
-            warning_msg += f" The following keys were missing: {missing_keys}" if missing_keys else ""
+            warning_msg += (
+                f" The following keys had size mismatches: {size_mismatches}"
+                if size_mismatches
+                else ""
+            )
+            warning_msg += (
+                f" The following keys were unexpected: {unexpected_keys}"
+                if unexpected_keys
+                else ""
+            )
+            warning_msg += (
+                f" The following keys were missing: {missing_keys}"
+                if missing_keys
+                else ""
+            )
             logging.warning(warning_msg)
-
 
     def _check_predict_in_order(self, precursor_df: pd.DataFrame):
         pass
