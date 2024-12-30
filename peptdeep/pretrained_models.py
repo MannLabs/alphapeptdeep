@@ -270,6 +270,7 @@ class ModelManager(object):
         self,
         mask_modloss: bool = False,
         device: str = "gpu",
+        charged_frag_types: list[str]= None
     ):
         """
         Parameters
@@ -283,12 +284,15 @@ class ModelManager(object):
             Device for DL models, could be 'gpu' ('cuda') or 'cpu'.
             if device=='gpu' but no GPUs are detected, it will automatically switch to 'cpu'.
             Defaults to 'gpu'
+        charge_frag_types : list[str], optional
+            Charge fragment types for MS2 model to override the default configuration in the yaml file. 
+            If set to None, it will use the default configuration in the yaml file.
         """
         self._train_psm_logging = True
 
         self.ms2_model: pDeepModel = pDeepModel(
             mask_modloss=mask_modloss, device=device
-        )
+        ) if charged_frag_types is None else pDeepModel(mask_modloss=mask_modloss, device=device, charged_frag_types=charged_frag_types)
         self.rt_model: AlphaRTModel = AlphaRTModel(device=device)
         self.ccs_model: AlphaCCSModel = AlphaCCSModel(device=device)
         self.load_installed_models()

@@ -2,7 +2,7 @@ import torch
 import pandas as pd
 import numpy as np
 import warnings
-
+from peptdeep.utils import logging
 from typing import List, Tuple, IO
 
 from tqdm import tqdm
@@ -424,6 +424,41 @@ class pDeepModel(model_interface.ModelInterface):
         self.frag_inten_df = fragment_intensity_df[self.charged_frag_types]
         # if np.all(precursor_df['nce'].values > 1):
         #     precursor_df['nce'] = precursor_df['nce']*self.NCE_factor
+    def _load_model_from_stream(self, stream: IO):
+        """
+        Overriding this function to allow for partial loading of pretrained models.
+        Helpful incase of just changing the prediction head (fragment types) of the model,
+        while keeping the rest of the model weights same.
+
+        Parameters
+        ----------
+        stream : IO
+            A file stream to load the model from
+        """
+        current_model_dict = self.model.state_dict()
+        to_be_loaded_dict = torch.load(stream, map_location=self.device)
+        # load same size and key tensors
+        filtered_params = {}
+        size_mismatches = []
+        unexpected_keys = []
+        for source_key, source_value in to_be_loaded_dict.items():
+            if source_key in current_model_dict:
+                if source_value.size() == current_model_dict[source_key].size():
+                    filtered_params[source_key] = source_value
+                else:
+                    size_mismatches.append(source_key)
+            else:
+                unexpected_keys.append(source_key)
+        missing_keys = set(current_model_dict.keys()) - set(filtered_params.keys())
+
+        self.model.load_state_dict(filtered_params, strict=False)
+        if size_mismatches or unexpected_keys or missing_keys:
+            warning_msg = "Some layers might be randomly initialized due to a mismatch between the loaded weights and the model architecture. Make sure to train the model or load different weights before prediction."
+            warning_msg += f" The following keys had size mismatches: {size_mismatches}" if size_mismatches else ""
+            warning_msg += f" The following keys were unexpected: {unexpected_keys}" if unexpected_keys else ""
+            warning_msg += f" The following keys were missing: {missing_keys}" if missing_keys else ""
+            logging.warning(warning_msg)
+
 
     def _check_predict_in_order(self, precursor_df: pd.DataFrame):
         pass
