@@ -461,6 +461,7 @@ class ModelManager(object):
         ms2_model_file: Union[str, io.BytesIO] = "",
         rt_model_file: Union[str, io.BytesIO] = "",
         ccs_model_file: Union[str, io.BytesIO] = "",
+        charge_model_file: Union[str, io.BytesIO] = "",
     ):
         """Load external MS2/RT/CCS models.
 
@@ -484,7 +485,7 @@ class ModelManager(object):
                 return
             try:
                 if isinstance(model_file, str):
-                    if os.path.isfile(model_file):
+                    if os.path.isfile(model_file) and model:
                         model.load(model_file)
                     else:
                         return
@@ -512,6 +513,12 @@ class ModelManager(object):
             if not os.path.isfile(ccs_model_file):
                 logging.info(" -- This model file does not exist")
         _load_file(self.ccs_model, ccs_model_file)
+
+        if isinstance(charge_model_file, str) and charge_model_file:
+            logging.info(f"Using external charge model: '{charge_model_file}'")
+            if not os.path.isfile(charge_model_file):
+                logging.info(" -- This model file does not exist")
+        _load_file(self.charge_model, charge_model_file)
 
     def train_rt_model(
         self,
