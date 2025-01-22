@@ -8,8 +8,8 @@ rm -rf dist
 rm -rf build
 
 # Creating the wheel
-python setup.py sdist bdist_wheel
-pip install "dist/peptdeep-1.3.0-py3-none-any.whl[stable]"
+python -m build
+pip install "dist/peptdeep-1.3.1-py3-none-any.whl[stable, gui-stable]"
 
 # Creating the stand-alone pyinstaller folder
 pyinstaller release/pyinstaller/peptdeep.spec --distpath dist_pyinstaller --workpath build_pyinstaller -y

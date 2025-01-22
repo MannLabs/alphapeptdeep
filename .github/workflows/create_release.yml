@@ -1,0 +1,22 @@
+# Create a draft release and build and upload all installers to it.
+name: Create Draft Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      commitish_to_release:
+        type: string
+        description: 'Enter commit hash or branch to release (default: main).'
+        default: "main"
+
+jobs:
+  create-release:
+    uses: MannLabs/alphashared/.github/workflows/create_release.yml@v1
+    secrets: inherit
+    permissions:
+      contents: write
+    with:
+      package_name: peptdeep
+      commitish_to_release: ${{ inputs.commitish_to_release }}
+      build_nodejs_ui: false
+      python_version: 3.9
