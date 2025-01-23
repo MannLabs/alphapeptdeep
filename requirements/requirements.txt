@@ -3,7 +3,7 @@ pythonnet==3.0.4; sys_platform=='win32'
 
 click==8.1.7
 pandas==2.2.3
-numpy<2
+numpy<2 # test: tolerate_version
 torch==2.5.1
 tqdm==4.67.1
 numba==0.60.0
@@ -14,5 +14,5 @@ scikit-learn==1.6.0
 lxml==5.3.0
 pyteomics==4.7.5
 
-alphabase>=1.5.0
-alpharaw>=0.2.0
+alphabase>=1.5.0 # test: tolerate_version
+alpharaw>=0.2.0 # test: tolerate_version
