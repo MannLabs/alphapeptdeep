@@ -1,0 +1,8 @@
+
+autodocsumm
+myst_parser
+sphinx
+nbsphinx
+jinja2
+contextfilter
+furo
