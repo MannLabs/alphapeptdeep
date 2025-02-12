@@ -12,6 +12,9 @@ from alphabase.peptide.fragment import (
     update_sliced_fragment_dataframe,
     get_sliced_fragment_dataframe,
     get_charged_frag_types,
+    sort_charged_frag_types,
+    parse_charged_frag_type,
+    FRAGMENT_TYPES 
 )
 
 from peptdeep.utils import get_available_device
@@ -21,7 +24,7 @@ from peptdeep.model.featurize import (
     parse_instrument_indices,
     get_batch_mod_feature,
 )
-
+from peptdeep.utils import logging
 from peptdeep.settings import global_settings as settings, model_const
 
 import peptdeep.model.model_interface as model_interface
@@ -151,9 +154,7 @@ class ModelMS2Bert(torch.nn.Module):
 
     def __init__(
         self,
-        num_frag_types,
-        num_modloss_types=0,
-        mask_modloss=True,
+        charged_frag_types,
         dropout=0.1,
         nlayers=4,
         hidden=256,
@@ -161,14 +162,18 @@ class ModelMS2Bert(torch.nn.Module):
         **kwargs,
     ):
         super().__init__()
-
+        charged_frag_types = sort_charged_frag_types(charged_frag_types)
         self.dropout = torch.nn.Dropout(dropout)
-
-        self._num_modloss_types = num_modloss_types
-        self._num_non_modloss = num_frag_types - num_modloss_types
-        self._mask_modloss = mask_modloss
-        if num_modloss_types == 0:
-            self._mask_modloss = True
+        num_frag_types = len(charged_frag_types)
+        
+        # register charged fragment types
+        self.register_buffer(
+            "_supported_charged_frag_types",
+            charged_frags_to_tensor(charged_frag_types),
+        )
+        self._get_modloss_frags()
+        self._num_modloss_types = len(self._modloss_frag_types)
+        self._num_non_modloss = num_frag_types - self._num_modloss_types
 
         meta_dim = 8
         self.input_nn = building_block.Input_26AA_Mod_PositionalEncoding(
@@ -189,8 +194,8 @@ class ModelMS2Bert(torch.nn.Module):
             hidden,
             self._num_non_modloss,
         )
-
-        if num_modloss_types > 0:
+        
+        if self._num_modloss_types > 0:
             # for transfer learning of modloss frags
             self.modloss_nn = torch.nn.ModuleList(
                 [
@@ -202,13 +207,18 @@ class ModelMS2Bert(torch.nn.Module):
                     ),
                     building_block.Decoder_Linear(
                         hidden,
-                        num_modloss_types,
+                        self._num_modloss_types,
                     ),
                 ]
             )
         else:
             self.modloss_nn = None
-
+    def _get_modloss_frags(self):
+        self._modloss_frag_types = []
+        for i, frag in enumerate(self.supported_charged_frag_types):
+            frag_type, _ = parse_charged_frag_type(frag)
+            if FRAGMENT_TYPES[frag_type].modloss:
+                self._modloss_frag_types.append(i)
     @property
     def output_attentions(self):
         return self._output_attentions
@@ -218,7 +228,10 @@ class ModelMS2Bert(torch.nn.Module):
         self._output_attentions = val
         self.hidden_nn.output_attentions = val
         self.modloss_nn[0].output_attentions = val
-
+    @property
+    def supported_charged_frag_types(self):
+        return tensor_to_charged_frags(self._supported_charged_frag_types)
+    
     def forward(
         self,
         aa_indices,
@@ -246,25 +259,12 @@ class ModelMS2Bert(torch.nn.Module):
 
         self.modloss_attentions = None
         if self._num_modloss_types > 0:
-            if self._mask_modloss:
-                out_x = torch.cat(
-                    (
-                        out_x,
-                        torch.zeros(
-                            *out_x.size()[:2],
-                            self._num_modloss_types,
-                            device=in_x.device,
-                        ),
-                    ),
-                    2,
-                )
-            else:
-                modloss_x = self.modloss_nn[0](in_x)
-                if self.output_attentions:
-                    self.modloss_attentions = modloss_x[-1]
-                modloss_x = modloss_x[0] + hidden_x
-                modloss_x = self.modloss_nn[-1](modloss_x)
-                out_x = torch.cat((out_x, modloss_x), 2)
+            modloss_x = self.modloss_nn[0](in_x)
+            if self.output_attentions:
+                self.modloss_attentions = modloss_x[-1]
+            modloss_x = modloss_x[0] + hidden_x
+            modloss_x = self.modloss_nn[-1](modloss_x)
+            out_x = torch.cat((out_x, modloss_x), 2)
 
         return out_x[:, 3:, :]
 
@@ -379,42 +379,59 @@ num_ion_types = len(frag_types) * max_frag_charge
 class pDeepModel(model_interface.ModelInterface):
     """
     `ModelInterface` for MS2 prediction models
+
+    Parameters
+    ----------
+    charged_frag_types : List[str]
+        Charged fragment types to predict
+    dropout : float, optional
+        Dropout rate, by default 0.1
+    model_class : torch.nn.Module, optional
+        Ms2 Model class, by default ModelMS2Bert
+    device : str, optional
+        Device to run the model, by default "gpu"
+    override_from_weights : bool, optional default False
+        Over ride the requested charged frag types when loading model from weights, this will 
+        make the model always in a safe to predict state.
+    mask_modloss : bool, optional (deprecated)
+        Mask the modloss fragments, this is deprecated and will be removed in the future. To mask the modloss fragments,
+        the charged_frag_types should not include the modloss fragments.
+
     """
 
     def __init__(
         self,
         charged_frag_types=get_charged_frag_types(frag_types, max_frag_charge),
         dropout=0.1,
-        mask_modloss=True,
-        modloss_type="modloss",
         model_class: torch.nn.Module = ModelMS2Bert,
         device: str = "gpu",
+        mask_modloss: bool|None = None,
+        override_from_weights: bool = False,
         **kwargs,  # model params
     ):
         super().__init__(device=device)
+        if mask_modloss is not None:
+            warnings.warn("mask_modloss is deprecated and will be removed in the future. To mask the modloss fragments, the charged_frag_types should not include the modloss fragments.")
+        
+        self.override_from_weights = override_from_weights
         self.charged_frag_types = charged_frag_types
-        self._get_modloss_frags(modloss_type)
 
         self.charge_factor = 0.1
         self.NCE_factor = 0.01
         self.model: ModelMS2Bert = None
+        self._model_kwargs = kwargs
         self.build(
             model_class,
-            num_frag_types=len(self.charged_frag_types),
-            num_modloss_types=len(self._modloss_frag_types),
-            mask_modloss=mask_modloss,
+            charged_frag_types=self.charged_frag_types,
             dropout=dropout,
             **kwargs,  # other model params
         )
 
         self.loss_func = torch.nn.L1Loss()
         self.min_inten = 1e-4
+        self._safe_to_predict = True    
+        self._safe_to_train = True
 
-    def _get_modloss_frags(self, modloss="modloss"):
-        self._modloss_frag_types = []
-        for i, frag in enumerate(self.charged_frag_types):
-            if modloss in frag:
-                self._modloss_frag_types.append(i)
 
     def _prepare_train_data_df(
         self,
@@ -493,6 +510,10 @@ class pDeepModel(model_interface.ModelInterface):
         apex_intens[apex_intens <= 0] = 1
         predicts /= apex_intens.reshape((-1, 1, 1))
         predicts[predicts < self.min_inten] = 0.0
+        # mask out predicted charged frag types that are not in the requested charged_frag_types
+        columns_mask = np.isin(self.model.supported_charged_frag_types, self.charged_frag_types)
+        predicts = predicts[:, :, columns_mask]
+
         if self._predict_in_order:
             self.predict_df.values[
                 batch_df.frag_start_idx.values[0] : batch_df.frag_stop_idx.values[-1], :
@@ -504,6 +525,41 @@ class pDeepModel(model_interface.ModelInterface):
                 predicts.reshape((-1, len(self.charged_frag_types))),
                 batch_df[["frag_start_idx", "frag_stop_idx"]].values,
             )
+    def _align_model_charged_frag_types(self):
+        """
+        Align the underlying model charged_frag_types with the interface charged_frag_types, 
+        this function is necessary for the model to be safe to train. 
+        Important: This function when called will most probably reset the last layer of the model 
+        and randomly initialize is it so it might not be safe to use the model for prediction since 
+        the last layer will be randomly initialized.
+        """
+        loaded_model_state_dict = self.model.state_dict()
+        self.build(
+            self.model.__class__,
+            dropout = self.model.dropout.p,
+            charged_frag_types=self.charged_frag_types,
+            **self._model_kwargs,
+        )
+        current_model_dict = self.model.state_dict()
+        # use the layers/modules that are shared from the original model instead of starting from scratch
+        filtered_params = {}
+        size_mismatches = []
+        unexpected_keys = []
+        for source_key, source_value in loaded_model_state_dict.items():
+            if source_key in current_model_dict:
+                if source_value.size() == current_model_dict[source_key].size():
+                    filtered_params[source_key] = source_value
+                else:
+                    size_mismatches.append(source_key)
+            else:
+                unexpected_keys.append(source_key)
+        self.model.load_state_dict(filtered_params, strict=False) 
+
+        if len(size_mismatches) > 0 or len(unexpected_keys) > 0:
+            self._safe_to_predict = False
+
+        self._safe_to_train = True
+
 
     def train_with_warmup(
         self,
@@ -518,7 +574,9 @@ class pDeepModel(model_interface.ModelInterface):
         verbose_each_epoch=False,
         **kwargs,
     ):
-        return super().train_with_warmup(
+        if not self._safe_to_train:
+            self._align_model_charged_frag_types()
+        super().train_with_warmup(
             precursor_df,
             fragment_intensity_df=fragment_intensity_df,
             batch_size=batch_size,
@@ -529,6 +587,7 @@ class pDeepModel(model_interface.ModelInterface):
             verbose_each_epoch=verbose_each_epoch,
             **kwargs,
         )
+        self._safe_to_predict = True
 
     def test(
         self,
@@ -566,7 +625,9 @@ class pDeepModel(model_interface.ModelInterface):
         verbose_each_epoch=False,
         **kwargs,
     ):
-        return super().train(
+        if not self._safe_to_train:
+            self._align_model_charged_frag_types()
+        super().train(
             precursor_df,
             fragment_intensity_df=fragment_intensity_df,
             batch_size=batch_size,
@@ -577,6 +638,8 @@ class pDeepModel(model_interface.ModelInterface):
             verbose_each_epoch=verbose_each_epoch,
             **kwargs,
         )
+        self._safe_to_predict = True
+
 
     def predict(
         self,
@@ -587,6 +650,10 @@ class pDeepModel(model_interface.ModelInterface):
         reference_frag_df=None,
         **kwargs,
     ) -> pd.DataFrame:
+        if not self._safe_to_predict:
+            raise ValueError(
+                f"The model is not safe to use for prediction. This might mean that the requested charged_frag_types {self.charged_frag_types} are not a subset of the charged_frag_types used to train the loaded pretrained model {self.model.supported_charged_frag_types}. Please retrain the model or use a pretrained model with the correct charged_frag_types."
+            )
         return super().predict(
             precursor_df,
             batch_size=batch_size,
@@ -632,7 +699,49 @@ class pDeepModel(model_interface.ModelInterface):
             )
             nce_list.append(nce)
         return np.median(nce_list), instrument
+    def _load_model_from_stream(self, stream):
+        to_be_loaded_state_dict = torch.load(stream, map_location=self.device)
+        if "_supported_charged_frag_types" in to_be_loaded_state_dict:
+            loaded_charged_frag_types = to_be_loaded_state_dict["_supported_charged_frag_types"]
+            # build a model that has the same charged_frag_types as the loaded model
+            self.build(
+                self.model.__class__,
+                dropout = self.model.dropout.p,
+                charged_frag_types=tensor_to_charged_frags(loaded_charged_frag_types),
+                **self._model_kwargs,
+            )
 
+            if self.override_from_weights:
+                self.charged_frag_types = tensor_to_charged_frags(loaded_charged_frag_types)
+
+        (missing_keys, unexpect_keys) = self.model.load_state_dict(
+            to_be_loaded_state_dict, strict=False
+        )
+        self._update_model_state()
+        missing_keys = [key for key in missing_keys if "_supported_charged_frag_types" not in key]
+        if len(missing_keys) > 0:
+            logging.warn(
+                f"nn parameters {missing_keys} are MISSING while loading models in {self.__class__}"
+            )
+        if len(unexpect_keys) > 0:
+            logging.warn(
+                f"nn parameters {unexpect_keys} are UNEXPECTED while loading models in {self.__class__}"
+            )
+
+    def _update_model_state(self):
+        """
+        Update the model state "safe_to_predict" and "safe_to_train". 
+        Depending on the the interface (pDeepModel) charged frag types and he underlying model charged frag types,
+        the model state will be updated.
+        - safe_to_predict: True if the interface charged frag types are a subset of the underlying model charged frag types
+        - safe_to_train: True if the interface charged frag types are the same as the underlying model charged frag types
+        """
+        self._safe_to_predict = set(self.charged_frag_types).issubset(
+            set(self.model.supported_charged_frag_types)
+        )
+        self._safe_to_train = set(self.charged_frag_types) == set(
+            self.model.supported_charged_frag_types
+        )
     def grid_nce_search(
         self,
         psm_df: pd.DataFrame,
@@ -884,3 +993,31 @@ def calc_ms2_similarity(
 
     torch.cuda.empty_cache()
     return psm_df, metrics_describ
+
+
+def charged_frags_to_tensor(charged_frags: List[str]) -> torch.Tensor:
+    """
+    Convert a list of strings (charged fragment types, modloss fragment types) to a tensor
+
+    Parameters
+    ----------
+    list : List[str]
+        List of strings
+    """
+    seperator = ","
+    string = seperator.join(charged_frags)
+    return torch.tensor(
+        [ord(char) for char in string], dtype=torch.int32
+    ).unsqueeze(0)
+    
+def tensor_to_charged_frags(tensor: torch.Tensor) -> List[str]:
+    """
+    Convert a tensor to a list of strings (charged fragment types, modloss fragment types)
+
+    Parameters
+    ----------
+    tensor : torch.Tensor
+        Tensor of int32
+    """
+    string = "".join([chr(char) for char in tensor[0].tolist()])
+    return string.split(",")
