@@ -40,18 +40,22 @@ from peptdeep.utils import uniform_sampling
 
 from peptdeep.settings import global_settings, update_global_settings
 
-pretrain_dir = os.path.join(
+PRETRAIN_DIR = os.path.join(
     os.path.join(
         os.path.expanduser(global_settings["PEPTDEEP_HOME"]), "pretrained_models"
     )
 )
 
-LOCAL_MODAL_ZIP_NAME = global_settings["local_model_zip_name"]
-MODEL_URL = global_settings["model_url"]
-
-MODEL_ZIP_FILE_PATH = os.path.join(pretrain_dir, LOCAL_MODAL_ZIP_NAME)
 
 sys.modules[__name__].__class__ = ModuleWithDeprecations
+
+LOCAL_MODAL_ZIP_NAME = global_settings["local_model_zip_name"]
+MODEL_URL = global_settings["model_url"]
+MODEL_ZIP_FILE_PATH = os.path.join(PRETRAIN_DIR, LOCAL_MODAL_ZIP_NAME)
+
+ModuleWithDeprecations.deprecate(__name__, "pretrain_dir", "PRETRAIN_DIR")
+ModuleWithDeprecations.deprecate(__name__, "model_zip_name", "LOCAL_MODAL_ZIP_NAME")
+ModuleWithDeprecations.deprecate(__name__, "model_url", "MODEL_URL")
 ModuleWithDeprecations.deprecate(__name__, "model_zip", "MODEL_ZIP_FILE_PATH")
 
 
@@ -103,7 +107,7 @@ def download_models(url: str = MODEL_URL, target_path: str = MODEL_ZIP_FILE_PATH
 
 def _download_models(model_zip_file_path: str) -> None:
     """Download models if not done yet."""
-    os.makedirs(pretrain_dir, exist_ok=True)
+    os.makedirs(PRETRAIN_DIR, exist_ok=True)
     if not os.path.exists(model_zip_file_path):
         download_models()
     if not is_model_zip(model_zip_file_path):
