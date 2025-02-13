@@ -13,6 +13,8 @@ import typing
 from pickle import UnpicklingError
 import torch.multiprocessing as mp
 
+from peptdeep.utils.deprecations import ModuleWithDeprecations
+
 if sys.platform.lower().startswith("linux"):
     # to prevent `too many open files` bug on Linux
     mp.set_sharing_strategy("file_system")
@@ -50,16 +52,13 @@ pretrain_dir = os.path.join(
     )
 )
 
-if not os.path.exists(pretrain_dir):
-    os.makedirs(pretrain_dir)
-
-model_zip_name = global_settings["local_model_zip_name"]
-model_url = global_settings["model_url"]
-
 LOCAL_MODAL_ZIP_NAME = global_settings["local_model_zip_name"]
 MODEL_URL = global_settings["model_url"]
 
 MODEL_ZIP_FILE_PATH = os.path.join(pretrain_dir, LOCAL_MODAL_ZIP_NAME)
+
+sys.modules[__name__].__class__ = ModuleWithDeprecations
+ModuleWithDeprecations.deprecate(__name__, "model_zip", "MODEL_ZIP_FILE_PATH")
 
 
 def is_model_zip(downloaded_zip):
@@ -114,7 +113,7 @@ def _download_models(model_zip_file_path: str) -> None:
     if not os.path.exists(model_zip_file_path):
         download_models()
     if not is_model_zip(model_zip_file_path):
-        raise ValueError(f"Local model file is not valid: {model_zip_file_path}")
+        raise ValueError(f"Local model file is not a valid zip: {model_zip_file_path}")
 
 
 model_mgr_settings = global_settings["model_mgr"]
