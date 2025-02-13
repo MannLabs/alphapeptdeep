@@ -1,12 +1,9 @@
 import os
-import pathlib
 import io
 import sys
 import pandas as pd
-import torch
 import urllib
 import socket
-import logging
 import shutil
 import ssl
 import typing
@@ -30,19 +27,16 @@ from alphabase.peptide.fragment import (
 from alphabase.peptide.precursor import refine_precursor_df, update_precursor_mz
 from alphabase.peptide.mobility import mobility_to_ccs_for_df, ccs_to_mobility_for_df
 
-from peptdeep.settings import global_settings, add_user_defined_modifications
 from peptdeep.utils import logging, process_bar
-from peptdeep.settings import global_settings
 
 from peptdeep.model.ms2 import (
     pDeepModel,
     normalize_fragment_intensities,
-    calc_ms2_similarity,
 )
 from peptdeep.model.rt import AlphaRTModel
 from peptdeep.model.ccs import AlphaCCSModel
 from peptdeep.model.charge import ChargeModelForAASeq, ChargeModelForModAASeq
-from peptdeep.utils import uniform_sampling, evaluate_linear_regression
+from peptdeep.utils import uniform_sampling
 
 from peptdeep.settings import global_settings, update_global_settings
 
