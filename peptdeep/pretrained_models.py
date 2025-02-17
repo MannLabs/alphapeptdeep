@@ -297,6 +297,8 @@ class ModelManager(object):
             if device=='gpu' but no GPUs are detected, it will automatically switch to 'cpu'.
             Defaults to 'gpu'
         """
+        _download_models(MODEL_ZIP_FILE_PATH)
+
         self._train_psm_logging = True
 
         self.ms2_model: pDeepModel = pDeepModel(
@@ -311,8 +313,6 @@ class ModelManager(object):
         )
 
         self.reset_by_global_settings(reload_models=False)
-
-        _download_models(MODEL_ZIP_FILE_PATH)
 
     def reset_by_global_settings(
         self,
