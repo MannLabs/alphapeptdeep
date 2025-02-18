@@ -133,36 +133,9 @@ release/linux/build_package_linux.sh
 
 ### Pip
 
-> PythonNET must be installed to access Thermo or Sciex raw data.
->
-> *Legacy, should be replaced by AlphaRaw in the near future.*
->
-> #### PythonNET in Windows
->
-> Automatically installed for Windows.
->
-> #### PythonNET in Linux
->
-> 1.  Install Mono from mono-project website [Mono
->     Linux](https://www.mono-project.com/download/stable/#download-lin).
->     NOTE, the installed mono version should be at least 6.10, which
->     requires you to add the ppa to your trusted sources!
-> 2.  Install PythonNET with `pip install pythonnet`.
->
-> #### PythonNET in MacOS
->
-> 1.  Install [brew](https://brew.sh) and pkg-config:
->     `brew install pkg-config` 3. Install Mono from mono-project
->     website [Mono Mac](https://www.mono-project.com/download/stable/)
-> 2.  Register the Mono-Path to your system: For macOS Catalina, open
->     the configuration of zsh via the terminal:
->
-> - Type `nano ~/.zshrc` to open the configuration of the terminal
-> - Append the mono path to your `PKG_CONFIG_PATH`:
->   `export PKG_CONFIG_PATH=/usr/local/lib/pkgconfig:/usr/lib/pkgconfig:/Library/Frameworks/Mono.framework/Versions/Current/lib/pkgconfig:$PKG_CONFIG_PATH`.
-> - Save everything and execute `. ~/.zshrc`
->
-> 3.  Install PythonNET with `pip install pythonnet`.
+PythonNET must be installed to access Thermo or Sciex raw data.
+This is provided through AlphaRaw, which depends on Mono (for Mac/Linux).
+A detailed guide to installing AlphaRaw with mono can be found [here](https://github.com/MannLabs/alpharaw#installation).
 
 peptdeep can be installed in an existing Python environment with a
 single `bash` command. *This `bash` command can also be run directly
@@ -178,7 +151,7 @@ However, if new versions of dependancies are released, they are not
 guaranteed to be fully compatible with peptdeep. This should only occur
 in rare cases where dependencies are not backwards compatible.
 
-> **TODO** You can always force peptdeep to use dependancy versions
+> **TODO** You can always force peptdeep to use dependency versions
 > which are known to be compatible with:
 >
 > ``` bash
@@ -241,7 +214,7 @@ git clone https://github.com/MannLabs/alphapeptdeep.git
 
 For any Python package, it is highly recommended to use a separate
 [conda virtual environment](https://docs.conda.io/en/latest/), as
-otherwise *dependancy conflicts can occur with already existing
+otherwise *dependency conflicts can occur with already existing
 packages*.
 
 ``` bash
