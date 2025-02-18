@@ -29,11 +29,22 @@ class PSMLabelReader(pFindReader, PSMReader_w_FragBase):
         PSMReader_w_FragBase.__init__(
             self, frag_types=frag_types, max_frag_charge=max_frag_charge, **kwargs
         )
-        pFindReader.__init__(self)
+        pFindReader.__init__(
+            self,
+            column_mapping={
+                "sequence": "peptide",
+                "charge": "charge",
+                "rt": "RT",
+                "raw_name": "raw_name",
+                "query_id": "spec",
+                "scan_num": "scan_num",
+            },
+        )
 
-        psmlabel_columns = "b,b-NH3,b-H20,b-ModLoss,y,y-HN3,y-H20,y-ModLoss".split(",")
         self.psmlabel_frag_columns = []
         self.frag_df_columns = {}
+
+        psmlabel_columns = "b,b-NH3,b-H20,b-ModLoss,y,y-HN3,y-H20,y-ModLoss".split(",")
         for _type in psmlabel_columns:
             frag_idxes = [
                 i
@@ -44,18 +55,11 @@ class PSMLabelReader(pFindReader, PSMReader_w_FragBase):
                 self.psmlabel_frag_columns.append(_type)
                 self.frag_df_columns[_type] = np.array(frag_idxes, dtype=int)
 
-    def _init_column_mapping(self):
-        self.column_mapping = {
-            "sequence": "peptide",
-            "charge": "charge",
-            "rt": "RT",
-            "raw_name": "raw_name",
-            "query_id": "spec",
-            "scan_num": "scan_num",
-        }
-
     def _load_file(self, filename):
-        psmlabel_df = pd.read_csv(filename, sep="\t")
+        df = pd.read_csv(filename, sep="\t")
+        return df
+
+    def _pre_process(self, psmlabel_df: pd.DataFrame):
         psmlabel_df.fillna("", inplace=True)
 
         if psmlabel_df["spec"].values[0].count(".") >= 4:  # pfind
@@ -79,16 +83,16 @@ class PSMLabelReader(pFindReader, PSMReader_w_FragBase):
             *psmlabel_df["modinfo"].apply(get_pFind_mods)
         )
 
-    def _translate_decoy(self, df):
+    def _translate_decoy(self):
         pass
 
-    def _translate_score(self, df):
+    def _translate_score(self):
         pass
 
     def _translate_modifications(self):
         self._psm_df["mods"] = self._psm_df["mods"].apply(translate_pFind_mod)
 
-    def _post_process(self, psmlabel_df: pd.DataFrame):
+    def _post_process(self, psmlabel_df):
         psmlabel_df["nAA"] = psmlabel_df.peptide.str.len()
         self._psm_df["nAA"] = psmlabel_df.nAA
         psmlabel_df = psmlabel_df[~self._psm_df["mods"].isna()].reset_index(drop=True)
