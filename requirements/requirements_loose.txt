@@ -7,7 +7,6 @@ torch
 tqdm
 numba
 psutil
-biopython
 transformers
 scikit-learn
 lxml
