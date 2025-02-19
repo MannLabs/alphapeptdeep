@@ -1,3 +1,4 @@
 
+click
 streamlit>=1.23.0 # test: tolerate_version
 streamlit-aggrid
