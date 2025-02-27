@@ -7,11 +7,11 @@ from peptdeep.model.rt import IRT_PEPTIDE_DF
 import numpy as np
 
 
-def get_legacy_model(charged_frag_types: Optional[List[str]] = None):
+def get_legacy_model(charged_frag_types: Optional[List[str]] = None, mask_modloss: Optional[bool] = None):
     if charged_frag_types is None:
-        return pDeepModel()
+        return pDeepModel(mask_modloss=mask_modloss)
     else:
-        return pDeepModel(charged_frag_types=charged_frag_types)
+        return pDeepModel(charged_frag_types=charged_frag_types, mask_modloss=mask_modloss)
 
 
 def transform_weights_to_new_format():
@@ -101,6 +101,29 @@ def test_legacy_weights_complete_prediction():
     assert set(pred_df.columns) == set(charged_frag_types), (
         "Prediction did not have all requested charged frag types"
     )
+    # Non nan values should be present
+    assert not pred_df.isna().all().all(), "All values in the prediction were nan"
+
+def test_legacy_weights_mask_modloss():
+    # Given a user requests exactly the same charged frag types used when training the model
+    charged_frag_types = [
+        "b_z1",
+        "b_z2",
+        "y_z1",
+        "y_z2",
+        "b_modloss_z1",
+        "b_modloss_z2",
+        "y_modloss_z1",
+        "y_modloss_z2",
+    ]
+
+    # When the user loads the model from legacy weights and uses it for prediction with mask_modloss
+    model = get_legacy_model(charged_frag_types=charged_frag_types , mask_modloss=True)
+    df = get_prediction_dataset()
+    pred_df = model.predict(df)
+
+    # Then the prediction should have all requested charged frag types
+    assert set(pred_df.columns) == set(["b_z1", "b_z2", "y_z1", "y_z2"])
     # Non nan values should be present
     assert not pred_df.isna().all().all(), "All values in the prediction were nan"
 
@@ -244,3 +267,4 @@ def test_override_requested_frag_types_prediction():
     ), "Prediction did not have all supported charged frag types"
     # Non nan values should be present
     assert not pred_df.isna().all().all(), "All values in the prediction were nan"
+

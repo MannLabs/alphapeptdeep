@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 import warnings
 
-from typing import List, Tuple, IO
+from typing import List, Tuple, IO, Optional
 
 from tqdm import tqdm
 
@@ -405,7 +405,7 @@ class pDeepModel(model_interface.ModelInterface):
         dropout=0.1,
         model_class: torch.nn.Module = ModelMS2Bert,
         device: str = "gpu",
-        mask_modloss: bool|None = None,
+        mask_modloss: Optional[bool] = None,
         override_from_weights: bool = False,
         **kwargs,  # model params
     ):
@@ -426,7 +426,12 @@ class pDeepModel(model_interface.ModelInterface):
             dropout=dropout,
             **kwargs,  # other model params
         )
-
+        if mask_modloss: # To Be removed in the future
+            # remove modloss fragments from charged_frag_types
+            self.charged_frag_types = [
+                frag for frag in self.charged_frag_types if "modloss" not in frag
+            ]
+            
         self.loss_func = torch.nn.L1Loss()
         self.min_inten = 1e-4
         self._safe_to_predict = True    
