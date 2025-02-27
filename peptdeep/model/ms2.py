@@ -577,7 +577,7 @@ class pDeepModel(model_interface.ModelInterface):
         **kwargs,
     ):
         if not self._safe_to_train:
-            self._align_model_charged_frag_types()
+            self._adapt_model_prediction_head()
         super().train_with_warmup(
             precursor_df,
             fragment_intensity_df=fragment_intensity_df,
@@ -628,7 +628,7 @@ class pDeepModel(model_interface.ModelInterface):
         **kwargs,
     ):
         if not self._safe_to_train:
-            self._align_model_charged_frag_types()
+            self._adapt_model_prediction_head()
         super().train(
             precursor_df,
             fragment_intensity_df=fragment_intensity_df,
