@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 from typing import List, Union
-
+import torch
 from peptdeep.settings import (
     model_const,
     mod_feature_size,
@@ -11,8 +11,14 @@ from peptdeep.settings import (
     _parse_mod_formula,
     update_all_mod_features,
 )
+from rdkit import Chem
 
+from transformers import AutoTokenizer, RobertaModel
 
+from alphabase.smiles.peptide import PeptideSmilesEncoder
+from typing import List, Optional, Union
+from abc import ABC, abstractmethod
+from torch.nn.utils.rnn import pad_sequence
 def parse_mod_feature(
     nAA: int, mod_names: List[str], mod_sites: List[int]
 ) -> np.ndarray:
@@ -145,3 +151,57 @@ def parse_instrument_indices(instrument_list):
         instrument_dict[inst] if inst in instrument_dict else unknown_inst_index
         for inst in instrument_list
     ]
+
+class FeatureExtractor(ABC):
+    """
+    Abstract class for feature extraction. All feature extractors should implement
+    the get_batch_mod_feature, get_batch_aa_feature
+    """
+    
+    @abstractmethod
+    def get_batch_mod_feature(self, batch_df: pd.DataFrame)-> np.ndarray:
+        pass
+
+    @abstractmethod
+    def get_batch_aa_feature(self, seq_array: Union[List, np.ndarray]) -> np.ndarray:
+        pass    
+
+class BertaFeatureExtractor(FeatureExtractor):
+    def __init__(self):
+        self.tokenizer = AutoTokenizer.from_pretrained("DeepChem/ChemBERTa-77M-MTR")
+        self.model = RobertaModel.from_pretrained("DeepChem/ChemBERTa-77M-MTR")
+        self.peptide_encoder = PeptideSmilesEncoder()
+        self.padding_value = 0
+    
+    def _get_batch_features_from_smiles(self, smiles: List[List[str]]) -> np.ndarray:
+        embeddings = []
+        for smile in smiles:
+            tokens = self.tokenizer(smile, return_tensors="pt", padding=True)
+            with torch.no_grad():
+                outputs = self.model(**tokens)
+                embedding = outputs.last_hidden_state 
+                embedding = embedding[:,0,:]
+                embeddings.append(embedding)
+                print(embedding.shape)
+
+        # padding and batching the embeddings
+        embeddings = pad_sequence(embeddings, batch_first=True, padding_value=self.padding_value)
+
+        return embeddings
+    
+
+    def get_batch_aa_feature(self, seq_array: Union[List, np.ndarray]) -> np.ndarray:
+        """
+        Convert peptide sequences into BERTa features using only the amino acid information.
+        """
+        # get smiles for each sequence 
+        smiles = [self.peptide_encoder.peptide_to_smiles_per_amino_acid(seq) for seq in seq_array]
+        return self._get_batch_features_from_smiles(smiles)
+    
+    def get_batch_mod_feature(self, batch_df):
+        """
+        Get BERTa features of a given peptide sequence with modifications.
+        """
+        smiles = [self.peptide_encoder.peptide_to_smiles_per_amino_acid(seq, mods, mod_sites) for seq, mods, mod_sites in zip(batch_df.sequence, batch_df.mods, batch_df.mod_sites)]
+
+        return self._get_batch_features_from_smiles(smiles)
