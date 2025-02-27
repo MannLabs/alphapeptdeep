@@ -391,8 +391,7 @@ class pDeepModel(model_interface.ModelInterface):
     device : str, optional
         Device to run the model, by default "gpu"
     override_from_weights : bool, optional default False
-        Over ride the requested charged frag types when loading model from weights, this will 
-        make the model always in a safe to predict state.
+        Override the requested charged frag types from the model weights on loading. This allows to predict all fragment types supported by the weights even if the user doesn't know what fragments types are supported by the weights. Thereby, the model will always be in a safe to predict state.
     mask_modloss : bool, optional (deprecated)
         Mask the modloss fragments, this is deprecated and will be removed in the future. To mask the modloss fragments,
         the charged_frag_types should not include the modloss fragments.
@@ -436,7 +435,6 @@ class pDeepModel(model_interface.ModelInterface):
         self.min_inten = 1e-4
         self._safe_to_predict = True    
         self._safe_to_train = True
-
 
     def _prepare_train_data_df(
         self,
@@ -530,13 +528,12 @@ class pDeepModel(model_interface.ModelInterface):
                 predicts.reshape((-1, len(self.charged_frag_types))),
                 batch_df[["frag_start_idx", "frag_stop_idx"]].values,
             )
-    def _align_model_charged_frag_types(self):
+    def _adapt_model_prediction_head(self):
         """
         Align the underlying model charged_frag_types with the interface charged_frag_types, 
         this function is necessary for the model to be safe to train. 
-        Important: This function when called will most probably reset the last layer of the model 
-        and randomly initialize is it so it might not be safe to use the model for prediction since 
-        the last layer will be randomly initialized.
+        Important: This function when called will reshape the prediction head of the model to match the requested charged_frag_types
+        and randomly initialize is it so it might not be safe to use the model for prediction before training.
         """
         loaded_model_state_dict = self.model.state_dict()
         self.build(
@@ -657,7 +654,7 @@ class pDeepModel(model_interface.ModelInterface):
     ) -> pd.DataFrame:
         if not self._safe_to_predict:
             raise ValueError(
-                f"The model is not safe to use for prediction. This might mean that the requested charged_frag_types {self.charged_frag_types} are not a subset of the charged_frag_types used to train the loaded pretrained model {self.model.supported_charged_frag_types}. Please retrain the model or use a pretrained model with the correct charged_frag_types."
+                f"The model is not safe to use for prediction. This might mean that the requested charged_frag_types {self.charged_frag_types} are not a subset of the charged_frag_types used to train the loaded pretrained model {self.model.supported_charged_frag_types}. Please choose a subset of the supported charged_frag_types or retrain the model with the requested charged_frag_types."
             )
         return super().predict(
             precursor_df,
