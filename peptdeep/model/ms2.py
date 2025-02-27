@@ -413,7 +413,7 @@ class pDeepModel(model_interface.ModelInterface):
             warnings.warn("mask_modloss is deprecated and will be removed in the future. To mask the modloss fragments, the charged_frag_types should not include the modloss fragments.")
         
         self.override_from_weights = override_from_weights
-        self.charged_frag_types = charged_frag_types
+        self.charged_frag_types = sort_charged_frag_types(charged_frag_types)
 
         self.charge_factor = 0.1
         self.NCE_factor = 0.01
