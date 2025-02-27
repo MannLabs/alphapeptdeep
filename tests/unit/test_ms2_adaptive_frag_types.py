@@ -286,3 +286,13 @@ def test_prediction_after_alignment():
     assert model._safe_to_predict, "Model was not safe to predict after alignment"
     # And the prediction should have only the supported charged frag types
     assert set(pred_df.columns) == set(model.model.supported_charged_frag_types), "Prediction did not have all supported charged frag types"
+
+def test_charged_frag_types_order():
+    # Given user requests supported charged frag types in a different order
+    requested_charged_frag_types = ["y_z2", "b_z1", "b_z2", "y_z1", "b_modloss_z1", "b_modloss_z2", "y_modloss_z1", "y_modloss_z2"]
+    # When the user loads the model from new weights
+    model = pDeepModel(requested_charged_frag_types)
+    model.load(transform_weights_to_new_format())
+    # Then the model should automatically order them to match the alphabase.sort_charged_frag_types
+    expected_charged_frag_types = ["b_z1", "b_z2", "y_z1", "y_z2", "b_modloss_z1", "b_modloss_z2", "y_modloss_z1", "y_modloss_z2"]
+    assert model.charged_frag_types == expected_charged_frag_types, "Charged frag types were not ordered as expected"
