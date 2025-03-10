@@ -79,12 +79,8 @@ def test_legacy_weights_with_correct_frag_types():
     model = get_legacy_model(charged_frag_types=charged_frag_types)
 
     # Then the model should be safe to predict and train
-    assert model._safe_to_predict, (
-        "Model was not safe to predict when loading legacy weights with correct charged frag types"
-    )
-    assert model._safe_to_train, (
-        "Model was not safe to train when loading legacy weights with correct charged frag types"
-    )
+    assert model._safe_to_predict, "Model was not safe to predict when loading legacy weights with correct charged frag types"
+    assert model._safe_to_train, "Model was not safe to train when loading legacy weights with correct charged frag types"
 
 
 def test_legacy_weights_complete_prediction():
@@ -106,9 +102,9 @@ def test_legacy_weights_complete_prediction():
     pred_df = model.predict(df)
 
     # Then the prediction should have all requested charged frag types
-    assert set(pred_df.columns) == set(charged_frag_types), (
-        "Prediction did not have all requested charged frag types"
-    )
+    assert set(pred_df.columns) == set(
+        charged_frag_types
+    ), "Prediction did not have all requested charged frag types"
     # Non nan values should be present
     assert not pred_df.isna().all().all(), "All values in the prediction were nan"
 
@@ -162,9 +158,9 @@ def test_new_weights_complete_prediction():
     pred_df = model.predict(df)
 
     # Then the prediction should have all requested charged frag types
-    assert set(pred_df.columns) == set(requested_charged_frag_types), (
-        "Prediction did not have all requested charged frag types"
-    )
+    assert set(pred_df.columns) == set(
+        requested_charged_frag_types
+    ), "Prediction did not have all requested charged frag types"
     # Non nan values should be present
     assert not pred_df.isna().all().all(), "All values in the prediction were nan"
 
@@ -178,13 +174,10 @@ def test_new_state_subset_prediction():
     model.load(transform_weights_to_new_format())
 
     # The model should be safe to predict but not to train
-    assert model._safe_to_predict, (
-        "Model was not safe to predict when loading new weights with subset of charged frag types"
-    )
+    assert model._safe_to_predict, "Model was not safe to predict when loading new weights with subset of charged frag types"
+
     # since theres a discrepancy between the requested and the trained charged frag types
-    assert not model._safe_to_train, (
-        "Model was safe to train when loading new weights with subset of charged frag types"
-    )
+    assert not model._safe_to_train, "Model was safe to train when loading new weights with subset of charged frag types"
 
 
 def test_new_state_unsupported_frag_types():
@@ -201,12 +194,8 @@ def test_new_state_unsupported_frag_types():
     model.load(transform_weights_to_new_format())
 
     # The model should not be safe to predict or train
-    assert not model._safe_to_predict, (
-        "Model was safe to predict when loading new weights with unsupported charged frag types"
-    )
-    assert not model._safe_to_train, (
-        "Model was safe to train when loading new weights with unsupported charged frag types"
-    )
+    assert not model._safe_to_predict, "Model was safe to predict when loading new weights with unsupported charged frag types"
+    assert not model._safe_to_train, "Model was safe to train when loading new weights with unsupported charged frag types"
 
 
 def test_prediction_unsupported_frag_types():
@@ -244,9 +233,9 @@ def test_override_requested_frag_types():
             "y_modloss_z2",
         ]
     ), "Overridden charged frag types were not as expected"
-    assert model._safe_to_predict, (
-        "Model was not safe to predict when overriding requested charged frag types"
-    )
+    assert (
+        model._safe_to_predict
+    ), "Model was not safe to predict when overriding requested charged frag types"
 
 
 def test_override_requested_frag_types_prediction():
@@ -310,9 +299,9 @@ def test_prediction_after_alignment():
     # Then the model should be now safe to predict
     assert model._safe_to_predict, "Model was not safe to predict after alignment"
     # And the prediction should have only the supported charged frag types
-    assert set(pred_df.columns) == set(model.model.supported_charged_frag_types), (
-        "Prediction did not have all supported charged frag types"
-    )
+    assert set(pred_df.columns) == set(
+        model.model.supported_charged_frag_types
+    ), "Prediction did not have all supported charged frag types"
 
 
 def test_charged_frag_types_order():
@@ -341,6 +330,6 @@ def test_charged_frag_types_order():
         "y_modloss_z1",
         "y_modloss_z2",
     ]
-    assert model.charged_frag_types == expected_charged_frag_types, (
-        "Charged frag types were not ordered as expected"
-    )
+    assert (
+        model.charged_frag_types == expected_charged_frag_types
+    ), "Charged frag types were not ordered as expected"
