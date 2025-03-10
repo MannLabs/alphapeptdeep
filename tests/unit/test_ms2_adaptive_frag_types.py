@@ -7,11 +7,16 @@ from peptdeep.model.rt import IRT_PEPTIDE_DF
 import numpy as np
 import pandas as pd
 
-def get_legacy_model(charged_frag_types: Optional[List[str]] = None, mask_modloss: Optional[bool] = None):
+
+def get_legacy_model(
+    charged_frag_types: Optional[List[str]] = None, mask_modloss: Optional[bool] = None
+):
     if charged_frag_types is None:
         return pDeepModel(mask_modloss=mask_modloss)
     else:
-        return pDeepModel(charged_frag_types=charged_frag_types, mask_modloss=mask_modloss)
+        return pDeepModel(
+            charged_frag_types=charged_frag_types, mask_modloss=mask_modloss
+        )
 
 
 def transform_weights_to_new_format():
@@ -53,7 +58,9 @@ def get_prediction_dataset():
     # sort by
     return df
 
+
 # Unit tests for backward compatibility with legacy weights
+
 
 def test_legacy_weights_with_correct_frag_types():
     # Given a user requests exactly the same charged frag types used when training the model
@@ -105,6 +112,7 @@ def test_legacy_weights_complete_prediction():
     # Non nan values should be present
     assert not pred_df.isna().all().all(), "All values in the prediction were nan"
 
+
 def test_legacy_weights_mask_modloss():
     # Given a user requests exactly the same charged frag types used when training the model
     charged_frag_types = [
@@ -119,7 +127,7 @@ def test_legacy_weights_mask_modloss():
     ]
 
     # When the user loads the model from legacy weights and uses it for prediction with mask_modloss
-    model = get_legacy_model(charged_frag_types=charged_frag_types , mask_modloss=True)
+    model = get_legacy_model(charged_frag_types=charged_frag_types, mask_modloss=True)
     df = get_prediction_dataset()
     pred_df = model.predict(df)
 
@@ -128,7 +136,9 @@ def test_legacy_weights_mask_modloss():
     # Non nan values should be present
     assert not pred_df.isna().all().all(), "All values in the prediction were nan"
 
+
 # Unit tests for new weights format and state
+
 
 def test_new_weights_complete_prediction():
     # Given a user requests exactly the same charged frag types used when training the model
@@ -179,7 +189,12 @@ def test_new_state_subset_prediction():
 
 def test_new_state_unsupported_frag_types():
     # Given a user requests a charged frag types that are not supported by the loaded model
-    requested_charged_frag_types = ["b_z1", "b_z2", "x_z1", "x_z2"] # x_z1 and x_z2 are not supported with the loaded weights
+    requested_charged_frag_types = [
+        "b_z1",
+        "b_z2",
+        "x_z1",
+        "x_z2",
+    ]  # x_z1 and x_z2 are not supported with the loaded weights
 
     # When the user loads the model from new weights
     model = pDeepModel(charged_frag_types=requested_charged_frag_types)
@@ -260,24 +275,32 @@ def test_override_requested_frag_types_prediction():
     # Non nan values should be present
     assert not pred_df.isna().all().all(), "All values in the prediction were nan"
 
+
 def test_model_alignment_when_training():
     # Given user requests unsupported charged frag types
     requested_charged_frag_types = ["b_z1", "b_z2", "x_z1", "x_z2"]
     precursor_df = get_prediction_dataset()
-    fragment_df = np.random.rand(precursor_df.iloc[-1]["frag_stop_idx"], len(requested_charged_frag_types))
+    fragment_df = np.random.rand(
+        precursor_df.iloc[-1]["frag_stop_idx"], len(requested_charged_frag_types)
+    )
     fragment_df = pd.DataFrame(fragment_df, columns=requested_charged_frag_types)
     # When the user loads the model from new weights and uses it for training
     model = pDeepModel(requested_charged_frag_types)
     model.load(transform_weights_to_new_format())
     model.train(precursor_df, fragment_df)
     # Then the model should align the fragment_df with the supported charged frag types
-    assert set(model.charged_frag_types) == set(model.model.supported_charged_frag_types), "Model interface and underlying model are not aligned"
+    assert set(model.charged_frag_types) == set(
+        model.model.supported_charged_frag_types
+    ), "Model interface and underlying model are not aligned"
+
 
 def test_prediction_after_alignment():
     # Given user requests unsupported charged frag types
     requested_charged_frag_types = ["b_z1", "b_z2", "x_z1", "x_z2"]
     precursor_df = get_prediction_dataset()
-    fragment_df = np.random.rand(precursor_df.iloc[-1]["frag_stop_idx"], len(requested_charged_frag_types))
+    fragment_df = np.random.rand(
+        precursor_df.iloc[-1]["frag_stop_idx"], len(requested_charged_frag_types)
+    )
     fragment_df = pd.DataFrame(fragment_df, columns=requested_charged_frag_types)
     # When the user loads the model from new weights and uses it for training
     model = pDeepModel(requested_charged_frag_types)
@@ -287,14 +310,37 @@ def test_prediction_after_alignment():
     # Then the model should be now safe to predict
     assert model._safe_to_predict, "Model was not safe to predict after alignment"
     # And the prediction should have only the supported charged frag types
-    assert set(pred_df.columns) == set(model.model.supported_charged_frag_types), "Prediction did not have all supported charged frag types"
+    assert set(pred_df.columns) == set(model.model.supported_charged_frag_types), (
+        "Prediction did not have all supported charged frag types"
+    )
+
 
 def test_charged_frag_types_order():
     # Given user requests supported charged frag types in a different order
-    requested_charged_frag_types = ["y_z2", "b_z1", "b_z2", "y_z1", "b_modloss_z1", "b_modloss_z2", "y_modloss_z1", "y_modloss_z2"]
+    requested_charged_frag_types = [
+        "y_z2",
+        "b_z1",
+        "b_z2",
+        "y_z1",
+        "b_modloss_z1",
+        "b_modloss_z2",
+        "y_modloss_z1",
+        "y_modloss_z2",
+    ]
     # When the user loads the model from new weights
     model = pDeepModel(requested_charged_frag_types)
     model.load(transform_weights_to_new_format())
     # Then the model should automatically order them to match the alphabase.sort_charged_frag_types
-    expected_charged_frag_types = ["b_z1", "b_z2", "y_z1", "y_z2", "b_modloss_z1", "b_modloss_z2", "y_modloss_z1", "y_modloss_z2"]
-    assert model.charged_frag_types == expected_charged_frag_types, "Charged frag types were not ordered as expected"
+    expected_charged_frag_types = [
+        "b_z1",
+        "b_z2",
+        "y_z1",
+        "y_z2",
+        "b_modloss_z1",
+        "b_modloss_z2",
+        "y_modloss_z1",
+        "y_modloss_z2",
+    ]
+    assert model.charged_frag_types == expected_charged_frag_types, (
+        "Charged frag types were not ordered as expected"
+    )
