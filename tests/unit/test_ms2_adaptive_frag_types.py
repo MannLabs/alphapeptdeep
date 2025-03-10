@@ -53,6 +53,7 @@ def get_prediction_dataset():
     # sort by
     return df
 
+# Unit tests for backward compatibility with legacy weights
 
 def test_legacy_weights_with_correct_frag_types():
     # Given a user requests exactly the same charged frag types used when training the model
@@ -127,6 +128,7 @@ def test_legacy_weights_mask_modloss():
     # Non nan values should be present
     assert not pred_df.isna().all().all(), "All values in the prediction were nan"
 
+# Unit tests for new weights format and state
 
 def test_new_weights_complete_prediction():
     # Given a user requests exactly the same charged frag types used when training the model
