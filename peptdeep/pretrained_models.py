@@ -88,18 +88,19 @@ def download_models(url: str = MODEL_URL, target_path: str = MODEL_ZIP_FILE_PATH
     if not os.path.isfile(url):
         logging.info(f"Downloading {url} ...")
         try:
+            os.makedirs(os.path.dirname(target_path), exist_ok=True)
             context = ssl._create_unverified_context()
             requests = urllib.request.urlopen(url, context=context, timeout=10)
             with open(target_path, "wb") as f:
                 f.write(requests.read())
-        except (socket.timeout, urllib.error.URLError, urllib.error.HTTPError):
+        except Exception as e:
             raise FileNotFoundError(
                 "Downloading model failed! Please download the "
                 f'zip or tar file by yourself from "{url}",'
                 " and use \n"
                 f'"peptdeep --install-model /path/to/{LOCAL_MODAL_ZIP_NAME}.zip"\n'
                 " to install the models"
-            )
+            ) from e
     else:
         shutil.copy(url, target_path)
     logging.info(f"The pretrained models had been downloaded in {target_path}")
