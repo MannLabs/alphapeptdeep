@@ -1,20 +1,20 @@
-pywin32; sys_platform=='win32'
-pythonnet; sys_platform=='win32'
+pywin32==308; sys_platform=='win32'
+pythonnet==3.0.4; sys_platform=='win32'
 
-click
-pandas
-numpy<2
-torch
-tqdm
-numba
-psutil
-biopython
-transformers
-scikit-learn
-streamlit-aggrid
-lxml
-pyteomics
+click==8.1.7
+pandas==2.2.3
+numpy<2 # test: tolerate_version
+# torch 2.5.1 not available on darwin-x86_64:
+torch==2.5.1; sys_platform != 'darwin' or platform_machine != 'x86_64'
+torch==2.2.2; sys_platform == 'darwin' and platform_machine == 'x86_64' # test: ignore
+tqdm==4.67.1
+numba==0.60.0
+psutil==6.1.0
+biopython==1.84
+transformers==4.47.0
+scikit-learn==1.6.0
+lxml==5.3.0
+pyteomics==4.7.5
 
-streamlit>=1.23.0
-alphabase>=1.5.0
-alpharaw>=0.2.0
+alphabase>=1.5.0 # test: tolerate_version
+alpharaw>=0.2.0 # test: tolerate_version

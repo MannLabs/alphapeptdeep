@@ -53,21 +53,22 @@ find = {}
 [tool.setuptools.dynamic]
 # https://stackoverflow.com/a/73600610
 dependencies = {file = ["requirements/requirements_loose.txt"]}
-optional-dependencies = { stable = { file = ["requirements/requirements.txt",
-] }, gui = { file = [ "requirements/requirements_gui_loose.txt",
-] }, gui-stable = { file = [ "requirements/requirements_gui.txt",
-] }, development = { file = ["requirements/requirements_development_loose.txt",
-] }, development-stable = { file = ["requirements/requirements_development.txt",
-] }, hla = { file = ["requirements/requirements_hla_loose.txt",
-] }, hla-stable = { file = ["requirements/requirements_hla.txt",
-] }}
+optional-dependencies.stable = { file = ["requirements/requirements.txt"] }
+optional-dependencies.gui = { file = [ "requirements/requirements_gui_loose.txt"] }
+optional-dependencies.gui-stable = { file = [ "requirements/requirements_gui.txt"] }
+optional-dependencies.hla = { file = ["requirements/requirements_hla_loose.txt"] }
+optional-dependencies.hla-stable = { file = ["requirements/requirements_hla.txt"] }
+optional-dependencies.docs = { file = ["requirements/requirements_docs.txt"] }
+optional-dependencies.tests = { file = ["requirements/requirements_tests.txt"] }
+optional-dependencies.development = { file = [
+    "requirements/requirements_development.txt",
+    "requirements/requirements_docs.txt",
+    "requirements/requirements_tests.txt"] }
+
 version = {attr = "peptdeep.__version__"}
 
 [project.scripts]
 peptdeep = "peptdeep.cli:run"
-
-[tool.ruff]
-extend-exclude = [".bumpversion.cfg"]
 
 [tool.ruff.lint]
 select = ["E", "F"]

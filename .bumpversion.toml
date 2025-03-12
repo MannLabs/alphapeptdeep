@@ -1,0 +1,64 @@
+[tool.bumpversion]
+current_version = "1.3.2-dev0"
+parse = """(?x)
+    (?P<major>0|[1-9]\\d*)\\.
+    (?P<minor>0|[1-9]\\d*)\\.
+    (?P<patch>0|[1-9]\\d*)
+    (?:
+        -                             # dash separator for pre-release section
+        (?P<pre_l>[a-zA-Z-]+)         # pre_l: pre-release label
+        (?P<pre_n>0|[1-9]\\d*)        # pre_n: pre-release version number
+    )?                                # pre-release section is optional
+"""
+serialize = [
+    "{major}.{minor}.{patch}-{pre_l}{pre_n}",
+    "{major}.{minor}.{patch}",
+]
+search = "{current_version}"
+replace = "{new_version}"
+regex = false
+ignore_missing_version = false
+ignore_missing_files = false
+tag = false
+sign_tags = false
+tag_name = "v{new_version}"
+tag_message = "Bump version: {current_version} → {new_version}"
+allow_dirty = false
+commit = true
+message = "Bump version: {current_version} → {new_version}"
+commit_args = ""
+setup_hooks = []
+pre_commit_hooks = []
+post_commit_hooks = []
+
+[tool.bumpversion.parts.pre_l]
+# 'final' is just a dummy, but required to have the versioning compatible with the reusable alphashared workflow
+values = ["dev", "final"]
+optional_value = "final"
+
+[[tool.bumpversion.files]]
+filename = "./peptdeep/__init__.py"
+
+[[tool.bumpversion.files]]
+filename = "./docs/conf.py"
+
+[[tool.bumpversion.files]]
+filename = "./README.md"
+
+[[tool.bumpversion.files]]
+filename = "./release/linux/control"
+
+[[tool.bumpversion.files]]
+filename = "./release/linux/build_package_linux.sh"
+
+[[tool.bumpversion.files]]
+filename = "./release/macos/distribution.xml"
+
+[[tool.bumpversion.files]]
+filename = "./release/macos/Info.plist"
+
+[[tool.bumpversion.files]]
+filename = "./release/macos/build_package_macos.sh"
+
+[[tool.bumpversion.files]]
+filename = "./release/windows/peptdeep_innoinstaller.iss"
