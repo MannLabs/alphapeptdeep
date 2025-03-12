@@ -20,13 +20,14 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-13, windows-latest]
+        python-version : [3.9]
         # macOS-latest and macos-latest-xlarge use Arm64, resulting in MPS OOM error in peptdeep
         # os: [ubuntu-latest, macos-13, macos-latest, windows-latest, macos-latest-xlarge]
     uses: ./.github/workflows/_run_tests.yml
     with:
       os: ${{ matrix.os }}
       python-version: ${{ matrix.python-version }}
-      install-script: "stable_pip_install.sh"
+      install-script: pip_install.sh stable,tests
 
   loose_installation:
     name: Test loose pip installation on ${{ matrix.os }}
@@ -34,9 +35,10 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-13, windows-latest]
+        python-version : [3.9]
         # os: [ubuntu-latest, macos-13, macos-latest, windows-latest, macos-latest-xlarge]
     uses: ./.github/workflows/_run_tests.yml
     with:
       os: ${{ matrix.os }}
       python-version: ${{ matrix.python-version }}
-      install-script: "loose_pip_install.sh"
+      install-script: pip_install.sh loose,tests

@@ -11,14 +11,12 @@ on:
 
 jobs:
   publish_on_pypi:
-    uses: MannLabs/alphashared/.github/workflows/publish_on_pypi.yml@v0
+    uses: MannLabs/alphashared/.github/workflows/publish_on_pypi.yml@v1
     with:
       # see the documentation of the workflow for more information on the parameters
       package_name: peptdeep
       tag_to_release: ${{ inputs.tag_to_release }}
       python_version: 3.9
-      use_pyproject_toml: true
-      only_testpypi_release: true
     secrets:
       test_pypi_api_token: ${{ secrets.TEST_PYPI_PEPTDEEP_API_TOKEN }}
       pypi_api_token: ${{ secrets.PYPI_PEPTDEEP_API_TOKEN }}

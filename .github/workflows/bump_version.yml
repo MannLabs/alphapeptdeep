@@ -1,0 +1,24 @@
+# Bump the version for releases
+# Requires a .bumpversion.toml file in the root of the repository
+name: Bump version
+
+on:
+  workflow_dispatch:
+    inputs:
+      bump_type:
+        description: 'Bump type'
+        required: true
+        default: 'patch'
+        type: choice
+        options:
+        - prerelease
+        - patch
+        - minor
+        - major
+
+jobs:
+  bump-version:
+    uses: MannLabs/alphashared/.github/workflows/bump_version.yml@v1
+    secrets: inherit
+    with:
+     bump_type: ${{inputs.bump_type}}
