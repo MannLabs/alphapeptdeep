@@ -49,7 +49,7 @@ def _read_requirements(file_path: str) -> Dict[str, Tuple[Requirement, str]]:
     with open(file_path) as file:
         for line in file:
             line = line.strip()
-            if line and not line.startswith("#"):
+            if line and not line.startswith("#") and not "test: ignore" in line:
                 req_string, comment = _split_at_first_hash(line)
 
                 req_string = req_string.split(";")[0]
