@@ -4,9 +4,7 @@ pythonnet==3.0.4; sys_platform=='win32'
 click==8.1.7
 pandas==2.2.3
 numpy<2 # test: tolerate_version
-# torch 2.5.1 not available on darwin-x86_64:
-torch==2.5.1; sys_platform != 'darwin' or platform_machine != 'x86_64'
-torch; sys_platform == 'darwin' and platform_machine == 'x86_64' # test: ignore
+torch==2.5.1
 tqdm==4.67.1
 numba==0.60.0
 psutil==6.1.0
