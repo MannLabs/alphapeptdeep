@@ -11,7 +11,7 @@ tqdm==4.67.1
 numba==0.60.0
 psutil==6.1.0
 biopython==1.84
-transformers==4.47.0
+transformers==4.48.0
 scikit-learn==1.6.0
 lxml==5.3.0
 pyteomics==4.7.5
