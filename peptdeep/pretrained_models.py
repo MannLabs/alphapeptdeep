@@ -64,7 +64,9 @@ def is_model_zip(downloaded_zip):
         return any(x == "generic/ms2.pth" for x in zip.namelist())
 
 
-def download_models(url: str = MODEL_URL, target_path: str = MODEL_ZIP_FILE_PATH):
+def download_models(
+    url: str = MODEL_URL, target_path: str = MODEL_ZIP_FILE_PATH, overwrite: bool = True
+):
     """
     Parameters
     ----------
@@ -77,7 +79,7 @@ def download_models(url: str = MODEL_URL, target_path: str = MODEL_ZIP_FILE_PATH
         Defaults to :data:`peptdeep.pretrained_models.MODEL_ZIP_FILE_PATH`
 
     overwrite : bool, optional
-        overwirte old model files.
+        overwrite old model files.
         Defaults to True.
 
     Raises
@@ -85,22 +87,27 @@ def download_models(url: str = MODEL_URL, target_path: str = MODEL_ZIP_FILE_PATH
     FileNotFoundError
         If remote url is not accessible.
     """
+    if not overwrite and os.path.exists(target_path):
+        raise FileExistsError(f"Model file already exists: {target_path}")
+
     if not os.path.isfile(url):
         logging.info(f"Downloading {url} ...")
         try:
+            os.makedirs(os.path.dirname(target_path), exist_ok=True)
             context = ssl._create_unverified_context()
             requests = urllib.request.urlopen(url, context=context, timeout=10)
             with open(target_path, "wb") as f:
                 f.write(requests.read())
-        except (socket.timeout, urllib.error.URLError, urllib.error.HTTPError):
+        except Exception as e:
             raise FileNotFoundError(
                 "Downloading model failed! Please download the "
                 f'zip or tar file by yourself from "{url}",'
                 " and use \n"
                 f'"peptdeep --install-model /path/to/{LOCAL_MODAL_ZIP_NAME}.zip"\n'
                 " to install the models"
-            )
+            ) from e
     else:
+        os.makedirs(os.path.dirname(target_path), exist_ok=True)
         shutil.copy(url, target_path)
     logging.info(f"The pretrained models had been downloaded in {target_path}")
 
