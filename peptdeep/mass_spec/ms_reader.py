@@ -7,8 +7,7 @@ from peptdeep.utils import logging
 from inspect import currentframe, getframeinfo
 
 try:
-    # should be replaced by AlphaRaw in the near future
-    from peptdeep.legacy.thermo_raw.pyrawfilereader import RawFileReader
+    from alpharaw.raw_access.pythermorawfilereader import RawFileReader
 except (ImportError, AttributeError, RuntimeError) as e:
     frameinfo = getframeinfo(currentframe())
     logging.warn(
