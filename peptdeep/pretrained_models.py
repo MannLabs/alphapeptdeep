@@ -1069,7 +1069,7 @@ class ModelManager(object):
                 refine_precursor_df(df, drop_frag_idx=False)
 
         if frag_types is None:
-            if self.ms2_model.model._mask_modloss:
+            if self.ms2_model.mask_modloss:
                 frag_types = [
                     frag
                     for frag in self.ms2_model.charged_frag_types
