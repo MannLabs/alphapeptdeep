@@ -320,13 +320,7 @@ class ModelManager(object):
         )
 
         self.reset_by_global_settings(reload_models=False)
-    def reinitialize_ms2_model(self, charged_frag_types: typing.List[str], **kwargs):
-        """
-        Reinitialize the MS2 model with new charged fragment types.
-        """
-        self.ms2_model = pDeepModel(charged_frag_types=charged_frag_types, **kwargs)
 
-                                
     def reset_by_global_settings(
         self,
         reload_models=True,
