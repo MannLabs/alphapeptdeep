@@ -656,9 +656,30 @@ class pDeepModel(model_interface.ModelInterface):
         batch_size=1024,
         verbose=False,
         reference_frag_df=None,
+        allow_unsafe_predictions=False,
         **kwargs,
     ) -> pd.DataFrame:
-        if not self._safe_to_predict:
+        """
+        Predict MS2 fragment intensities
+
+        Parameters
+        ----------
+        precursor_df : pd.DataFrame
+            Precursor DataFrame
+        batch_size : int, optional
+            Batch size, by default 1024
+        verbose : bool, optional
+            Verbose, by default False
+        reference_frag_df : pd.DataFrame, optional  
+            Reference fragment intensity DataFrame, by default None
+        allow_unsafe_predictions : bool, optional
+            Allow a newly a randomly initialized model to be used for prediction, by default False
+        Returns
+        -------
+        pd.DataFrame
+            Predicted fragment intensities
+        """
+        if not self._safe_to_predict and allow_unsafe_predictions:
             raise ValueError(
                 f"The model is not safe to use for prediction. This might mean that the requested charged_frag_types {self.charged_frag_types} are not a subset of the charged_frag_types used to train the loaded pretrained model {self.model.supported_charged_frag_types}. Please choose a subset of the supported charged_frag_types or retrain the model with the requested charged_frag_types."
             )
