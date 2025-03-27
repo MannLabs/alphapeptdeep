@@ -329,11 +329,12 @@ class ModelManager(object):
         ----------
         charged_frag_types : List[str]
             Charged fragment types for the new MS2 model.
-        
+
         kwargs : dict
             Other keyword arguments for `pDeepModel`.
         """
         self.ms2_model = pDeepModel(charged_frag_types=charged_frag_types, **kwargs)
+
     def reset_by_global_settings(
         self,
         reload_models=True,
@@ -978,7 +979,7 @@ class ModelManager(object):
             fragment_mz_df_list = None
 
         if self.verbose:
-            logging.info(f'Predicting {",".join(predict_items)} ...')
+            logging.info(f"Predicting {','.join(predict_items)} ...")
         verbose_bak = self.verbose
         self.verbose = False
 

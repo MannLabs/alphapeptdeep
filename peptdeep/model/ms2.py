@@ -670,7 +670,7 @@ class pDeepModel(model_interface.ModelInterface):
             Batch size, by default 1024
         verbose : bool, optional
             Verbose, by default False
-        reference_frag_df : pd.DataFrame, optional  
+        reference_frag_df : pd.DataFrame, optional
             Reference fragment intensity DataFrame, by default None
         allow_unsafe_predictions : bool, optional
             Allow a newly a randomly initialized model to be used for prediction, by default False
