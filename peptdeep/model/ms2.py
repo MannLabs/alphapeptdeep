@@ -679,7 +679,7 @@ class pDeepModel(model_interface.ModelInterface):
         pd.DataFrame
             Predicted fragment intensities
         """
-        if not self._safe_to_predict and allow_unsafe_predictions:
+        if not self._safe_to_predict and not allow_unsafe_predictions:
             raise ValueError(
                 f"The model is not safe to use for prediction. This might mean that the requested charged_frag_types {self.charged_frag_types} are not a subset of the charged_frag_types used to train the loaded pretrained model {self.model.supported_charged_frag_types}. Please choose a subset of the supported charged_frag_types or retrain the model with the requested charged_frag_types."
             )
