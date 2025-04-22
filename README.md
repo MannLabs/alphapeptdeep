@@ -819,9 +819,9 @@ experimental fragment intensities.
 peptdeep install-models [--model-file url_or_local_model_zip] --overwrite True
 ```
 
-Running peptdeep for the first time, it will download and install models
-from [models on github](https://github.com/MannLabs/alphapeptdeep/releases/download/pre-trained-models/pretrained_models.zip)
-defined in ‘model_url’ in the default yaml settings. This command will
+When run for the first time, peptdeep will download and install models
+defined in ‘model_url’ in the default yaml settings
+from [GitHub](https://github.com/MannLabs/alphapeptdeep/releases/tag/pre-trained-models). This command will
 update `pretrained_models.zip` from `--model-file url_or_local_model_zip`.
 
 It is also possible to use other models instead of the pretrained_models by providing `model_mgr:external_ms2_model`,

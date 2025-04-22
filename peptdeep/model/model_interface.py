@@ -20,7 +20,6 @@ from typing import IO, Tuple, List, Union
 from alphabase.yaml_utils import save_yaml, load_yaml
 from alphabase.peptide.precursor import is_precursor_refined
 
-from peptdeep.pretrained_models import MODEL_DOWNLOAD_INSTRUCTIONS
 from peptdeep.settings import model_const
 from peptdeep.utils import logging, process_bar, get_device, get_available_device
 from peptdeep.settings import global_settings
@@ -727,7 +726,7 @@ class ModelInterface(object):
             raise ValueError(
                 f"Error loading model from zip file: {e}.\n"
                 f"Please delete this file and try again."
-                f"\nOr: {MODEL_DOWNLOAD_INSTRUCTIONS}"
+                f"\nOr: download the model manually (cf. Readme)"
             ) from e
 
     def _load_model_from_pytorchfile(self, model_file):

@@ -48,28 +48,27 @@ PRETRAIN_DIR = os.path.join(
 
 sys.modules[__name__].__class__ = ModuleWithDeprecations
 
-LOCAL_MODAL_ZIP_NAME = global_settings["local_model_zip_name"]
+LOCAL_MODEL_ZIP_NAME = global_settings["local_model_zip_name"]
 MODEL_URL = global_settings["model_url"]
-MODEL_ZIP_FILE_PATH = os.path.join(PRETRAIN_DIR, LOCAL_MODAL_ZIP_NAME)
+MODEL_ZIP_FILE_PATH = os.path.join(PRETRAIN_DIR, LOCAL_MODEL_ZIP_NAME)
 
 ModuleWithDeprecations.deprecate(__name__, "pretrain_dir", "PRETRAIN_DIR")
 ModuleWithDeprecations.deprecate(__name__, "model_zip_name", "LOCAL_MODAL_ZIP_NAME")
 ModuleWithDeprecations.deprecate(__name__, "model_url", "MODEL_URL")
 ModuleWithDeprecations.deprecate(__name__, "model_zip", "MODEL_ZIP_FILE_PATH")
 
-
-def is_model_zip(downloaded_zip):
-    with ZipFile(downloaded_zip) as zip:
-        return any(x == "generic/ms2.pth" for x in zip.namelist())
-
-
 MODEL_DOWNLOAD_INSTRUCTIONS = (
     "Please download the "
     f'zip or tar file by yourself from "{MODEL_URL}",'
     " and use \n"
-    f'"peptdeep --install-model /path/to/{LOCAL_MODAL_ZIP_NAME}.zip"\n'
+    f'"peptdeep --install-model /path/to/{LOCAL_MODEL_ZIP_NAME}.zip"\n'
     " to install the models"
 )
+
+
+def is_model_zip(downloaded_zip):
+    with ZipFile(downloaded_zip) as zip:
+        return any(x == "generic/ms2.pth" for x in zip.namelist())
 
 
 def download_models(
