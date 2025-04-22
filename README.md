@@ -189,11 +189,11 @@ in rare cases where dependencies are not backwards compatible.
 > peptdeep like this. Also note the double quotes `"`.
 
 For those who are really adventurous, it is also possible to directly
-install any branch (e.g. `@development`) with any extras
+install any branch (e.g. `@main`) with any extras
 (e.g. `#egg=peptdeep[stable,development-stable]`) from GitHub with e.g.
 
 ``` bash
-pip install "git+https://github.com/MannLabs/alphapeptdeep.git@development#egg=peptdeep[stable,development-stable]"
+pip install "git+https://github.com/MannLabs/alphapeptdeep.git@main#egg=peptdeep[stable,development-stable]"
 ```
 
 ### Use GPU
