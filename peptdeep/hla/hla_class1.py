@@ -8,7 +8,7 @@ from typing import Union
 import peptdeep.model.building_block as building_block
 from peptdeep.model.model_interface import ModelInterface, append_nAA_column_if_missing
 from peptdeep.model.featurize import get_ascii_indices
-from peptdeep.pretrained_models import pretrain_dir, download_models, global_settings
+from peptdeep.pretrained_models import PRETRAIN_DIR, download_models, global_settings
 
 from .hla_utils import (
     get_random_sequences,
@@ -134,7 +134,7 @@ class HLA1_Binding_Classifier(ModelInterface):
 
     _model_zip_name = global_settings["local_hla_model_zip_name"]
     _model_url = global_settings["hla_model_url"]
-    _model_zip = os.path.join(pretrain_dir, _model_zip_name)
+    _model_zip = os.path.join(PRETRAIN_DIR, _model_zip_name)
 
     def __init__(
         self,

@@ -9,11 +9,11 @@ model:
 
 PEPTDEEP_HOME: "~/peptdeep" # ~ refers to user folder (e.g. C:/Users/username)
 
-local_model_zip_name: "pretrained_models.zip"
+local_model_zip_name: "pretrained_models_v2.zip"
 local_hla_model_zip_name: "hla_model.zip"
 
 # overwritable config
-model_url: "https://github.com/MannLabs/alphapeptdeep/releases/download/pre-trained-models/pretrained_models.zip"
+model_url: "https://github.com/MannLabs/alphapeptdeep/releases/download/pre-trained-models/pretrained_models_v2.zip"
 hla_model_url: "https://github.com/MannLabs/alphapeptdeep/releases/download/pre-trained-models/hla_model.zip"
 
 task_workflow: [library]
