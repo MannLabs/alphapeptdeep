@@ -718,9 +718,16 @@ class ModelInterface(object):
         return torch.tensor(data, dtype=dtype, device=self.device)
 
     def _load_model_from_zipfile(self, model_file, model_path_in_zip):
-        with ZipFile(model_file) as model_zip:
-            with model_zip.open(model_path_in_zip, "r") as pt_file:
-                self._load_model_from_stream(pt_file)
+        try:
+            with ZipFile(model_file) as model_zip:
+                with model_zip.open(model_path_in_zip, "r") as pt_file:
+                    self._load_model_from_stream(pt_file)
+        except Exception as e:
+            raise ValueError(
+                f"Error loading model from zip file: {e}.\n"
+                f"Please delete this file and try again."
+                f"\nOr: download the model manually (cf. Readme)"
+            ) from e
 
     def _load_model_from_pytorchfile(self, model_file):
         with open(model_file, "rb") as pt_file:

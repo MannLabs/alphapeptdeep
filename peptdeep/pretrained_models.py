@@ -3,7 +3,6 @@ import io
 import sys
 import pandas as pd
 import urllib
-import socket
 import shutil
 import ssl
 import typing
@@ -49,14 +48,22 @@ PRETRAIN_DIR = os.path.join(
 
 sys.modules[__name__].__class__ = ModuleWithDeprecations
 
-LOCAL_MODAL_ZIP_NAME = global_settings["local_model_zip_name"]
+LOCAL_MODEL_ZIP_NAME = global_settings["local_model_zip_name"]
 MODEL_URL = global_settings["model_url"]
-MODEL_ZIP_FILE_PATH = os.path.join(PRETRAIN_DIR, LOCAL_MODAL_ZIP_NAME)
+MODEL_ZIP_FILE_PATH = os.path.join(PRETRAIN_DIR, LOCAL_MODEL_ZIP_NAME)
 
 ModuleWithDeprecations.deprecate(__name__, "pretrain_dir", "PRETRAIN_DIR")
 ModuleWithDeprecations.deprecate(__name__, "model_zip_name", "LOCAL_MODAL_ZIP_NAME")
 ModuleWithDeprecations.deprecate(__name__, "model_url", "MODEL_URL")
 ModuleWithDeprecations.deprecate(__name__, "model_zip", "MODEL_ZIP_FILE_PATH")
+
+MODEL_DOWNLOAD_INSTRUCTIONS = (
+    "Please download the "
+    f'zip or tar file by yourself from "{MODEL_URL}",'
+    " and use \n"
+    f'"peptdeep --install-model /path/to/{LOCAL_MODEL_ZIP_NAME}.zip"\n'
+    " to install the models"
+)
 
 
 def is_model_zip(downloaded_zip):
@@ -91,7 +98,7 @@ def download_models(
         raise FileExistsError(f"Model file already exists: {target_path}")
 
     if not os.path.isfile(url):
-        logging.info(f"Downloading {url} ...")
+        logging.info(f"Downloading pretrained models from {url} to {target_path} ...")
         try:
             os.makedirs(os.path.dirname(target_path), exist_ok=True)
             context = ssl._create_unverified_context()
@@ -100,16 +107,13 @@ def download_models(
                 f.write(requests.read())
         except Exception as e:
             raise FileNotFoundError(
-                "Downloading model failed! Please download the "
-                f'zip or tar file by yourself from "{url}",'
-                " and use \n"
-                f'"peptdeep --install-model /path/to/{LOCAL_MODAL_ZIP_NAME}.zip"\n'
-                " to install the models"
+                f"Downloading model failed: {e}.\n" + MODEL_DOWNLOAD_INSTRUCTIONS
             ) from e
     else:
+        logging.info(f"Copying pretrained models from {url} to {target_path} ...")
         os.makedirs(os.path.dirname(target_path), exist_ok=True)
         shutil.copy(url, target_path)
-    logging.info(f"The pretrained models had been downloaded in {target_path}")
+    logging.info(f"Successfully downloaded pretrained models.")
 
 
 def _download_models(model_zip_file_path: str) -> None:
@@ -118,7 +122,11 @@ def _download_models(model_zip_file_path: str) -> None:
     if not os.path.exists(model_zip_file_path):
         download_models()
     if not is_model_zip(model_zip_file_path):
-        raise ValueError(f"Local model file is not a valid zip: {model_zip_file_path}")
+        raise ValueError(
+            f"Local model file is not a valid zip: {model_zip_file_path}.\n"
+            f"Please delete this file and try again.\n"
+            f"Or: {MODEL_DOWNLOAD_INSTRUCTIONS}"
+        )
 
 
 model_mgr_settings = global_settings["model_mgr"]

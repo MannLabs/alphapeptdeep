@@ -1,14 +1,12 @@
 # Perform pip installation and run all tests
 
 # For feature branches, we don't test the full matrix (os x [stable, loose]) in order to save time & resources.
-# On each push to develop, the whole test matrix runs, additionally, its success is mandatory for merging to main.
+# On each push to main, the whole test matrix runs.
 # In the (assumed to be rare case) that these full matrix tests fail but the reduced matrix tests passed,
 # we will learn about it latest before pushing to main. The merge that caused the issue can then be identified
-# from the tests that ran on develop.
+# from the tests that ran on main.
 on:
   push:
-    branches: [ main, development ]
-  pull_request:
     branches: [ main ]
   workflow_dispatch:
 
