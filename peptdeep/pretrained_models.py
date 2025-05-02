@@ -321,13 +321,13 @@ class ModelManager(object):
         )
         self.rt_model: AlphaRTModel = AlphaRTModel(device=device)
         self.ccs_model: AlphaCCSModel = AlphaCCSModel(device=device)
-        self.load_installed_models()
 
         self.charge_model: typing.Union[ChargeModelForAASeq, ChargeModelForModAASeq] = (
-            None
+            ChargeModelForModAASeq(device=device)
         )
-
+        self.load_installed_models()
         self.reset_by_global_settings(reload_models=False)
+        self.group_by_modseq = isinstance(self.charge_model, ChargeModelForModAASeq)
 
     def reinitialize_ms2_model(self, charged_frag_types: typing.List[str], **kwargs):
         """
@@ -355,9 +355,9 @@ class ModelManager(object):
             else:
                 self.charge_model = ChargeModelForAASeq()
             self.charge_model.load(mgr_settings["charge_model_file"])
-            self.charge_model.predict_batch_size = mgr_settings["predict"][
-                "batch_size_charge"
-            ]
+        self.charge_model.predict_batch_size = mgr_settings["predict"][
+            "batch_size_charge"
+        ]
         self.charge_prob_cutoff = mgr_settings["charge_prob_cutoff"]
         self.use_predicted_charge_in_speclib = mgr_settings[
             "use_predicted_charge_in_speclib"
@@ -407,6 +407,14 @@ class ModelManager(object):
         self.psm_num_per_mod_to_train_rt_ccs = mgr_settings["transfer"][
             "psm_num_per_mod_to_train_rt_ccs"
         ]
+
+        self.epoch_to_train_charge = mgr_settings["transfer"]["epoch_charge"]
+        self.batch_size_to_train_charge = mgr_settings["transfer"]["batch_size_charge"]
+        self.lr_to_train_charge = float(mgr_settings["transfer"]["lr_charge"])
+        self.warmup_epoch_to_train_charge = mgr_settings["transfer"][
+            "warmup_epoch_charge"
+        ]
+
         self.top_n_mods_to_train = mgr_settings["transfer"]["top_n_mods_to_train"]
 
         self.nce = mgr_settings["default_nce"]
@@ -483,6 +491,9 @@ class ModelManager(object):
             self.ccs_model.load(
                 MODEL_ZIP_FILE_PATH, model_path_in_zip="generic/ccs.pth"
             )
+            self.charge_model.load(
+                MODEL_ZIP_FILE_PATH, model_path_in_zip="generic/charge.pth"
+            )
         elif model_type.lower() in [
             "digly",
             "glygly",
@@ -499,6 +510,9 @@ class ModelManager(object):
             self.ccs_model.load(
                 MODEL_ZIP_FILE_PATH, model_path_in_zip="generic/ccs.pth"
             )
+            self.charge_model.load(
+                MODEL_ZIP_FILE_PATH, model_path_in_zip="generic/charge.pth"
+            )
         elif model_type.lower() in ["regular", "common", "generic"]:
             self.ms2_model.load(
                 MODEL_ZIP_FILE_PATH, model_path_in_zip="generic/ms2.pth"
@@ -506,6 +520,9 @@ class ModelManager(object):
             self.rt_model.load(MODEL_ZIP_FILE_PATH, model_path_in_zip="generic/rt.pth")
             self.ccs_model.load(
                 MODEL_ZIP_FILE_PATH, model_path_in_zip="generic/ccs.pth"
+            )
+            self.charge_model.load(
+                MODEL_ZIP_FILE_PATH, model_path_in_zip="generic/charge.pth"
             )
         elif model_type.lower() in ["hla", "unspecific", "non-specific", "nonspecific"]:
             self.load_installed_models(model_type="generic")
@@ -647,6 +664,42 @@ class ModelManager(object):
         if len(test_psm_df) > 0:
             logging.info(
                 "Testing refined RT model:\n" + str(self.rt_model.test(test_psm_df))
+            )
+
+    def train_charge_model(self, psm_df: pd.DataFrame):
+        """
+        Train/fine-tune the charge model.
+
+        Parameters
+        ----------
+        psm_df : pd.DataFrame
+            Training psm_df which contains 'charge' column.
+
+        """
+
+        grouped_df = self.charge_model.create_charge_indicators(
+            psm_df.copy(), group_by_modseq=self.group_by_modseq
+        )
+        train_df = grouped_df.sample(frac=0.8)
+        test_df = grouped_df.drop(train_df.index)
+        if len(test_df) > 0:
+            logging.info(
+                "Testing pretrained charge model:\n"
+                + str(self.charge_model.test(test_df))
+            )
+
+        self.charge_model.train(
+            train_df,
+            batch_size=self.batch_size_to_train_charge,
+            epoch=self.epoch_to_train_charge,
+            warmup_epoch=self.warmup_epoch_to_train_charge,
+            lr=self.lr_to_train_charge,
+            verbose=self.train_verbose,
+        )
+
+        if len(test_df) > 0:
+            logging.info(
+                "Testing refined charge model:\n" + str(self.charge_model.test(test_df))
             )
 
     def train_ccs_model(
@@ -883,6 +936,45 @@ class ModelManager(object):
             batch_size=batch_size,
             reference_frag_df=reference_frag_df,
             verbose=self.verbose,
+        )
+
+    def predict_charge(
+        self,
+        psm_df: pd.DataFrame,
+        min_precursor_charge: int,
+        max_precursor_charge: int,
+        charge_prob_cutoff: float = None,
+    ) -> pd.DataFrame:
+        """
+        Predict charge states for a given PSM dataframe by predicting the probabilities of each charge state,
+        and including precursors with charge probabilities above the cutoff.
+
+        Parameters
+        ----------
+        psm_df : pd.DataFrame
+            PSM dataframe to predict charge states.
+
+        min_precursor_charge : int
+            Minimum precursor charge.
+
+        max_precursor_charge : int
+            Maximum precursor charge.
+
+        charge_prob_cutoff : float
+            Charge probability cutoff.
+
+        Returns
+        -------
+        pd.DataFrame
+            PSM dataframe with predicted charge states.
+        """
+        charge_prob_cutoff = charge_prob_cutoff or self.charge_prob_cutoff
+
+        return self.charge_model.predict_and_clip_charges(
+            psm_df,
+            min_precursor_charge=min_precursor_charge,
+            max_precursor_charge=max_precursor_charge,
+            charge_prob_cutoff=charge_prob_cutoff,
         )
 
     def predict_rt(

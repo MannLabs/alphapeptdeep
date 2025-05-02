@@ -9,11 +9,11 @@ model:
 
 PEPTDEEP_HOME: "~/peptdeep" # ~ refers to user folder (e.g. C:/Users/username)
 
-local_model_zip_name: "pretrained_models_v2.zip"
+local_model_zip_name: "pretrained_models_v3.zip"
 local_hla_model_zip_name: "hla_model.zip"
 
 # overwritable config
-model_url: "https://github.com/MannLabs/alphapeptdeep/releases/download/pre-trained-models/pretrained_models_v2.zip"
+model_url: "https://github.com/MannLabs/alphapeptdeep/releases/download/pre-trained-models/pretrained_models_v3.zip"
 hla_model_url: "https://github.com/MannLabs/alphapeptdeep/releases/download/pre-trained-models/hla_model.zip"
 
 task_workflow: [library]
@@ -115,6 +115,10 @@ model_mgr:
     warmup_epoch_rt_ccs: 10
     batch_size_rt_ccs: 1024
     lr_rt_ccs: 0.0001
+    epoch_charge: 40
+    warmup_epoch_charge: 10
+    batch_size_charge: 1024
+    lr_charge: 0.0001
     verbose: False
     grid_nce_search: False
     grid_nce_first: 15.0
