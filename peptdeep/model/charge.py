@@ -46,17 +46,15 @@ class _ChargeModelInterface:
         df.rename(columns={"charge_probs": "charge_prob"}, inplace=True)
         df["charge"] = [
             self.charge_range[
-                min_precursor_charge
-                - self.min_supported_predict_charge : max_precursor_charge
-                - self.min_supported_predict_charge
+                min_precursor_charge - MIN_SUPPORTED_CHARGE : max_precursor_charge
+                - MIN_SUPPORTED_CHARGE
                 + 1
             ]
         ] * len(df)
         df["charge_prob"] = df.charge_prob.apply(
             lambda x: x[
-                min_precursor_charge
-                - self.min_supported_predict_charge : max_precursor_charge
-                - self.min_supported_predict_charge
+                min_precursor_charge - MIN_SUPPORTED_CHARGE : max_precursor_charge
+                - MIN_SUPPORTED_CHARGE
                 + 1
             ]
         )
@@ -94,7 +92,7 @@ class _ChargeModelInterface:
         precursor_df["charge_prob"] = (
             precursor_df[["charge_probs", "charge"]]
             .apply(
-                lambda x: x.iloc[0][x.iloc[1] - self.min_supported_predict_charge],
+                lambda x: x.iloc[0][x.iloc[1] - MIN_SUPPORTED_CHARGE],
                 axis=1,
             )
             .astype(np.float32)
@@ -154,14 +152,14 @@ class _ChargeModelInterface:
         if group_by_modseq:
             grouped_psm_df = group_psm_df_by_modseq(
                 psm_df,
-                min_charge=self.min_supported_predict_charge,
-                max_charge=self.max_supported_predict_charge,
+                min_charge=MIN_SUPPORTED_CHARGE,
+                max_charge=MAX_SUPPORTED_CHARGE,
             )
         else:
             grouped_psm_df = group_psm_df_by_sequence(
                 psm_df,
-                min_charge=self.min_supported_predict_charge,
-                max_charge=self.max_supported_predict_charge,
+                min_charge=MIN_SUPPORTED_CHARGE,
+                max_charge=MAX_SUPPORTED_CHARGE,
             )
         return grouped_psm_df
 
@@ -204,8 +202,6 @@ class ChargeModelForModAASeq(
 
         self.target_column_to_predict = "charge_probs"
         self.target_column_to_train = "charge_indicators"
-        self.min_supported_predict_charge = MIN_SUPPORTED_CHARGE
-        self.max_supported_predict_charge = MAX_SUPPORTED_CHARGE
         self.charge_range = np.arange(
             MIN_SUPPORTED_CHARGE, MAX_SUPPORTED_CHARGE + 1, dtype=np.int8
         )
@@ -236,8 +232,6 @@ class ChargeModelForAASeq(
 
         self.target_column_to_predict = "charge_probs"
         self.target_column_to_train = "charge_indicators"
-        self.min_supported_predict_charge = MIN_SUPPORTED_CHARGE
-        self.max_supported_predict_charge = MAX_SUPPORTED_CHARGE
         self.charge_range = np.arange(
             MIN_SUPPORTED_CHARGE, MAX_SUPPORTED_CHARGE + 1, dtype=np.int8
         )
