@@ -21,7 +21,24 @@ class _ChargeModelInterface:
         pep_df: pd.DataFrame,
         min_precursor_charge: int,
         max_precursor_charge: int,
-    ):
+    ) -> pd.DataFrame:
+        """
+        Predict the charge probabilities for a given dataframe, our models support charges from 1 to 10.
+
+        Parameters
+        ----------
+        pep_df : pd.DataFrame
+            DataFrame containing the peptide sequences and their corresponding features.
+        min_precursor_charge : int
+            Minimum precursor charge to predict for, the model supports 1-10.
+        max_precursor_charge : int
+            Maximum precursor charge to predict for, the model supports 1-10.
+
+        Returns
+        -------
+        pd.DataFrame
+            DataFrame containing the predicted charge probabilities for each peptide sequence.
+        """
         df = self.predict_mp(
             pep_df.copy(),
             batch_size=self.predict_batch_size,
@@ -53,7 +70,21 @@ class _ChargeModelInterface:
     def predict_prob_for_charge(
         self,
         precursor_df: pd.DataFrame,
-    ):
+    ) -> pd.DataFrame:
+        """
+        Predict the charge probabilities for a given dataframe with charge column.
+
+        Parameters
+        ----------
+        precursor_df : pd.DataFrame
+            DataFrame containing the peptide sequences and the charge column.
+
+
+        Returns
+        -------
+        pd.DataFrame
+            DataFrame containing the predicted charge probabilities for each peptide sequence.
+        """
         if "charge" not in precursor_df.columns:
             raise KeyError("precursor_df must contain `charge` column")
         precursor_df = self.predict_mp(
@@ -77,7 +108,29 @@ class _ChargeModelInterface:
         min_precursor_charge: int,
         max_precursor_charge: int,
         charge_prob_cutoff: float,
-    ):
+    ) -> pd.DataFrame:
+        """
+        Predict the charge probabilities for a given dataframe and clip the charges based on the probability cutoff.
+
+        Parameters
+        ----------
+
+        pep_df : pd.DataFrame
+            DataFrame containing the peptide sequences and mods and mod_sites.
+        min_precursor_charge : int
+                Minimum precursor charge to predict for, the model supports 1-10.
+        max_precursor_charge : int
+                Maximum precursor charge to predict for, the model supports 1-10.
+        charge_prob_cutoff : float
+                Cutoff for charge prediction probabilities, set to 0.0 to include include all charges in the requested range.
+
+
+        Returns
+        -------
+        pd.DataFrame
+            DataFrame containing the predicted charge probabilities for each peptide sequence.
+
+        """
         df = self.predict_mp(
             pep_df.copy(),
             batch_size=self.predict_batch_size,
@@ -167,10 +220,6 @@ class ChargeModelForAASeq(
 
     Parameters
     ----------
-    min_charge : int, optional
-        Minimum charge to predict, by default 1
-    max_charge : int, optional
-        Maximum charge to predict, by default 6
     device : str, optional
         Device to use for training and prediction, by default "gpu"
     """
@@ -261,9 +310,9 @@ def evaluate_charge_precision_recall(
     charge_prob_cutoff : float, optional
         Cutoff for charge prediction, by default 0.3
     min_precursor_charge : int, optional
-        Minimum charge to predict, by default 1
+        Minimum requested charge to predict for, the model supports 1-10, by default 1
     max_precursor_charge : int, optional
-        Maximum charge to predict, by default 10
+        Maximum requested charge to predict for, the model supports 1-10, by default 6
 
     Returns
     -------
