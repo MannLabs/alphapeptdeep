@@ -8,6 +8,9 @@ from peptdeep.model.generic_property_prediction import (
     Model_for_Generic_ModAASeq_BinaryClassification_Transformer,
 )
 
+MAX_SUPPORTED_CHARGE = 10
+MIN_SUPPORTED_CHARGE = 1
+
 
 class _ChargeModelInterface:
     def __init__(self, *args, **kwargs):
@@ -18,7 +21,24 @@ class _ChargeModelInterface:
         pep_df: pd.DataFrame,
         min_precursor_charge: int,
         max_precursor_charge: int,
-    ):
+    ) -> pd.DataFrame:
+        """
+        Predict the charge probabilities for a given dataframe, our models support charges from 1 to 10.
+
+        Parameters
+        ----------
+        pep_df : pd.DataFrame
+            DataFrame containing the peptide sequences and their corresponding features.
+        min_precursor_charge : int
+            Minimum precursor charge to predict for, the model supports 1-10.
+        max_precursor_charge : int
+            Maximum precursor charge to predict for, the model supports 1-10.
+
+        Returns
+        -------
+        pd.DataFrame
+            DataFrame containing the predicted charge probabilities for each peptide sequence.
+        """
         df = self.predict_mp(
             pep_df.copy(),
             batch_size=self.predict_batch_size,
@@ -26,15 +46,15 @@ class _ChargeModelInterface:
         df.rename(columns={"charge_probs": "charge_prob"}, inplace=True)
         df["charge"] = [
             self.charge_range[
-                min_precursor_charge - self.min_predict_charge : max_precursor_charge
-                - self.min_predict_charge
+                min_precursor_charge - MIN_SUPPORTED_CHARGE : max_precursor_charge
+                - MIN_SUPPORTED_CHARGE
                 + 1
             ]
         ] * len(df)
         df["charge_prob"] = df.charge_prob.apply(
             lambda x: x[
-                min_precursor_charge - self.min_predict_charge : max_precursor_charge
-                - self.min_predict_charge
+                min_precursor_charge - MIN_SUPPORTED_CHARGE : max_precursor_charge
+                - MIN_SUPPORTED_CHARGE
                 + 1
             ]
         )
@@ -48,7 +68,21 @@ class _ChargeModelInterface:
     def predict_prob_for_charge(
         self,
         precursor_df: pd.DataFrame,
-    ):
+    ) -> pd.DataFrame:
+        """
+        Predict the charge probabilities for a given dataframe with charge column.
+
+        Parameters
+        ----------
+        precursor_df : pd.DataFrame
+            DataFrame containing the peptide sequences and the charge column.
+
+
+        Returns
+        -------
+        pd.DataFrame
+            DataFrame containing the predicted charge probabilities for each peptide sequence.
+        """
         if "charge" not in precursor_df.columns:
             raise KeyError("precursor_df must contain `charge` column")
         precursor_df = self.predict_mp(
@@ -57,7 +91,10 @@ class _ChargeModelInterface:
         )
         precursor_df["charge_prob"] = (
             precursor_df[["charge_probs", "charge"]]
-            .apply(lambda x: x.iloc[0][x.iloc[1] - self.min_predict_charge], axis=1)
+            .apply(
+                lambda x: x.iloc[0][x.iloc[1] - MIN_SUPPORTED_CHARGE],
+                axis=1,
+            )
             .astype(np.float32)
         )
         precursor_df.drop(columns="charge_probs", inplace=True)
@@ -69,7 +106,29 @@ class _ChargeModelInterface:
         min_precursor_charge: int,
         max_precursor_charge: int,
         charge_prob_cutoff: float,
-    ):
+    ) -> pd.DataFrame:
+        """
+        Predict the charge probabilities for a given dataframe and clip the charges based on the probability cutoff.
+
+        Parameters
+        ----------
+
+        pep_df : pd.DataFrame
+            DataFrame containing the peptide sequences and mods and mod_sites.
+        min_precursor_charge : int
+                Minimum precursor charge to predict for, the model supports 1-10.
+        max_precursor_charge : int
+                Maximum precursor charge to predict for, the model supports 1-10.
+        charge_prob_cutoff : float
+                Cutoff for charge prediction probabilities, set to 0.0 to include include all charges in the requested range.
+
+
+        Returns
+        -------
+        pd.DataFrame
+            DataFrame containing the predicted charge probabilities for each peptide sequence.
+
+        """
         df = self.predict_mp(
             pep_df.copy(),
             batch_size=self.predict_batch_size,
@@ -87,6 +146,37 @@ class _ChargeModelInterface:
         df["charge_prob"] = df.charge_prob.astype(np.float32)
         return df
 
+    def create_charge_indicators(
+        self, psm_df: pd.DataFrame, group_by_modseq: bool = True
+    ):
+        if group_by_modseq:
+            grouped_psm_df = group_psm_df_by_modseq(
+                psm_df,
+                min_charge=MIN_SUPPORTED_CHARGE,
+                max_charge=MAX_SUPPORTED_CHARGE,
+            )
+        else:
+            grouped_psm_df = group_psm_df_by_sequence(
+                psm_df,
+                min_charge=MIN_SUPPORTED_CHARGE,
+                max_charge=MAX_SUPPORTED_CHARGE,
+            )
+        return grouped_psm_df
+
+    def test(
+        self,
+        precursor_df: pd.DataFrame,
+        batch_size: int = 1024,
+        min_precursor_charge: int = MIN_SUPPORTED_CHARGE,
+        max_precursor_charge: int = MAX_SUPPORTED_CHARGE,
+    ):
+        return evaluate_charge_precision_recall(
+            self.predict(precursor_df, batch_size=batch_size),
+            charge_prob_cutoff=0.3,
+            min_precursor_charge=min_precursor_charge,
+            max_precursor_charge=max_precursor_charge,
+        )
+
 
 class ChargeModelForModAASeq(
     ModelInterface_for_Generic_ModAASeq_MultiLabelClassification, _ChargeModelInterface
@@ -96,17 +186,13 @@ class ChargeModelForModAASeq(
 
      Parameters
     ----------
-    min_charge : int, optional
-        Minimum charge to predict, by default 1
-    max_charge : int, optional
-        Maximum charge to predict, by default 6
     device : str, optional
         Device to use for training and prediction, by default "gpu"
     """
 
-    def __init__(self, min_charge: int = 1, max_charge: int = 6, device: str = "gpu"):
+    def __init__(self, device: str = "gpu"):
         super().__init__(
-            num_target_values=max_charge - min_charge + 1,
+            num_target_values=MAX_SUPPORTED_CHARGE - MIN_SUPPORTED_CHARGE + 1,
             model_class=Model_for_Generic_ModAASeq_BinaryClassification_Transformer,
             nlayers=4,
             hidden_dim=128,
@@ -116,9 +202,9 @@ class ChargeModelForModAASeq(
 
         self.target_column_to_predict = "charge_probs"
         self.target_column_to_train = "charge_indicators"
-        self.min_predict_charge = min_charge
-        self.max_predict_charge = max_charge
-        self.charge_range = np.arange(min_charge, max_charge + 1, dtype=np.int8)
+        self.charge_range = np.arange(
+            MIN_SUPPORTED_CHARGE, MAX_SUPPORTED_CHARGE + 1, dtype=np.int8
+        )
         self.predict_batch_size = 1024
 
 
@@ -130,17 +216,13 @@ class ChargeModelForAASeq(
 
     Parameters
     ----------
-    min_charge : int, optional
-        Minimum charge to predict, by default 1
-    max_charge : int, optional
-        Maximum charge to predict, by default 6
     device : str, optional
         Device to use for training and prediction, by default "gpu"
     """
 
-    def __init__(self, min_charge: int = 1, max_charge: int = 6, device: str = "gpu"):
+    def __init__(self, device: str = "gpu"):
         super().__init__(
-            num_target_values=max_charge - min_charge + 1,
+            num_target_values=MAX_SUPPORTED_CHARGE - MIN_SUPPORTED_CHARGE + 1,
             model_class=Model_for_Generic_AASeq_BinaryClassification_Transformer,
             nlayers=4,
             hidden_dim=128,
@@ -150,9 +232,9 @@ class ChargeModelForAASeq(
 
         self.target_column_to_predict = "charge_probs"
         self.target_column_to_train = "charge_indicators"
-        self.min_predict_charge = min_charge
-        self.max_predict_charge = max_charge
-        self.charge_range = np.arange(min_charge, max_charge + 1, dtype=np.int8)
+        self.charge_range = np.arange(
+            MIN_SUPPORTED_CHARGE, MAX_SUPPORTED_CHARGE + 1, dtype=np.int8
+        )
         self.predict_batch_size = 1024
 
 
@@ -199,4 +281,65 @@ def get_charge_indicators(
     for charge in charge_list:
         if charge <= max_charge and charge >= min_charge:
             charge_indicators[charge - min_charge] = 1.0
+        else:
+            raise ValueError(
+                f"Charge {charge} is out of range [{min_charge}, {max_charge}]"
+            )
     return charge_indicators
+
+
+def evaluate_charge_precision_recall(
+    df: pd.DataFrame,
+    charge_prob_cutoff: float = 0.3,
+    min_precursor_charge: int = 1,
+    max_precursor_charge: int = 6,
+):
+    """
+    Evaluate the precision and recall of charge prediction.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        DataFrame containing the "charge_indicators" and "charge_probs" columns.
+    charge_prob_cutoff : float, optional
+        Cutoff for charge prediction, by default 0.3
+    min_precursor_charge : int, optional
+        Minimum requested charge to predict for, the model supports 1-10, by default 1
+    max_precursor_charge : int, optional
+        Maximum requested charge to predict for, the model supports 1-10, by default 6
+
+    Returns
+    -------
+    pd.DataFrame
+        DataFrame containing the precision and recall for each charge.
+    """
+    target_charges = df["charge_indicators"].apply(
+        lambda x: x[
+            min_precursor_charge - MIN_SUPPORTED_CHARGE : max_precursor_charge
+            - MIN_SUPPORTED_CHARGE
+            + 1
+        ]
+    )
+    target_charges = np.array(target_charges.tolist())
+
+    predicted_charges = df["charge_probs"].apply(
+        lambda x: x[
+            min_precursor_charge - MIN_SUPPORTED_CHARGE : max_precursor_charge
+            - MIN_SUPPORTED_CHARGE
+            + 1
+        ]
+    )
+    predicted_charges = np.array(predicted_charges.tolist())
+    # cutoff
+    predicted_charges = predicted_charges >= charge_prob_cutoff
+
+    matches = np.logical_and(target_charges, predicted_charges)
+    precision = np.sum(matches) / (np.sum(predicted_charges) + 1e-10)
+    recall = np.sum(matches) / (np.sum(target_charges) + 1e-10)
+
+    results = {
+        "precision": precision,
+        "recall": recall,
+    }
+
+    return results

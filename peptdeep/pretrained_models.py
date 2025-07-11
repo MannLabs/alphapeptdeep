@@ -321,12 +321,12 @@ class ModelManager(object):
         )
         self.rt_model: AlphaRTModel = AlphaRTModel(device=device)
         self.ccs_model: AlphaCCSModel = AlphaCCSModel(device=device)
-        self.load_installed_models()
 
-        self.charge_model: typing.Union[ChargeModelForAASeq, ChargeModelForModAASeq] = (
-            None
+        self.charge_model: ChargeModelForModAASeq = ChargeModelForModAASeq(
+            device=device
         )
 
+        self.load_installed_models()
         self.reset_by_global_settings(reload_models=False)
 
     def reinitialize_ms2_model(self, charged_frag_types: typing.List[str], **kwargs):
@@ -349,26 +349,13 @@ class ModelManager(object):
     ):
         mgr_settings = global_settings["model_mgr"]
 
-        if os.path.isfile(mgr_settings["charge_model_file"]):
-            if mgr_settings["charge_model_type"] == "modseq":
-                self.charge_model = ChargeModelForModAASeq()
-            else:
-                self.charge_model = ChargeModelForAASeq()
-            self.charge_model.load(mgr_settings["charge_model_file"])
-            self.charge_model.predict_batch_size = mgr_settings["predict"][
-                "batch_size_charge"
-            ]
-        self.charge_prob_cutoff = mgr_settings["charge_prob_cutoff"]
-        self.use_predicted_charge_in_speclib = mgr_settings[
-            "use_predicted_charge_in_speclib"
-        ]
-
         if reload_models:
             self.load_installed_models(mgr_settings["model_type"])
             self.load_external_models(
                 ms2_model_file=mgr_settings["external_ms2_model"],
                 rt_model_file=mgr_settings["external_rt_model"],
                 ccs_model_file=mgr_settings["external_ccs_model"],
+                charge_model_file=mgr_settings["external_charge_model"],
             )
 
             self.ms2_model.model._mask_modloss = global_settings["model_mgr"][
@@ -379,6 +366,7 @@ class ModelManager(object):
             self.ms2_model.set_device(device)
             self.rt_model.set_device(device)
             self.ccs_model.set_device(device)
+            self.charge_model.set_device(device)
 
         self.use_grid_nce_search = mgr_settings["transfer"]["grid_nce_search"]
 
@@ -406,6 +394,29 @@ class ModelManager(object):
 
         self.psm_num_per_mod_to_train_rt_ccs = mgr_settings["transfer"][
             "psm_num_per_mod_to_train_rt_ccs"
+        ]
+
+        # loading charge model parameters
+        self.charge_model.predict_batch_size = mgr_settings["predict"][
+            "batch_size_charge"
+        ]
+        self.charge_prob_cutoff = mgr_settings["charge_prob_cutoff"]
+        self.use_predicted_charge_in_speclib = mgr_settings[
+            "use_predicted_charge_in_speclib"
+        ]
+
+        self.psm_num_to_test_charge = mgr_settings["transfer"]["psm_num_to_test_charge"]
+        self.psm_num_to_train_charge = mgr_settings["transfer"][
+            "psm_num_to_train_charge"
+        ]
+        self.psm_num_per_mod_to_train_charge = mgr_settings["transfer"][
+            "psm_num_per_mod_to_train_charge"
+        ]
+        self.epoch_to_train_charge = mgr_settings["transfer"]["epoch_charge"]
+        self.batch_size_to_train_charge = mgr_settings["transfer"]["batch_size_charge"]
+        self.lr_to_train_charge = float(mgr_settings["transfer"]["lr_charge"])
+        self.warmup_epoch_to_train_charge = mgr_settings["transfer"][
+            "warmup_epoch_charge"
         ]
         self.top_n_mods_to_train = mgr_settings["transfer"]["top_n_mods_to_train"]
 
@@ -483,6 +494,9 @@ class ModelManager(object):
             self.ccs_model.load(
                 MODEL_ZIP_FILE_PATH, model_path_in_zip="generic/ccs.pth"
             )
+            self.charge_model.load(
+                MODEL_ZIP_FILE_PATH, model_path_in_zip="generic/charge.pth"
+            )
         elif model_type.lower() in [
             "digly",
             "glygly",
@@ -499,6 +513,9 @@ class ModelManager(object):
             self.ccs_model.load(
                 MODEL_ZIP_FILE_PATH, model_path_in_zip="generic/ccs.pth"
             )
+            self.charge_model.load(
+                MODEL_ZIP_FILE_PATH, model_path_in_zip="generic/charge.pth"
+            )
         elif model_type.lower() in ["regular", "common", "generic"]:
             self.ms2_model.load(
                 MODEL_ZIP_FILE_PATH, model_path_in_zip="generic/ms2.pth"
@@ -506,6 +523,9 @@ class ModelManager(object):
             self.rt_model.load(MODEL_ZIP_FILE_PATH, model_path_in_zip="generic/rt.pth")
             self.ccs_model.load(
                 MODEL_ZIP_FILE_PATH, model_path_in_zip="generic/ccs.pth"
+            )
+            self.charge_model.load(
+                MODEL_ZIP_FILE_PATH, model_path_in_zip="generic/charge.pth"
             )
         elif model_type.lower() in ["hla", "unspecific", "non-specific", "nonspecific"]:
             self.load_installed_models(model_type="generic")
@@ -521,6 +541,7 @@ class ModelManager(object):
         ms2_model_file: Union[str, io.BytesIO] = "",
         rt_model_file: Union[str, io.BytesIO] = "",
         ccs_model_file: Union[str, io.BytesIO] = "",
+        charge_model_file: Union[str, io.BytesIO] = "",
     ):
         """Load external MS2/RT/CCS models.
 
@@ -536,6 +557,10 @@ class ModelManager(object):
 
         ccs_model_file : Tuple[str, io.BytesIO], optional
             CCS model or stream. Do nothing if the value is '' or None.
+            Defaults to ''.
+
+        charge_model_file : Tuple[str, io.BytesIO], optional
+            Charge model or stream. Do nothing if the value is '' or None.
             Defaults to ''.
         """
 
@@ -572,6 +597,12 @@ class ModelManager(object):
             if not os.path.isfile(ccs_model_file):
                 logging.info(" -- This model file does not exist")
         _load_file(self.ccs_model, ccs_model_file)
+
+        if isinstance(charge_model_file, str) and charge_model_file:
+            logging.info(f"Using external charge model: '{charge_model_file}'")
+            if not os.path.isfile(charge_model_file):
+                logging.info(" -- This model file does not exist")
+        _load_file(self.charge_model, charge_model_file)
 
     def train_rt_model(
         self,
@@ -647,6 +678,83 @@ class ModelManager(object):
         if len(test_psm_df) > 0:
             logging.info(
                 "Testing refined RT model:\n" + str(self.rt_model.test(test_psm_df))
+            )
+
+    def train_charge_model(self, psm_df: pd.DataFrame):
+        """
+        Train/fine-tune the charge model.
+
+        Parameters
+        ----------
+        psm_df : pd.DataFrame
+            Training psm_df which contains 'charge' column.
+
+        """
+
+        psm_df = self.charge_model.create_charge_indicators(psm_df.copy())
+
+        if self.psm_num_to_train_charge > 0:
+            if self.psm_num_to_train_charge < len(psm_df):
+                tr_df = psm_sampling_with_important_mods(
+                    psm_df,
+                    self.psm_num_to_train_charge,
+                    self.top_n_mods_to_train,
+                    self.psm_num_per_mod_to_train_charge,
+                ).copy()
+            else:
+                tr_df = psm_df
+
+            if self._train_psm_logging:
+                logging.info(
+                    f"{len(tr_df)} PSMs for charge model training/transfer learning"
+                )
+        else:
+            tr_df = []
+
+        if self.psm_num_to_test_charge > 0:
+            if len(tr_df) > 0:
+                test_psm_df = psm_df[~psm_df.sequence.isin(set(tr_df.sequence))].copy()
+                if len(test_psm_df) > self.psm_num_to_test_charge:
+                    test_psm_df = test_psm_df.sample(
+                        n=self.psm_num_to_test_charge
+                    ).copy()
+                elif len(test_psm_df) == 0:
+                    logging.info(
+                        "No enough PSMs for testing CHarge models, "
+                        "please reduce the `psm_num_to_train_charge` "
+                        "value according to overall peptide numbers. "
+                    )
+                    test_psm_df = []
+            else:
+                test_psm_df = psm_df
+        else:
+            test_psm_df = []
+
+        if len(test_psm_df) > 0:
+            logging.info(
+                "Testing pretrained RT model:\n" + str(self.rt_model.test(test_psm_df))
+            )
+        # train_df = grouped_df.sample(frac=0.8)
+        # test_df = grouped_df.drop(train_df.index)
+        # if len(test_df) > 0:
+        #     logging.info(
+        #         "Testing pretrained charge model:\n"
+        #         + str(self.charge_model.test(test_df))
+        #     )
+
+        self.charge_model.train(
+            tr_df,
+            batch_size=self.batch_size_to_train_charge,
+            epoch=self.epoch_to_train_charge,
+            warmup_epoch=self.warmup_epoch_to_train_charge,
+            lr=self.lr_to_train_charge,
+            verbose=self.train_verbose,
+        )
+
+        if len(test_psm_df) > 0:
+            logging.info(
+                "Testing refined charge model:\n"
+                + str(self.charge_model.test(test_psm_df))
             )
 
     def train_ccs_model(
@@ -883,6 +991,49 @@ class ModelManager(object):
             batch_size=batch_size,
             reference_frag_df=reference_frag_df,
             verbose=self.verbose,
+        )
+
+    def predict_charge(
+        self,
+        psm_df: pd.DataFrame,
+        min_precursor_charge: int,
+        max_precursor_charge: int,
+        charge_prob_cutoff: float = None,
+    ) -> pd.DataFrame:
+        """
+        Predict charge states for a given PSM dataframe by predicting the probabilities of each charge state,
+        and including precursors with charge probabilities above the cutoff.
+
+        Parameters
+        ----------
+        psm_df : pd.DataFrame
+            PSM dataframe to predict charge states.
+
+        min_precursor_charge : int
+            Minimum precursor charge.
+
+        max_precursor_charge : int
+            Maximum precursor charge.
+
+        charge_prob_cutoff : float
+            Charge probability cutoff for including precursors set to 0.0 to predict all charges in the given range, and set to None to use the default value from the default_settings yaml.
+
+        Returns
+        -------
+        pd.DataFrame
+            PSM dataframe with predicted charge states.
+        """
+        charge_prob_cutoff = (
+            self.charge_prob_cutoff
+            if charge_prob_cutoff is None
+            else charge_prob_cutoff
+        )
+
+        return self.charge_model.predict_and_clip_charges(
+            psm_df,
+            min_precursor_charge=min_precursor_charge,
+            max_precursor_charge=max_precursor_charge,
+            charge_prob_cutoff=charge_prob_cutoff,
         )
 
     def predict_rt(
