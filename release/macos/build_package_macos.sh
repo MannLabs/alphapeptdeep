@@ -5,7 +5,7 @@ set -e -u
 # This script must be run from the root of the repository after running build_installer_macos.sh
 
 PACKAGE_NAME=peptdeep
-# BUILD_NAME is taken from environment variables, e.g. peptdeep-1.4.0-dev0-macos-darwin-arm64 or peptdeep-1.4.0-dev0-macos-darwin-x64
+# BUILD_NAME is taken from environment variables, e.g. peptdeep-1.4.0-macos-darwin-arm64 or peptdeep-1.4.0-macos-darwin-x64
 rm -rf ${BUILD_NAME}.pkg
 
 # If needed, include additional source such as e.g.:
@@ -30,5 +30,5 @@ cd -
 
 chmod 777 release/macos/scripts/*
 
-pkgbuild --root dist_pyinstaller/${PACKAGE_NAME} --identifier de.mpg.biochem.${PACKAGE_NAME}.app --version 1.4.0-dev0 --install-location /Applications/${PACKAGE_NAME}.app --scripts release/macos/scripts ${PACKAGE_NAME}.pkg
+pkgbuild --root dist_pyinstaller/${PACKAGE_NAME} --identifier de.mpg.biochem.${PACKAGE_NAME}.app --version 1.4.0 --install-location /Applications/${PACKAGE_NAME}.app --scripts release/macos/scripts ${PACKAGE_NAME}.pkg
 productbuild --distribution release/macos/distribution.xml --resources release/macos/Resources --package-path ${PACKAGE_NAME}.pkg ${BUILD_NAME}.pkg

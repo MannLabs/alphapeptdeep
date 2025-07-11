@@ -6,7 +6,7 @@ set -e -u
 
 PACKAGE_NAME=peptdeep
 
-# BUILD_NAME is taken from environment variables, e.g. 'peptdeep-1.4.0-dev0-linux-x64'
+# BUILD_NAME is taken from environment variables, e.g. 'peptdeep-1.4.0-linux-x64'
 rm -rf ${BUILD_NAME}.deb
 
 # If needed, include additional source such as e.g.:
