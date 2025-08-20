@@ -2,8 +2,8 @@
 import os
 
 
-def run(port=10077):
-    print(f"Starting PeptDeep Web Server on port {port} ...")
+def run(port: int = -1):
+    print(f"Starting PeptDeep Web Server (port={port}) ...")
 
     _this_file = __file__
     _this_directory = os.path.dirname(_this_file)
@@ -40,10 +40,11 @@ def run(port=10077):
         "run",
         file_path,
         "--global.developmentMode=false",
-        f"--server.port={port}",
         "--browser.gatherUsageStats=False",
         "--logger.level=error",
     ]
+    if port is not None:
+        args.append(f"--server.port={port}")
 
     args.extend(theme)
 

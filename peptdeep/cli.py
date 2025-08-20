@@ -48,7 +48,11 @@ def run(ctx, **kwargs):
 
 @run.command("gui", help="Start graphical user interface.")
 @click.option(
-    "--port", default=10077, type=int, show_default=True, help="The web server port."
+    "--port",
+    default=-1,
+    type=int,
+    show_default=True,
+    help="The web server port. The default value -1 will auto-select a port, typically 8501.",
 )
 @click.option(
     "--settings_yaml",
