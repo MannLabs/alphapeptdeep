@@ -50,19 +50,7 @@ For details, check out our [publications](#citations).
 
 For documentation, see [readthedocs](https://alphapeptdeep.readthedocs.io/en/latest/).
 
-### AlphaX repositories:
-
-- [**alphabase**](https://github.com/MannLabs/alphabase): Infrastructure for AlphaX Ecosystem
-- [**alphapept**](https://github.com/MannLabs/alphapept): DDA search
-  engine
-- [**alphapeptdeep**](https://github.com/MannLabs/alphapeptdeep): Deep
-  learning for proteomics
-- [**alpharaw**](https://github.com/MannLabs/alpharaw): Raw data
-  accessing
-- [**alphaviz**](https://github.com/MannLabs/alphaviz): MS data and
-  result visualization
-- [**alphatims**](https://github.com/MannLabs/alphatims): timsTOF data
-  accessing
+Check out [alphapept.org](https://alphapept.org) for other packages of AlphaPept ecosystem.
 
 ### Subsequent projects of AlphaPeptDeep
 
