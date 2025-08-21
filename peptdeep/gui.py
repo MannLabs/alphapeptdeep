@@ -43,7 +43,7 @@ def run(port: int = -1):
         "--browser.gatherUsageStats=False",
         "--logger.level=error",
     ]
-    if port is not None:
+    if port != -1:
         args.append(f"--server.port={port}")
 
     args.extend(theme)
