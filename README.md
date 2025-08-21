@@ -40,7 +40,7 @@
 ![screenshot](misc/screenshot.png)
 
 ## About
-[d](#installation)
+
 AlphaPeptDeep (`peptdeep` for short) aims to easily build new deep
 learning models for shotgun proteomics studies. Transfer learning is
 also easy to apply using AlphaPeptDeep.
