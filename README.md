@@ -932,8 +932,9 @@ for a full overview of the changes made in each version, [CHANGELOG.md](CHANGELO
 
 ## Citations
 
-Wen-Feng Zeng, Xie-Xuan Zhou, Sander Willems, Constantin Ammar, Maria Wahle, Isabell Bludau, Eugenia Voytik, Maximillian T. Strauss & Matthias Mann. AlphaPeptDeep: a modular deep learning framework to predict peptide properties for proteomics. Nat Commun 13, 7238 (2022).
-https://doi.org/10.1038/s41467-022-34904-3
+> **AlphaPeptDeep: a modular deep learning framework to predict peptide properties for proteomics.**
+> Wen-Feng Zeng, Xie-Xuan Zhou, Sander Willems, Constantin Ammar, Maria Wahle, Isabell Bludau, Eugenia Voytik, Maximillian T. Strauss & Matthias Mann.
+> Nat Commun 13, 7238 (2022), doi: https://doi.org/10.1038/s41467-022-34904-3
 
 
 ------------------------------------------------------------------------
