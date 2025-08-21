@@ -62,25 +62,6 @@ Check out [alphapept.org](https://alphapept.org) for other packages of AlphaPept
 
 ------------------------------------------------------------------------
 
-## Citations
-
-Wen-Feng Zeng, Xie-Xuan Zhou, Sander Willems, Constantin Ammar, Maria Wahle, Isabell Bludau, Eugenia Voytik, Maximillian T. Strauss & Matthias Mann. AlphaPeptDeep: a modular deep learning framework to predict peptide properties for proteomics. Nat Commun 13, 7238 (2022). https://doi.org/10.1038/s41467-022-34904-3
-
-
-------------------------------------------------------------------------
-
-## License
-
-AlphaPeptDeep was developed by the [Mann Labs at the Max Planck
-Institute of Biochemistry](https://www.biochem.mpg.de/mann) and the
-[University of
-Copenhagen](https://www.cpr.ku.dk/research/proteomics/mann/) and is
-freely available with an [Apache License](LICENSE.txt). External Python
-packages (available in the [requirements](requirements) folder) have
-their own licenses, which can be consulted on their respective websites.
-
-------------------------------------------------------------------------
-
 ## Installation
 
 AlphaPeptDeep can be installed and used on all major operating systems
@@ -146,15 +127,15 @@ However, if new versions of dependancies are released, they are not
 guaranteed to be fully compatible with peptdeep. This should only occur
 in rare cases where dependencies are not backwards compatible.
 
-> **TODO** You can always force peptdeep to use dependency versions
-> which are known to be compatible with:
->
-> ``` bash
-> pip install "peptdeep[stable]"
-> ```
->
-> NOTE: You might need to run `pip install pip` before installing
-> peptdeep like this. Also note the double quotes `"`.
+You can always force peptdeep to use dependency versions
+which are known to be compatible with:
+
+``` bash
+pip install "peptdeep[stable]"
+```
+
+ NOTE: You might need to run `pip install pip` before installing
+ peptdeep like this. Also note the double quotes `"`.
 
 For those who are really adventurous, it is also possible to directly
 install any branch (e.g. `@main`) with any extras
@@ -946,3 +927,23 @@ pre-commit run --all-files
 
 See the [HISTORY.md](HISTORY.md) for a full overview of the changes made
 in each version.
+
+------------------------------------------------------------------------
+
+## Citations
+
+Wen-Feng Zeng, Xie-Xuan Zhou, Sander Willems, Constantin Ammar, Maria Wahle, Isabell Bludau, Eugenia Voytik, Maximillian T. Strauss & Matthias Mann. AlphaPeptDeep: a modular deep learning framework to predict peptide properties for proteomics. Nat Commun 13, 7238 (2022).
+https://doi.org/10.1038/s41467-022-34904-3
+
+
+------------------------------------------------------------------------
+
+## License
+
+AlphaPeptDeep was developed by the [Mann Labs at the Max Planck
+Institute of Biochemistry](https://www.biochem.mpg.de/mann) and the
+[University of
+Copenhagen](https://www.cpr.ku.dk/research/proteomics/mann/) and is
+freely available with an [Apache License](LICENSE.txt). External Python
+packages (available in the [requirements](requirements) folder) have
+their own licenses, which can be consulted on their respective websites.
