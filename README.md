@@ -1,7 +1,7 @@
 # AlphaPeptDeep (PeptDeep)
 
 [![Default installation and tests](https://github.com/MannLabs/alphapeptdeep/actions/workflows/pip_installation.yml/badge.svg)](https://github.com/MannLabs/alphapeptdeep/actions/workflows/pip_installation.yml)
-[![Publish on PyPi and release on GitHub](https://github.com/MannLabs/alphapeptdeep/actions/workflows/publish_and_release.yml/badge.svg)](https://github.com/MannLabs/alphapeptdeep/actions/workflows/publish_and_release.yml)
+[![Publish on PyPi and release on GitHub](https://github.com/MannLabs/alphapeptdeep/actions/workflows/publish_on_pypi.yml/badge.svg)](https://github.com/MannLabs/alphapeptdeep/actions/workflows/publish_and_release.yml)
 [![Documentation Status](https://readthedocs.org/projects/alphapeptdeep/badge/?version=latest)](https://alphapeptdeep.readthedocs.io/en/latest/?badge=latest)
 [![pypi](https://img.shields.io/pypi/v/peptdeep)](https://pypi.org/project/peptdeep)
 [![GitHub release](https://img.shields.io/github/v/release/mannlabs/alphapeptdeep?display_name=tag)](https://github.com/MannLabs/alphapeptdeep/releases)
@@ -10,26 +10,37 @@
 [![pip downloads](https://img.shields.io/pypi/dm/peptdeep?color=blue&label=pip%20downloads)](https://pypi.org/project/peptdeep)
 ![Python](https://img.shields.io/pypi/pyversions/peptdeep)
 
-- [**About**](#about)
-- [**License**](#license)
-- [**Installation**](#installation)
-  - [**One-click GUI**](#one-click-gui)
-  - [**Pip installer**](#pip)
-  - [**Use GPU**](#use-gpu)
-  - [**Developer installer**](#developer)
-- [**Usage**](#usage)
-  - [**GUI**](#gui)
-  - [**CLI**](#cli)
-  - [**Python and jupyter notebooks**](#python-and-jupyter-notebooks)
-- [**Troubleshooting**](#troubleshooting)
-- [**Citations**](#citations)
-- [**How to contribute**](#how-to-contribute)
-- [**Changelog**](#changelog)
-
 ------------------------------------------------------------------------
 
-## About
+<!-- PROJECT LOGO -->
+<br />
+<div align="center">
+  <a href="https://github.com/othneildrew/Best-README-Template">
+    <img src="peptdeep/webui/logos/peptdeep.png" alt="Logo" width="80" height="80">
+  </a>
 
+  <h3 align="center">AlphaPeptDeep</h3>
+
+  <p align="center">
+    <a href="https://doi.org/10.1038/s41467-022-34904-3">Publication</a>
+    ·
+    <a href="https://github.com/Mannlabs/peptdeeo/releases/latest">Download</a>
+    ·
+    <a href="#installation">Installation</a>
+    ·
+    <a href="#usage">Usage</a>
+    ·
+    <a href="https://alphapeptdeep.readthedocs.io/en/latest/">Documentation</a>
+    ·
+    <a href="https://alphapept.org">alphapept.org</a>
+
+  </p>
+</div>
+
+![screenshot](misc/screenshot.png)
+
+## About
+[d](#installation)
 AlphaPeptDeep (`peptdeep` for short) aims to easily build new deep
 learning models for shotgun proteomics studies. Transfer learning is
 also easy to apply using AlphaPeptDeep.
@@ -39,23 +50,9 @@ cross section (CCS), and tandem mass spectrum (MS2) prediction for given
 peptides. With these models, one can easily generate a predicted library
 from fasta files.
 
-For details, check out our [publications](#citations).
+For details, check out our [publication](#citation), and the [documentation](https://alphapeptdeep.readthedocs.io/en/latest/).
 
-For documentation, see [readthedocs](https://alphapeptdeep.readthedocs.io/en/latest/).
-
-### AlphaX repositories:
-
-- [**alphabase**](https://github.com/MannLabs/alphabase): Infrastructure for AlphaX Ecosystem
-- [**alphapept**](https://github.com/MannLabs/alphapept): DDA search
-  engine
-- [**alphapeptdeep**](https://github.com/MannLabs/alphapeptdeep): Deep
-  learning for proteomics
-- [**alpharaw**](https://github.com/MannLabs/alpharaw): Raw data
-  accessing
-- [**alphaviz**](https://github.com/MannLabs/alphaviz): MS data and
-  result visualization
-- [**alphatims**](https://github.com/MannLabs/alphatims): timsTOF data
-  accessing
+Visit [alphapept.org](https://alphapept.org) for other packages of AlphaPept ecosystem.
 
 ### Subsequent projects of AlphaPeptDeep
 
@@ -67,25 +64,6 @@ For documentation, see [readthedocs](https://alphapeptdeep.readthedocs.io/en/lat
 
 ------------------------------------------------------------------------
 
-## Citations
-
-Wen-Feng Zeng, Xie-Xuan Zhou, Sander Willems, Constantin Ammar, Maria Wahle, Isabell Bludau, Eugenia Voytik, Maximillian T. Strauss & Matthias Mann. AlphaPeptDeep: a modular deep learning framework to predict peptide properties for proteomics. Nat Commun 13, 7238 (2022). https://doi.org/10.1038/s41467-022-34904-3
-
-
-------------------------------------------------------------------------
-
-## License
-
-AlphaPeptDeep was developed by the [Mann Labs at the Max Planck
-Institute of Biochemistry](https://www.biochem.mpg.de/mann) and the
-[University of
-Copenhagen](https://www.cpr.ku.dk/research/proteomics/mann/) and is
-freely available with an [Apache License](LICENSE.txt). External Python
-packages (available in the [requirements](requirements) folder) have
-their own licenses, which can be consulted on their respective websites.
-
-------------------------------------------------------------------------
-
 ## Installation
 
 AlphaPeptDeep can be installed and used on all major operating systems
@@ -93,12 +71,12 @@ AlphaPeptDeep can be installed and used on all major operating systems
 
 There are three different types of installation possible:
 
-- [**One-click GUI installer:**](#one-click-gui) Choose this
+- [**One-click GUI installation:**](#one-click-gui) Choose this
   installation if you only want the GUI and/or keep things as simple as
   possible.
-- [**Pip installer:**](#pip) Choose this installation if you want to use peptdeep as a Python package in an existing Python (recommended Python 3.8 or 3.9) environment (e.g. a Jupyter notebook). If needed, the GUI and CLI
+- [**Pip installation:**](#pip) Choose this installation if you want to use peptdeep as a Python package in an existing Python (recommended Python 3.8 or 3.9) environment (e.g. a Jupyter notebook). If needed, the GUI and CLI
   can be installed with pip as well.
-- [**Developer installer:**](#developer) Choose this installation if you
+- [**Developer installation:**](#developer) Choose this installation if you
   are familiar with CLI tools, [conda](https://docs.conda.io/en/latest/)
   and Python. This installation allows access to all available features
   of peptdeep and even allows to modify its source code directly.
@@ -106,123 +84,106 @@ There are three different types of installation possible:
   precompiled versions which makes this the installation of choice for
   high-throughput experiments.
 
-### One-click GUI
+### One-click GUI installation
 
 The GUI of peptdeep is a completely stand-alone tool that requires no
-knowledge of Python or CLI tools. Click on one of the links below to
-download the latest release for:
+knowledge of Python or CLI tools.
 
-- [**Windows**](https://github.com/MannLabs/alphapeptdeep/releases/latest/download/peptdeep-1.4.1-dev0-windows-amd64.exe)
-- [**macOS**](https://github.com/MannLabs/alphapeptdeep/releases/latest/download/peptdeep-1.4.1-dev0-macos-darwin-x64.pkg)
-- [**macOS ARM**](https://github.com/MannLabs/alphapeptdeep/releases/latest/download/peptdeep-1.4.1-dev0-macos-darwin-arm64.pkg )
-- [**Linux**](https://github.com/MannLabs/alphapeptdeep/releases/latest/download/peptdeep-1.4.1-dev0-linux-x64.deb)
+You can download the latest release of peptdeep [here](https://github.com/Mannlabs/peptdeep/releases/latest).
+
+Note that, as GitHub does not support large release files, these installers do not have GPU support.
+To install a version with GPU support [see here](#enable-gpu-support).
+
+#### Windows
+Download the latest `peptdeep-X.Y.Z-windows-amd64.exe ` build and double click it to install. If you receive a warning during installation click *Run anyway*.
+Important note: always install peptdeep into a new folder, as the installer will not properly overwrite existing installations.
+
+#### Linux
+Download the latest `peptdeep-X.Y.Z-linux-x64.deb` build and install it via `dpkg -i peptdeep-X.Y.Z-linux-x64.deb`.
+
+#### MacOS
+Download the latest build suitable for your chip architecture
+(can be looked up by clicking on the Apple Symbol > *About this Mac* > *Chip* ("M1", "M2", "M3" -> `arm64`, "Intel" -> `x64`),
+`peptdeep-X.Y.Z-macos-darwin-arm64.pkg ` or ` peptdeep-X.Y.Z-macos-darwin-x64.pkg`. Open the parent folder of the downloaded file in Finder,
+right-click and select *open*. If you receive a warning during installation click *Open*.
+
+In newer MacOS versions, additional steps are required to enable installation of unverified software.
+This is indicated by a dialog telling you `“peptdeep. ... .pkg” Not Opened`.
+1. Close this dialog by clicking `Done`.
+2. Choose `Apple menu` > `System Settings`, then `Privacy & Security` in the sidebar. (You may need to scroll down.)
+3. Go to `Security`, locate the line "alphadia.pkg was blocked to protect your Mac" then click `Open Anyway`.
+4. In the dialog windows, click `Open Anyway`.
+
 
 Older releases remain available on the [release
 page](https://github.com/MannLabs/alphapeptdeep/releases), but no
 backwards compatibility is guaranteed.
 
-Note that, as GitHub does not allow large release files, these installers do not have GPU support.
-To create GPU version installers: clone the source code, install the GPU-version of pytorch [see here](#use-gpu),
-and then use the `build_installer_*.sh` and `build_package_*.sh`
-script in the respective `release/[macos, linux, windows]` folder to build the installer locally.
-For Linux you need to additionally pass the "GPU" flag, i.e. run
-```bash
-release/linux/build_installer_linux.sh GPU
-release/linux/build_package_linux.sh
-```
 
-### Pip
 
-PythonNET must be installed to access Thermo or Sciex raw data.
-This is provided through AlphaRaw, which depends on Mono (for Mac/Linux).
-A detailed guide to installing AlphaRaw with mono can be found [here](https://github.com/MannLabs/alpharaw#installation).
+### Pip installation
 
 peptdeep can be installed in an existing Python environment with a
 single `bash` command. *This `bash` command can also be run directly
 from within a Jupyter notebook by prepending it with a `!`*:
 
-``` bash
+```bash
 pip install peptdeep
 ```
 
 Installing peptdeep like this avoids conflicts when integrating it in
-other tools, as this does not enforce strict versioning of dependancies.
-However, if new versions of dependancies are released, they are not
+other tools, as this does not enforce strict versioning of dependencies.
+However, if new versions of dependencies are released, they are not
 guaranteed to be fully compatible with peptdeep. This should only occur
 in rare cases where dependencies are not backwards compatible.
 
-> **TODO** You can always force peptdeep to use dependency versions
-> which are known to be compatible with:
->
-> ``` bash
-> pip install "peptdeep[stable]"
-> ```
->
-> NOTE: You might need to run `pip install pip` before installing
-> peptdeep like this. Also note the double quotes `"`.
-
-For those who are really adventurous, it is also possible to directly
-install any branch (e.g. `@main`) with any extras
-(e.g. `#egg=peptdeep[stable,development-stable]`) from GitHub with e.g.
+You can always force peptdeep to use dependency versions
+which are known to be compatible with:
 
 ``` bash
-pip install "git+https://github.com/MannLabs/alphapeptdeep.git@main#egg=peptdeep[stable,development-stable]"
+pip install "peptdeep[stable]"
 ```
 
-### Use GPU
-
-To enable GPU, GPU version of PyTorch is required, it can be installed
-with:
-
+It is also possible to directly install any branch (e.g. `some-branch`) from GitHub with
 ``` bash
-pip install torch --extra-index-url https://download.pytorch.org/whl/cu116 --upgrade
+pip install "git+https://github.com/MannLabs/alphapeptdeep.git@some-branch#egg=peptdeep[stable,development-stable]"
 ```
 
-Note that this may depend on your NVIDIA driver version. Run the command
-to check your NVIDIA driver:
-
+The GUI version can be installed with
 ``` bash
-nvidia-smi
+pip install "peptdeep[gui]"
 ```
-
-For latest pytorch version, see [pytorch.org](https://pytorch.org/get-started/locally/).
-
-### Developer
-
-peptdeep can also be installed in editable (i.e. developer) mode with a
-few `bash` commands. This allows to fully customize the software and
-even modify the source code to your specific needs. When an editable
-Python package is installed, its source code is stored in a transparent
-location of your choice. While optional, it is advised to first (create
-and) navigate to e.g. a general software folder:
-
+or
 ``` bash
-mkdir ~/alphapeptdeep/project/folder
-cd ~/alphapeptdeep/project/folder
+pip install "peptdeep[stable,gui-stable]"
 ```
 
-***The following commands assume you do not perform any additional `cd`
-commands anymore***.
+Note: PythonNET must be installed to access Thermo or Sciex raw data.
+This is provided through AlphaRaw, which depends on Mono (for Mac/Linux).
+A detailed guide to installing AlphaRaw with mono can be found [here](https://github.com/MannLabs/alpharaw#installation).
 
-Next, download the peptdeep repository from GitHub either directly or
-with a `git` command. This creates a new peptdeep subfolder in your
-current directory.
 
+### Developer installation
+
+peptdeep can also be installed in "editable" mode. This allows to fully customize the software and
+even modify the source code to your specific needs.
+
+First, clone the peptdeep repository from GitHub to a new directory
 ``` bash
-git clone https://github.com/MannLabs/alphapeptdeep.git
+mkdir -p ~/alphapeptdeep/project/folder && cd ~/alphapeptdeep/project/folder
+git clone https://github.com/MannLabs/alphapeptdeep.git && cd alphapeptdeep
 ```
 
-For any Python package, it is highly recommended to use a separate
+Next, it is highly recommended to use a separate
 [conda virtual environment](https://docs.conda.io/en/latest/), as
-otherwise *dependency conflicts can occur with already existing
-packages*.
-
+otherwise dependency conflicts can occur with already existing
+packages
 ``` bash
 conda create --name peptdeep python=3.9 -y
 conda activate peptdeep
 ```
 
-Finally, peptdeep and all its [dependancies](requirements) need to be
+Finally, peptdeep and all its [dependencies](requirements) need to be
 installed. To take advantage of all features and allow development (with
 the `-e` flag), this is best done by also installing the [development
 dependencies](requirements/requirements_development_loose.txt) instead of only
@@ -234,14 +195,31 @@ pip install -e ".[development]"
 
 By default this installs 'loose' dependencies (no pinned versions),
 although it is also possible to use stable dependencies
-(e.g. `pip install -e ".[stable,development-stable]"`).
+(e.g. `pip install -e ".[stable,development-stable]"`).
 
 ***By using the editable flag `-e`, all modifications to the [peptdeep
 source code folder](peptdeep) are directly reflected when running
 peptdeep. Note that the peptdeep folder cannot be moved and/or renamed
 if an editable version is installed. In case of confusion, you can
-always retrieve the location of any Python module with e.g. the command
+always retrieve the location of any Python module with e.g. the command
 `import module` followed by `module.__file__`.***
+
+
+### Enable GPU support
+
+To enable GPU, it is use the either the [pip installation](#pip-installation)
+or the [developer installation](#developer-installation) option,
+and install the GPU version of PyTorch:
+``` bash
+pip install torch --extra-index-url https://download.pytorch.org/whl/cu116 --upgrade
+```
+
+Note that this may depend on your NVIDIA driver version, which can be checked with:
+``` bash
+nvidia-smi
+```
+
+For latest pytorch version, see [pytorch.org](https://pytorch.org/get-started/locally/).
 
 ------------------------------------------------------------------------
 
@@ -319,7 +297,7 @@ peptdeep library -h
 #### export-settings
 
 ``` bash
-peptdeep export-settings C:/path/to/settings.yaml
+peptdeep export-settings /path/to/settings.yaml
 ```
 
 This command will export the default settings into the `settings.yaml`
@@ -880,7 +858,7 @@ from peptdeep.rescore.percolator import Percolator
 `Percolator` class provides functionalities to rescore DDA PSMs search by `pFind` and
 `AlphaPept`, (and `MaxQuant` if output FDR=100%), …
 
-Check out [test_percolator.ipynb](https://github.com/MannLabs/alphapeptdeep/blob/main/nbs_tests/test_percolator.ipynb)
+Check out [test_percolator.ipynb](https://github.com/MannLabs/alphapeptdeep/blob/main/nbs_trials/test_percolator.ipynb)
 for details.
 
 #### HLA Peptide Prediction
@@ -949,5 +927,26 @@ pre-commit run --all-files
 
 ## Changelog
 
-See the [HISTORY.md](HISTORY.md) for a full overview of the changes made
-in each version.
+See the [GitHub releases](https://github.com/MannLabs/alphapeptdeep/releases).
+for a full overview of the changes made in each version, [CHANGELOG.md](CHANGELOG.md) for older versions.
+
+------------------------------------------------------------------------
+
+## Citation
+
+> **AlphaPeptDeep: a modular deep learning framework to predict peptide properties for proteomics.**
+> Wen-Feng Zeng, Xie-Xuan Zhou, Sander Willems, Constantin Ammar, Maria Wahle, Isabell Bludau, Eugenia Voytik, Maximillian T. Strauss & Matthias Mann.
+> Nat Commun 13, 7238 (2022), doi: https://doi.org/10.1038/s41467-022-34904-3
+
+
+------------------------------------------------------------------------
+
+## License
+
+AlphaPeptDeep was developed by the [Mann Labs at the Max Planck
+Institute of Biochemistry](https://www.biochem.mpg.de/mann) and the
+[University of
+Copenhagen](https://www.cpr.ku.dk/research/proteomics/mann/) and is
+freely available with an [Apache License](LICENSE.txt). External Python
+packages (available in the [requirements](requirements) folder) have
+their own licenses, which can be consulted on their respective websites.
