@@ -69,12 +69,12 @@ AlphaPeptDeep can be installed and used on all major operating systems
 
 There are three different types of installation possible:
 
-- [**One-click GUI installer:**](#one-click-gui) Choose this
+- [**One-click GUI installation:**](#one-click-gui) Choose this
   installation if you only want the GUI and/or keep things as simple as
   possible.
-- [**Pip installer:**](#pip) Choose this installation if you want to use peptdeep as a Python package in an existing Python (recommended Python 3.8 or 3.9) environment (e.g. a Jupyter notebook). If needed, the GUI and CLI
+- [**Pip installation:**](#pip) Choose this installation if you want to use peptdeep as a Python package in an existing Python (recommended Python 3.8 or 3.9) environment (e.g. a Jupyter notebook). If needed, the GUI and CLI
   can be installed with pip as well.
-- [**Developer installer:**](#developer) Choose this installation if you
+- [**Developer installation:**](#developer) Choose this installation if you
   are familiar with CLI tools, [conda](https://docs.conda.io/en/latest/)
   and Python. This installation allows access to all available features
   of peptdeep and even allows to modify its source code directly.
@@ -82,16 +82,33 @@ There are three different types of installation possible:
   precompiled versions which makes this the installation of choice for
   high-throughput experiments.
 
-### One-click GUI
+### One-click GUI installation
 
 The GUI of peptdeep is a completely stand-alone tool that requires no
-knowledge of Python or CLI tools. Click on one of the links below to
-download the latest release for:
+knowledge of Python or CLI tools.
 
-- [**Windows**](https://github.com/MannLabs/alphapeptdeep/releases/latest/download/peptdeep-1.4.1-dev0-windows-amd64.exe)
-- [**macOS**](https://github.com/MannLabs/alphapeptdeep/releases/latest/download/peptdeep-1.4.1-dev0-macos-darwin-x64.pkg)
-- [**macOS ARM**](https://github.com/MannLabs/alphapeptdeep/releases/latest/download/peptdeep-1.4.1-dev0-macos-darwin-arm64.pkg )
-- [**Linux**](https://github.com/MannLabs/alphapeptdeep/releases/latest/download/peptdeep-1.4.1-dev0-linux-x64.deb)
+You can download the latest release of peptdeep [here](https://github.com/Mannlabs/peptdeep/releases/latest).
+
+#### Windows
+Download the latest `peptdeep-X.Y.Z-windows-amd64.exe ` build and double click it to install. If you receive a warning during installation click *Run anyway*.
+Important note: always install peptdeep into a new folder, as the installer will not properly overwrite existing installations.
+
+#### Linux
+Download the latest `peptdeep-X.Y.Z-linux-x64.deb` build and install it via `dpkg -i peptdeep-X.Y.Z-linux-x64.deb`.
+
+#### MacOS
+Download the latest build suitable for your chip architecture
+(can be looked up by clicking on the Apple Symbol > *About this Mac* > *Chip* ("M1", "M2", "M3" -> `arm64`, "Intel" -> `x64`),
+`peptdeep-X.Y.Z-macos-darwin-arm64.pkg ` or ` peptdeep-X.Y.Z-macos-darwin-x64.pkg`. Open the parent folder of the downloaded file in Finder,
+right-click and select *open*. If you receive a warning during installation click *Open*.
+
+In newer MacOS versions, additional steps are required to enable installation of unverified software.
+This is indicated by a dialog telling you `“peptdeep. ... .pkg” Not Opened`.
+1. Close this dialog by clicking `Done`.
+2. Choose `Apple menu` > `System Settings`, then `Privacy & Security` in the sidebar. (You may need to scroll down.)
+3. Go to `Security`, locate the line "alphadia.pkg was blocked to protect your Mac" then click `Open Anyway`.
+4. In the dialog windows, click `Open Anyway`.
+
 
 Older releases remain available on the [release
 page](https://github.com/MannLabs/alphapeptdeep/releases), but no
@@ -122,8 +139,8 @@ pip install peptdeep
 ```
 
 Installing peptdeep like this avoids conflicts when integrating it in
-other tools, as this does not enforce strict versioning of dependancies.
-However, if new versions of dependancies are released, they are not
+other tools, as this does not enforce strict versioning of dependencies.
+However, if new versions of dependencies are released, they are not
 guaranteed to be fully compatible with peptdeep. This should only occur
 in rare cases where dependencies are not backwards compatible.
 
@@ -134,12 +151,12 @@ which are known to be compatible with:
 pip install "peptdeep[stable]"
 ```
 
- NOTE: You might need to run `pip install pip` before installing
- peptdeep like this. Also note the double quotes `"`.
+NOTE: You might need to run `pip install pip` before installing
+peptdeep like this. Also note the double quotes `"`.
 
-For those who are really adventurous, it is also possible to directly
-install any branch (e.g. `@main`) with any extras
-(e.g. `#egg=peptdeep[stable,development-stable]`) from GitHub with e.g.
+It is also possible to directly
+install any branch (e.g. `@main`) with any extras
+(e.g. `#egg=peptdeep[stable,development-stable]`) from GitHub with e.g.
 
 ``` bash
 pip install "git+https://github.com/MannLabs/alphapeptdeep.git@main#egg=peptdeep[stable,development-stable]"
@@ -856,7 +873,7 @@ from peptdeep.rescore.percolator import Percolator
 `Percolator` class provides functionalities to rescore DDA PSMs search by `pFind` and
 `AlphaPept`, (and `MaxQuant` if output FDR=100%), …
 
-Check out [test_percolator.ipynb](https://github.com/MannLabs/alphapeptdeep/blob/main/nbs_tests/test_percolator.ipynb)
+Check out [test_percolator.ipynb](https://github.com/MannLabs/alphapeptdeep/blob/main/nbs_trials/test_percolator.ipynb)
 for details.
 
 #### HLA Peptide Prediction
