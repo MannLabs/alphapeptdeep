@@ -26,6 +26,10 @@
     ·
     <a href="https://github.com/Mannlabs/peptdeeo/releases/latest">Download</a>
     ·
+    <a href="#installation">Installation</a>
+    ·
+    <a href="#usage">Usage</a>
+    ·
     <a href="https://alphapeptdeep.readthedocs.io/en/latest/">Documentation</a>
     ·
     <a href="https://alphapept.org">alphapept.org</a>
@@ -36,7 +40,7 @@
 ![screenshot](misc/screenshot.png)
 
 ## About
-
+[d](#installation)
 AlphaPeptDeep (`peptdeep` for short) aims to easily build new deep
 learning models for shotgun proteomics studies. Transfer learning is
 also easy to apply using AlphaPeptDeep.
