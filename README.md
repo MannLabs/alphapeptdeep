@@ -1,7 +1,7 @@
 # AlphaPeptDeep (PeptDeep)
 
 [![Default installation and tests](https://github.com/MannLabs/alphapeptdeep/actions/workflows/pip_installation.yml/badge.svg)](https://github.com/MannLabs/alphapeptdeep/actions/workflows/pip_installation.yml)
-[![Publish on PyPi and release on GitHub](https://github.com/MannLabs/alphapeptdeep/actions/workflows/publish_and_release.yml/badge.svg)](https://github.com/MannLabs/alphapeptdeep/actions/workflows/publish_and_release.yml)
+[![Publish on PyPi and release on GitHub](https://github.com/MannLabs/alphapeptdeep/actions/workflows/publish_on_pypi.yml/badge.svg)](https://github.com/MannLabs/alphapeptdeep/actions/workflows/publish_and_release.yml)
 [![Documentation Status](https://readthedocs.org/projects/alphapeptdeep/badge/?version=latest)](https://alphapeptdeep.readthedocs.io/en/latest/?badge=latest)
 [![pypi](https://img.shields.io/pypi/v/peptdeep)](https://pypi.org/project/peptdeep)
 [![GitHub release](https://img.shields.io/github/v/release/mannlabs/alphapeptdeep?display_name=tag)](https://github.com/MannLabs/alphapeptdeep/releases)
@@ -10,23 +10,30 @@
 [![pip downloads](https://img.shields.io/pypi/dm/peptdeep?color=blue&label=pip%20downloads)](https://pypi.org/project/peptdeep)
 ![Python](https://img.shields.io/pypi/pyversions/peptdeep)
 
-- [**About**](#about)
-- [**License**](#license)
-- [**Installation**](#installation)
-  - [**One-click GUI**](#one-click-gui)
-  - [**Pip installer**](#pip)
-  - [**Use GPU**](#use-gpu)
-  - [**Developer installer**](#developer)
-- [**Usage**](#usage)
-  - [**GUI**](#gui)
-  - [**CLI**](#cli)
-  - [**Python and jupyter notebooks**](#python-and-jupyter-notebooks)
-- [**Troubleshooting**](#troubleshooting)
-- [**Citations**](#citations)
-- [**How to contribute**](#how-to-contribute)
-- [**Changelog**](#changelog)
-
 ------------------------------------------------------------------------
+
+<!-- PROJECT LOGO -->
+<br />
+<div align="center">
+  <a href="https://github.com/othneildrew/Best-README-Template">
+    <img src="peptdeep/webui/logos/peptdeep.png" alt="Logo" width="80" height="80">
+  </a>
+
+  <h3 align="center">AlphaPeptDeep</h3>
+
+  <p align="center">
+    <a href="https://doi.org/10.1038/s41467-022-34904-3">Publication</a>
+    ·
+    <a href="https://github.com/Mannlabs/peptdeeo/releases/latest">Download</a>
+    ·
+    <a href="https://alphapeptdeep.readthedocs.io/en/latest/">Documentation</a>
+    ·
+    <a href="https://alphapept.org">alphapept.org</a>
+
+  </p>
+</div>
+
+![screenshot](misc/screenshot.png)
 
 ## About
 
