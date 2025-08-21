@@ -50,11 +50,9 @@ cross section (CCS), and tandem mass spectrum (MS2) prediction for given
 peptides. With these models, one can easily generate a predicted library
 from fasta files.
 
-For details, check out our [publications](#citations).
+For details, check out our [publication](#citation), and the [documentation](https://alphapeptdeep.readthedocs.io/en/latest/).
 
-For documentation, see [readthedocs](https://alphapeptdeep.readthedocs.io/en/latest/).
-
-Check out [alphapept.org](https://alphapept.org) for other packages of AlphaPept ecosystem.
+Visit [alphapept.org](https://alphapept.org) for other packages of AlphaPept ecosystem.
 
 ### Subsequent projects of AlphaPeptDeep
 
@@ -934,7 +932,7 @@ for a full overview of the changes made in each version, [CHANGELOG.md](CHANGELO
 
 ------------------------------------------------------------------------
 
-## Citations
+## Citation
 
 > **AlphaPeptDeep: a modular deep learning framework to predict peptide properties for proteomics.**
 > Wen-Feng Zeng, Xie-Xuan Zhou, Sander Willems, Constantin Ammar, Maria Wahle, Isabell Bludau, Eugenia Voytik, Maximillian T. Strauss & Matthias Mann.
