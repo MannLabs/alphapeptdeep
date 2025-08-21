@@ -89,6 +89,9 @@ knowledge of Python or CLI tools.
 
 You can download the latest release of peptdeep [here](https://github.com/Mannlabs/peptdeep/releases/latest).
 
+Note that, as GitHub does not support large release files, these installers do not have GPU support.
+To install a version with GPU support [see here](#enable-gpu-support).
+
 #### Windows
 Download the latest `peptdeep-X.Y.Z-windows-amd64.exe ` build and double click it to install. If you receive a warning during installation click *Run anyway*.
 Important note: always install peptdeep into a new folder, as the installer will not properly overwrite existing installations.
@@ -114,15 +117,7 @@ Older releases remain available on the [release
 page](https://github.com/MannLabs/alphapeptdeep/releases), but no
 backwards compatibility is guaranteed.
 
-Note that, as GitHub does not allow large release files, these installers do not have GPU support.
-To create GPU version installers: clone the source code, install the GPU-version of pytorch [see here](#use-gpu),
-and then use the `build_installer_*.sh` and `build_package_*.sh`
-script in the respective `release/[macos, linux, windows]` folder to build the installer locally.
-For Linux you need to additionally pass the "GPU" flag, i.e. run
-```bash
-release/linux/build_installer_linux.sh GPU
-release/linux/build_package_linux.sh
-```
+
 
 ### Pip installation
 
@@ -166,20 +161,6 @@ This is provided through AlphaRaw, which depends on Mono (for Mac/Linux).
 A detailed guide to installing AlphaRaw with mono can be found [here](https://github.com/MannLabs/alpharaw#installation).
 
 
-### Enable GPU support for pip installations
-
-To use the GPU, the GPU version of PyTorch needs to be installed with:
-``` bash
-pip install torch --extra-index-url https://download.pytorch.org/whl/cu116 --upgrade
-```
-
-Note that this may depend on your NVIDIA driver version, which can be checked with:
-``` bash
-nvidia-smi
-```
-
-For latest pytorch version, see [pytorch.org](https://pytorch.org/get-started/locally/).
-
 ### Developer installation
 
 peptdeep can also be installed in "editable" mode. This allows to fully customize the software and
@@ -193,8 +174,8 @@ git clone https://github.com/MannLabs/alphapeptdeep.git && cd alphapeptdeep
 
 Next, it is highly recommended to use a separate
 [conda virtual environment](https://docs.conda.io/en/latest/), as
-otherwise *dependency conflicts can occur with already existing
-packages*.
+otherwise dependency conflicts can occur with already existing
+packages
 ``` bash
 conda create --name peptdeep python=3.9 -y
 conda activate peptdeep
@@ -221,6 +202,22 @@ if an editable version is installed. In case of confusion, you can
 always retrieve the location of any Python module with e.g. the command
 `import module` followed by `module.__file__`.***
 
+
+### Enable GPU support
+
+To enable GPU, it is use the either the [pip installation](#pip-installation)
+or the [developer installation](#developer-installation) option,
+and install the GPU version of PyTorch:
+``` bash
+pip install torch --extra-index-url https://download.pytorch.org/whl/cu116 --upgrade
+```
+
+Note that this may depend on your NVIDIA driver version, which can be checked with:
+``` bash
+nvidia-smi
+```
+
+For latest pytorch version, see [pytorch.org](https://pytorch.org/get-started/locally/).
 
 ------------------------------------------------------------------------
 
