@@ -126,10 +126,6 @@ release/linux/build_package_linux.sh
 
 ### Pip installation
 
-PythonNET must be installed to access Thermo or Sciex raw data.
-This is provided through AlphaRaw, which depends on Mono (for Mac/Linux).
-A detailed guide to installing AlphaRaw with mono can be found [here](https://github.com/MannLabs/alpharaw#installation).
-
 peptdeep can be installed in an existing Python environment with a
 single `bash` command. *This `bash` command can also be run directly
 from within a Jupyter notebook by prepending it with a `!`*:
@@ -151,29 +147,33 @@ which are known to be compatible with:
 pip install "peptdeep[stable]"
 ```
 
-NOTE: You might need to run `pip install pip` before installing
-peptdeep like this. Also note the double quotes `"`.
-
-It is also possible to directly
-install any branch (e.g. `@main`) with any extras
-(e.g. `#egg=peptdeep[stable,development-stable]`) from GitHub with e.g.
-
+It is also possible to directly install any branch (e.g. `some-branch`) from GitHub with
 ``` bash
-pip install "git+https://github.com/MannLabs/alphapeptdeep.git@main#egg=peptdeep[stable,development-stable]"
+pip install "git+https://github.com/MannLabs/alphapeptdeep.git@some-branch#egg=peptdeep[stable,development-stable]"
 ```
 
-### Use GPU
+The GUI version can be installed with
+``` bash
+pip install "peptdeep[gui]"
+```
+or
+``` bash
+pip install "peptdeep[stable,gui-stable]"
+```
 
-To enable GPU, GPU version of PyTorch is required, it can be installed
-with:
+Note: PythonNET must be installed to access Thermo or Sciex raw data.
+This is provided through AlphaRaw, which depends on Mono (for Mac/Linux).
+A detailed guide to installing AlphaRaw with mono can be found [here](https://github.com/MannLabs/alpharaw#installation).
 
+
+### Enable GPU support for pip installations
+
+To use the GPU, the GPU version of PyTorch needs to be installed with:
 ``` bash
 pip install torch --extra-index-url https://download.pytorch.org/whl/cu116 --upgrade
 ```
 
-Note that this may depend on your NVIDIA driver version. Run the command
-to check your NVIDIA driver:
-
+Note that this may depend on your NVIDIA driver version, which can be checked with:
 ``` bash
 nvidia-smi
 ```
@@ -182,8 +182,7 @@ For latest pytorch version, see [pytorch.org](https://pytorch.org/get-started/lo
 
 ### Developer installation
 
-peptdeep can also be installed in "editable" mode with a
-few `bash` commands. This allows to fully customize the software and
+peptdeep can also be installed in "editable" mode. This allows to fully customize the software and
 even modify the source code to your specific needs.
 
 First, clone the peptdeep repository from GitHub to a new directory
@@ -299,7 +298,7 @@ peptdeep library -h
 #### export-settings
 
 ``` bash
-peptdeep export-settings C:/path/to/settings.yaml
+peptdeep export-settings /path/to/settings.yaml
 ```
 
 This command will export the default settings into the `settings.yaml`
