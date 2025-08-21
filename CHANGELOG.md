@@ -1,6 +1,9 @@
 # Changelog
 
+
 Follow the changelog format from https://keepachangelog.com/en/1.0.0/.
+
+For later changes, see the [GitHub releases](https://github.com/MannLabs/alphapeptdeep/releases).
 
 ## 1.1.0
 

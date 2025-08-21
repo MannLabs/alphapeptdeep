@@ -925,8 +925,8 @@ pre-commit run --all-files
 
 ## Changelog
 
-See the [HISTORY.md](HISTORY.md) for a full overview of the changes made
-in each version.
+See the [GitHub releases](https://github.com/MannLabs/alphapeptdeep/releases).
+for a full overview of the changes made in each version, [CHANGELOG.md](CHANGELOG.md) for older versions.
 
 ------------------------------------------------------------------------
 
