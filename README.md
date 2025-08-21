@@ -124,7 +124,7 @@ release/linux/build_installer_linux.sh GPU
 release/linux/build_package_linux.sh
 ```
 
-### Pip
+### Pip installation
 
 PythonNET must be installed to access Thermo or Sciex raw data.
 This is provided through AlphaRaw, which depends on Mono (for Mac/Linux).
@@ -134,7 +134,7 @@ peptdeep can be installed in an existing Python environment with a
 single `bash` command. *This `bash` command can also be run directly
 from within a Jupyter notebook by prepending it with a `!`*:
 
-``` bash
+```bash
 pip install peptdeep
 ```
 
@@ -180,42 +180,28 @@ nvidia-smi
 
 For latest pytorch version, see [pytorch.org](https://pytorch.org/get-started/locally/).
 
-### Developer
+### Developer installation
 
-peptdeep can also be installed in editable (i.e. developer) mode with a
+peptdeep can also be installed in "editable" mode with a
 few `bash` commands. This allows to fully customize the software and
-even modify the source code to your specific needs. When an editable
-Python package is installed, its source code is stored in a transparent
-location of your choice. While optional, it is advised to first (create
-and) navigate to e.g. a general software folder:
+even modify the source code to your specific needs.
 
+First, clone the peptdeep repository from GitHub to a new directory
 ``` bash
-mkdir ~/alphapeptdeep/project/folder
-cd ~/alphapeptdeep/project/folder
+mkdir -p ~/alphapeptdeep/project/folder && cd ~/alphapeptdeep/project/folder
+git clone https://github.com/MannLabs/alphapeptdeep.git && cd alphapeptdeep
 ```
 
-***The following commands assume you do not perform any additional `cd`
-commands anymore***.
-
-Next, download the peptdeep repository from GitHub either directly or
-with a `git` command. This creates a new peptdeep subfolder in your
-current directory.
-
-``` bash
-git clone https://github.com/MannLabs/alphapeptdeep.git
-```
-
-For any Python package, it is highly recommended to use a separate
+Next, it is highly recommended to use a separate
 [conda virtual environment](https://docs.conda.io/en/latest/), as
 otherwise *dependency conflicts can occur with already existing
 packages*.
-
 ``` bash
 conda create --name peptdeep python=3.9 -y
 conda activate peptdeep
 ```
 
-Finally, peptdeep and all its [dependancies](requirements) need to be
+Finally, peptdeep and all its [dependencies](requirements) need to be
 installed. To take advantage of all features and allow development (with
 the `-e` flag), this is best done by also installing the [development
 dependencies](requirements/requirements_development_loose.txt) instead of only
@@ -227,14 +213,15 @@ pip install -e ".[development]"
 
 By default this installs 'loose' dependencies (no pinned versions),
 although it is also possible to use stable dependencies
-(e.g. `pip install -e ".[stable,development-stable]"`).
+(e.g. `pip install -e ".[stable,development-stable]"`).
 
 ***By using the editable flag `-e`, all modifications to the [peptdeep
 source code folder](peptdeep) are directly reflected when running
 peptdeep. Note that the peptdeep folder cannot be moved and/or renamed
 if an editable version is installed. In case of confusion, you can
-always retrieve the location of any Python module with e.g. the command
+always retrieve the location of any Python module with e.g. the command
 `import module` followed by `module.__file__`.***
+
 
 ------------------------------------------------------------------------
 
