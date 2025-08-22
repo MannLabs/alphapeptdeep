@@ -15,14 +15,11 @@ readme = "README.md"
 keywords = [
     "mass spectrometry",
     "proteomics",
-    "search engine",
-    "DIA",
-    "data-independent acquisition",
     "bioinformatics",
     "AlphaPept",
     "AlphaPept ecosystem",
     "deep learning",
-    "AlphaX ecosystem",
+    "alphapept.org",
 ]
 license = {file = "LICENSE.txt"}
 classifiers = [
@@ -38,14 +35,13 @@ classifiers = [
 
 [project.urls]
 
-"Paper preprint" = "https://www.biochem.mpg.de/mann"
-Repository = "https://github.com/MannLabs/peptdeep"
-#Documentation = "https://readthedocs.org"
-#Changelog = "https://github.com/me/spam/blob/master/CHANGELOG.md"
-Issues = "https://github.com/MannLabs/peptdeep/issues"
+repository = "https://github.com/MannLabs/peptdeep"
+issues = "https://github.com/MannLabs/peptdeep/issues"
+download = "https://mannlabs.github.io/peptdeep/releases"
+homepage = "https://www.alphapept.org"
 "Mann Labs Homepage" = "https://www.biochem.mpg.de/mann"
-Docs = "https://alphapeptdeep.readthedocs.io/en/latest/"
-PyPi = "https://pypi.org/project/peptdeep/"
+publication = "https://doi.org/10.1038/s41467-022-34904-3"
+documentation = "https://alphapeptdeep.readthedocs.io/en/latest/"
 
 [tool.setuptools.packages]
 find = {}

@@ -1,4 +1,3 @@
-# AlphaPeptDeep (PeptDeep)
 
 [![Default installation and tests](https://github.com/MannLabs/alphapeptdeep/actions/workflows/pip_installation.yml/badge.svg)](https://github.com/MannLabs/alphapeptdeep/actions/workflows/pip_installation.yml)
 [![Publish on PyPi and release on GitHub](https://github.com/MannLabs/alphapeptdeep/actions/workflows/publish_on_pypi.yml/badge.svg)](https://github.com/MannLabs/alphapeptdeep/actions/workflows/publish_and_release.yml)
@@ -10,21 +9,21 @@
 [![pip downloads](https://img.shields.io/pypi/dm/peptdeep?color=blue&label=pip%20downloads)](https://pypi.org/project/peptdeep)
 ![Python](https://img.shields.io/pypi/pyversions/peptdeep)
 
+# AlphaPeptDeep (PeptDeep)
+
 ------------------------------------------------------------------------
 
 <!-- PROJECT LOGO -->
 <br />
 <div align="center">
-  <a href="https://github.com/othneildrew/Best-README-Template">
-    <img src="peptdeep/webui/logos/peptdeep.png" alt="Logo" width="80" height="80">
-  </a>
+  <img src="peptdeep/webui/logos/peptdeep.png" alt="Logo" width="80" height="80">
 
-  <h3 align="center">AlphaPeptDeep</h3>
+  <h3 align="center">PeptDeep</h3>
 
   <p align="center">
     <a href="https://doi.org/10.1038/s41467-022-34904-3">Publication</a>
     ·
-    <a href="https://github.com/Mannlabs/peptdeeo/releases/latest">Download</a>
+    <a href="https://github.com/Mannlabs/peptdeep/releases/latest">Download</a>
     ·
     <a href="#installation">Installation</a>
     ·
@@ -69,20 +68,21 @@ Visit [alphapept.org](https://alphapept.org) for other packages of AlphaPept eco
 AlphaPeptDeep can be installed and used on all major operating systems
 (Windows, macOS and Linux).
 
-There are three different types of installation possible:
+There are different types of installation possible:
 
-- [**One-click GUI installation:**](#one-click-gui) Choose this
+- [**One-click GUI installation:**](#one-click-gui-installation) Choose this
   installation if you only want the GUI and/or keep things as simple as
   possible.
-- [**Pip installation:**](#pip) Choose this installation if you want to use peptdeep as a Python package in an existing Python (recommended Python 3.8 or 3.9) environment (e.g. a Jupyter notebook). If needed, the GUI and CLI
+- [**Pip installation:**](#pip-installation) Choose this installation if you want to use peptdeep as a Python package in an existing Python (recommended Python 3.8 or 3.9) environment (e.g. a Jupyter notebook). If needed, the GUI and CLI
   can be installed with pip as well.
-- [**Developer installation:**](#developer) Choose this installation if you
+- [**Developer installation:**](#developer-installation) Choose this installation if you
   are familiar with CLI tools, [conda](https://docs.conda.io/en/latest/)
   and Python. This installation allows access to all available features
   of peptdeep and even allows to modify its source code directly.
   Generally, the developer version of peptdeep outperforms the
   precompiled versions which makes this the installation of choice for
   high-throughput experiments.
+- [**Docker installation**](#docker-installation) Choose this installation if you want to use peptdeep without any changes to your system.
 
 ### One-click GUI installation
 
@@ -111,7 +111,7 @@ In newer MacOS versions, additional steps are required to enable installation of
 This is indicated by a dialog telling you `“peptdeep. ... .pkg” Not Opened`.
 1. Close this dialog by clicking `Done`.
 2. Choose `Apple menu` > `System Settings`, then `Privacy & Security` in the sidebar. (You may need to scroll down.)
-3. Go to `Security`, locate the line "alphadia.pkg was blocked to protect your Mac" then click `Open Anyway`.
+3. Go to `Security`, locate the line "peptdeep.pkg was blocked to protect your Mac" then click `Open Anyway`.
 4. In the dialog windows, click `Open Anyway`.
 
 
@@ -197,13 +197,45 @@ By default this installs 'loose' dependencies (no pinned versions),
 although it is also possible to use stable dependencies
 (e.g. `pip install -e ".[stable,development-stable]"`).
 
-***By using the editable flag `-e`, all modifications to the [peptdeep
+By using the editable flag `-e`, all modifications to the [peptdeep
 source code folder](peptdeep) are directly reflected when running
 peptdeep. Note that the peptdeep folder cannot be moved and/or renamed
 if an editable version is installed. In case of confusion, you can
 always retrieve the location of any Python module with e.g. the command
-`import module` followed by `module.__file__`.***
+`import module` followed by `module.__file__`.
 
+### Docker installation
+The containerized version can be used to run peptdeep without any installation to your system.
+
+#### 1. Setting up Docker
+Install the latest version of docker (https://docs.docker.com/engine/install/).
+
+#### 2. Prepare folder structure
+Set up your data to match the expected folder structure:
+create a folder and store its name in a variable, and specify a port
+```
+DATA_FOLDER=/home/username/data; mkdir -p $DATA_FOLDER
+PORT=8501
+```
+
+#### 3. Start the container
+```bash
+docker run -v $DATA_FOLDER:/app/data -p $PORT:8501 mannlabs/peptdeep:latest
+```
+After initial download of the container, peptdeep will start running immediately,
+and can be accessed under [localhost:$PORT](http://localhost:8501).
+
+Note: in the app, the local `$DATA_FOLDER` needs to be referred to as "`/app/data`".
+
+#### Alternatively: Build the image yourself
+If you want to build the image yourself, you can do so by
+```bash
+docker build -t peptdeep .
+```
+and run it with
+```bash
+docker run -p $PORT:8501 -v $DATA_FOLDER:/app/data -t peptdeep
+```
 
 ### Enable GPU support
 
