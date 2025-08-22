@@ -71,18 +71,19 @@ AlphaPeptDeep can be installed and used on all major operating systems
 
 There are three different types of installation possible:
 
-- [**One-click GUI installation:**](#one-click-gui) Choose this
+- [**One-click GUI installation:**](#one-click-gui-installation) Choose this
   installation if you only want the GUI and/or keep things as simple as
   possible.
-- [**Pip installation:**](#pip) Choose this installation if you want to use peptdeep as a Python package in an existing Python (recommended Python 3.8 or 3.9) environment (e.g. a Jupyter notebook). If needed, the GUI and CLI
+- [**Pip installation:**](#pip-installation) Choose this installation if you want to use peptdeep as a Python package in an existing Python (recommended Python 3.8 or 3.9) environment (e.g. a Jupyter notebook). If needed, the GUI and CLI
   can be installed with pip as well.
-- [**Developer installation:**](#developer) Choose this installation if you
+- [**Developer installation:**](#developer-installation) Choose this installation if you
   are familiar with CLI tools, [conda](https://docs.conda.io/en/latest/)
   and Python. This installation allows access to all available features
   of peptdeep and even allows to modify its source code directly.
   Generally, the developer version of peptdeep outperforms the
   precompiled versions which makes this the installation of choice for
   high-throughput experiments.
+- [**Docker installation**](#docker-installation) Choose this installation if you want to use peptdeep without any changes to your system.
 
 ### One-click GUI installation
 
@@ -204,6 +205,34 @@ if an editable version is installed. In case of confusion, you can
 always retrieve the location of any Python module with e.g. the command
 `import module` followed by `module.__file__`.***
 
+### Docker installation
+The containerized version can be used to run peptdeep without any installation to your system.
+
+#### 1. Setting up Docker
+Install the latest version of docker (https://docs.docker.com/engine/install/).
+
+#### 2. Prepare folder structure
+Set up your data to match the expected folder structure:Create a folder and store its name in a variable,
+e.g. `DATA_FOLDER=/home/username/data; mkdir -p $DATA_FOLDER`
+
+#### 3. Start the container
+```bash
+docker run -v $DATA_FOLDER:/app/data -p 8501:8501 mannlabs/peptdeep:latest
+```
+After initial download of the container, peptdeep will start running immediately,
+and can be accessed under [localhost:8501](localhost:8501).
+
+Note: in the app, the local `$DATA_FOLDER` needs to be referred to as "`/app/data`".
+
+#### Alternatively: Build the image yourself
+If you want to build the image yourself, you can do so by
+```bash
+docker build -t peptdeep .
+```
+and run it with
+```bash
+docker run -p 8501:8501 -v $DATA_FOLDER:/app/data -t peptdeep
+```
 
 ### Enable GPU support
 
