@@ -1,4 +1,3 @@
-# AlphaPeptDeep (PeptDeep)
 
 [![Default installation and tests](https://github.com/MannLabs/alphapeptdeep/actions/workflows/pip_installation.yml/badge.svg)](https://github.com/MannLabs/alphapeptdeep/actions/workflows/pip_installation.yml)
 [![Publish on PyPi and release on GitHub](https://github.com/MannLabs/alphapeptdeep/actions/workflows/publish_on_pypi.yml/badge.svg)](https://github.com/MannLabs/alphapeptdeep/actions/workflows/publish_and_release.yml)
@@ -10,6 +9,8 @@
 [![pip downloads](https://img.shields.io/pypi/dm/peptdeep?color=blue&label=pip%20downloads)](https://pypi.org/project/peptdeep)
 ![Python](https://img.shields.io/pypi/pyversions/peptdeep)
 
+# AlphaPeptDeep (PeptDeep)
+
 ------------------------------------------------------------------------
 
 <!-- PROJECT LOGO -->
@@ -17,7 +18,7 @@
 <div align="center">
   <img src="peptdeep/webui/logos/peptdeep.png" alt="Logo" width="80" height="80">
 
-  <h3 align="center">AlphaPeptDeep</h3>
+  <h3 align="center">PeptDeep</h3>
 
   <p align="center">
     <a href="https://doi.org/10.1038/s41467-022-34904-3">Publication</a>
