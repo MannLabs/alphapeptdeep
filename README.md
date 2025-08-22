@@ -68,7 +68,7 @@ Visit [alphapept.org](https://alphapept.org) for other packages of AlphaPept eco
 AlphaPeptDeep can be installed and used on all major operating systems
 (Windows, macOS and Linux).
 
-There are three different types of installation possible:
+There are different types of installation possible:
 
 - [**One-click GUI installation:**](#one-click-gui-installation) Choose this
   installation if you only want the GUI and/or keep things as simple as
