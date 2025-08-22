@@ -15,9 +15,7 @@
 <!-- PROJECT LOGO -->
 <br />
 <div align="center">
-  <a href="https://github.com/othneildrew/Best-README-Template">
-    <img src="peptdeep/webui/logos/peptdeep.png" alt="Logo" width="80" height="80">
-  </a>
+  <img src="peptdeep/webui/logos/peptdeep.png" alt="Logo" width="80" height="80">
 
   <h3 align="center">AlphaPeptDeep</h3>
 
@@ -212,15 +210,19 @@ The containerized version can be used to run peptdeep without any installation t
 Install the latest version of docker (https://docs.docker.com/engine/install/).
 
 #### 2. Prepare folder structure
-Set up your data to match the expected folder structure:Create a folder and store its name in a variable,
-e.g. `DATA_FOLDER=/home/username/data; mkdir -p $DATA_FOLDER`
+Set up your data to match the expected folder structure:
+create a folder and store its name in a variable, and specify a port
+```
+DATA_FOLDER=/home/username/data; mkdir -p $DATA_FOLDER`
+PORT=8501
+```
 
 #### 3. Start the container
 ```bash
-docker run -v $DATA_FOLDER:/app/data -p 8501:8501 mannlabs/peptdeep:latest
+docker run -v $DATA_FOLDER:/app/data -p $PORT:8501 mannlabs/peptdeep:latest
 ```
 After initial download of the container, peptdeep will start running immediately,
-and can be accessed under [localhost:8501](localhost:8501).
+and can be accessed under [localhost:$PORT](http://localhost:8501).
 
 Note: in the app, the local `$DATA_FOLDER` needs to be referred to as "`/app/data`".
 
@@ -231,7 +233,7 @@ docker build -t peptdeep .
 ```
 and run it with
 ```bash
-docker run -p 8501:8501 -v $DATA_FOLDER:/app/data -t peptdeep
+docker run -p $PORT:8501 -v $DATA_FOLDER:/app/data -t peptdeep
 ```
 
 ### Enable GPU support
