@@ -22,7 +22,7 @@
   <p align="center">
     <a href="https://doi.org/10.1038/s41467-022-34904-3">Publication</a>
     ·
-    <a href="https://github.com/Mannlabs/peptdeeo/releases/latest">Download</a>
+    <a href="https://github.com/Mannlabs/peptdeep/releases/latest">Download</a>
     ·
     <a href="#installation">Installation</a>
     ·
