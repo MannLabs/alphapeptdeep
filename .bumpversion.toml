@@ -43,9 +43,6 @@ filename = "./peptdeep/__init__.py"
 filename = "./docs/conf.py"
 
 [[tool.bumpversion.files]]
-filename = "./README.md"
-
-[[tool.bumpversion.files]]
 filename = "./release/linux/control"
 
 [[tool.bumpversion.files]]
