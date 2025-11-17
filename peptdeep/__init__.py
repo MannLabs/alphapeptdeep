@@ -1,4 +1,4 @@
-__version__ = "1.4.1-dev0"
+__version__ = "1.4.1"
 # This information is duplicated in pyproject.toml:
 __author_email__ = "jalew.zwf@qq.com"
 __github__ = "https://github.com/MannLabs/peptdeep"
