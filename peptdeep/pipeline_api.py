@@ -125,7 +125,7 @@ def get_median_pccs_for_dia_psms(
     sorted_psm_df = psm_match.psm_df.iloc[sort_order].reset_index(drop=True)
 
     psm_len = len(sorted_psm_df) // psm_match.max_spec_per_query
-    psm_df = sorted_psm_df.iloc[:psm_len].copy()
+    psm_df_spec0 = sorted_psm_df.iloc[:psm_len].copy()
     sorted_median_pccs = np.zeros(len(psm_df))
     metrics_list = []
     for i in range(psm_match.max_spec_per_query):
@@ -133,12 +133,12 @@ def get_median_pccs_for_dia_psms(
         for j in range(psm_match.max_spec_per_query):
             if i == j:
                 continue
-            psm_df, metrics_df = calc_ms2_similarity(
-                psm_df,
+            psm_df_spec0, metrics_df = calc_ms2_similarity(
+                psm_df_spec0,
                 frag_df[i * frag_len : (i + 1) * frag_len],
                 frag_df[j * frag_len : (j + 1) * frag_len],
             )
-            pcc_list.append(psm_df["PCC"].values)
+            pcc_list.append(psm_df_spec0["PCC"].values)
             metrics_list.append(metrics_df)
         pccs = np.median(np.array(pcc_list), axis=0)
         sorted_median_pccs[i * psm_len : (i + 1) * psm_len] = pccs
