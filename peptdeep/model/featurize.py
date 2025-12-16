@@ -19,7 +19,7 @@ def parse_mod_feature(
     """
     Get modification feature of a given peptide (len=nAA).
     Note that `site=0` is for peptide N-term modification,
-    `site=1` is for peptide C-term modification, and
+    `site=-1` is for peptide C-term modification, and
     `1<=site<=nAA` is for residue modifications on the peptide.
 
     Parameters
