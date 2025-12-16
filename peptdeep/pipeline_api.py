@@ -116,16 +116,16 @@ def get_median_pccs_for_dia_psms(
         - `PepSpecMatch_DIA._match_ms2_one_raw_numba`: finds nearby MS2 scans and extracts fragments
         - `PepSpecMatch.match_ms2_multi_raw`: processes multiple MS files (reorders by raw_name)
     """
-    _frag_df = fragment_intensity_df.mask(fragment_mz_df < psm_match.min_frag_mz, 0.0)
-    frag_len = len(_frag_df) // psm_match.max_spec_per_query
+    frag_df = fragment_intensity_df.mask(fragment_mz_df < psm_match.min_frag_mz, 0.0)
+    frag_len = len(frag_df) // psm_match.max_spec_per_query
 
-    # sort by spec_idx to support multiple MS files
+    # sort by spec_idx to account for different ordering when multiple MS files are used
     spec_idx = psm_match.psm_df.frag_start_idx.values // frag_len
     sort_order = np.argsort(spec_idx, kind="stable")
     sorted_psm_df = psm_match.psm_df.iloc[sort_order].reset_index(drop=True)
 
     psm_len = len(sorted_psm_df) // psm_match.max_spec_per_query
-    _df = sorted_psm_df.iloc[:psm_len].copy()
+    psm_df = sorted_psm_df.iloc[:psm_len].copy()
     sorted_median_pccs = np.zeros(len(psm_df))
     metrics_list = []
     for i in range(psm_match.max_spec_per_query):
@@ -133,12 +133,12 @@ def get_median_pccs_for_dia_psms(
         for j in range(psm_match.max_spec_per_query):
             if i == j:
                 continue
-            _df, metrics_df = calc_ms2_similarity(
-                _df,
-                _frag_df[i * frag_len : (i + 1) * frag_len],
-                _frag_df[j * frag_len : (j + 1) * frag_len],
+            psm_df, metrics_df = calc_ms2_similarity(
+                psm_df,
+                frag_df[i * frag_len : (i + 1) * frag_len],
+                frag_df[j * frag_len : (j + 1) * frag_len],
             )
-            pcc_list.append(_df.PCC.values)
+            pcc_list.append(psm_df["PCC"].values)
             metrics_list.append(metrics_df)
         pccs = np.median(np.array(pcc_list), axis=0)
         sorted_median_pccs[i * psm_len : (i + 1) * psm_len] = pccs
