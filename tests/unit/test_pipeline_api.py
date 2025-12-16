@@ -6,10 +6,6 @@ from unittest.mock import Mock, patch
 
 from peptdeep.pipeline_api import get_median_pccs_for_dia_psms
 
-# ============================================================================
-# FIXTURES
-# ============================================================================
-
 
 def create_mock_psm_match(
     min_frag_mz: float, max_spec_per_query: int, psm_df: pd.DataFrame

@@ -277,9 +277,7 @@ def match_psms() -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
             )
         else:
             psm_df = psm_df.query(f"ion_count>={DIA_min_ion_count}")
-    # logging.info("OK: checkpoint reached in match_psms(). Exiting gracefully.")
-    # import sys
-    # sys.exit(0)
+
     return psm_df, frag_mz_df, frag_inten_df
 
 
