@@ -85,9 +85,25 @@ def get_median_pccs_for_dia_psms(
     fragment_mz_df: pd.DataFrame,
     fragment_intensity_df: pd.DataFrame,
 ):
+    """Compute median cross-scan PCC for DIA PSMs.
+
+    This function computes the Pearson correlation between
+    fragment intensities across scans - high correlation indicates confident ID.
+
+    The `psm_df` contains `max_spec_per_query` copies per peptide, each matched against
+    a different MS2 scan. The PSMs need to be sorted by spec index before processing because
+    `alpharaw.match.psm_match.PepSpecMatch.match_ms2_multi_raw`
+    orders them by `raw_name` when multiple MS files are used.
+
+    See also (alpharaw.match.psm_match):
+        - `PepSpecMatch_DIA._prepare_matching_dfs`: creates replicated PSM/fragment structure
+        - `PepSpecMatch_DIA._match_ms2_one_raw_numba`: finds nearby MS2 scans and extracts fragments
+        - `PepSpecMatch.match_ms2_multi_raw`: processes multiple MS files (reorders by raw_name)
+    """
     _frag_df = fragment_intensity_df.mask(fragment_mz_df < psm_match.min_frag_mz, 0.0)
     frag_len = len(_frag_df) // psm_match.max_spec_per_query
 
+    # sort by spec_idx to support multiple MS files
     spec_idx = psm_match.psm_df.frag_start_idx.values // frag_len
     sort_order = np.argsort(spec_idx, kind="stable")
     sorted_psm_df = psm_match.psm_df.iloc[sort_order].reset_index(drop=True)
