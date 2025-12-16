@@ -4,7 +4,7 @@ import pandas as pd
 from unittest.mock import Mock, patch
 
 
-from peptdeep.pipeline_api import get_median_pccs_for_dia_psms_ori
+from peptdeep.pipeline_api import get_median_pccs_for_dia_psms
 
 # ============================================================================
 # FIXTURES
@@ -35,8 +35,8 @@ def create_psm_df(n_psms: int, nAA: int = 10) -> pd.DataFrame:
     )
 
 
-def test_get_median_pccs_for_dia_psms_ori_returns_correct_shape() -> None:
-    """Test that function returns array with correct shape matching psm_df length."""
+def test_get_median_pccs_for_dia_psms_returns_correct_result() -> None:
+    """Test that function returns correct result."""
     # given - 3 spectra per query, 6 PSMs total (2 per spectrum)
     # This covers the case of median calculation with 3 spectra (2 comparisons per spectrum)
 
@@ -72,7 +72,7 @@ def test_get_median_pccs_for_dia_psms_ori_returns_correct_shape() -> None:
     )
 
     # when
-    result = get_median_pccs_for_dia_psms_ori(
+    result = get_median_pccs_for_dia_psms(
         psm_match, psm_df, fragment_mz_df, fragment_intensity_df
     )
 

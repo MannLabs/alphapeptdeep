@@ -87,9 +87,14 @@ def get_median_pccs_for_dia_psms(
 ):
     _frag_df = fragment_intensity_df.mask(fragment_mz_df < psm_match.min_frag_mz, 0.0)
     frag_len = len(_frag_df) // psm_match.max_spec_per_query
-    psm_len = len(psm_match.psm_df) // psm_match.max_spec_per_query
-    _df = psm_match.psm_df.iloc[:psm_len].copy()
-    median_pccs = np.zeros(len(psm_df))
+
+    spec_idx = psm_match.psm_df.frag_start_idx.values // frag_len
+    sort_order = np.argsort(spec_idx, kind="stable")
+    sorted_psm_df = psm_match.psm_df.iloc[sort_order].reset_index(drop=True)
+
+    psm_len = len(sorted_psm_df) // psm_match.max_spec_per_query
+    _df = sorted_psm_df.iloc[:psm_len].copy()
+    sorted_median_pccs = np.zeros(len(psm_df))
     metrics_list = []
     for i in range(psm_match.max_spec_per_query):
         pcc_list = []
@@ -104,13 +109,15 @@ def get_median_pccs_for_dia_psms(
             pcc_list.append(_df.PCC.values)
             metrics_list.append(metrics_df)
         pccs = np.median(np.array(pcc_list), axis=0)
-        median_pccs[i * psm_len : (i + 1) * psm_len] = pccs
+        sorted_median_pccs[i * psm_len : (i + 1) * psm_len] = pccs
 
     logging.info(
         f"Average MS2 similarity metrics among {psm_match.max_spec_per_query} DIA scans at frag_mz>={psm_match.min_frag_mz}:\n"
         f"{str(sum(metrics_list)/len(metrics_list))}"
     )
-    return median_pccs
+
+    unsort_order = np.argsort(sort_order)
+    return sorted_median_pccs[unsort_order]
 
 
 def match_psms() -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
@@ -230,6 +237,7 @@ def match_psms() -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
             psm_df["median_pcc"] = get_median_pccs_for_dia_psms(
                 psm_match, psm_df, frag_mz_df, frag_inten_df
             )
+
             psm_df = psm_df.query(f"ion_count>={DIA_min_ion_count} and median_pcc>=0.9")
             logging.info(
                 f"Kept {len(psm_df)} PSMs at ion_count>={DIA_min_ion_count} "
@@ -237,7 +245,9 @@ def match_psms() -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
             )
         else:
             psm_df = psm_df.query(f"ion_count>={DIA_min_ion_count}")
-
+    # logging.info("OK: checkpoint reached in match_psms(). Exiting gracefully.")
+    # import sys
+    # sys.exit(0)
     return psm_df, frag_mz_df, frag_inten_df
 
 
