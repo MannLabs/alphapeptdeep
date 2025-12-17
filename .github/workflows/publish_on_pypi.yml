@@ -18,5 +18,5 @@ jobs:
       tag_to_release: ${{ inputs.tag_to_release }}
       python_version: 3.9
     secrets:
-      test_pypi_api_token: ${{ secrets.TEST_PYPI_PEPTDEEP_API_TOKEN }}
-      pypi_api_token: ${{ secrets.PYPI_PEPTDEEP_API_TOKEN }}
+      test_pypi_api_token: ${{ secrets.TEST_PYPI_API_TOKEN }}
+      pypi_api_token: ${{ secrets.PYPI_API_TOKEN }}
