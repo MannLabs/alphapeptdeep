@@ -85,32 +85,71 @@ def get_median_pccs_for_dia_psms(
     fragment_mz_df: pd.DataFrame,
     fragment_intensity_df: pd.DataFrame,
 ):
-    _frag_df = fragment_intensity_df.mask(fragment_mz_df < psm_match.min_frag_mz, 0.0)
-    frag_len = len(_frag_df) // psm_match.max_spec_per_query
-    psm_len = len(psm_match.psm_df) // psm_match.max_spec_per_query
-    _df = psm_match.psm_df.iloc[:psm_len].copy()
-    median_pccs = np.zeros(len(psm_df))
+    """Compute median PCC between fragment intensities across scans.
+
+    Parameters
+    ----------
+    psm_match : PepSpecMatch_DIA
+        The matcher object containing `psm_df` with replicated PSMs and matching parameters
+        (`max_spec_per_query`, `min_frag_mz`).
+    psm_df : pd.DataFrame
+        PSM dataframe.
+    fragment_mz_df : pd.DataFrame
+        Fragment m/z values, indexed by `frag_start_idx`/`frag_stop_idx` in `psm_df`.
+    fragment_intensity_df : pd.DataFrame
+        Matched fragment intensities from MS2 scans, same structure as `fragment_mz_df`.
+
+    Returns
+    -------
+    np.ndarray
+        Median PCC values for each PSM, in the same order as `psm_df`.
+
+    Notes
+    -----
+    The `psm_df` contains `max_spec_per_query` copies per peptide, each matched against
+    a different MS2 scan. The PSMs need to be sorted by spec index before processing because
+    `alpharaw.match.psm_match.PepSpecMatch.match_ms2_multi_raw`
+    orders them by `raw_name` when multiple MS files are used.
+
+    See also (alpharaw.match.psm_match):
+        - `PepSpecMatch_DIA._prepare_matching_dfs`: creates replicated PSM/fragment structure
+        - `PepSpecMatch_DIA._match_ms2_one_raw_numba`: finds nearby MS2 scans and extracts fragments
+        - `PepSpecMatch.match_ms2_multi_raw`: processes multiple MS files (reorders by raw_name)
+    """
+    frag_df = fragment_intensity_df.mask(fragment_mz_df < psm_match.min_frag_mz, 0.0)
+    frag_len = len(frag_df) // psm_match.max_spec_per_query
+
+    # sort by spec_idx to account for different ordering when multiple MS files are used
+    spec_idx = psm_match.psm_df.frag_start_idx.values // frag_len
+    sort_order = np.argsort(spec_idx, kind="stable")
+    sorted_psm_df = psm_match.psm_df.iloc[sort_order].reset_index(drop=True)
+
+    psm_len = len(sorted_psm_df) // psm_match.max_spec_per_query
+    psm_df_spec0 = sorted_psm_df.iloc[:psm_len].copy()
+    sorted_median_pccs = np.zeros(len(psm_df))
     metrics_list = []
     for i in range(psm_match.max_spec_per_query):
         pcc_list = []
         for j in range(psm_match.max_spec_per_query):
             if i == j:
                 continue
-            _df, metrics_df = calc_ms2_similarity(
-                _df,
-                _frag_df[i * frag_len : (i + 1) * frag_len],
-                _frag_df[j * frag_len : (j + 1) * frag_len],
+            psm_df_spec0, metrics_df = calc_ms2_similarity(
+                psm_df_spec0,
+                frag_df[i * frag_len : (i + 1) * frag_len],
+                frag_df[j * frag_len : (j + 1) * frag_len],
             )
-            pcc_list.append(_df.PCC.values)
+            pcc_list.append(psm_df_spec0["PCC"].values)
             metrics_list.append(metrics_df)
         pccs = np.median(np.array(pcc_list), axis=0)
-        median_pccs[i * psm_len : (i + 1) * psm_len] = pccs
+        sorted_median_pccs[i * psm_len : (i + 1) * psm_len] = pccs
 
     logging.info(
         f"Average MS2 similarity metrics among {psm_match.max_spec_per_query} DIA scans at frag_mz>={psm_match.min_frag_mz}:\n"
         f"{str(sum(metrics_list)/len(metrics_list))}"
     )
-    return median_pccs
+
+    unsort_order = np.argsort(sort_order)
+    return sorted_median_pccs[unsort_order]
 
 
 def match_psms() -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
@@ -230,6 +269,7 @@ def match_psms() -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
             psm_df["median_pcc"] = get_median_pccs_for_dia_psms(
                 psm_match, psm_df, frag_mz_df, frag_inten_df
             )
+
             psm_df = psm_df.query(f"ion_count>={DIA_min_ion_count} and median_pcc>=0.9")
             logging.info(
                 f"Kept {len(psm_df)} PSMs at ion_count>={DIA_min_ion_count} "
