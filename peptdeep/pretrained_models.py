@@ -76,7 +76,7 @@ def get_model_download_instructions() -> str:
         "Please download the "
         f'zip or tar file by yourself from "{get_model_url()}",'
         " and use \n"
-        f'"peptdeep --install-model /path/to/{get_local_model_zip_name()}.zip"\n'
+        f'"peptdeep install-models --model-file /path/to/{get_local_model_zip_name()}.zip"\n'
         " to install the models"
     )
 

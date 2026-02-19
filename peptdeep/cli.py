@@ -89,10 +89,10 @@ def _gui(port, settings_yaml):
     help="If overwrite existing model file.",
 )
 def _install_model(model_file, overwrite):
-    from peptdeep.pretrained_models import download_models, MODEL_URL
+    from peptdeep.pretrained_models import download_models, get_model_url
 
     if not model_file:
-        download_models(MODEL_URL, overwrite=overwrite)
+        download_models(get_model_url(), overwrite=overwrite)
     else:
         download_models(model_file, overwrite=overwrite)
 
