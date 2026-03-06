@@ -2,7 +2,7 @@ pywin32; sys_platform=='win32'
 pythonnet; sys_platform=='win32'
 
 click
-pandas
+pandas<3 # test: tolerate_version
 numpy<2  # test: tolerate_version
 torch
 tqdm
