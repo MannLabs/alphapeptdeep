@@ -64,10 +64,12 @@ def get_model_zip_file_path() -> str:
 
 sys.modules[__name__].__class__ = ModuleWithDeprecations
 
-ModuleWithDeprecations.deprecate(__name__, "pretrain_dir", "get_pretrain_dir")
-ModuleWithDeprecations.deprecate(__name__, "model_zip_name", "get_local_model_zip_name")
-ModuleWithDeprecations.deprecate(__name__, "model_url", "get_model_url")
-ModuleWithDeprecations.deprecate(__name__, "model_zip", "get_model_zip_file_path")
+ModuleWithDeprecations.deprecate(__name__, "pretrain_dir", "get_pretrain_dir()")
+ModuleWithDeprecations.deprecate(
+    __name__, "model_zip_name", "get_local_model_zip_name()"
+)
+ModuleWithDeprecations.deprecate(__name__, "model_url", "get_model_url()")
+ModuleWithDeprecations.deprecate(__name__, "model_zip", "get_model_zip_file_path()")
 
 
 def get_model_download_instructions() -> str:
