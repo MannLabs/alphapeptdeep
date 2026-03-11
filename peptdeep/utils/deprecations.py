@@ -22,7 +22,11 @@ class ModuleWithDeprecations(ModuleType):
         module_deprecations = self._deprecations[self.__name__]
         if name in module_deprecations:
             new_name = module_deprecations[name]
+
             msg = f"{name} is deprecated! Use '{new_name}' instead."
+            if new_name.endswith("()"):  # hack to support functions
+                raise AttributeError(msg)
+
             warn(msg, DeprecationWarning)
             print(f"WARNING: {msg}")
             return self.__getattribute__(new_name)
