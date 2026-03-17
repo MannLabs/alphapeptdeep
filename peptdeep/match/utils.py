@@ -1,4 +1,5 @@
 """Utilities for psm matching. Moved from alpharaw."""
+
 from typing import Union
 
 import numba
@@ -107,5 +108,3 @@ def load_ms_data(
             return
         raw_data.import_raw(ms_file)
         return raw_data
-
-

@@ -1,4 +1,5 @@
 """This module provides the `PepSpecMatch` class to match fragment ions of PSMs. Moved from alpharaw."""
+
 from typing import Tuple, Union
 
 import numba
