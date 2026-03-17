@@ -23,16 +23,13 @@ from peptdeep.spec_lib.library_factory import library_maker_provider
 
 from peptdeep.pretrained_models import ModelManager
 
-# from peptdeep.rescore.feature_extractor import match_one_raw
-from alpharaw.match.psm_match import (
-    PepSpecMatch,
-    PepSpecMatch_DIA,
-    parse_ms_files_to_dict,
-    get_ion_count_scores,
-)
 
 from peptdeep.model.ms2 import calc_ms2_similarity
 import peptdeep.model.rt as rt_module
+
+from peptdeep.match.psm_match import PepSpecMatch_DIA, PepSpecMatch
+from peptdeep.match.utils import get_ion_count_scores
+from alpharaw.utils.ms_path_utils import parse_ms_files_to_dict
 
 DIA_max_spec_per_query = 3
 DIA_min_ion_count = 6
