@@ -111,31 +111,6 @@ def load_ms_data(
 
 
 @numba.njit
-def get_best_matched_intens(
-    matched_intensity_values: np.ndarray,
-    frag_start_idxes: np.ndarray,
-    frag_stop_idxes: np.ndarray,
-):
-    """
-    TODO Deprecated
-    """
-    ret_intens = np.zeros(
-        shape=matched_intensity_values.shape[1:], dtype=matched_intensity_values.dtype
-    )
-    for i in range(len(frag_start_idxes)):
-        start = frag_start_idxes[i]
-        stop = frag_stop_idxes[i]
-        i = np.argmax(
-            np.matmul(
-                matched_intensity_values[:, start:stop, :],
-                matched_intensity_values[:, start:stop, :].T,
-            ).sum()
-        )
-        ret_intens[start:stop, :] = matched_intensity_values[i, start:stop, :]
-    return ret_intens
-
-
-@numba.njit
 def get_ion_count_scores(
     frag_mz_values: np.ndarray,
     matched_intens: np.ndarray,

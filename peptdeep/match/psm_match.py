@@ -12,7 +12,7 @@ from alphabase.peptide.fragment import (
 )
 
 from peptdeep.match.utils import load_ms_data, match_one_raw_with_numba
-from peptdeep.match.normal_dia import NormalDIAGrouperfix
+from peptdeep.match.normal_dia import NormalDIAGrouper
 from alpharaw import register_all_readers
 from alpharaw.match.match_utils import (
     match_closest_peaks,
