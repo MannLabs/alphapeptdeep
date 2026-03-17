@@ -105,10 +105,10 @@ def get_median_pccs_for_dia_psms(
     -----
     The `psm_df` contains `max_spec_per_query` copies per peptide, each matched against
     a different MS2 scan. The PSMs need to be sorted by spec index before processing because
-    `alpharaw.match.psm_match.PepSpecMatch.match_ms2_multi_raw`
+    `peptdeep.match.psm_match.PepSpecMatch.match_ms2_multi_raw`
     orders them by `raw_name` when multiple MS files are used.
 
-    See also (alpharaw.match.psm_match):
+    See also (peptdeep.match.psm_match):
         - `PepSpecMatch_DIA._prepare_matching_dfs`: creates replicated PSM/fragment structure
         - `PepSpecMatch_DIA._match_ms2_one_raw_numba`: finds nearby MS2 scans and extracts fragments
         - `PepSpecMatch.match_ms2_multi_raw`: processes multiple MS files (reorders by raw_name)
