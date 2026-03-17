@@ -34,6 +34,8 @@ class PepSpecMatch:
     Extract fragment ions from MS2 data.
     The extracted information can be used for visualization of peak annotation or
     PeptDeep transfer learnining for the MS2 model.
+
+    TODO: figure out relation with `peptdeep.mass_spec.match.PepSpecMatch`.
     """
 
     match_closest: bool = True
