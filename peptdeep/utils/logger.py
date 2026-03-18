@@ -38,7 +38,7 @@ def set_logger(
         The file name to where the log is written.
         Folders are automatically created if needed.
         This is relative to the current path. When an empty string is provided,
-        a log is written to the AlphaTims "logs" folder with the name
+        a log is written to the PeptDeep "logs" folder with the name
         "log_yymmddhhmmss" (reversed timestamp year to seconds).
         If None, no log file is saved.
         Default is "".
@@ -158,7 +158,7 @@ def show_python_info() -> None:
     This is done in the following format:
     ```
         - [timestamp]> Python information:
-        - [timestamp]> alphatims          - [current_version]
+        - [timestamp]> peptdeep           - [current_version]
         - [timestamp]> [required package] - [current_version]
         - ...
         - [timestamp]> [required package] - [current_version]

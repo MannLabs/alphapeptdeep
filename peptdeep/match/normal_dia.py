@@ -26,7 +26,6 @@ class NormalDIAGrouper:
             )
         self.dia_groups = np.sort(list(self.dia_isolation_dict.keys()))
 
-
     def assign_dia_groups(
         self, precursor_mzs
     ) -> typing.DefaultDict[typing.List, typing.List]:
