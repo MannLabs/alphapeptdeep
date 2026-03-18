@@ -1,5 +1,5 @@
 # ignore notebooks that requires local data
-TEST_NBS=$(find ../nbs_tests -name "*.ipynb" | grep -Ev "test_dia_matching.ipynb|test_alphatims_wrapper.ipynb")
+TEST_NBS=$(find ../nbs_tests -name "*.ipynb")
 
 TUTORIAL_NBS=$(find ../docs/tutorials -name "*.ipynb")
 UNIT_TESTS=$(find ../tests/unit -name "test_*.py")
