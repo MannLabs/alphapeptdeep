@@ -213,7 +213,10 @@ def match_one_raw_with_numba(
 
 
 class PepSpecMatch(object):
-    """Main entry for peptide-spectrum matching"""
+    """Main entry for peptide-spectrum matching.
+
+    TODO: figure out relation with `peptdeep.match.psm_match.PepSpecMatch`.
+    """
 
     def __init__(
         self,

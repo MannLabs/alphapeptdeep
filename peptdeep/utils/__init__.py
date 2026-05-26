@@ -12,7 +12,6 @@ import pandas as pd
 import numpy as np
 
 
-# from alphatims
 def process_bar(iterator, len_iter):
     with tqdm.tqdm(total=len_iter) as bar:
         i = 0
