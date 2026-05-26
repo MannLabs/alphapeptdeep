@@ -346,16 +346,17 @@ class ModelManager(object):
         """
         _download_models(get_model_zip_file_path())
 
+        self._device = device
         self._train_psm_logging = True
 
         self.ms2_model: pDeepModel = pDeepModel(
-            mask_modloss=mask_modloss, device=device
+            mask_modloss=mask_modloss, device=self._device
         )
-        self.rt_model: AlphaRTModel = AlphaRTModel(device=device)
-        self.ccs_model: AlphaCCSModel = AlphaCCSModel(device=device)
+        self.rt_model: AlphaRTModel = AlphaRTModel(device=self._device)
+        self.ccs_model: AlphaCCSModel = AlphaCCSModel(device=self._device)
 
         self.charge_model: ChargeModelForModAASeq = ChargeModelForModAASeq(
-            device=device
+            device=self._device
         )
 
         self.load_installed_models()
@@ -373,7 +374,16 @@ class ModelManager(object):
         kwargs : dict
             Other keyword arguments for `pDeepModel`.
         """
-        self.ms2_model = pDeepModel(charged_frag_types=charged_frag_types, **kwargs)
+        device = kwargs.pop("device", self._device)
+        if device != self._device:
+            logging.warning(
+                f"Overwriting MS2 model device from '{self._device}' to '{device}'"
+            )
+        self.ms2_model = pDeepModel(
+            charged_frag_types=charged_frag_types,
+            device=device,
+            **kwargs,
+        )
 
     def reset_by_global_settings(
         self,
