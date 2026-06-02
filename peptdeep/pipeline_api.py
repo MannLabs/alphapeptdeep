@@ -23,16 +23,13 @@ from peptdeep.spec_lib.library_factory import library_maker_provider
 
 from peptdeep.pretrained_models import ModelManager
 
-# from peptdeep.rescore.feature_extractor import match_one_raw
-from alpharaw.match.psm_match import (
-    PepSpecMatch,
-    PepSpecMatch_DIA,
-    parse_ms_files_to_dict,
-    get_ion_count_scores,
-)
 
 from peptdeep.model.ms2 import calc_ms2_similarity
 import peptdeep.model.rt as rt_module
+
+from peptdeep.match.psm_match import PepSpecMatch_DIA, PepSpecMatch
+from peptdeep.match.utils import get_ion_count_scores
+from alpharaw.utils.ms_path_utils import parse_ms_files_to_dict
 
 DIA_max_spec_per_query = 3
 DIA_min_ion_count = 6
@@ -108,10 +105,10 @@ def get_median_pccs_for_dia_psms(
     -----
     The `psm_df` contains `max_spec_per_query` copies per peptide, each matched against
     a different MS2 scan. The PSMs need to be sorted by spec index before processing because
-    `alpharaw.match.psm_match.PepSpecMatch.match_ms2_multi_raw`
+    `peptdeep.match.psm_match.PepSpecMatch.match_ms2_multi_raw`
     orders them by `raw_name` when multiple MS files are used.
 
-    See also (alpharaw.match.psm_match):
+    See also (peptdeep.match.psm_match):
         - `PepSpecMatch_DIA._prepare_matching_dfs`: creates replicated PSM/fragment structure
         - `PepSpecMatch_DIA._match_ms2_one_raw_numba`: finds nearby MS2 scans and extracts fragments
         - `PepSpecMatch.match_ms2_multi_raw`: processes multiple MS files (reorders by raw_name)
