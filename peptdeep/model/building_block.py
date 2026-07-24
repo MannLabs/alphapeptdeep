@@ -223,10 +223,19 @@ class Hidden_HFace_Transformer(torch.nn.Module):
             num_attention_heads=nheads,
             num_bert_layers=nlayers,
             dropout=dropout,
-            output_attentions=False,
+            output_attentions=output_attentions,
         )
-        self.output_attentions = output_attentions
         self.bert = BertEncoder(self.config)
+
+    @property
+    def output_attentions(self):
+        return self.config.output_attentions
+
+    @output_attentions.setter
+    def output_attentions(self, val: bool):
+        # BertEncoder reads output_attentions from the config (not from the
+        # forward kwarg) in transformers>=4.48, so it must be set on the config.
+        self.config.output_attentions = val
 
     def forward(
         self,
@@ -250,12 +259,15 @@ class Hidden_HFace_Transformer(torch.nn.Module):
         """
         if attention_mask is not None:
             attention_mask = invert_attention_mask(attention_mask, dtype=x.dtype)
-        return self.bert(
+        output = self.bert(
             x,
             attention_mask=attention_mask,
-            output_attentions=self.output_attentions,
-            return_dict=False,
+            output_attentions=self.config.output_attentions,
+            return_dict=True,
         )
+        if self.config.output_attentions:
+            return output.last_hidden_state, output.attentions
+        return (output.last_hidden_state,)
 
 
 # legacy
