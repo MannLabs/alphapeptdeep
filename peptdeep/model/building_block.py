@@ -233,6 +233,8 @@ class Hidden_HFace_Transformer(torch.nn.Module):
 
     @output_attentions.setter
     def output_attentions(self, val: bool):
+        # BertEncoder reads output_attentions from the config (not from the
+        # forward kwarg) in transformers>=4.48, so it must be set on the config.
         self.config.output_attentions = val
 
     def forward(
@@ -252,39 +254,20 @@ class Hidden_HFace_Transformer(torch.nn.Module):
         -------
         (Tensor, [Tensor])
             out[0] is the hidden layer output,
-            and out[1] is the list of per-layer attention weights
+            and out[1] is the output attention
             if self.output_attentions==True
         """
         if attention_mask is not None:
             attention_mask = invert_attention_mask(attention_mask, dtype=x.dtype)
-
-        if not self.config.output_attentions:
-            return (self.bert(x, attention_mask=attention_mask).last_hidden_state,)
-
-        # transformers>=4.48 refactored BertEncoder so it no longer returns
-        # per-layer attentions (they are collected by a decorator on the
-        # top-level BertModel, which is bypassed here). Capture them directly
-        # from the self-attention submodules with forward hooks instead, which
-        # is robust across transformers versions.
-        attentions = []
-
-        def _capture_attention(module, inputs, output):
-            attentions.append(output[1])
-
-        handles = [
-            layer.attention.self.register_forward_hook(_capture_attention)
-            for layer in self.bert.layer
-        ]
-        try:
-            hidden_states = self.bert(
-                x,
-                attention_mask=attention_mask,
-                output_attentions=True,
-            ).last_hidden_state
-        finally:
-            for handle in handles:
-                handle.remove()
-        return hidden_states, attentions
+        output = self.bert(
+            x,
+            attention_mask=attention_mask,
+            output_attentions=self.config.output_attentions,
+            return_dict=True,
+        )
+        if self.config.output_attentions:
+            return output.last_hidden_state, output.attentions
+        return (output.last_hidden_state,)
 
 
 # legacy
