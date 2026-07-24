@@ -126,7 +126,9 @@ def test_requirements(extra_name):
 
             # here we rely on the test for 'fixed version' above to access the specifier
             specifier_strict = reqs_strict[req_name][0].specifier
-            version_strict = str(list(specifier_strict)[0]).replace("==", "")
+            # .version strips the operator, so this works for a tolerated
+            # non-'==' strict specifier (e.g. '>=0.6.0') as well as a pin
+            version_strict = list(specifier_strict)[0].version
 
             specifier_loose = req.specifier
             assert specifier_loose.contains(
