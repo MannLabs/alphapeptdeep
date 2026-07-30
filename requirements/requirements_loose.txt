@@ -8,7 +8,11 @@ torch
 tqdm
 numba
 psutil
-transformers
+# transformers 5.0 refactored BertEncoder so it no longer returns per-layer
+# attentions (collection moved to a decorator on the top-level BertModel, which
+# peptdeep bypasses by using BertEncoder directly), breaking output_attentions
+# in building_block.Hidden_HFace_Transformer. The entire 4.x line still works.
+transformers<5 # test: tolerate_version
 scikit-learn
 lxml
 pyteomics
