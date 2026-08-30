@@ -19,7 +19,7 @@ from typing import Dict
 from zipfile import ZipFile
 from typing import Union
 
-from alphabase.utils import spawn_pool
+from alphabase.utils import parallel_imap
 from alphabase.peptide.fragment import (
     create_fragment_mz_dataframe,
     concat_precursor_fragment_dataframes,
@@ -39,6 +39,9 @@ from peptdeep.model.charge import ChargeModelForAASeq, ChargeModelForModAASeq
 from peptdeep.utils import uniform_sampling
 
 from peptdeep.settings import global_settings, update_global_settings
+
+#: torch.multiprocessing reducers are needed to share model tensors with workers
+TORCH_SPAWN_CONTEXT = mp.get_context("spawn")
 
 
 def get_pretrain_dir() -> str:
@@ -1186,17 +1189,19 @@ class ModelManager(object):
         verbose_bak = self.verbose
         self.verbose = False
 
-        with spawn_pool(process_num, context=mp.get_context("spawn")) as p:
-            for ret_dict in process_bar(
-                p.imap_unordered(
-                    self._predict_func_for_mp, mp_param_generator(df_groupby)
-                ),
-                get_batch_num_mp(df_groupby),
-            ):
-                precursor_df_list.append(ret_dict["precursor_df"])
-                if fragment_mz_df_list is not None:
-                    fragment_mz_df_list.append(ret_dict["fragment_mz_df"])
-                    fragment_intensity_df_list.append(ret_dict["fragment_intensity_df"])
+        for ret_dict in parallel_imap(
+            self._predict_func_for_mp,
+            mp_param_generator(df_groupby),
+            processes=process_num,
+            total=get_batch_num_mp(df_groupby),
+            unordered=True,
+            progress=process_bar,
+            context=TORCH_SPAWN_CONTEXT,
+        ):
+            precursor_df_list.append(ret_dict["precursor_df"])
+            if fragment_mz_df_list is not None:
+                fragment_mz_df_list.append(ret_dict["fragment_mz_df"])
+                fragment_intensity_df_list.append(ret_dict["fragment_intensity_df"])
         self.verbose = verbose_bak
 
         if fragment_mz_df_list is not None:
