@@ -19,6 +19,7 @@ from typing import Dict
 from zipfile import ZipFile
 from typing import Union
 
+from alphabase.utils import spawn_pool
 from alphabase.peptide.fragment import (
     create_fragment_mz_dataframe,
     concat_precursor_fragment_dataframes,
@@ -1185,7 +1186,7 @@ class ModelManager(object):
         verbose_bak = self.verbose
         self.verbose = False
 
-        with mp.get_context("spawn").Pool(process_num) as p:
+        with spawn_pool(process_num, context=mp.get_context("spawn")) as p:
             for ret_dict in process_bar(
                 p.imap_unordered(
                     self._predict_func_for_mp, mp_param_generator(df_groupby)

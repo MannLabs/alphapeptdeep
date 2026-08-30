@@ -5,11 +5,10 @@ from typing import List, Union
 from peptdeep.settings import (
     model_const,
     mod_feature_size,
-    MOD_TO_FEATURE,
+    mod_feature,
     mod_elements,
     mod_elem_to_idx,
     _parse_mod_formula,
-    update_all_mod_features,
 )
 
 
@@ -43,8 +42,7 @@ def parse_mod_feature(
     mod_x = np.zeros((nAA + 2, mod_feature_size))
     if len(mod_names) > 0:
         for site, mod in zip(mod_sites, mod_names):
-            mod_x[site] += MOD_TO_FEATURE[mod]
-        # mod_x[mod_sites] = [MOD_TO_FEATURE[mod] for mod in mod_names]
+            mod_x[site] += mod_feature(mod)
     return mod_x
 
 
@@ -63,7 +61,7 @@ def get_batch_mod_feature(batch_df: pd.DataFrame) -> np.ndarray:
     """
 
     mod_features_list = batch_df.mods.str.split(";").apply(
-        lambda mod_names: [MOD_TO_FEATURE[mod] for mod in mod_names if len(mod) > 0]
+        lambda mod_names: [mod_feature(mod) for mod in mod_names if len(mod) > 0]
     )
     mod_sites_list = batch_df.mod_sites.str.split(";").apply(
         lambda mod_sites: [int(site) for site in mod_sites if len(site) > 0]

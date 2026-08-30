@@ -1,5 +1,8 @@
 import os
 import collections
+from collections.abc import Mapping
+from functools import lru_cache
+
 import numpy as np
 
 from alphabase.yaml_utils import load_yaml
@@ -7,7 +10,8 @@ from alphabase.constants.modification import (
     load_mod_df,
     keep_modloss_by_importance,
     add_new_modifications,
-    MOD_DF,
+    MOD_CHEM,
+    MOD_DF,  # noqa: F401  re-exported for backwards compatibility
 )
 
 from peptdeep.constants._const import CONST_FOLDER
@@ -43,15 +47,49 @@ def _parse_mod_formula(formula):
     return feature
 
 
-MOD_TO_FEATURE = {}
+@lru_cache(maxsize=None)
+def _feature_for_formula(formula: str) -> np.ndarray:
+    """Cache mod features by composition, not by modification name.
+
+    The feature vector depends only on the composition formula, so it cannot go
+    stale when the modification registry changes -- unlike a name-keyed mirror
+    of MOD_DF, which had to be rebuilt by hand after every registry change and
+    was silently missed whenever modifications were added through alphabase
+    directly. Roughly half the modifications share a formula with another, so
+    this also holds fewer arrays than the mirror did.
+
+    The returned array is shared between all callers, so it is made read-only:
+    an accidental in-place write would otherwise corrupt every modification with
+    this composition.
+    """
+    feature = _parse_mod_formula(formula)
+    feature.flags.writeable = False
+    return feature
+
+
+def mod_feature(mod_name: str) -> np.ndarray:
+    """Return the (read-only) feature vector of a modification."""
+    return _feature_for_formula(MOD_CHEM[mod_name])
+
+
+class _ModFeatureMap(Mapping):
+    """Read-only `{mod_name: feature}` view, kept for backwards compatibility."""
+
+    def __getitem__(self, mod_name: str) -> np.ndarray:
+        return mod_feature(mod_name)
+
+    def __iter__(self):
+        return iter(MOD_CHEM)
+
+    def __len__(self) -> int:
+        return len(MOD_CHEM)
+
+
+MOD_TO_FEATURE = _ModFeatureMap()
 
 
 def update_all_mod_features():
-    for modname, formula in MOD_DF[["mod_name", "composition"]].values:
-        MOD_TO_FEATURE[modname] = _parse_mod_formula(formula)
-
-
-update_all_mod_features()
+    """Deprecated: mod features are now derived on demand and never go stale."""
 
 
 def add_user_defined_modifications(user_mods: dict = None):

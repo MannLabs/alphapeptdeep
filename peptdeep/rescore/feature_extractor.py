@@ -5,6 +5,7 @@ import os
 import torch
 import torch.multiprocessing as mp
 
+from alphabase.utils import spawn_pool
 from alphabase.peptide.fragment import get_charged_frag_types
 from alphabase.peptide.precursor import refine_precursor_df
 from alphabase.peptide.fragment import concat_precursor_fragment_dataframes
@@ -953,7 +954,9 @@ class ScoreFeatureExtractorMP(ScoreFeatureExtractor):
         logging.info("Preparing for fine-tuning ...")
         psm_df_list = []
         matched_intensity_df_list = []
-        with mp.get_context("spawn").Pool(global_settings["thread_num"]) as p:
+        with spawn_pool(
+            global_settings["thread_num"], context=mp.get_context("spawn")
+        ) as p:
             for df, _, inten_df, _ in process_bar(
                 p.imap_unordered(
                     match_one_raw_mp, one_raw_param_generator(df_groupby_raw)
@@ -1086,7 +1089,9 @@ class ScoreFeatureExtractorMP(ScoreFeatureExtractor):
         ):
             # multiprocessing is only used for ms2 matching
             def prediction_gen(df_groupby_raw):
-                with mp.get_context("spawn").Pool(global_settings["thread_num"]) as _p:
+                with spawn_pool(
+                    global_settings["thread_num"], context=mp.get_context("spawn")
+                ) as _p:
                     for (
                         df,
                         frag_mz_df,
@@ -1154,7 +1159,9 @@ class ScoreFeatureExtractorMP(ScoreFeatureExtractor):
                             frag_merr_df,
                         )
 
-            with mp.get_context("spawn").Pool(global_settings["thread_num"]) as p:
+            with spawn_pool(
+                global_settings["thread_num"], context=mp.get_context("spawn")
+            ) as p:
                 for df in process_bar(
                     p.imap_unordered(
                         get_ms2_features_mp, prediction_gen(df_groupby_raw)
@@ -1166,7 +1173,9 @@ class ScoreFeatureExtractorMP(ScoreFeatureExtractor):
         else:
             # use multiprocessing for prediction
             # only when no GPUs are available
-            with mp.get_context("spawn").Pool(global_settings["thread_num"]) as p:
+            with spawn_pool(
+                global_settings["thread_num"], context=mp.get_context("spawn")
+            ) as p:
                 for _df in process_bar(
                     p.imap_unordered(
                         self.extract_features_one_raw_mp,
