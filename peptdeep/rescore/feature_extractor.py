@@ -3,13 +3,13 @@ import numpy as np
 import os
 
 import torch
-import torch.multiprocessing as mp
 
+from alphabase.utils import parallel_imap
 from alphabase.peptide.fragment import get_charged_frag_types
 from alphabase.peptide.precursor import refine_precursor_df
 from alphabase.peptide.fragment import concat_precursor_fragment_dataframes
 
-from peptdeep.pretrained_models import ModelManager
+from peptdeep.pretrained_models import ModelManager, TORCH_SPAWN_CONTEXT
 from peptdeep.model.ms2 import calc_ms2_similarity
 from peptdeep.mass_spec.match import PepSpecMatch
 
@@ -953,15 +953,17 @@ class ScoreFeatureExtractorMP(ScoreFeatureExtractor):
         logging.info("Preparing for fine-tuning ...")
         psm_df_list = []
         matched_intensity_df_list = []
-        with mp.get_context("spawn").Pool(global_settings["thread_num"]) as p:
-            for df, _, inten_df, _ in process_bar(
-                p.imap_unordered(
-                    match_one_raw_mp, one_raw_param_generator(df_groupby_raw)
-                ),
-                df_groupby_raw.ngroups,
-            ):
-                psm_df_list.append(df)
-                matched_intensity_df_list.append(inten_df)
+        for df, _, inten_df, _ in parallel_imap(
+            match_one_raw_mp,
+            one_raw_param_generator(df_groupby_raw),
+            processes=global_settings["thread_num"],
+            total=df_groupby_raw.ngroups,
+            unordered=True,
+            progress=process_bar,
+            context=TORCH_SPAWN_CONTEXT,
+        ):
+            psm_df_list.append(df)
+            matched_intensity_df_list.append(inten_df)
 
         logging.info("Fine-tuning ...")
         if len(psm_df_list) == 0:
@@ -1086,95 +1088,102 @@ class ScoreFeatureExtractorMP(ScoreFeatureExtractor):
         ):
             # multiprocessing is only used for ms2 matching
             def prediction_gen(df_groupby_raw):
-                with mp.get_context("spawn").Pool(global_settings["thread_num"]) as _p:
-                    for (
-                        df,
-                        frag_mz_df,
-                        frag_inten_df,
-                        frag_merr_df,
-                    ) in _p.imap_unordered(
-                        match_one_raw_mp, one_raw_param_generator(df_groupby_raw)
+                for (
+                    df,
+                    frag_mz_df,
+                    frag_inten_df,
+                    frag_merr_df,
+                ) in parallel_imap(
+                    match_one_raw_mp,
+                    one_raw_param_generator(df_groupby_raw),
+                    processes=global_settings["thread_num"],
+                    unordered=True,
+                    progress=False,
+                    context=TORCH_SPAWN_CONTEXT,
+                ):
+                    # outsite multiprocessing region
+                    self.extract_rt_features(df)
+                    self.extract_mobility_features(df)
+
+                    if (
+                        self.require_raw_specific_tuning
+                        and self.raw_specific_ms2_tuning
                     ):
-                        # outsite multiprocessing region
-                        self.extract_rt_features(df)
-                        self.extract_mobility_features(df)
-
-                        if (
-                            self.require_raw_specific_tuning
-                            and self.raw_specific_ms2_tuning
-                        ):
-                            (
-                                psm_num_to_train_ms2,
-                                psm_num_per_mod_to_train_ms2,
-                                epoch_to_train_ms2,
-                                use_grid_nce_search,
-                            ) = (
-                                self.model_mgr.psm_num_to_train_ms2,
-                                self.model_mgr.psm_num_per_mod_to_train_ms2,
-                                self.model_mgr.epoch_to_train_ms2,
-                                self.model_mgr.use_grid_nce_search,
-                            )
-
-                            (self.model_mgr.psm_num_to_train_ms2) = perc_settings[
-                                "psm_num_per_raw_to_tune"
-                            ]
-
-                            self.model_mgr.psm_num_per_mod_to_train_ms2 = 0
-
-                            self.model_mgr.epoch_to_train_ms2 = 3
-
-                            self.model_mgr.use_grid_nce_search = False
-
-                            if "nce" not in df.columns:
-                                self.model_mgr.set_default_nce(df)
-
-                            self.model_mgr.train_ms2_model(
-                                df[(df.fdr < 0.01) & (df.decoy == 0)], frag_inten_df
-                            )
-
-                            (
-                                self.model_mgr.psm_num_to_train_ms2,
-                                self.model_mgr.psm_num_per_mod_to_train_ms2,
-                                self.model_mgr.epoch_to_train_ms2,
-                                self.model_mgr.use_grid_nce_search,
-                            ) = (
-                                psm_num_to_train_ms2,
-                                psm_num_per_mod_to_train_ms2,
-                                epoch_to_train_ms2,
-                                use_grid_nce_search,
-                            )
-
-                        predict_inten_df = self.model_mgr.predict_ms2(df)
-
-                        yield (
-                            df,
-                            used_frag_types,
-                            predict_inten_df,
-                            frag_inten_df,
-                            frag_merr_df,
+                        (
+                            psm_num_to_train_ms2,
+                            psm_num_per_mod_to_train_ms2,
+                            epoch_to_train_ms2,
+                            use_grid_nce_search,
+                        ) = (
+                            self.model_mgr.psm_num_to_train_ms2,
+                            self.model_mgr.psm_num_per_mod_to_train_ms2,
+                            self.model_mgr.epoch_to_train_ms2,
+                            self.model_mgr.use_grid_nce_search,
                         )
 
-            with mp.get_context("spawn").Pool(global_settings["thread_num"]) as p:
-                for df in process_bar(
-                    p.imap_unordered(
-                        get_ms2_features_mp, prediction_gen(df_groupby_raw)
-                    ),
-                    df_groupby_raw.ngroups,
-                ):
-                    result_psm_list.append(df)
+                        (self.model_mgr.psm_num_to_train_ms2) = perc_settings[
+                            "psm_num_per_raw_to_tune"
+                        ]
+
+                        self.model_mgr.psm_num_per_mod_to_train_ms2 = 0
+
+                        self.model_mgr.epoch_to_train_ms2 = 3
+
+                        self.model_mgr.use_grid_nce_search = False
+
+                        if "nce" not in df.columns:
+                            self.model_mgr.set_default_nce(df)
+
+                        self.model_mgr.train_ms2_model(
+                            df[(df.fdr < 0.01) & (df.decoy == 0)], frag_inten_df
+                        )
+
+                        (
+                            self.model_mgr.psm_num_to_train_ms2,
+                            self.model_mgr.psm_num_per_mod_to_train_ms2,
+                            self.model_mgr.epoch_to_train_ms2,
+                            self.model_mgr.use_grid_nce_search,
+                        ) = (
+                            psm_num_to_train_ms2,
+                            psm_num_per_mod_to_train_ms2,
+                            epoch_to_train_ms2,
+                            use_grid_nce_search,
+                        )
+
+                    predict_inten_df = self.model_mgr.predict_ms2(df)
+
+                    yield (
+                        df,
+                        used_frag_types,
+                        predict_inten_df,
+                        frag_inten_df,
+                        frag_merr_df,
+                    )
+
+            for df in parallel_imap(
+                get_ms2_features_mp,
+                prediction_gen(df_groupby_raw),
+                processes=global_settings["thread_num"],
+                total=df_groupby_raw.ngroups,
+                unordered=True,
+                progress=process_bar,
+                context=TORCH_SPAWN_CONTEXT,
+            ):
+                result_psm_list.append(df)
 
         else:
             # use multiprocessing for prediction
             # only when no GPUs are available
-            with mp.get_context("spawn").Pool(global_settings["thread_num"]) as p:
-                for _df in process_bar(
-                    p.imap_unordered(
-                        self.extract_features_one_raw_mp,
-                        one_raw_param_generator(df_groupby_raw),
-                    ),
-                    df_groupby_raw.ngroups,
-                ):
-                    result_psm_list.append(_df)
+            for _df in parallel_imap(
+                self.extract_features_one_raw_mp,
+                one_raw_param_generator(df_groupby_raw),
+                processes=global_settings["thread_num"],
+                total=df_groupby_raw.ngroups,
+                unordered=True,
+                progress=process_bar,
+                context=TORCH_SPAWN_CONTEXT,
+            ):
+                result_psm_list.append(_df)
 
         self.psm_df = pd.concat(result_psm_list, ignore_index=True)
         logging.info("Finished feature extraction with multiprocessing")
